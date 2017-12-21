@@ -89,19 +89,21 @@
       <version>5.1.32</version>
       <optional>true</optional>
     </dependency>
+    <!--
+      to add ojdbc7 to local repo
+        mvn install:install-file -Dfile=ojdbc7.jar
+        -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2
+        -Dpackaging=jar -DgeneratePom=true 
+    -->
+    <!--
     <dependency>
-      <!--
-        to add ojdbc7 to local repo
-          mvn install:install-file -Dfile=ojdbc7.jar
-          -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2
-          -Dpackaging=jar -DgeneratePom=true 
-        -->
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc7</artifactId>
       <version>12.1.0.2</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+    -->
 
   </dependencies>
 
@@ -138,6 +140,7 @@
         <version>2.4.3</version>
         <executions>
           <!-- JSON JAR -->
+          <!-- 
           <execution>
             <id>json</id>
             <phase>package</phase>
@@ -166,6 +169,8 @@
               </artifactSet>
             </configuration>
           </execution>
+          -->
+          
           <!-- MySQL JAR -->
           <execution>
             <id>mysql</id>
@@ -195,8 +200,10 @@
                 </includes>
               </artifactSet>
             </configuration>
-          </execution>          
+          </execution>
+                    
           <!-- Oracle JAR -->
+          <!-- 
           <execution>
             <id>ora</id>
             <phase>package</phase>
@@ -226,6 +233,7 @@
               </artifactSet>
             </configuration>
           </execution>
+          -->
                     
         </executions>
       </plugin>
