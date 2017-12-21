@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <Console name="Console">
+      <ThresholdFilter level="debug" />
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss} %level %logger %X{table} %marker: %msg%n</Pattern>  
+      </PatternLayout>
+    </Console>
+    <File name="File" fileName="/tmp/log/sndml3.log" append="false">
+      <ThresholdFilter level="debug" />
+      <PatternLayout>
+        <Pattern>%d{MM-dd HH:mm:ss} %level [%thread] %logger %X{table} %marker: %msg%n</Pattern>  
+      </PatternLayout>
+    </File>    
+  </Appenders>
+  <Loggers>
+    <Root level="debug">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="File" />
+    </Root>
+    <Logger name="org.apache.http.headers" level="info" />
+    <Logger name="org.apache.http.impl" level="info" />
+    <Logger name="org.apache.http.wire" level="info" />
+    <Logger name="servicenow.common" level="trace" />>
+  </Loggers>
+</Configuration>

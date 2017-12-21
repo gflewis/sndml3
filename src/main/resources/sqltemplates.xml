@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE config [
+<!ELEMENT config (sql)+>
+<!ELEMENT sql (drivers,properties,initialize,templates,datatypes,fieldnames)>
+<!ELEMENT drivers (driver*) >
+<!ELEMENT driver (#PCDATA)>
+<!ELEMENT properties (namecase,namequotes) >
+<!ELEMENT namecase (#PCDATA)>
+<!ELEMENT namequotes (#PCDATA)>
+<!ELEMENT initialize (statement*)>
+<!ELEMENT templates (create,grant,timestamp,insert,update,delete,truncate)>
+<!ELEMENT create (#PCDATA)>
+<!ELEMENT grant (#PCDATA)>
+<!ELEMENT timestamp (#PCDATA)>
+<!ELEMENT insert (#PCDATA)>
+<!ELEMENT update (#PCDATA)>
+<!ELEMENT delete (#PCDATA)>
+<!ELEMENT truncate (#PCDATA)>
+<!ELEMENT datatypes (typemap*)>
+<!ELEMENT fieldnames (namemap*)>
+<!ELEMENT statement (#PCDATA)>
+<!ELEMENT typemap (#PCDATA)>
+<!ELEMENT namemap (#PCDATA)>
+<!ATTLIST sql dialect NMTOKEN #REQUIRED>
+<!ATTLIST typemap glidetype CDATA #REQUIRED maxsize CDATA #IMPLIED minsize CDATA #IMPLIED>
+<!ATTLIST namemap glidename NMTOKEN #REQUIRED>
+]>
+<config>
+
+  <sql dialect="default">
+    <!--
+      ***************
+      *** default ***
+      ***************
+      Generic dialog which should work for most ANSI databases 
+    -->
+    <drivers/>
+    <properties>
+      <!-- namecase   must be upper, lower or auto -->
+      <!-- namequotes must be double, square or none -->
+      <namecase>lower</namecase>
+      <namequotes>double</namequotes>
+    </properties>
+    <initialize/>
+    <templates>
+      <create>create table $schema.$table (
+$fielddefinitions,
+primary key ("sys_id"))</create>
+      <grant>grant select on $schema.$table to public</grant>
+      <timestamp>select "sys_updated_on" from $schema.$table 
+where "sys_id" = $keyvalue</timestamp>
+      <insert>insert into $schema.$table (
+$fieldnames) 
+values ($fieldvalues)</insert>
+      <update>update $schema.$table set 
+$fieldmap 
+where "sys_id" = $keyvalue</update>
+      <delete>delete from $schema.$table where "sys_id" = $keyvalue</delete>
+      <truncate>truncate table $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- Character types -->
+      <typemap glidetype="string"          >VARCHAR(#) NULL</typemap>      
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >SMALLINT NULL</typemap>
+      <typemap glidetype="integer"         >INTEGER NULL</typemap>
+      <typemap glidetype="numeric"         >INTEGER NULL</typemap>
+      <typemap glidetype="float"           >FLOAT NULL</typemap>
+      <typemap glidetype="decimal"         >FLOAT NULL</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >CHARACTER(32) NOT NULL</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >CHARACTER(#) NULL</typemap>      
+      <typemap glidetype="variables"       >CHARACTER(32) NULL</typemap>
+      <typemap glidetype="journal"         >CHARACTER(32) NULL</typemap>
+      <typemap glidetype="journal_input"   >CHARACTER(32) NULL</typemap>
+      <typemap glidetype="document_id"     >CHARACTER(32) NULL</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >DATE NULL</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >TIMESTAMP NULL</typemap>
+      <typemap glidetype="due_date"        >TIMESTAMP NULL</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >INTEGER NULL</typemap>
+      <typemap glidetype="timer"           >INTEGER NULL</typemap>
+      <!-- Wildcard template must appear last -->
+      <typemap glidetype="*">VARCHAR(#) NULL</typemap>      
+    </datatypes>
+    <fieldnames/>
+  </sql>
+  
+  <sql dialect="oracle">
+    <!--
+      **************
+      *** oracle ***
+      **************
+      This dialect quotes all column names, allowing Oracle reserved words to be used as column names.
+      This dialect uses CLOB for any string with length greater than 4000.
+    -->
+    <drivers>
+      <driver>oracle</driver>
+    </drivers>
+    <properties>
+      <!-- namecase   must be "upper" or "lower" -->
+      <!-- namequotes must be "none", "double" or "square" -->
+      <namecase>upper</namecase>
+      <namequotes>double</namequotes>
+    </properties>
+    <initialize>
+      <statement>alter session set nls_length_semantics = 'CHAR'</statement>
+      <statement>alter session set nls_date_format = 'YYYY-MM-DD'</statement>
+      <statement>alter session set nls_timestamp_format = 'YYYY-MM-DD HH24:MI:SS'</statement>
+      <statement>alter session set time_zone = '+0:00'</statement>
+    </initialize>
+    <templates>
+      <create>CREATE TABLE $schema.$table (
+$fielddefinitions,
+CONSTRAINT ${table}_PK PRIMARY KEY (SYS_ID))</create>
+      <grant>GRANT SELECT,REFERENCES ON $schema.$table TO PUBLIC</grant>
+      <timestamp>SELECT SYS_UPDATED_ON FROM $schema.$table WHERE SYS_ID=$keyvalue</timestamp>
+      <insert>INSERT INTO $schema.$table (
+$fieldnames) 
+VALUES ($fieldvalues)</insert>
+      <update>UPDATE $schema.$table SET 
+$fieldmap 
+WHERE SYS_ID=$keyvalue</update>
+      <delete>DELETE FROM $schema.$table WHERE SYS_ID=$keyvalue</delete>
+      <truncate>TRUNCATE TABLE $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- This map is used to convert glide data types to Oracle data types. -->
+      <!-- If '#' is encountered in a value then the field size will be substituted. -->
+      <!-- Character types -->
+      <!-- If string is over 3999 chars store as a CLOB in Oracle -->
+      <typemap glidetype="string" maxsize="3999">VARCHAR2(# CHAR) NULL</typemap>
+      <typemap glidetype="string" minsize="4000">CLOB NULL</typemap>
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >NUMBER(1) NULL</typemap>
+      <typemap glidetype="integer"         >NUMBER(10) NULL</typemap>
+      <typemap glidetype="numeric"         >NUMBER(10) NULL</typemap>
+      <typemap glidetype="float"           >NUMBER NULL</typemap>
+      <typemap glidetype="decimal"         >NUMBER NULL</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >CHAR(32 BYTE) NOT NULL</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >CHAR(# BYTE) NULL</typemap>      
+      <typemap glidetype="variables"       >CHAR(32 BYTE) NULL</typemap>
+      <typemap glidetype="journal"         >CHAR(32 BYTE) NULL</typemap>
+      <typemap glidetype="journal_input"   >CHAR(32 BYTE) NULL</typemap>
+      <typemap glidetype="document_id"     >CHAR(32 BYTE) NULL</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >DATE NULL</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >TIMESTAMP WITH LOCAL TIME ZONE NULL</typemap>
+      <typemap glidetype="due_date"        >TIMESTAMP WITH LOCAL TIME ZONE NULL</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >NUMBER(10) NULL</typemap>
+      <typemap glidetype="timer"           >NUMBER(10) NULL</typemap>
+      <!-- These wildcard templates must appear last -->
+      <typemap glidetype="*" maxsize="3999">VARCHAR2(# CHAR) NULL</typemap>
+      <typemap glidetype="*" minsize="4000">CLOB NULL</typemap>
+    </datatypes>
+    <fieldnames>
+      <!-- This section is empty  -->
+    </fieldnames>
+  </sql>
+  
+  <sql dialect="oracle_">
+    <!-- 
+      ***************
+      *** oracle_ ***
+      ***************
+      This dialect appends an underscore to any field name which is an Oracle reserved word.
+      For example, the field "number" is renamed to to "number_".
+      This dialect generates VARCHAR2(3500) for any string with length greater than 3500.
+    -->
+    <drivers/>
+  	<properties>
+      <!-- namecase   must be "upper" or "lower" -->
+      <!-- namequotes must be "none", "double" or "square" -->
+  	  <namecase>upper</namecase>
+      <namequotes>none</namequotes>
+  	</properties>
+    <initialize>
+      <statement>alter session set nls_length_semantics = 'CHAR'</statement>
+      <statement>alter session set nls_date_format = 'YYYY-MM-DD'</statement>
+      <statement>alter session set nls_timestamp_format = 'YYYY-MM-DD HH24:MI:SS'</statement>
+      <statement>alter session set time_zone = '+0:00'</statement>
+    </initialize>
+    <templates>
+      <create>CREATE TABLE $schema.$table (
+$fielddefinitions,
+CONSTRAINT ${table}_PK PRIMARY KEY (SYS_ID))</create>
+      <grant>GRANT SELECT,REFERENCES ON $schema.$table TO PUBLIC</grant>
+      <timestamp>SELECT SYS_UPDATED_ON FROM $schema.$table WHERE SYS_ID=$keyvalue</timestamp>
+      <insert>INSERT INTO $schema.$table (
+$fieldnames) 
+VALUES ($fieldvalues)</insert>
+      <update>UPDATE $schema.$table SET 
+$fieldmap 
+WHERE SYS_ID=$keyvalue</update>
+      <delete>DELETE FROM $schema.$table WHERE SYS_ID=$keyvalue</delete>
+      <truncate>TRUNCATE TABLE $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- This map is used to convert glide data types to Oracle data types. -->
+      <!-- If '#' is encountered in a value then the field size will be substituted. -->
+      <!-- Character types -->
+      <!-- If string is over 3999 chars store as a CLOB in Oracle -->
+      <typemap glidetype="string" maxsize="3999">VARCHAR2(# CHAR)</typemap>
+      <typemap glidetype="string" minsize="4000">VARCHAR2(4000 CHAR)</typemap>
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >NUMBER(1)</typemap>
+      <typemap glidetype="integer"         >NUMBER(10)</typemap>
+      <typemap glidetype="numeric"         >NUMBER(10)</typemap>
+      <typemap glidetype="float"           >NUMBER</typemap>
+      <typemap glidetype="decimal"         >NUMBER</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >CHAR(32 BYTE) NOT NULL</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >CHAR(# BYTE)</typemap>      
+      <typemap glidetype="variables"       >CHAR(32 BYTE)</typemap>
+      <typemap glidetype="journal"         >CHAR(32 BYTE)</typemap>
+      <typemap glidetype="journal_input"   >CHAR(32 BYTE)</typemap>
+      <typemap glidetype="document_id"     >CHAR(32 BYTE)</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >DATE</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >TIMESTAMP WITH LOCAL TIME ZONE</typemap>
+      <typemap glidetype="due_date"        >TIMESTAMP WITH LOCAL TIME ZONE</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >NUMBER(10)</typemap>
+      <typemap glidetype="timer"           >NUMBER(10)</typemap>
+      <!-- These wildcard templates must appear last -->
+      <typemap glidetype="*" maxsize="3499">VARCHAR2(# CHAR)</typemap>
+      <typemap glidetype="*" minsize="3500">VARCHAR2(3500 CHAR)</typemap>
+    </datatypes>
+    <fieldnames>
+      <!-- 
+        Some glide field names are Oracle reserved words.  
+        An example is 'number' which occurs in tables based on 'task'.
+        If namequotes=none then field names will not be quoted in the SQL.
+        Thus, these fields must be renamed.
+        The following is a list of Oracle reserved words.  
+        If the datapump encounters a field with one of these names, it will append an underscore.
+        For example, 'number' is renamed to 'NUMBER_'.
+        This map is used for all tables. (There is no table specific field name map capability.)
+        If namequotes=double or namequotes=square then these entries can be removed.  
+      --> 
+      <namemap glidename="access"    >ACCESS_</namemap>
+      <namemap glidename="add"       >ADD_</namemap>
+      <namemap glidename="all"       >ALL_</namemap>
+      <namemap glidename="alter"     >ALTER_</namemap>
+      <namemap glidename="and"       >AND_</namemap>
+      <namemap glidename="any"       >ANY_</namemap>
+      <namemap glidename="as"        >AS_</namemap>
+      <namemap glidename="asc"       >ASC_</namemap>
+      <namemap glidename="audit"     >AUDIT_</namemap>
+      <namemap glidename="between"   >BETWEEN_</namemap>
+      <namemap glidename="by"        >BY_</namemap>
+      <namemap glidename="char"      >CHAR_</namemap>
+      <namemap glidename="check"     >CHECK_</namemap>
+      <namemap glidename="cluster"   >CLUSTER_</namemap>
+      <namemap glidename="column"    >COLUMN_</namemap>
+      <namemap glidename="comment"   >COMMENT_</namemap>
+      <namemap glidename="compress"  >COMPRESS_</namemap>
+      <namemap glidename="connect"   >CONNECT_</namemap>
+      <namemap glidename="create"    >CREATE_</namemap>
+      <namemap glidename="current"   >CURRENT_</namemap>
+      <namemap glidename="date"      >DATE_</namemap>
+      <namemap glidename="decimal"   >DECIMAL_</namemap>
+      <namemap glidename="default"   >DEFAULT_</namemap>
+      <namemap glidename="delete"    >DELETE_</namemap>
+      <namemap glidename="desc"      >DESC_</namemap>
+      <namemap glidename="distinct"  >DISTINCT_</namemap>
+      <namemap glidename="drop"      >DROP_</namemap>
+      <namemap glidename="else"      >ELSE_</namemap>
+      <namemap glidename="exclusive" >EXCLUSIVE_</namemap>
+      <namemap glidename="exists"    >EXISTS_</namemap>
+      <namemap glidename="file"      >FILE_</namemap>
+      <namemap glidename="float"     >FLOAT_</namemap>
+      <namemap glidename="for"       >FOR_</namemap>
+      <namemap glidename="from"      >FROM_</namemap>
+      <namemap glidename="grant"     >GRANT_</namemap>
+      <namemap glidename="group"     >GROUP_</namemap>
+      <namemap glidename="having"    >HAVING_</namemap>
+      <namemap glidename="identified">IDENTIFIED_</namemap>
+      <namemap glidename="immediate" >IMMEDIATE_</namemap>
+      <namemap glidename="in"        >IN_</namemap>
+      <namemap glidename="increment" >INCREMENT_</namemap>
+      <namemap glidename="index"     >INDEX_</namemap>
+      <namemap glidename="initial"   >INITIAL_</namemap>
+      <namemap glidename="insert"    >INSERT_</namemap>
+      <namemap glidename="integer"   >INTEGER_</namemap>
+      <namemap glidename="intersect" >INTERSECT_</namemap>
+      <namemap glidename="into"      >INTO_</namemap>
+      <namemap glidename="is"        >IS_</namemap>
+      <namemap glidename="level"     >LEVEL_</namemap>
+      <namemap glidename="like"      >LIKE_</namemap>
+      <namemap glidename="lock"      >LOCK_</namemap>
+      <namemap glidename="long"      >LONG_</namemap>
+      <namemap glidename="maxextents">MAXEXTENTS_</namemap>
+      <namemap glidename="minus"     >MINUS_</namemap>
+      <namemap glidename="mlslabel"  >MLSLABEL_</namemap>
+      <namemap glidename="mode"      >MODE_</namemap>
+      <namemap glidename="modify"    >MODIFY_</namemap>
+      <namemap glidename="noaudit"   >NOAUDIT_</namemap>
+      <namemap glidename="nocompress">NOCOMPRESS_</namemap>
+      <namemap glidename="not"       >NOT_</namemap>
+      <namemap glidename="nowait"    >NOWAIT_</namemap>
+      <namemap glidename="null"      >NULL_</namemap>
+      <namemap glidename="number"    >NUMBER_</namemap>
+      <namemap glidename="of"        >OF_</namemap>
+      <namemap glidename="offline"   >OFFLINE_</namemap>
+      <namemap glidename="on"        >ON_</namemap>
+      <namemap glidename="online"    >ONLINE_</namemap>
+      <namemap glidename="option"    >OPTION_</namemap>
+      <namemap glidename="or"        >OR_</namemap>
+      <namemap glidename="order"     >ORDER_</namemap>
+      <namemap glidename="pctfree"   >PCTFREE_</namemap>
+      <namemap glidename="prior"     >PRIOR_</namemap>
+      <namemap glidename="privileges">PRIVILEGES_</namemap>
+      <namemap glidename="public"    >PUBLIC_</namemap>
+      <namemap glidename="raw"       >RAW_</namemap>
+      <namemap glidename="rename"    >RENAME_</namemap>
+      <namemap glidename="resource"  >RESOURCE_</namemap>
+      <namemap glidename="revoke"    >REVOKE_</namemap>
+      <namemap glidename="row"       >ROW_</namemap>
+      <namemap glidename="rowid"     >ROWID_</namemap>
+      <namemap glidename="rownum"    >ROWNUM_</namemap>
+      <namemap glidename="rows"      >ROWS_</namemap>
+      <namemap glidename="select"    >SELECT_</namemap>
+      <namemap glidename="session"   >SESSION_</namemap>
+      <namemap glidename="set"       >SET_</namemap>
+      <namemap glidename="share"     >SHARE_</namemap>
+      <namemap glidename="size"      >SIZE_</namemap>
+      <namemap glidename="smallint"  >SMALLINT_</namemap>
+      <namemap glidename="start"     >START_</namemap>
+      <namemap glidename="successful">SUCCESSFUL_</namemap>
+      <namemap glidename="synonym"   >SYNONYM_</namemap>
+      <namemap glidename="sysdate"   >SYSDATE_</namemap>
+      <namemap glidename="table"     >TABLE_</namemap>
+      <namemap glidename="then"      >THEN_</namemap>
+      <namemap glidename="to"        >TO_</namemap>
+      <namemap glidename="trigger"   >TRIGGER_</namemap>
+      <namemap glidename="uid"       >UID_</namemap>
+      <namemap glidename="union"     >UNION_</namemap>
+      <namemap glidename="unique"    >UNIQUE_</namemap>
+      <namemap glidename="update"    >UPDATE_</namemap>
+      <namemap glidename="user"      >USER_</namemap>
+      <namemap glidename="validate"  >VALIDATE_</namemap>
+      <namemap glidename="values"    >VALUES_</namemap>
+      <namemap glidename="varchar"   >VARCHAR_</namemap>
+      <namemap glidename="varchar2"  >varchar2_</namemap>
+      <namemap glidename="view"      >VIEW_</namemap>
+      <namemap glidename="whenever"  >WHENEVER_</namemap>
+      <namemap glidename="where"     >WHERE_</namemap>
+      <namemap glidename="with"      >WITH_</namemap>
+    </fieldnames>
+  </sql>
+
+  <sql dialect="mysql">
+    <!--
+      *************
+      *** mysql ***
+      *************
+     -->
+    <drivers>
+      <driver>mysql</driver>
+    </drivers>
+  	<properties>
+      <!-- namecase   must be "upper" or "lower" -->
+      <!-- namequotes must be "none", "double" or "square" -->
+  	  <namecase>lower</namecase>
+      <namequotes>double</namequotes>
+    </properties>
+    <initialize>
+      <statement>set autocommit = 0</statement>     
+      <statement>set sql_mode = 'ANSI_QUOTES'</statement>
+      <statement>set time_zone = '+0:00'</statement>
+    </initialize>
+    <templates>
+      <create>CREATE TABLE $schema.$table (
+$fielddefinitions,
+PRIMARY KEY (sys_id))</create>
+      <grant></grant>
+      <timestamp>SELECT sys_updated_on FROM $schema.$table WHERE sys_id=$keyvalue</timestamp>
+      <insert>INSERT INTO $schema.$table (
+$fieldnames) 
+VALUES ($fieldvalues)</insert>
+      <update>UPDATE $schema.$table SET 
+$fieldmap 
+WHERE sys_id = $keyvalue</update>
+      <delete>DELETE FROM $schema.$table WHERE sys_id=$keyvalue</delete>
+      <truncate>TRUNCATE TABLE $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- Character types -->
+      <typemap glidetype="string" maxsize="3999">VARCHAR(#) NULL</typemap>
+      <typemap glidetype="string" minsize="4000">TEXT NULL</typemap>
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >BOOLEAN NULL</typemap>
+      <typemap glidetype="integer"         >INTEGER NULL</typemap>
+      <typemap glidetype="numeric"         >INTEGER NULL</typemap>
+      <typemap glidetype="float"           >DOUBLE NULL</typemap>
+      <typemap glidetype="decimal"         >DOUBLE NULL</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >CHAR(32) NOT NULL</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >CHAR(#) NULL</typemap>      
+      <typemap glidetype="variables"       >CHAR(32) NULL</typemap>
+      <typemap glidetype="journal"         >CHAR(32) NULL</typemap>
+      <typemap glidetype="journal_input"   >CHAR(32) NULL</typemap>
+      <typemap glidetype="document_id"     >CHAR(32) NULL</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >DATE NULL</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >TIMESTAMP NULL</typemap>
+      <typemap glidetype="due_date"        >TIMESTAMP NULL</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >INTEGER NULL</typemap>
+      <typemap glidetype="timer"           >INTEGER NULL</typemap>
+      <!-- Wildcard templates must appear last -->
+      <typemap glidetype="*" maxsize="3999">VARCHAR(#) NULL</typemap>
+      <typemap glidetype="*" minsize="4000">TEXT NULL</typemap>
+    </datatypes>
+    <fieldnames>
+      <!-- not required if using quotes -->
+    </fieldnames>
+  </sql>
+
+  <sql dialect="mssql">
+    <!--
+      *************
+      *** mssql ***
+      *************
+      Dialect for Microsoft SQL Server 
+    -->
+    <drivers>
+      <driver>sqlserver</driver>
+    </drivers>
+    <properties>
+      <!-- namecase   must be "upper" or "lower" -->
+      <!-- namequotes must be "none", "double" or "square" -->
+      <namecase>lower</namecase>
+      <namequotes>square</namequotes>
+    </properties>
+    <initialize>
+    </initialize>
+    <templates>
+      <create>create table $schema.$table (
+$fielddefinitions,
+constraint ${table}_pk primary key ([sys_id]))</create>
+      <grant></grant>
+      <timestamp>select sys_updated_on from $schema.$table where [sys_id]=$keyvalue</timestamp>
+      <insert>insert into $schema.$table (
+$fieldnames) 
+values ($fieldvalues)</insert>
+      <update>update $schema.$table set 
+$fieldmap 
+where [sys_id] = $keyvalue</update>
+      <delete>delete from $schema.$table where [sys_id] = $keyvalue</delete>
+      <truncate>truncate table $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- Character types -->
+      <typemap glidetype="string" maxsize="3999">varchar(#)</typemap>
+      <typemap glidetype="string" minsize="4000">varchar(max)</typemap>
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >tinyint</typemap>
+      <typemap glidetype="integer"         >int</typemap>
+      <typemap glidetype="numeric"         >int</typemap>
+      <typemap glidetype="float"           >float</typemap>
+      <typemap glidetype="decimal"         >decimal</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >char(32) not null</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >char(#)</typemap>      
+      <typemap glidetype="variables"       >char(32)</typemap>
+      <typemap glidetype="journal"         >char(32)</typemap>
+      <typemap glidetype="journal_input"   >char(32)</typemap>
+      <typemap glidetype="document_id"     >char(32)</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >date</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >datetimeoffset</typemap>
+      <typemap glidetype="due_date"        >datetimeoffset</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >int</typemap>
+      <typemap glidetype="timer"           >int</typemap>
+      <!-- Wildcard templates must appear last -->
+      <typemap glidetype="*" maxsize="3999">varchar(#)</typemap>
+      <typemap glidetype="*" minsize="4000">varchar(max)</typemap>
+    </datatypes>
+    <fieldnames/>
+  </sql>  
+  
+  <sql dialect="postgres">
+    <!--
+      ****************
+      *** postgres ***
+      ****************
+      Dialect for H2 and other Postgress compatible databases 
+    -->
+    <drivers>
+      <driver>postgresql</driver>
+      <driver>h2</driver>
+    </drivers>
+    <properties>
+      <!-- namecase   must be upper, lower or auto -->
+      <!-- namequotes must be double, square or none -->
+      <namecase>auto</namecase>
+      <namequotes>double</namequotes>
+    </properties>
+    <initialize>
+      <statement>set time zone 'UTC'</statement>
+    </initialize>
+    <templates>
+      <create>create table $schema.$table (
+$fielddefinitions,
+primary key (sys_id))</create>
+      <grant>grant select on $schema.$table to public</grant>
+      <timestamp>select sys_updated_on from $schema.$table where sys_id = $keyvalue</timestamp>
+      <insert>insert into $schema.$table (
+$fieldnames) 
+values ($fieldvalues)</insert>
+      <update>update $schema.$table set 
+$fieldmap 
+where sys_id = $keyvalue</update>
+      <delete>delete from $schema.$table where sys_id = $keyvalue</delete>
+      <truncate>truncate table $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- Character types -->
+      <typemap glidetype="string"          >varchar(#) null</typemap>      
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >boolean null</typemap>
+      <typemap glidetype="integer"         >integer null</typemap>
+      <typemap glidetype="numeric"         >integer null</typemap>
+      <typemap glidetype="float"           >double precision null</typemap>
+      <typemap glidetype="decimal"         >decimal null</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >char(32) not null</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >char(#) null</typemap>      
+      <typemap glidetype="variables"       >char(32) null</typemap>
+      <typemap glidetype="journal"         >char(32) null</typemap>
+      <typemap glidetype="journal_input"   >char(32) null</typemap>
+      <typemap glidetype="document_id"     >char(32) null</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >date null</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >timestamp with time zone null</typemap>
+      <typemap glidetype="due_date"        >timestamp with time zone null</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >integer null</typemap>
+      <typemap glidetype="timer"           >integer null</typemap>
+      <!-- Wildcard template must appear last -->
+      <typemap glidetype="*">varchar(#) null</typemap>      
+    </datatypes>
+    <fieldnames/>
+  </sql>
+  
+  <sql dialect="sqlite">
+    <!--
+      ***************
+      *** SQLite ***
+      ***************
+    -->
+    <drivers>
+      <driver>sqlite</driver>
+    </drivers>
+    <properties>
+      <!-- namecase   must be upper, lower or auto -->
+      <!-- namequotes must be double, square or none -->
+      <namecase>lower</namecase>
+      <namequotes>double</namequotes>
+    </properties>
+    <initialize/>
+    <templates>
+      <create>create table $schema.$table (
+$fielddefinitions,
+primary key ("sys_id"))</create>
+      <grant/>
+      <timestamp>select "sys_updated_on" from $schema.$table 
+where "sys_id" = $keyvalue</timestamp>
+      <insert>insert into $schema.$table (
+$fieldnames) 
+values ($fieldvalues)</insert>
+      <update>update $schema.$table set 
+$fieldmap 
+where "sys_id" = $keyvalue</update>
+      <delete>delete from $schema.$table where "sys_id" = $keyvalue</delete>
+      <truncate>truncate table $schema.$table</truncate>
+    </templates>
+    <datatypes>
+      <!-- Character types -->
+      <typemap glidetype="string"          >VARCHAR(#)</typemap>      
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >INTEGER</typemap>
+      <typemap glidetype="integer"         >INTEGER</typemap>
+      <typemap glidetype="numeric"         >INTEGER</typemap>
+      <typemap glidetype="float"           >FLOAT</typemap>
+      <typemap glidetype="decimal"         >FLOAT</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >CHARACTER(32) NOT NULL</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >CHARACTER(#)</typemap>      
+      <typemap glidetype="variables"       >CHARACTER(32)</typemap>
+      <typemap glidetype="journal"         >CHARACTER(32)</typemap>
+      <typemap glidetype="journal_input"   >CHARACTER(32)</typemap>
+      <typemap glidetype="document_id"     >CHARACTER(32)</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >DATE</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >TIMESTAMP</typemap>
+      <typemap glidetype="due_date"        >TIMESTAMP</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >INTEGER</typemap>
+      <typemap glidetype="timer"           >INTEGER</typemap>
+      <!-- Wildcard template must appear last -->
+      <typemap glidetype="*">VARCHAR(#)</typemap>      
+    </datatypes>
+    <fieldnames/>
+  </sql>
+  
+</config>

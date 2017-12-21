@@ -1,0 +1,169 @@
+package servicenow.datamart;
+
+import servicenow.core.*;
+
+public class TableLoaderConfig extends Config {
+
+	private String name;
+	private String target;
+	private LoaderAction action = LoaderAction.UPDATE;
+	private Boolean truncate = false;
+	private DateTimeRange created = null;
+	private DateTimeRange updated = null;
+	private DateTimeRange since = null;
+	private EncodedQuery filter = null;
+	private DateTime.Interval partition = null;
+	private Integer pagesize = null;
+	private Integer threads = null;
+	private DateTimeFactory dateFactory;
+
+	public TableLoaderConfig(Table table) {
+		this.name = table.getName();
+	}
+	
+	public TableLoaderConfig(LoaderConfig parent, Object config) throws ConfigParseException {
+		if (isMap(config)) {
+			assert parent != null;
+			dateFactory = new DateTimeFactory(parent);
+			Map items = new Config.Map(config);
+			/*
+			for (Entry<String, Object> entry : items.entrySet()) {
+				String key = entry.getKey();
+				Object val = entry.getValue();
+				if ("name".equalsIgnoreCase(key))
+		    		this.name = val.toString();					
+				else if ("target".equalsIgnoreCase(key))
+		    		this.target = val.toString();
+				else if ("action".equalsIgnoreCase(key)) {
+					
+				}
+			}
+			*/
+			for (String key : items.keySet()) {
+			    Object val = items.get(key);
+			    switch (key.toLowerCase()) {
+			    case "name":
+			    		this.name = val.toString();
+			    		break;
+			    case "target": 
+			    		this.target = val.toString(); 
+			    		break;
+			    case "action":
+			    		switch (val.toString().toLowerCase()) {
+			    		case "update": this.action = LoaderAction.UPDATE; break;
+			    		case "insert": this.action = LoaderAction.INSERT; break;
+			    		default:
+						throw new ConfigParseException("Not recognized: " + val.toString());			    			
+			    		}
+			    		break;
+			    case "truncate":
+			    		this.truncate = (Boolean) val;
+			    		break;
+			    case "created":
+			    		this.created = asDateRange(val);
+			    		break;
+			    case "updated":
+			    		this.updated = asDateRange(val);
+			    		break;
+			    case "since":
+			    		this.since = new DateTimeRange(
+			    				dateFactory.getDate(val.toString()), dateFactory.getStart());
+			    		break;
+			    case "filter":
+			    		this.filter = new EncodedQuery(val.toString());
+			    		break;
+			    case "partition":
+			    		this.partition = asInterval(val);
+			    		break;
+			    case "pagesize" :
+			    		this.pagesize = asInteger(val);
+			    		break;
+			    case "threads" :
+			    		this.threads = asInteger(val);
+			    		break;
+			    	default:
+			    		throw new ConfigParseException("Not recognized: " + key);
+			    }
+			}
+		}
+		else {
+			if (config instanceof String)
+				name = (String) config;
+			else
+				throw new ConfigParseException("Not recognized: " + config.toString());
+		}		
+		assert name != null && name.length() > 0;
+	}
+		
+	public String getName() {
+		return this.name;
+	}
+
+	public String getTargetName() {
+		return this.target;
+	}
+
+	public LoaderAction getAction() {
+		return this.action;
+	}
+	
+	public boolean getTruncate() {
+		return this.truncate;
+	}
+	
+	public DateTimeRange getCreated() {
+		return this.created;
+	}
+	
+	public DateTimeRange getUpdated() {
+		return this.updated;
+	}
+	
+	public DateTimeRange getSince() {
+		return this.since;
+	}
+	
+	public EncodedQuery getFilter() {
+		return this.filter;
+	}
+	
+	public DateTime.Interval getPartitionInterval() {
+		return this.partition;
+	}
+	
+	public Integer getPageSize() {
+		return this.pagesize;
+	}
+
+	public Integer getThreads() {
+		return this.threads;
+	}
+	
+	public DateTime.Interval asInterval(Object obj) throws ConfigParseException {
+		DateTime.Interval result;
+		try {
+			result = DateTime.Interval.valueOf(obj.toString().toUpperCase());
+		}
+		catch (IllegalArgumentException e) {
+			throw new ConfigParseException("Invalid partition: " + obj.toString());
+		}
+		return result;
+	}
+	
+	public DateTimeRange asDateRange(Object obj) throws ConfigParseException {
+		DateTime start, end;
+		end = dateFactory.getStart();
+		if (isList(obj)) {
+			List dates = new Config.List(obj);
+			if (dates.size() < 1 || dates.size() > 2) 
+				throw new ConfigParseException("Invalid date range: " + obj.toString());
+			start = dateFactory.getDate(dates.get(0));
+			if (dates.size() > 1) end = dateFactory.getDate(dates.get(1));
+		}
+		else {
+			start = dateFactory.getDate(obj);
+		}
+		return new DateTimeRange(start, end);
+	}
+	
+}

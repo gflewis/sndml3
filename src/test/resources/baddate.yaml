@@ -1,0 +1,10 @@
+parallel: true
+tables:
+- name: sys_user
+- name: sys_user_group
+- {name: sys_user_grmember, truncate: true}
+- {name: core_company, truncate: false}
+- {name: rm_story, created: [2017-10-15]}
+- {name: incident, sqlname: incident_2017, created: [2017-01-01, yellow], order: 10}
+- {name: problem, updated: 2017-10-15}
+- {name: cmdb_ci_service, updated: [today,now]}
