@@ -35,7 +35,7 @@ public class GetRecordsTest {
 	public void testGetSingleRecord() throws Exception {
 		logger.info(String.format("%s %s", profile, "testGetSingleRecord"));
 		Table tbl = session.table("cmn_department");
-		RecordList recs = tbl.getDefaultImpl().getRecords("id", TestingManager.getProperty("some_department_id"));
+		RecordList recs = tbl.api().getRecords("id", TestingManager.getProperty("some_department_id"));
 		assertTrue(recs.size() == 1);
 	}
 	
@@ -43,7 +43,7 @@ public class GetRecordsTest {
 	public void testGetEmptyRecordset() throws Exception {
 		logger.info(String.format("%s %s", profile, "testGetEmptyRecordset"));
 		Table tbl = session.table("sys_user");
-		RecordList recs = tbl.getDefaultImpl().getRecords("name", "Zebra Elephant");
+		RecordList recs = tbl.api().getRecords("name", "Zebra Elephant");
 		assertTrue(recs.size() == 0);
 	}
 	
