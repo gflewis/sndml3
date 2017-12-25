@@ -9,7 +9,7 @@ import servicenow.core.*;
 
 public class SoapTableReader extends TableReader {
 
-	final TableImplSoap soapImpl;
+	final SoapTableAPI soapImpl;
 	
 	private KeyList allKeys;
 
@@ -17,7 +17,7 @@ public class SoapTableReader extends TableReader {
 		
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public SoapTableReader(TableImplSoap impl) {
+	public SoapTableReader(SoapTableAPI impl) {
 		super(impl);
 		soapImpl = impl;
 	}

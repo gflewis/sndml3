@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 
 import servicenow.core.*;
 
-public class TableImplSoap extends TableImpl {
+public class SoapTableAPI extends TableAPI {
 
 	final Table table;
 	final String tablename;
@@ -19,7 +19,7 @@ public class TableImplSoap extends TableImpl {
 	
 	final Logger log = Log.logger(this.getClass());
 	
-	public TableImplSoap(Table table) {
+	public SoapTableAPI(Table table) {
 		this.table = table;
 		this.tablename = table.getName();
 		this.session = table.getSession();

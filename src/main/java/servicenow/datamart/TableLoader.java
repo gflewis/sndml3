@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
 import servicenow.rest.MultiDatePartReader;
-import servicenow.rest.TableImplRest;
+import servicenow.rest.RestTableAPI;
 
 public class TableLoader implements Callable<WriterMetrics> {
 
@@ -59,7 +59,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 		
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		Log.setTableContext(table);
-		TableImplRest impl = table.rest();
+		RestTableAPI impl = table.rest();
 		String targetName = config.getTargetName() == null ? table.getName() : config.getTargetName();
 		switch (config.getAction()) {
 		case UPDATE: 

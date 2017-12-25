@@ -27,7 +27,7 @@ public class MultiDatePartReader extends RestTableReader {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public MultiDatePartReader(
-			TableImplRest impl, 
+			RestTableAPI impl, 
 			DateTime.Interval interval, 
 			EncodedQuery baseQuery,
 			DateTimeRange createdRange,

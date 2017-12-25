@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import servicenow.rest.TableImplRest;
-import servicenow.soap.TableImplSoap;
+import servicenow.rest.RestTableAPI;
+import servicenow.soap.SoapTableAPI;
 import servicenow.soap.TableWSDL;
 
 public class Table {
@@ -17,9 +17,9 @@ public class Table {
 	protected final Session session;
 	protected final String tablename;
 	
-	private final TableImplSoap implSOAP;
-	private final TableImplRest implREST;
-	TableImpl implDefault;
+	private final SoapTableAPI apiSOAP;
+	private final RestTableAPI apiREST;
+	TableAPI apiDefault;
 		
 	final private Logger log = LoggerFactory.getLogger(this.getClass());
 	final Marker mrkRequest = MarkerFactory.getMarker("REQUEST");
@@ -29,12 +29,12 @@ public class Table {
 		this.session = session;
 		this.tablename = tablename;
 		this.instance = session.getInstance();
-		this.implSOAP = new TableImplSoap(this);
-		this.implREST = new TableImplRest(this);
+		this.apiSOAP = new SoapTableAPI(this);
+		this.apiREST = new RestTableAPI(this);
 		if ("soap".equals(session.getProperty("api"))) 
-			this.implDefault = implSOAP;
+			this.apiDefault = apiSOAP;
 		else
-			this.implDefault = implREST;
+			this.apiDefault = apiREST;
 	}
 
 	public Session getSession() {
@@ -48,38 +48,38 @@ public class Table {
 	/**
 	 * Return the SOAP API.
 	 */
-	public TableImplSoap soap() {
-		return this.implSOAP;
+	public SoapTableAPI soap() {
+		return this.apiSOAP;
 	}
 	
 	/**
 	 * return the REST API.
 	 */
-	public TableImplRest rest() {
-		return this.implREST;
+	public RestTableAPI rest() {
+		return this.apiREST;
 	}
 	
 	/**
 	 * Set the default API to SOAP Web Services (XML).
 	 */
-	public TableImpl setSOAP() {
-		this.implDefault = implSOAP;
-		return implDefault;
+	public TableAPI setSOAP() {
+		this.apiDefault = apiSOAP;
+		return apiDefault;
 	}
 	
 	/**
 	 * Set the default API to the REST Table API (JSON).
 	 */
-	public TableImpl setREST() {
-		this.implDefault = implREST;
-		return implDefault;
+	public TableAPI setREST() {
+		this.apiDefault = apiREST;
+		return apiDefault;
 	}
 	
 	/**
 	 * Return the default API.
 	 */
-	public TableImpl getDefaultImpl() {
-		return implDefault;
+	public TableAPI getDefaultImpl() {
+		return apiDefault;
 	}
 	
 	public TableReader getDefaultReader() throws IOException {
@@ -87,44 +87,44 @@ public class Table {
 	}
 		
 	public KeyList getKeys() throws IOException {
-		return implDefault.getKeys((EncodedQuery) null);
+		return apiDefault.getKeys((EncodedQuery) null);
 	}
 	
 	public KeyList getKeys(EncodedQuery filter) throws IOException {
-		return implDefault.getKeys(filter);
+		return apiDefault.getKeys(filter);
 	}
 	
 	public Record getRecord(Key key) throws IOException {
-		return implDefault.getRecord(key);
+		return apiDefault.getRecord(key);
 	}
 	
 	public Record getRecord(String fieldname, String fieldvalue, boolean displayValue)  throws IOException {
-		return implDefault.getRecord(fieldname, fieldvalue, displayValue);
+		return apiDefault.getRecord(fieldname, fieldvalue, displayValue);
 	}
 
 	@Deprecated
 	public RecordList getRecords() throws IOException {
-		return implDefault.getRecords();
+		return apiDefault.getRecords();
 	}
 	
 	@Deprecated
 	public RecordList getRecords(String fieldname, String fieldvalue) throws IOException {
-		return implDefault.getRecords(fieldname, fieldvalue);
+		return apiDefault.getRecords(fieldname, fieldvalue);
 	}
 	
 	@Deprecated
 	public RecordList getRecords(String fieldname, String fieldvalue, boolean displayValues) throws IOException {
-		return implDefault.getRecords(fieldname, fieldvalue, displayValues);
+		return apiDefault.getRecords(fieldname, fieldvalue, displayValues);
 	}
 	
 	@Deprecated
 	public RecordList getRecords(EncodedQuery query) throws IOException {
-		return implDefault.getRecords(query);
+		return apiDefault.getRecords(query);
 	}
 	
 	@Deprecated
 	public RecordList getRecords(EncodedQuery query, boolean displayValues) throws IOException {
-		return implDefault.getRecords(query, displayValues);
+		return apiDefault.getRecords(query, displayValues);
 	}
 	
 	/**
@@ -154,7 +154,7 @@ public class Table {
 	}
 	
 	public TableWSDL getWSDL() throws IOException {
-		return implSOAP.getWSDL();
+		return apiSOAP.getWSDL();
 	}
 	
 	public TableSchema getSchema() throws IOException, InterruptedException {

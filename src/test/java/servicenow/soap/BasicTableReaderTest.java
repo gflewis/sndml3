@@ -5,13 +5,13 @@ import org.junit.Test;
 
 import servicenow.core.*;
 import servicenow.soap.SoapTableReader;
-import servicenow.soap.TableImplSoap;
+import servicenow.soap.SoapTableAPI;
 
 public class BasicTableReaderTest {
 
 	Session session;
 	Table table;
-	TableImplSoap impl;
+	SoapTableAPI impl;
 	
 	@Test
 	public void test() throws Exception {

@@ -10,7 +10,7 @@ import servicenow.datamart.TableLoaderConfig;
 
 public class RestTableReader extends TableReader {
 
-	final TableImplRest restImpl;
+	final RestTableAPI restImpl;
 	private boolean statsEnabled = true;
 	protected TableStats stats = null;
 	
@@ -18,12 +18,12 @@ public class RestTableReader extends TableReader {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public RestTableReader(TableImplRest impl) {
+	public RestTableReader(RestTableAPI impl) {
 		super(impl);
 		restImpl = impl;
 	}
 	
-	public RestTableReader(TableImplRest impl, TableLoaderConfig config) {
+	public RestTableReader(RestTableAPI impl, TableLoaderConfig config) {
 		this(impl);
 		assert config != null;
 		setPageSize(config.getPageSize() == null ? DEFAULT_PAGE_SIZE : config.getPageSize());

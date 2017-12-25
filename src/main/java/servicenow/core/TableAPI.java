@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import servicenow.soap.SoapResponseException;
 
-public abstract class TableImpl {
+public abstract class TableAPI {
 
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	

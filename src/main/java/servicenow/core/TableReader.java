@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 public abstract class TableReader implements Callable<TableReader>{
  
 	protected final Table table;
-	protected final TableImpl impl;
+	protected final TableAPI impl;
 	
 	private EncodedQuery baseQuery;
 	private DateTimeRange createdRange;
@@ -21,7 +21,7 @@ public abstract class TableReader implements Callable<TableReader>{
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
 
-	public TableReader(TableImpl impl) {
+	public TableReader(TableAPI impl) {
 		this.impl = impl;
 		this.table = impl.getTable();
 		this.pageSize = getDefaultPageSize();

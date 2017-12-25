@@ -15,14 +15,14 @@ import org.slf4j.Logger;
 
 import servicenow.core.*;
 
-public class TableImplRest extends TableImpl {
+public class RestTableAPI extends TableAPI {
 
 	final Table table;
 	final Session session;
 
 	final private Logger logger = Log.logger(this.getClass());
 	
-	public TableImplRest(Table table) {
+	public RestTableAPI(Table table) {
 		this.table = table;
 		this.session = table.getSession();		
 	}

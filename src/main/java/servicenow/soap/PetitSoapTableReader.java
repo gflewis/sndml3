@@ -40,11 +40,11 @@ import servicenow.core.*;
  */
 public class PetitSoapTableReader extends TableReader {
 
-	final TableImplSoap soapImpl;
+	final SoapTableAPI soapImpl;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public PetitSoapTableReader(TableImplSoap impl) {
+	public PetitSoapTableReader(SoapTableAPI impl) {
 		super(impl);
 		soapImpl = impl;
 	}
