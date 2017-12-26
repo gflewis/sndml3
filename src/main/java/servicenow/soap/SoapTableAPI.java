@@ -44,7 +44,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 
 	public TableReader getDefaultReader() throws IOException {
-		return new SoapTableReader(this);
+		return new KeyedTableReader(this);
 	}
 			
 	public KeyList getKeys() throws IOException {

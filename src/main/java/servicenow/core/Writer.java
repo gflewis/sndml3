@@ -8,9 +8,6 @@ public abstract class Writer {
 	protected WriterMetrics metrics = new WriterMetrics();
 	protected TableReader reader;
 	
-//	@Deprecated
-//	protected ReaderMetrics readerMetrics = null;
-
 	public abstract void processRecords(RecordList recs) throws IOException, SQLException;	
 
 	public void open() throws IOException, SQLException {
@@ -33,16 +30,5 @@ public abstract class Writer {
 	public TableReader getReader() {
 		return this.reader;
 	}
-	
-//	@Deprecated
-//	public void setReaderMetrics(ReaderMetrics m) {
-//		this.readerMetrics = m;
-//	}
-//	
-//	@Deprecated
-//	public ReaderMetrics getReaderMetrics() {
-//		return readerMetrics;
-//	}
-	
-	
+
 }

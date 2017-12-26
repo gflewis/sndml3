@@ -7,6 +7,7 @@ public class NullWriter extends Writer {
 
 	@Override
 	public void processRecords(RecordList recs) throws IOException, SQLException {
+		metrics.addSkipped(recs.size());
 	}
 
 }
