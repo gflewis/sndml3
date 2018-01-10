@@ -37,9 +37,9 @@ public class Generator {
 	static Document xmldocument = null;
 	
 	public static void main(String[] args) throws Exception {
-		PropertyManager.initialize(args);
-		Session session = PropertyManager.getSession();
-		String tablename = PropertyManager.getArg(0);
+		Globals.initialize(args);
+		Session session = Globals.getSession();
+		String tablename = Globals.getArg(0);
 		Table table = session.table(tablename);
 		Generator generator = new Generator("mysql", null);
 		System.out.println(generator.getCreateTable(table, tablename));
@@ -73,7 +73,7 @@ public class Generator {
 		if (xmldocument == null) {
 			try {
 				InputStream sqlConfigStream;
-				String path = PropertyManager.getSetting("templates",  "datamart.templates", null);
+				String path = Globals.getSetting("templates");
 				if (path == null) 
 					sqlConfigStream = ClassLoader.getSystemResourceAsStream("sqltemplates.xml");
 				else
@@ -90,6 +90,8 @@ public class Generator {
 	}
 	
 	static Element getTree(URI dbURI) {
+		String dialectName = Globals.getSetting("dialect");
+		if (dialectName != null) return getTree(dialectName);
 		String urlPart[] = dbURI.toString().split(":");
 		String protocol = urlPart[1];
 		ListIterator<Element> children = getDocument().getRootElement().getChildren().listIterator();

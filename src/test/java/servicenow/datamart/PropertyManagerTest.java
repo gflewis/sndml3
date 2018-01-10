@@ -7,7 +7,7 @@ import java.io.File;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import servicenow.datamart.PropertyManager;
+import servicenow.datamart.Globals;
 
 public class PropertyManagerTest {
 	
@@ -15,7 +15,7 @@ public class PropertyManagerTest {
 
 	@Test
 	public void testExecute() throws Exception {
-		String result = PropertyManager.evaluate("echo hello");
+		String result = Globals.evaluate("echo hello");
 		logger.debug("result=" + result);
 		assertEquals("hello", result);
 	}
@@ -24,12 +24,12 @@ public class PropertyManagerTest {
 	public void testLassPass() throws Exception {
 		logger.debug("Start of Test");
 		String cmd = "/usr/local/bin/lpass show --password servicenow.mit.api-gflewis";
-		String result = PropertyManager.evaluate(cmd);
+		String result = Globals.evaluate(cmd);
 		assertTrue(result.length() > 2);
 		logger.debug("result=" + result);
 		File profile = new File("mit/mitexplp.profile");
-		PropertyManager.loadPropertyFile(profile);
-		logger.debug("password=" + PropertyManager.getProperties().getProperty("servicenow.password"));
+		Globals.loadPropertyFile(profile);
+		logger.debug("password=" + Globals.getProperties().getProperty("servicenow.password"));
 		logger.debug("End of Test");
 	}
 	

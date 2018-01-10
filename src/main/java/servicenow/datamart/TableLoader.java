@@ -31,9 +31,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 				desc("Property file (required)").build());
 		options.addOption(Option.builder("t").longOpt("table").required(true).hasArg(true).
 				desc("Table name").build());		
-		PropertyManager.initialize(options, args);
-		ResourceManager.initialize(PropertyManager.getProperties());
-		String tablename = PropertyManager.getOptionValue("t");
+		Globals.initialize(options, args);
+		ResourceManager.initialize(Globals.getProperties());
+		String tablename = Globals.getOptionValue("t");
 		TableLoader loader = new TableLoader(ResourceManager.getSession().table(tablename));
 		loader.call();
 	}
@@ -60,7 +60,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		Log.setTableContext(table);
 		RestTableAPI impl = table.rest();
-		String targetName = config.getTargetName() == null ? table.getName() : config.getTargetName();
+		String targetName = config.getTargetName();
+		assert targetName != null;
+		assert targetName.length() > 0;
 		switch (config.getAction()) {
 		case UPDATE: 
 			writer = new TableUpdateWriter(db, table, targetName);

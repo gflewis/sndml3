@@ -21,14 +21,14 @@ import org.slf4j.LoggerFactory;
 import servicenow.core.Log;
 import servicenow.core.Session;
 
-public class PropertyManager {
+public class Globals {
 
 	private static CommandLine cmdline;
 	private static Properties properties = new Properties();
 	private static LoaderConfig config  = null;
 	
 	public static Boolean warnOnTruncate = true;
-	static Logger logger = LoggerFactory.getLogger(PropertyManager.class);
+	static Logger logger = LoggerFactory.getLogger(Globals.class);
 		
 	public static void initialize(String[] args) throws IOException, ParseException {
 		Options options = new Options();
@@ -76,6 +76,18 @@ public class PropertyManager {
 		return config;
 	}
 
+	public static String getSetting(String name) {
+		assert name != null;
+		String value = null;
+		String prefix = (name.matches("templates|dialect")) ? "datamart" : "loader";
+		String propname = prefix + "." + name;
+		value = System.getProperty(propname);
+		if (value != null) value = properties.getProperty(propname);
+		if (value != null) value = config.getString(name);
+		return value;
+	}
+	
+	@Deprecated
 	public static String getSetting(String configName, String propName, String defaultValue) {
 		String value;
 		value = config.getString(configName);

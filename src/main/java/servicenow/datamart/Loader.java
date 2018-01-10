@@ -36,19 +36,19 @@ public class Loader {
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("config").required(false).hasArg(true).
 				desc("Config file (required)").build());
-		PropertyManager.initialize(options, args);				
-		if (PropertyManager.hasOptionValue("t") && PropertyManager.hasOptionValue("y"))
+		Globals.initialize(options, args);				
+		if (Globals.hasOptionValue("t") && Globals.hasOptionValue("y"))
 			throw new CommandOptionsException("Cannot specify both --table and --config");
-		ResourceManager.setSession(new Session(PropertyManager.getProperties()));
-		ResourceManager.setDatabase(new Database(PropertyManager.getProperties()));
-		if (PropertyManager.hasOptionValue("t")) {
-			String tablename = PropertyManager.getOptionValue("t");
+		ResourceManager.setSession(new Session(Globals.getProperties()));
+		ResourceManager.setDatabase(new Database(Globals.getProperties()));
+		if (Globals.hasOptionValue("t")) {
+			String tablename = Globals.getOptionValue("t");
 			Table table = ResourceManager.getSession().table(tablename);
 			Loader loader = new Loader(table);
 			loader.loadTables();
 		}
-		if (PropertyManager.hasOptionValue("y")) {
-			File configFile = new File(PropertyManager.getOptionValue("y"));
+		if (Globals.hasOptionValue("y")) {
+			File configFile = new File(Globals.getOptionValue("y"));
 			LoaderConfig config = new LoaderConfig(configFile);
 			Loader loader = new Loader(config);
 			loader.loadTables();			

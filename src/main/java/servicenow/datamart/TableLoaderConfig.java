@@ -5,6 +5,7 @@ import servicenow.core.*;
 public class TableLoaderConfig extends Config {
 
 	private String name;
+	private String source;
 	private String target;
 	private LoaderAction action = LoaderAction.UPDATE;
 	private Boolean truncate = false;
@@ -26,24 +27,14 @@ public class TableLoaderConfig extends Config {
 			assert parent != null;
 			dateFactory = new DateTimeFactory(parent);
 			Map items = new Config.Map(config);
-			/*
-			for (Entry<String, Object> entry : items.entrySet()) {
-				String key = entry.getKey();
-				Object val = entry.getValue();
-				if ("name".equalsIgnoreCase(key))
-		    		this.name = val.toString();					
-				else if ("target".equalsIgnoreCase(key))
-		    		this.target = val.toString();
-				else if ("action".equalsIgnoreCase(key)) {
-					
-				}
-			}
-			*/
 			for (String key : items.keySet()) {
 			    Object val = items.get(key);
 			    switch (key.toLowerCase()) {
 			    case "name":
 			    		this.name = val.toString();
+			    		break;
+			    case "source":
+			    		this.source = val.toString();
 			    		break;
 			    case "target": 
 			    		this.target = val.toString(); 
@@ -95,12 +86,25 @@ public class TableLoaderConfig extends Config {
 		assert name != null && name.length() > 0;
 	}
 		
-	public String getName() {
-		return this.name;
+	public String getName() throws ConfigParseException {
+		if (this.name != null) return this.name;
+		if (this.target != null) return this.target;
+		if (this.source != null) return this.source;
+		throw new ConfigParseException("Name not specified");
 	}
 
-	public String getTargetName() {
-		return this.target;
+	public String getSource() throws ConfigParseException {
+		if (this.source != null) return this.source;
+		if (this.target != null) return this.target;
+		if (this.name != null) return this.name;
+		throw new ConfigParseException("Source not specified");
+	}
+	
+	public String getTargetName() throws ConfigParseException {
+		if (this.target != null) return this.target;
+		if (this.source != null) return this.source;
+		if (this.name != null) return this.name;
+		throw new ConfigParseException("Target not specified");
 	}
 
 	public LoaderAction getAction() {
