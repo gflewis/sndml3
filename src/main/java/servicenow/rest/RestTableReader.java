@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
-import servicenow.datamart.TableLoaderConfig;
+import servicenow.datamart.TableConfig;
 
 public class RestTableReader extends TableReader {
 
@@ -23,7 +23,7 @@ public class RestTableReader extends TableReader {
 		restImpl = impl;
 	}
 	
-	public RestTableReader(RestTableAPI impl, TableLoaderConfig config) {
+	public RestTableReader(RestTableAPI impl, TableConfig config) {
 		this(impl);
 		assert config != null;
 		setPageSize(config.getPageSize() == null ? DEFAULT_PAGE_SIZE : config.getPageSize());

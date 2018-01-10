@@ -18,7 +18,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	private final Session session;
 	private final Database db;
 	private final Table table;
-	private final TableLoaderConfig config;
+	private final TableConfig config;
 	
 	TableWriter writer;
 	
@@ -39,10 +39,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 	}
 	
 	TableLoader(Table table) throws ConfigParseException {
-		this(new TableLoaderConfig(null, table.getName()));
+		this(new TableConfig(null, table.getName()));
 	}
 	
-	TableLoader(TableLoaderConfig config) {		
+	TableLoader(TableConfig config) {		
 		this.session = ResourceManager.getSession();
 		this.db = ResourceManager.getDatabaseWriter();
 		this.table = session.table(config.getName());

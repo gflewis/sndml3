@@ -19,13 +19,13 @@ public class LoaderConfig extends Config {
 	private String name = "loader";
 	private File metricsFile;
 	
-	private final java.util.List<TableLoaderConfig> tables = 
-			new java.util.ArrayList<TableLoaderConfig>();
+	private final java.util.List<TableConfig> tables = 
+			new java.util.ArrayList<TableConfig>();
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public LoaderConfig(Table table) throws IOException, ConfigParseException {
-		tables.add(new TableLoaderConfig(table));		
+		tables.add(new TableConfig(table));		
 	}
 	
 	public LoaderConfig(File configFile) throws IOException, ConfigParseException {
@@ -44,7 +44,7 @@ public class LoaderConfig extends Config {
 			case "metrics" : metricsFile = new File(val.toString()); break;
 			case "tables" : 
 				for (Object job : toList(val)) {
-					this.tables.add(new TableLoaderConfig(this, job));
+					this.tables.add(new TableConfig(this, job));
 				}
 				break;
 		    	default:
@@ -69,7 +69,7 @@ public class LoaderConfig extends Config {
 		return new File(path);
 	}
 	
-	public java.util.List<TableLoaderConfig> getJobs() {
+	public java.util.List<TableConfig> getJobs() {
 		return this.tables;
 	}
 

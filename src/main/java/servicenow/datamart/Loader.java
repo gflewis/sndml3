@@ -64,7 +64,7 @@ public class Loader {
 		this.threads = config.getThreads();
 		logger.debug(String.format("starting %s threads=%d",config.getName(), this.threads));
 		this.metricsFile = config.getMetricsFile();
-		for (TableLoaderConfig jobConfig : config.getJobs()) {
+		for (TableConfig jobConfig : config.getJobs()) {
 			jobs.add(new TableLoader(jobConfig));
 		}
 	}

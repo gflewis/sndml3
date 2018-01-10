@@ -2,7 +2,7 @@ package servicenow.datamart;
 
 import servicenow.core.*;
 
-public class TableLoaderConfig extends Config {
+public class TableConfig extends Config {
 
 	private String name;
 	private String source;
@@ -18,11 +18,11 @@ public class TableLoaderConfig extends Config {
 	private Integer threads = null;
 	private DateTimeFactory dateFactory;
 
-	public TableLoaderConfig(Table table) {
+	public TableConfig(Table table) {
 		this.name = table.getName();
 	}
 	
-	public TableLoaderConfig(LoaderConfig parent, Object config) throws ConfigParseException {
+	public TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
 		if (isMap(config)) {
 			assert parent != null;
 			dateFactory = new DateTimeFactory(parent);
