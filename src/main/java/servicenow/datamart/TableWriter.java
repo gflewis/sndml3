@@ -16,6 +16,7 @@ public abstract class TableWriter extends Writer {
 	private ColumnDefinitions columns;
 	protected InsertStatement insertStmt;
 	protected UpdateStatement updateStmt;
+	protected DeleteStatement deleteStmt;
 	
 	final private Logger logger = Log.logger(this.getClass());
 	
@@ -30,9 +31,27 @@ public abstract class TableWriter extends Writer {
 	public void open() throws SQLException, IOException {
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
 		insertStmt = new InsertStatement(this.db, this.sqlTableName, columns);
-		updateStmt = new UpdateStatement(this.db, this.sqlTableName, columns);		
+		updateStmt = new UpdateStatement(this.db, this.sqlTableName, columns);
+		deleteStmt = new DeleteStatement(this.db, this.sqlTableName);
 		metrics.start();
 	}
+
+	/*
+	void insertRecord(Record rec) throws SQLException {
+		insertStmt.insert(rec);
+		metrics.incrementInserted();
+	}
+	
+	void updateRecord(Record rec) throws SQLException {
+		if (updateStmt.update(rec))
+			metrics.incrementUpdated();
+	}
+	
+	void deleteRecord(Key key) throws SQLException {
+		if (deleteStmt.deleteRecord(key))
+			metrics.incrementDeleted();
+	}
+	*/
 	
 	@Override
 	public synchronized void processRecords(RecordList recs) throws IOException, SQLException {
@@ -59,15 +78,5 @@ public abstract class TableWriter extends Writer {
 	}
 
 	abstract void writeRecord(Record rec) throws SQLException;
-	
-//	private synchronized void writeRecord(Record rec) throws SQLException {
-//		if (updateStmt.update(rec)) {
-//			metrics.incrementUpdated();
-//		}
-//		else {
-//			insertStmt.insert(rec);
-//			metrics.incrementInserted();
-//		}
-//	}
-				
+					
 }

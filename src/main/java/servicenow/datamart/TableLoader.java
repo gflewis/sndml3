@@ -1,5 +1,9 @@
 package servicenow.datamart;
 
+import servicenow.core.*;
+import servicenow.rest.MultiDatePartReader;
+import servicenow.rest.RestTableAPI;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
@@ -9,10 +13,6 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.core.*;
-import servicenow.rest.MultiDatePartReader;
-import servicenow.rest.RestTableAPI;
-
 public class TableLoader implements Callable<WriterMetrics> {
 
 	private final Session session;
@@ -20,6 +20,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	private final Table table;
 	private final TableConfig config;
 	
+	TableReader reader;
 	TableWriter writer;
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -63,33 +64,46 @@ public class TableLoader implements Callable<WriterMetrics> {
 		String targetName = config.getTargetName();
 		assert targetName != null;
 		assert targetName.length() > 0;
-		switch (config.getAction()) {
+		LoaderAction action = config.getAction();
+		switch (action) {
 		case UPDATE: 
 			writer = new TableUpdateWriter(db, table, targetName);
 			break;
 		case INSERT:
 			writer = new TableInsertWriter(db, table, targetName);
 			break;
+		case PRUNE:
+			writer = new TableDeleteWriter(db, table, targetName);
+			break;
 		}
 		db.createMissingTable(table, targetName);
 		writer.open();
 		if (config.getTruncate()) db.truncateTable(targetName);
-		TableReader reader;
-		EncodedQuery filter = config.getFilter();
+		EncodedQuery filter;
 		DateTime.Interval partitionInterval = config.getPartitionInterval();
-		DateTimeRange created = config.getCreated();
-		DateTimeRange updated = DateTimeRange.all().
-				intersect(config.getUpdated()).
-				intersect(config.getSince());
-		if (partitionInterval == null) {
-			reader = table.getDefaultReader().setWriter(writer);
-			reader.setBaseQuery(filter);
-			reader.setCreatedRange(created);
-			reader.setUpdatedRange(updated);
+		if (action == LoaderAction.PRUNE) {
+			Table audit = session.table("sys_audit_delete");
+			reader = audit.getDefaultReader();
+			reader.setBaseQuery(new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName()));
+			reader.setCreatedRange(config.getSince());			
 		}
 		else {
-			Integer threads = config.getThreads();
-			reader = new MultiDatePartReader(impl, partitionInterval, filter, created, updated, threads, writer);			
+			DateTimeRange created = config.getCreated();
+			DateTimeRange updated = DateTimeRange.all().
+					intersect(config.getUpdated()).
+					intersect(config.getSince());
+			filter = config.getFilter();
+			if (partitionInterval == null) {
+				reader = table.getDefaultReader();
+				reader.setBaseQuery(filter);
+				reader.setCreatedRange(created);
+				reader.setUpdatedRange(updated);
+				reader.setWriter(writer);
+			}
+			else {
+				Integer threads = config.getThreads();
+				reader = new MultiDatePartReader(impl, partitionInterval, filter, created, updated, threads, writer);			
+			}
 		}
 		if (config.getPageSize() != null) reader.setPageSize(config.getPageSize());
 		reader.initialize();

@@ -36,7 +36,7 @@ public class WriterMetrics {
 	}
 		
 	public int getProcessed() {
-		return getInserted() + getUpdated() + + getDeleted() + getSkipped();
+		return getInserted() + getUpdated() + getDeleted() + getSkipped();
 	}
 	
 	public int getInserted() {
@@ -61,6 +61,10 @@ public class WriterMetrics {
 	
 	public void incrementUpdated() {
 		addUpdated(1);
+	}
+	
+	public void incrementDeleted() {
+		addDeleted(1);
 	}
 	
 	public void incrementSkipped() {

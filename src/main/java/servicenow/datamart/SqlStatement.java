@@ -45,6 +45,10 @@ public abstract class SqlStatement {
 
 	abstract String buildStatement() throws SQLException;
 		
+	public void bindField(int bindCol, String value) throws SQLException {
+		stmt.setString(bindCol, value);
+	}
+	
 	/**
 	 * Get a value from a Glide Record and bind it to a variable in prepared statement.
 	 * 

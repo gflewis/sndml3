@@ -1,3 +1,3 @@
 package servicenow.datamart;
 
-public enum LoaderAction { UPDATE, INSERT }
+public enum LoaderAction { UPDATE, INSERT, PRUNE }

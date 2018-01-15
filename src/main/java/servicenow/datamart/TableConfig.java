@@ -43,6 +43,7 @@ public class TableConfig extends Config {
 			    		switch (val.toString().toLowerCase()) {
 			    		case "update": this.action = LoaderAction.UPDATE; break;
 			    		case "insert": this.action = LoaderAction.INSERT; break;
+			    		case "prune":  this.action = LoaderAction.PRUNE; break;
 			    		default:
 						throw new ConfigParseException("Not recognized: " + val.toString());			    			
 			    		}
@@ -83,7 +84,10 @@ public class TableConfig extends Config {
 			else
 				throw new ConfigParseException("Not recognized: " + config.toString());
 		}		
-		assert name != null && name.length() > 0;
+	}
+	
+	public void validate() throws ConfigParseException {
+		
 	}
 		
 	public String getName() throws ConfigParseException {
