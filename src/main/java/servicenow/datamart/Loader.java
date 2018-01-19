@@ -62,7 +62,7 @@ public class Loader {
 	Loader(LoaderConfig config) {
 		this.config = config;
 		this.threads = config.getThreads();
-		logger.debug(String.format("starting %s threads=%d",config.getName(), this.threads));
+		logger.debug(String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = config.getMetricsFile();
 		for (TableConfig jobConfig : config.getJobs()) {
 			jobs.add(new TableLoader(jobConfig));
@@ -95,9 +95,9 @@ public class Loader {
 	
 	void writeAllMetrics() throws IOException {
 		statsWriter = new PrintWriter(metricsFile);
-		loaderStats.write(statsWriter,  config.getName());
+		loaderStats.write(statsWriter);
 		for (TableLoader job : jobs) {			
-			job.getMetrics().write(statsWriter, config.getName() + "." + job.getName());
+			job.getMetrics().write(statsWriter, job.getName());
 		}
 		statsWriter.close();		
 	}

@@ -19,7 +19,7 @@ public class LoaderConfigTest {
 	@Test
 	public void testSimple() throws Exception {
 		String yaml = "tables: [core_company, incident]";
-		LoaderConfig config = new LoaderConfig(new StringReader(yaml), null);
+		LoaderConfig config = new LoaderConfig(new StringReader(yaml));
 		assertEquals(2, config.getJobs().size());
 		assertEquals("core_company", config.getJobs().get(0).getName());
 		assertEquals("incident", config.getJobs().get(1).getName());

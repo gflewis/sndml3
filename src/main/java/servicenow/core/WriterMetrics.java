@@ -96,17 +96,22 @@ public class WriterMetrics {
 		skipped += stats.skipped;
 	}
 	
+	public void write(PrintWriter writer) throws IOException {
+		write(writer, null);
+	}
+
 	public void write(PrintWriter writer, String prefix) throws IOException {
 		assert writer != null;
-		assert prefix != null;
-		writer.println(String.format("%s.start=%s",   prefix, getStarted()));
-		writer.println(String.format("%s.finish=%s",  prefix, getFinished()));
-		writer.println(String.format("%s.elapsed=%d",   prefix, getElapsedSec()));
-		writer.println(String.format("%s.inserted=%d",  prefix, getInserted()));
-		writer.println(String.format("%s.updated=%d",   prefix, getUpdated()));
-		writer.println(String.format("%s.deleted=%d",   prefix, getDeleted()));
-		writer.println(String.format("%s.skipped=%d",   prefix, getSkipped()));
-		writer.println(String.format("%s.processed=%d", prefix, getProcessed()));		
+		if (prefix == null) prefix = "";
+		if (prefix.length() > 0) prefix = prefix + ".";
+		writer.println(prefix + "start="     + getStarted());
+		writer.println(prefix + "finish="    + getFinished());
+		writer.println(prefix + "elapsed="   + String.valueOf(getElapsedSec()));
+		writer.println(prefix + "inserted="  + String.valueOf(getInserted()));
+		writer.println(prefix + "updated="   + String.valueOf(getUpdated()));
+		writer.println(prefix + "deleted="   + String.valueOf(getDeleted()));
+		writer.println(prefix + "skipped="   + String.valueOf(getSkipped()));
+		writer.println(prefix + "processed=" + String.valueOf(getProcessed()));		
 	}
 	
 }

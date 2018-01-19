@@ -16,8 +16,7 @@ public class LoaderConfig extends Config {
 	
 	private Map root;
 	private Integer threads = 0;
-	private String name = "loader";
-	private File metricsFile;
+	private File metricsFile = null;
 	
 	private final java.util.List<TableConfig> tables = 
 			new java.util.ArrayList<TableConfig>();
@@ -29,17 +28,15 @@ public class LoaderConfig extends Config {
 	}
 	
 	public LoaderConfig(File configFile) throws IOException, ConfigParseException {
-		this(new FileReader(configFile), defaultMetricsFile(configFile));
+		this(new FileReader(configFile));
 	}
-
-	public LoaderConfig(Reader reader, File defaultMetricsFile) throws IOException, ConfigParseException {
-		this.metricsFile = defaultMetricsFile;
+	
+	public LoaderConfig(Reader reader) throws IOException, ConfigParseException {
 		root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());
 		for (String key : root.keySet()) {
 		    Object val = root.get(key);
 			switch (key.toLowerCase()) {
-			case "name" : name = val.toString(); break;
 			case "threads" : threads = asInteger(val); break;
 			case "metrics" : metricsFile = new File(val.toString()); break;
 			case "tables" : 
@@ -57,24 +54,9 @@ public class LoaderConfig extends Config {
 		assert root != null;
 		return root.getString(propName);
 	}
-	
-	@Deprecated
-	private static File defaultMetricsFile(File configFile) {
-		if (configFile == null) return null;
-		String path = configFile.getPath();
-		// remove old extension
-		path = path.replaceFirst("\\.\\w$",  "");
-		// add new extension
-		path = path + ".metrics";
-		return new File(path);
-	}
-	
+		
 	public java.util.List<TableConfig> getJobs() {
 		return this.tables;
-	}
-
-	public String getName() {
-		return this.name;
 	}
 	
 	public int getThreads() {

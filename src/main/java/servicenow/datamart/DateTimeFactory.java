@@ -82,7 +82,11 @@ public class DateTimeFactory {
 		if (name.equalsIgnoreCase("void")) return null;
 		if (name.equalsIgnoreCase("start")) return getStart();
 		if (name.equalsIgnoreCase("today")) return getStart().truncate();
-		if (name.equalsIgnoreCase("last")) return getLast("loader.start");
+		if (name.equalsIgnoreCase("last")) return getLast("start");
+		if (name.toLowerCase().startsWith("last.")) {
+			name = name.substring(5);
+			return getLast(name);
+		}
 		return getLast(name);
 	}
 		
