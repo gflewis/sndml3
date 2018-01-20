@@ -28,18 +28,17 @@ public class DateTimeFactory {
 		start = parent.getStart();
 		File metricsFile = parent.getMetricsFile();
 		assert start != null;
-		if (metricsFile == null) {
+		if (metricsFile == null || !metricsFile.exists()) {
 			this.lastMetrics = null;
+			return;
 		}
-		else {
-			this.lastMetrics = new Properties();
-			try {
-				FileInputStream input = new FileInputStream(metricsFile);
-				lastMetrics.load(input);
-			}
-			catch (IOException e) {
-				throw new ConfigParseException(e);
-			}
+		this.lastMetrics = new Properties();
+		try {
+			FileInputStream input = new FileInputStream(metricsFile);
+			lastMetrics.load(input);
+		}
+		catch (IOException e) {
+			throw new ConfigParseException(e);
 		}
 	}
 	
