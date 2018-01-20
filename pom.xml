@@ -17,6 +17,27 @@
     <main.class>servicenow.datamart.Loader</main.class>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>maven.oracle.com</id>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <url>https://maven.oracle.com</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>maven.oracle.com</id>
+      <url>https://maven.oracle.com</url>
+    </pluginRepository>
+  </pluginRepositories>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -89,13 +110,15 @@
       <version>5.1.32</version>
       <optional>true</optional>
     </dependency>
-    <!--
-      to add ojdbc7 to local repo
-        mvn install:install-file -Dfile=ojdbc7.jar
-        -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2
-        -Dpackaging=jar -DgeneratePom=true 
-    -->
-    <!--
+ 
+     <dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>mssql-jdbc</artifactId>
+      <version>6.2.2.jre7</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc7</artifactId>
@@ -103,7 +126,6 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
-    -->
 
   </dependencies>
 
@@ -139,37 +161,6 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.4.3</version>
         <executions>
-          <!-- JSON JAR -->
-          <!-- 
-          <execution>
-            <id>json</id>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>json</shadedClassifierName>
-              <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>servicenow.common.core.FileWriter</mainClass>
-                </transformer>
-              </transformers>
-              <artifactSet>
-                <includes>
-                  <include>org.apache.*:*</include>
-                  <include>commons-*:*</include>
-                  <include>org.jdom:*</include>
-                  <include>org.json:*</include>
-                  <include>org.yaml:*</include>
-                  <include>org.slf4j:*</include>
-                  <include>log4j:*</include>
-                </includes>
-              </artifactSet>
-            </configuration>
-          </execution>
-          -->
           
           <!-- MySQL JAR -->
           <execution>
@@ -203,7 +194,6 @@
           </execution>
                     
           <!-- Oracle JAR -->
-          <!-- 
           <execution>
             <id>ora</id>
             <phase>package</phase>
@@ -233,7 +223,38 @@
               </artifactSet>
             </configuration>
           </execution>
-          -->
+
+          <!-- MS SQL Server JAR -->
+          <execution>
+            <id>mssql</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>mssql</shadedClassifierName>             
+              <transformers>
+                <transformer implementation=
+                  "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>${main.class}</mainClass>
+                </transformer>
+              </transformers>
+              <artifactSet>
+                <includes>
+                  <include>com.microsoft.sqlserver</include>
+                  <include>org.apache.*:*</include>
+                  <include>commons-*:*</include>
+                  <include>org.jdom:*</include>
+                  <include>org.json:*</include>
+                  <include>org.yaml:*</include>
+                  <include>org.slf4j:*</include>
+                  <include>log4j:*</include>
+                </includes>
+              </artifactSet>
+            </configuration>
+          </execution>
+
                     
         </executions>
       </plugin>
