@@ -70,6 +70,7 @@ public class Loader {
 	}
 	
 	public void loadTables() throws SQLException, IOException, InterruptedException {
+		Log.setGlobalContext();
 		loaderMetrics.start();
 		if (threads > 1) {
 			logger.info(Log.INIT, String.format("starting %d threads", threads));
@@ -88,7 +89,7 @@ public class Loader {
 				job.call();
 			}			
 		}
-		Log.clearContext();
+		Log.setGlobalContext();
 		loaderMetrics.finish();
 		for (TableLoader job : jobs) loaderMetrics.add(job.getMetrics());
 		if (metricsFile != null) writeAllMetrics();

@@ -20,18 +20,20 @@ public class Log {
 		return org.slf4j.LoggerFactory.getLogger(name);
 	}
 	
-	static public synchronized void setSessionContext(Session session) {
-		setContext("user", session.getUsername());
-	}
-
 	static public synchronized void setGlobalContext() {
+		clearContext();
 		setContext("table", "_global_");
 	}
 	
 	static public synchronized void setTableContext(Table table) {
+		clearContext();
 		setTableContext(table.getName());
 	}
 	
+	static public synchronized void setSessionContext(Session session) {
+		setContext("user", session.getUsername());
+	}
+
 	static public synchronized void setTableContext(String tablename) {
 		setContext("table", tablename);
 	}
