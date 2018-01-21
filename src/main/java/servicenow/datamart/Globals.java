@@ -69,6 +69,7 @@ public class Globals {
 
 	static void setLoaderConfig(LoaderConfig value) {
 		config = value;
+		logger.debug(Log.INIT, String.format("setLoaderConfig start=%s metrics=%s",  getStart(), getMetricsFile()));
 	}
 	
 	static LoaderConfig getLoaderConfig() {
@@ -76,9 +77,13 @@ public class Globals {
 	}
 	
 	public static DateTime getStart() {
-		return config.getStart();
+		return config.start;
 	}
 
+	public static File getMetricsFile() {
+		return getFile("metrics");
+	}
+		
 	public static String getValue(String name) {
 		assert name != null;
 		String value = null;

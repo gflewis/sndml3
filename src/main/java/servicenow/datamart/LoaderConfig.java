@@ -63,7 +63,8 @@ public class LoaderConfig extends Config {
 	public int getThreads() {
 		return this.threads==null ? 0 : this.threads.intValue();
 	}
-		
+	
+	@Deprecated
 	public File getMetricsFile() {
 		return metricsFile;
 	}
@@ -71,6 +72,7 @@ public class LoaderConfig extends Config {
 	/**
 	 * Return the DateTime that this object was initialized.
 	 */
+	@Deprecated
 	public DateTime getStart() {
 		return start;
 	}

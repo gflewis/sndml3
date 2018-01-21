@@ -27,7 +27,7 @@ public class DateTimeFactory {
 	public DateTimeFactory() throws ConfigParseException {
 		start = Globals.getStart();
 		assert start != null;
-		File metricsFile = Globals.getFile("metrics");
+		File metricsFile = Globals.getMetricsFile();
 		if (metricsFile == null || !metricsFile.exists()) {
 			this.lastMetrics = null;
 			return;
