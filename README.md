@@ -1,2 +1,4 @@
 # sndml3
-## This site is under construction. 
+
+3.0.1-b1 is the first beta release of SNDML3
+

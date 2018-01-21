@@ -4,7 +4,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.1-b1</version>
   <packaging>jar</packaging>
 
   <name>sndml</name>
@@ -253,9 +253,26 @@
                 </includes>
               </artifactSet>
             </configuration>
-          </execution>
+          </execution>                    
+        </executions>
+      </plugin>
 
-                    
+      <!-- zip file for release -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>bin</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assembly</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
 

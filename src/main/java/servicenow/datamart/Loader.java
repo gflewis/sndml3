@@ -94,6 +94,7 @@ public class Loader {
 	}
 	
 	void writeAllMetrics() throws IOException {
+		logger.info(Log.TERM, "Writing " + metricsFile.getPath());
 		statsWriter = new PrintWriter(metricsFile);
 		loaderStats.write(statsWriter);
 		for (TableLoader job : jobs) {			
