@@ -81,16 +81,23 @@ public class Globals {
 	}
 
 	public static File getMetricsFile() {
-		return getFile("metrics");
+		String filename = getProperty("metrics");
+		if (filename != null) return new File(filename);
+		return config.metricsFile;
 	}
-		
-	public static String getValue(String name) {
-		assert name != null;
+
+	private static String getProperty(String name) {
 		String value = null;
 		String prefix = (name.matches("templates|dialect")) ? "datamart" : "loader";
 		String propname = prefix + "." + name;
 		value = System.getProperty(propname);
 		if (value != null) value = properties.getProperty(propname);
+		return value;
+	}
+	
+	public static String getValue(String name) {
+		assert name != null;
+		String value = getProperty(name);
 		if (value != null) value = config.getString(name);
 		return value;
 	}

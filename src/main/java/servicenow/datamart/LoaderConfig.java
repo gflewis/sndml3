@@ -14,9 +14,9 @@ public class LoaderConfig extends Config {
 
 	final DateTime start = DateTime.now();
 	
-	private Map root;
-	private Integer threads = 0;
-	private File metricsFile = null;
+	Map root;
+	Integer threads = 0;
+	File metricsFile = null;
 	
 	private final java.util.List<TableConfig> tables = 
 			new java.util.ArrayList<TableConfig>();
@@ -51,9 +51,9 @@ public class LoaderConfig extends Config {
 		Globals.setLoaderConfig(this);
 	}
 	
-	String getString(String propName) {
+	String getString(String key) {
 		assert root != null;
-		return root.getString(propName);
+		return root.getString(key);
 	}
 		
 	public java.util.List<TableConfig> getJobs() {
@@ -64,7 +64,6 @@ public class LoaderConfig extends Config {
 		return this.threads==null ? 0 : this.threads.intValue();
 	}
 	
-	@Deprecated
 	public File getMetricsFile() {
 		return metricsFile;
 	}
@@ -72,7 +71,6 @@ public class LoaderConfig extends Config {
 	/**
 	 * Return the DateTime that this object was initialized.
 	 */
-	@Deprecated
 	public DateTime getStart() {
 		return start;
 	}
