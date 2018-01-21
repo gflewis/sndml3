@@ -73,7 +73,7 @@ public class Generator {
 		if (xmldocument == null) {
 			try {
 				InputStream sqlConfigStream;
-				String path = Globals.getSetting("templates");
+				String path = Globals.getValue("templates");
 				if (path == null) 
 					sqlConfigStream = ClassLoader.getSystemResourceAsStream("sqltemplates.xml");
 				else
@@ -90,7 +90,7 @@ public class Generator {
 	}
 	
 	static Element getTree(URI dbURI) {
-		String dialectName = Globals.getSetting("dialect");
+		String dialectName = Globals.getValue("dialect");
 		if (dialectName != null) return getTree(dialectName);
 		String urlPart[] = dbURI.toString().split(":");
 		String protocol = urlPart[1];

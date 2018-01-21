@@ -24,10 +24,10 @@ public class DateTimeFactory {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public DateTimeFactory(LoaderConfig parent) throws ConfigParseException {
-		start = parent.getStart();
-		File metricsFile = parent.getMetricsFile();
+	public DateTimeFactory() throws ConfigParseException {
+		start = Globals.getStart();
 		assert start != null;
+		File metricsFile = Globals.getFile("metrics");
 		if (metricsFile == null || !metricsFile.exists()) {
 			this.lastMetrics = null;
 			return;
@@ -65,15 +65,22 @@ public class DateTimeFactory {
 	
 	public DateTime getDate(Object obj) throws ConfigParseException {
 		assert obj != null;
-		if (obj instanceof java.util.Date) return new DateTime((java.util.Date) obj);
-		String expr = obj.toString();
-		if (datePattern.matcher(expr).matches())
-			return new DateTime(expr);
-		if (namePattern.matcher(expr).matches())
-			return getName(expr);
-		if (exprPattern.matcher(expr).matches())
-			return getExpr(expr);
-		throw new ConfigParseException("Invalid datetime: " + expr);
+		DateTime result;
+		if (obj instanceof java.util.Date) 
+			result = new DateTime((java.util.Date) obj);
+		else {
+			String expr = obj.toString();
+			if (datePattern.matcher(expr).matches())
+				result = new DateTime(expr);
+			else if (namePattern.matcher(expr).matches())
+				result = getName(expr);
+			else if (exprPattern.matcher(expr).matches())
+				result = getExpr(expr);
+			else
+				throw new ConfigParseException("Invalid datetime: " + expr);
+			logger.debug(Log.INIT, String.format("getDate(%s)=%s", expr, result.toString()));
+		}
+		return result;
 	}
 
 	private DateTime getName(String name) throws ConfigParseException {
@@ -86,6 +93,9 @@ public class DateTimeFactory {
 			name = name.substring(5);
 			return getLast(name);
 		}
+		// System property or profile property will override metrics value
+		String propValue = Globals.getValue(name);
+		if (propValue != null) return new DateTime(propValue);
 		return getLast(name);
 	}
 		

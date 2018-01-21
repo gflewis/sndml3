@@ -47,7 +47,8 @@ public class LoaderConfig extends Config {
 		    	default:
 		    		throw new ConfigParseException("Not recognized: " + key);
 			}
-		}		
+		}
+		Globals.setLoaderConfig(this);
 	}
 	
 	String getString(String propName) {

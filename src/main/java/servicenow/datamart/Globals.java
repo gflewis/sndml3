@@ -1,5 +1,7 @@
 package servicenow.datamart;
 
+import servicenow.core.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,9 +19,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import servicenow.core.Log;
-import servicenow.core.Session;
 
 public class Globals {
 
@@ -68,15 +67,19 @@ public class Globals {
 		}
 	}
 
-	public static void setLoaderConfig(LoaderConfig value) {
+	static void setLoaderConfig(LoaderConfig value) {
 		config = value;
 	}
 	
-	public static LoaderConfig getLoaderConfig() {
+	static LoaderConfig getLoaderConfig() {
 		return config;
 	}
+	
+	public static DateTime getStart() {
+		return config.getStart();
+	}
 
-	public static String getSetting(String name) {
+	public static String getValue(String name) {
 		assert name != null;
 		String value = null;
 		String prefix = (name.matches("templates|dialect")) ? "datamart" : "loader";
@@ -86,17 +89,20 @@ public class Globals {
 		if (value != null) value = config.getString(name);
 		return value;
 	}
+
+	public static File getFile(String varname) {
+		String path = getValue(varname);
+		return (path == null) ? null : new File(path); 
+	}
 	
-	@Deprecated
-	public static String getSetting(String configName, String propName, String defaultValue) {
-		String value;
-		value = config.getString(configName);
-		if (value != null) return value;
-		value = System.getProperty(propName);
-		if (value != null) return value;
-		value = properties.getProperty(propName);
-		if (value != null) return value;
-		return defaultValue;
+	public static Boolean getBoolean(String varname) {
+		String value = getValue(varname);
+		return (value == null) ? null : new Boolean(value);
+	}
+	
+	public static Integer getInteger(String varname) {
+		String value = getValue(varname);
+		return (value == null) ? null : new Integer(value);
 	}
 	
 	public static Properties getProperties() {

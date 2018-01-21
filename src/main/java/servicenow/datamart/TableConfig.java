@@ -25,7 +25,7 @@ public class TableConfig extends Config {
 	public TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
 		if (isMap(config)) {
 			assert parent != null;
-			dateFactory = new DateTimeFactory(parent);
+			dateFactory = new DateTimeFactory();
 			Map items = new Config.Map(config);
 			for (String key : items.keySet()) {
 			    Object val = items.get(key);
