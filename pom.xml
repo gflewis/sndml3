@@ -4,7 +4,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.0.1-b1</version>
+  <version>3.0.1-b.1</version>
   <packaging>jar</packaging>
 
   <name>sndml</name>
