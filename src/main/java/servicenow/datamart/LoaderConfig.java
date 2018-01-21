@@ -32,6 +32,7 @@ public class LoaderConfig extends Config {
 	}
 	
 	public LoaderConfig(Reader reader) throws IOException, ConfigParseException {
+		Globals.setLoaderConfig(this);
 		root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());
 		for (String key : root.keySet()) {
@@ -48,7 +49,6 @@ public class LoaderConfig extends Config {
 		    		throw new ConfigParseException("Not recognized: " + key);
 			}
 		}
-		Globals.setLoaderConfig(this);
 	}
 	
 	String getString(String key) {
