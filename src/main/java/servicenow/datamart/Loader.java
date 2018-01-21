@@ -22,7 +22,7 @@ public class Loader {
 	int threads;
 	File metricsFile = null;
 	PrintWriter statsWriter;
-	WriterMetrics loaderStats = new WriterMetrics();	
+	WriterMetrics loaderMetrics = new WriterMetrics();	
 	ArrayList<TableLoader> jobs = new ArrayList<TableLoader>();
 	
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -70,7 +70,7 @@ public class Loader {
 	}
 	
 	public void loadTables() throws SQLException, IOException, InterruptedException {
-		loaderStats.start();
+		loaderMetrics.start();
 		if (threads > 1) {
 			logger.info(Log.INIT, String.format("starting %d threads", threads));
 			ExecutorService executor = Executors.newFixedThreadPool(threads);
@@ -88,15 +88,16 @@ public class Loader {
 				job.call();
 			}			
 		}
-		loaderStats.finish();
-		for (TableLoader job : jobs) loaderStats.add(job.getMetrics());
+		Log.clearContext();
+		loaderMetrics.finish();
+		for (TableLoader job : jobs) loaderMetrics.add(job.getMetrics());
 		if (metricsFile != null) writeAllMetrics();
 	}
 	
 	void writeAllMetrics() throws IOException {
 		logger.info(Log.TERM, "Writing " + metricsFile.getPath());
 		statsWriter = new PrintWriter(metricsFile);
-		loaderStats.write(statsWriter);
+		loaderMetrics.write(statsWriter);
 		for (TableLoader job : jobs) {			
 			job.getMetrics().write(statsWriter, job.getName());
 		}
