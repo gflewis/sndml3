@@ -17,6 +17,7 @@
     <main.class>servicenow.datamart.Loader</main.class>
   </properties>
 
+<!--
   <repositories>
     <repository>
       <id>maven.oracle.com</id>
@@ -30,14 +31,15 @@
       <layout>default</layout>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
     <pluginRepository>
       <id>maven.oracle.com</id>
       <url>https://maven.oracle.com</url>
     </pluginRepository>
   </pluginRepositories>
-
+-->
+  
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -110,16 +112,22 @@
       <version>5.1.32</version>
       <optional>true</optional>
     </dependency>
- 
-     <dependency>
+
+    <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
       <version>6.2.2.jre7</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
-    
+
     <dependency>
+      <!--
+        to add ojdbc7 to local repo
+          mvn install:install-file -Dfile=ojdbc7.jar
+          -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2
+          -Dpackaging=jar -DgeneratePom=true 
+      -->    
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc7</artifactId>
       <version>12.1.0.2</version>
@@ -142,7 +150,7 @@
         </configuration>
       </plugin>
 
-	  <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.0.2</version>
@@ -155,13 +163,13 @@
           </archive>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.4.3</version>
         <executions>
-          
+
           <!-- MySQL JAR -->
           <execution>
             <id>mysql</id>
@@ -192,7 +200,7 @@
               </artifactSet>
             </configuration>
           </execution>
-                    
+
           <!-- Oracle JAR -->
           <execution>
             <id>ora</id>
@@ -202,10 +210,10 @@
             </goals>
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>ora</shadedClassifierName>             
+              <shadedClassifierName>ora</shadedClassifierName>
               <transformers>
-                <transformer implementation=
-                  "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
                 </transformer>
               </transformers>
@@ -233,16 +241,16 @@
             </goals>
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>mssql</shadedClassifierName>             
+              <shadedClassifierName>mssql</shadedClassifierName>
               <transformers>
-                <transformer implementation=
-                  "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
                 </transformer>
               </transformers>
               <artifactSet>
                 <includes>
-                  <include>com.microsoft.sqlserver</include>
+                  <include>com.microsoft.*:*</include>
                   <include>org.apache.*:*</include>
                   <include>commons-*:*</include>
                   <include>org.jdom:*</include>
@@ -253,7 +261,7 @@
                 </includes>
               </artifactSet>
             </configuration>
-          </execution>                    
+          </execution>
         </executions>
       </plugin>
 
