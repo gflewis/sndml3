@@ -65,6 +65,8 @@ public class TableLoader implements Callable<WriterMetrics> {
 		assert targetName != null;
 		assert targetName.length() > 0;
 		LoaderAction action = config.getAction();
+		logger.debug(Log.INIT, 
+			String.format("call table=%s action=%s", table.getName(), action.toString()));;
 		switch (action) {
 		case UPDATE: 
 			writer = new TableUpdateWriter(db, table, targetName);
