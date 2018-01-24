@@ -16,29 +16,6 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <main.class>servicenow.datamart.Loader</main.class>
   </properties>
-
-<!--
-  <repositories>
-    <repository>
-      <id>maven.oracle.com</id>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <url>https://maven.oracle.com</url>
-      <layout>default</layout>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>maven.oracle.com</id>
-      <url>https://maven.oracle.com</url>
-    </pluginRepository>
-  </pluginRepositories>
--->
   
   <dependencies>
     <dependency>
@@ -112,12 +89,11 @@
       <version>5.1.32</version>
       <optional>true</optional>
     </dependency>
-
     <dependency>
        <!--
-        to add sqljdbc4 to local repo
-          mvn install:install-file -Dfile=sqljdbc41.jar
-          -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc -Dversion=4.1
+        to add sqljdbc41 to local repo
+          mvn install:install-file -Dfile=sqljdbc41.jar \
+          -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc -Dversion=4.1 \
           -Dpackaging=jar -DgeneratePom=true 
         -->
       <groupId>com.microsoft.sqlserver</groupId>
@@ -126,12 +102,11 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
-
     <dependency>
       <!--
         to add ojdbc7 to local repo
-          mvn install:install-file -Dfile=ojdbc7.jar
-          -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2
+          mvn install:install-file -Dfile=ojdbc7.jar \
+          -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2 \
           -Dpackaging=jar -DgeneratePom=true 
       -->    
       <groupId>com.oracle</groupId>
