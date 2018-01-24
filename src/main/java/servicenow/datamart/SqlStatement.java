@@ -61,7 +61,14 @@ public abstract class SqlStatement {
 		SqlFieldDefinition defn = columns.get(glideCol);
 		String glidename = defn.getGlideName();
 		String value = rec.getValue(glidename);
-		bindField(bindCol, rec, defn, value);		
+		try {
+			bindField(bindCol, rec, defn, value);
+		}
+		catch (SQLException|NumberFormatException e) {
+			logger.error(Log.PROCESS, 
+					String.format("bindField %s=\"%s\" %s", glidename, value, e.getMessage()));
+			throw e;
+		}		
 	}
 	
 	public void bindField(int bindCol, Record rec, SqlFieldDefinition d, String value) throws SQLException {
