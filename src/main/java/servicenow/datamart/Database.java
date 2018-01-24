@@ -103,8 +103,13 @@ public class Database {
 	}
 		
 	String getSchema() {
-		if (this.schema == null && this.isOracle()) return this.dbuser;
-		return this.schema;
+		String result;
+		if (this.schema == null && this.isOracle()) 
+			result = this.dbuser;
+		else
+			result = this.schema;
+		if (this.isOracle()) result = result.toUpperCase();
+		return result;
 	}
 	
 	String qualifiedName(String name) {
