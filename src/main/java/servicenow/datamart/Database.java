@@ -155,14 +155,14 @@ public class Database {
 		if (this.isOracle()) tablename = tablename.toUpperCase();
 		ResultSet rs = meta.getTables(null, schema, tablename, null);
 		*/
-		ResultSet rs = getColumnDefinitions(tablename);
+		ResultSet rs = getTableDefinition(tablename);
 		boolean result = (rs.next() ? true : false);
 		rs.close();
 		logger.debug(Log.INIT, String.format("tableExists schema=%s table=%s result=%b", schema, tablename, result));
 		return result;
 	}
 
-	ResultSet getColumnDefinitions(String tablename) throws SQLException {
+	ResultSet getTableDefinition(String tablename) throws SQLException {
 		assert tablename != null;
 		assert tablename.length() > 0;
 		DatabaseMetaData meta = getConnection().getMetaData();
@@ -171,6 +171,17 @@ public class Database {
 		ResultSet rs = meta.getTables(null, schema, tablename, null);
 		return rs;		
 	}
+
+	ResultSet getColumnDefinitions(String tablename) throws SQLException {
+		assert tablename != null;
+		assert tablename.length() > 0;
+		DatabaseMetaData meta = getConnection().getMetaData();
+		String schema = getSchema();
+		if (this.isOracle()) tablename = tablename.toUpperCase();
+		ResultSet rs = meta.getColumns(null, schema, tablename, null);
+		return rs;		
+	}
+	
 	
 	/**
 	 * Create a table in the target database if it does not already exist.
