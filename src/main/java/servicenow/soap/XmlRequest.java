@@ -62,15 +62,19 @@ public class XmlRequest {
 		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
 		String responseText = EntityUtils.toString(responseEntity);
 		int responseLen = responseText == null ? 0 : responseText.length();
-		log.debug(Log.RESPONSE, "status=" + statusLine + " contentType=" + contentType + " len=" + responseLen);
+		log.debug(Log.RESPONSE,
+			String.format("status=\"%s\" contentType=%s len=%d", 
+				statusLine, contentType, responseLen));
 		if (statusCode == 401) {
-			log.error(Log.RESPONSE, "REQUEST:\n" + requestText);
+			log.error(Log.RESPONSE, 
+				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
 			throw new InsufficientRightsException(uri, null, requestText);
 		}
 		if (contentType == null) {
+			log.error(Log.RESPONSE, 
+				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
 			throw new NoContentException(uri);
-		}
-		
+		}		
 		if ("text/html".equals(contentType) /* && responseText.contains("Hibernating") */)
 			throw new InstanceUnavailableException(this.uri, responseText);
 		SAXBuilder parser = new SAXBuilder();

@@ -92,8 +92,7 @@ public class Generator {
 	static Element getTree(URI dbURI) {
 		String dialectName = Globals.getValue("dialect");
 		if (dialectName != null) return getTree(dialectName);
-		String urlPart[] = dbURI.toString().split(":");
-		String protocol = urlPart[1];
+		String protocol = Database.getProtocol(dbURI);
 		ListIterator<Element> children = getDocument().getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
 			Element tree = children.next();

@@ -22,6 +22,7 @@ public class Database {
 
 	private final Connection dbc;
 	private final URI dbURI;
+	private final String dbuser;
 	private final String dialect;
 	private final String schema;
 	private final Generator generator;
@@ -32,7 +33,7 @@ public class Database {
 	public Database(Properties props) throws SQLException, URISyntaxException {
 		String dburl  = props.getProperty("datamart.url");
 		this.dbURI = new URI(dburl);
-		String dbuser = props.getProperty("datamart.username");
+		this.dbuser = props.getProperty("datamart.username");
 		String dbpass = props.getProperty("datamart.password", "");
 		schema = props.getProperty("datamart.schema");
 		dialect = props.getProperty("datamart.dialect");
@@ -76,6 +77,18 @@ public class Database {
 //		logger.debug("batch_inserts=" + batchInserts);
 	}
 	
+	
+	boolean isOracle() {
+		String protocol = getProtocol(getURI());
+		return "oracle".equalsIgnoreCase(protocol);
+	}
+	
+	static String getProtocol(URI uri) {
+		String urlPart[] = uri.toString().split(":");
+		String protocol = urlPart[1];
+		return protocol;		
+	}
+	
 	URI getURI() {
 		return this.dbURI;
 	}
@@ -88,13 +101,9 @@ public class Database {
 	Generator getGenerator() {
 		return this.generator;
 	}
-	
-	@Deprecated
-	String getDialectName() {
-		return getGenerator().getDialectName();
-	}
-	
+		
 	String getSchema() {
+		if (this.schema == null && this.isOracle()) return this.dbuser;
 		return this.schema;
 	}
 	
