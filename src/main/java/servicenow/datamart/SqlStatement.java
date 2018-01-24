@@ -198,13 +198,13 @@ public abstract class SqlStatement {
 			}
 			break;
 		case Types.TINYINT :
-			if (value.equals("false")) value = "0";
-			if (value.equals("true"))  value = "1";
+			if (value.equalsIgnoreCase("false")) value = "0";
+			if (value.equalsIgnoreCase("true"))  value = "1";
 			stmt.setByte(bindCol, Byte.parseByte(value));
 			break;
 		case Types.SMALLINT :
-			if (value.equals("false")) value = "0";
-			if (value.equals("true"))  value = "1";
+			if (value.equalsIgnoreCase("false")) value = "0";
+			if (value.equalsIgnoreCase("true"))  value = "1";
 			stmt.setShort(bindCol, Short.parseShort(value));
 			break;
 		case Types.INTEGER :
@@ -220,17 +220,17 @@ public abstract class SqlStatement {
 					logger.debug(Log.PROCESS, message);
 				value = value.substring(0,  p);
 			}
-			if (value.length() == 0)   value = "0";
-			if (value.equals("false")) value = "0";
-			if (value.equals("true"))  value = "1";
+			if (value.length() == 0) value = "0";
+			if (value.equalsIgnoreCase("false")) value = "0";
+			if (value.equalsIgnoreCase("true"))  value = "1";
 			stmt.setInt(bindCol, Integer.parseInt(value));
 			break;
 		case Types.DOUBLE :
 		case Types.FLOAT :
 		case Types.NUMERIC :
 		case Types.DECIMAL :
-			if (value.equals("false")) value = "0";
-			if (value.equals("true"))  value = "1";
+			if (value.equalsIgnoreCase("false")) value = "0";
+			if (value.equalsIgnoreCase("true"))  value = "1";
 			stmt.setDouble(bindCol, Double.parseDouble(value));
 			break;
 		default :
