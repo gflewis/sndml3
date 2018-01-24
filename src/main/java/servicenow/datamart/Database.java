@@ -151,6 +151,7 @@ public class Database {
 		assert tablename.length() > 0;
 		DatabaseMetaData meta = getConnection().getMetaData();
 		String schema = getSchema();
+		if (this.isOracle()) tablename = tablename.toUpperCase();
 		ResultSet rs = meta.getTables(null, schema, tablename, null);
 		boolean result = (rs.next() ? true : false);
 		rs.close();
