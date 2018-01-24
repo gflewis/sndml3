@@ -66,7 +66,7 @@ public abstract class SqlStatement {
 		}
 		catch (SQLException|NumberFormatException e) {
 			logger.error(Log.PROCESS, 
-					String.format("bindField %s=\"%s\" %s", glidename, value, e.getMessage()));
+					String.format("bindField %s=\"%s\"", glidename, value));
 			throw e;
 		}		
 	}
@@ -198,9 +198,13 @@ public abstract class SqlStatement {
 			}
 			break;
 		case Types.TINYINT :
+			if (value == "false") value = "0";
+			if (value == "true")  value = "1";
 			stmt.setByte(bindCol, Byte.parseByte(value));
 			break;
 		case Types.SMALLINT :
+			if (value == "false") value = "0";
+			if (value == "true")  value = "1";
 			stmt.setShort(bindCol, Short.parseShort(value));
 			break;
 		case Types.INTEGER :
@@ -217,12 +221,16 @@ public abstract class SqlStatement {
 				value = value.substring(0,  p);
 			}
 			if (value == "") value = "0";
+			if (value == "false") value = "0";
+			if (value == "true")  value = "1";
 			stmt.setInt(bindCol, Integer.parseInt(value));
 			break;
 		case Types.DOUBLE :
 		case Types.FLOAT :
 		case Types.NUMERIC :
 		case Types.DECIMAL :
+			if (value == "false") value = "0";
+			if (value == "true")  value = "1";
 			stmt.setDouble(bindCol, Double.parseDouble(value));
 			break;
 		default :
