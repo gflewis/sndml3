@@ -231,10 +231,11 @@ public abstract class SqlStatement {
 		case Types.DECIMAL :
 			if (value == "false") value = "0";
 			if (value == "true")  value = "1";
+			logger.debug(Log.PROCESS, "value=\"" + value + "\"");
 			stmt.setDouble(bindCol, Double.parseDouble(value));
 			break;
 		default :
-			stmt.setString(bindCol, value);
+			stmt.setString(bindCol, value);			
 		}
 	}
 	
