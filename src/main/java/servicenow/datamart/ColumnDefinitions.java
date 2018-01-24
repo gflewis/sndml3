@@ -27,13 +27,12 @@ public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 		super();
 		String schema = db.getSchema();
 		logger.debug(Log.INIT, String.format("schema=%s table=%s", schema, sqlTableName));
-		Connection dbc = db.getConnection();
-		DatabaseMetaData meta = dbc.getMetaData();
 		Generator generator = db.getGenerator();
-		TableWSDL wsdl = table.getWSDL();
-		
+		TableWSDL wsdl = table.getWSDL();		
 		Log.setTableContext(table);
-		ResultSet columns = meta.getColumns(null, schema, sqlTableName, null);
+		// ResultSet columns = meta.getColumns(null, schema, sqlTableName, null);
+		ResultSet columns = db.getColumnDefinitions(sqlTableName);
+
 		while (columns.next()) {
 			String name = columns.getString(4);
 			int type = columns.getInt(5);
