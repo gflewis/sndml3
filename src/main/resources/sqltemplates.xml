@@ -467,7 +467,7 @@ where [sys_id] = $keyvalue</update>
       <typemap glidetype="string" maxsize="3999">varchar(#)</typemap>
       <typemap glidetype="string" minsize="4000">varchar(max)</typemap>
       <!-- Numeric types -->
-      <typemap glidetype="boolean"         >tinyint</typemap>
+      <typemap glidetype="boolean"         >bit</typemap>
       <typemap glidetype="integer"         >int</typemap>
       <typemap glidetype="numeric"         >int</typemap>
       <typemap glidetype="float"           >float</typemap>
