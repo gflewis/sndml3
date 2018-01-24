@@ -7,13 +7,13 @@ public class TableConfig extends Config {
 	private String name;
 	private String source;
 	private String target;
-	private LoaderAction action = LoaderAction.UPDATE;
-	private Boolean truncate = false;
-	private DateTimeRange created = null;
-	private DateTimeRange updated = null;
-	private DateTimeRange since = null;
-	private EncodedQuery filter = null;
-	private DateTime.Interval partition = null;
+	private LoaderAction action;
+	private Boolean truncate;
+	private DateTimeRange created;
+	private DateTimeRange updated;
+	private DateTimeRange since;
+	private EncodedQuery filter;
+	private DateTime.Interval partition;
 	private Integer pagesize = null;
 	private Integer threads = null;
 	private DateTimeFactory dateFactory;
@@ -112,11 +112,14 @@ public class TableConfig extends Config {
 	}
 
 	public LoaderAction getAction() {
-		return this.action;
+		if (this.action == null) 
+			return this.getTruncate() ? LoaderAction.INSERT : LoaderAction.UPDATE;
+		else
+			return this.action;
 	}
 	
 	public boolean getTruncate() {
-		return this.truncate;
+		return this.truncate == null ? false : this.truncate.booleanValue();
 	}
 	
 	public DateTimeRange getCreated() {
