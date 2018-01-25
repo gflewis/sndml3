@@ -66,6 +66,8 @@ public class DateTimeFactory {
 	public DateTime getDate(Object obj) throws ConfigParseException {
 		assert obj != null;
 		DateTime result;
+		logger.debug(Log.INIT, 
+			String.format("getDate %s=%s", obj.getClass().getName(), obj.toString()));
 		if (obj instanceof java.util.Date) 
 			result = new DateTime((java.util.Date) obj);
 		else {
