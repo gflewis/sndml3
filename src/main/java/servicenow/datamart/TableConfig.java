@@ -58,8 +58,7 @@ public class TableConfig extends Config {
 			    		this.updated = asDateRange(val);
 			    		break;
 			    case "since":
-			    		this.since = new DateTimeRange(
-			    				dateFactory.getDate(val), dateFactory.getStart());
+			    		this.since = asDateRange(val);
 			    		break;
 			    case "filter":
 			    		this.filter = new EncodedQuery(val.toString());
