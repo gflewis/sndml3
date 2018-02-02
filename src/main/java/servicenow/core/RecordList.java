@@ -31,8 +31,8 @@ public class RecordList extends ArrayList<Record> {
 	 * @param fieldname Name of a reference field
 	 * @return A list keys
 	 */
-	public KeyList extractKeys(String fieldname) {
-		KeyList result = new KeyList(this.size());
+	public KeySet extractKeys(String fieldname) {
+		KeySet result = new KeySet(this.size());
 		if (this.size() == 0) return result;
 		for (Record rec : this) {
 			String value = rec.getValue(fieldname);
@@ -47,7 +47,7 @@ public class RecordList extends ArrayList<Record> {
 	/**
 	 * Extract the primary keys (sys_ids) from this list.
 	 */
-	public KeyList extractKeys()  {
+	public KeySet extractKeys()  {
 		return extractKeys("sys_id");
 	}
 	

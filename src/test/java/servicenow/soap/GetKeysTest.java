@@ -28,7 +28,7 @@ public class GetKeysTest {
 	@Test
 	public void testAllKeys() throws IOException {
 		Table inc = session.table("cmn_department");
-		KeyList keys = inc.getKeys();
+		KeySet keys = inc.getKeys();
 		assertTrue("keys.size() must be greater than 0", keys.size() > 0);
 	}
 

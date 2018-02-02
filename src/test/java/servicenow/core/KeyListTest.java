@@ -2,7 +2,7 @@ package servicenow.core;
 
 import org.junit.AfterClass;
 
-import servicenow.core.KeyList;
+import servicenow.core.KeySet;
 import servicenow.core.Session;
 import servicenow.core.Table;
 
@@ -10,7 +10,7 @@ public class KeyListTest {
 
 	static Session session;
 	static Table tbl;
-	static KeyList keys;
+	static KeySet keys;
 
 	// TODO: implement
 	/*

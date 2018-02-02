@@ -108,7 +108,7 @@ public class EncodedQuery {
 		this.addQuery(field, EQUALS, value);
 	}
 	
-	public EncodedQuery(KeyList keys) {
+	public EncodedQuery(KeySet keys) {
 		this.addQuery(keys);
 	}
 	
@@ -162,7 +162,7 @@ public class EncodedQuery {
 	/**
 	 * Add a list of keys to a query filter.
 	 */
-	public EncodedQuery addQuery(KeyList keys) {
+	public EncodedQuery addQuery(KeySet keys) {
 		assert keys != null;
 		return addQuery("sys_id", EncodedQuery.IN, keys.toString());
 	}

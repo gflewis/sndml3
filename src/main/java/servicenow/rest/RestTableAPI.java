@@ -152,12 +152,12 @@ public class RestTableAPI extends TableAPI {
 		return list;	
 	}
 
-	public KeyList getKeys(EncodedQuery filter) throws IOException {
+	public KeySet getKeys(EncodedQuery filter) throws IOException {
 		Parameters params = new Parameters();		
 		params.add("sysparm_query", filter.toString());
 		params.add("sysparm_fields", "sys_id");
 		RecordList recs = getRecords(params);
-		KeyList keys = recs.extractKeys();
+		KeySet keys = recs.extractKeys();
 		return keys;
 	}
 

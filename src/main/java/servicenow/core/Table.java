@@ -86,11 +86,11 @@ public class Table {
 		return api().getDefaultReader();
 	}
 		
-	public KeyList getKeys() throws IOException {
+	public KeySet getKeys() throws IOException {
 		return api.getKeys((EncodedQuery) null);
 	}
 	
-	public KeyList getKeys(EncodedQuery filter) throws IOException {
+	public KeySet getKeys(EncodedQuery filter) throws IOException {
 		return api.getKeys(filter);
 	}
 	

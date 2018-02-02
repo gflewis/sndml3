@@ -14,7 +14,7 @@ public abstract class TableAPI {
 	public abstract Table getTable();
 	public abstract Session getSession();
 	
- 	public abstract KeyList getKeys(EncodedQuery query) throws IOException;
+ 	public abstract KeySet getKeys(EncodedQuery query) throws IOException;
  	
  	public abstract Record getRecord(Key sys_id) throws IOException;
  	 	

@@ -11,7 +11,7 @@ public class KeyedTableReader extends TableReader {
 
 	final SoapTableAPI soapImpl;
 	
-	private KeyList allKeys;
+	private KeySet allKeys;
 
 	static final int DEFAULT_PAGE_SIZE = 200;
 		
@@ -49,7 +49,7 @@ public class KeyedTableReader extends TableReader {
 		while (fromIndex < totalRows) {
 			int toIndex = fromIndex + pageSize;
 			if (toIndex > totalRows) toIndex = totalRows;
-			KeyList slice = allKeys.getSlice(fromIndex, toIndex);
+			KeySet slice = allKeys.getSlice(fromIndex, toIndex);
 			EncodedQuery sliceQuery = new EncodedQuery(slice);
 			Parameters params = new Parameters();
 			params.add("__encoded_query", sliceQuery.toString());

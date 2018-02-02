@@ -12,15 +12,15 @@ import java.util.Hashtable;
  * >http://wiki.servicenow.com/index.php?title=Direct_Web_Service_API_Functions</a>
  * 
  */
-public class KeyList extends ArrayList<Key> {
+public class KeySet extends ArrayList<Key> {
 
 	private static final long serialVersionUID = 1L;
 
-	public KeyList() {
+	public KeySet() {
 		super();
 	}
 	
-	public KeyList(int size) {
+	public KeySet(int size) {
 		super(size);
 	}
 	
@@ -47,8 +47,8 @@ public class KeyList extends ArrayList<Key> {
 	 * @return A comma separated list of sys_ids suitable for use in 
 	 * constructing an encoded query.
 	 */
-	public KeyList getSlice(int startIndex, int endIndex) {
-		KeyList result = new KeyList(endIndex - startIndex);
+	public KeySet getSlice(int startIndex, int endIndex) {
+		KeySet result = new KeySet(endIndex - startIndex);
 		int size = size();
 		for (int i = startIndex; i < endIndex && i < size; ++i) {
 			result.add(get(i));

@@ -47,11 +47,11 @@ public class SoapTableAPI extends TableAPI {
 		return new KeyedTableReader(this);
 	}
 			
-	public KeyList getKeys() throws IOException {
+	public KeySet getKeys() throws IOException {
 		return getKeys((Parameters) null);
 	}
 	
-	public KeyList getKeys(EncodedQuery filter) throws IOException {
+	public KeySet getKeys(EncodedQuery filter) throws IOException {
 		Parameters params = new Parameters();
 		if (filter != null) params.add("__encoded_query", filter.toString());
 		return getKeys(params);
@@ -63,12 +63,12 @@ public class SoapTableAPI extends TableAPI {
 	 * 
 	 * This method is called by {@link KeyReader}.
 	 */
-	public KeyList getKeys(Parameters params) throws IOException {
+	public KeySet getKeys(Parameters params) throws IOException {
 		Element responseElement = client.executeRequest("getKeys", params, null, "getKeysResponse");
 		Namespace ns = responseElement.getNamespace();
 		int size = Integer.parseInt(responseElement.getChildText("count", ns));
 		log.trace(Log.RESPONSE, "getKeys returned " + size + " keys");
-		KeyList result = new KeyList();
+		KeySet result = new KeySet();
 		if (size > 0) {
 			result.ensureCapacity(size);
 			String listStr = responseElement.getChildText("sys_id", ns);
