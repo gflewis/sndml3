@@ -11,35 +11,18 @@ import servicenow.core.*;
 
 public class SoapTableAPI extends TableAPI {
 
-	final Table table;
-	final String tablename;
-	final Session session;
 	final SoapClient client;
 	TableWSDL wsdl = null;
 	
 	final Logger log = Log.logger(this.getClass());
 	
 	public SoapTableAPI(Table table) {
-		this.table = table;
-		this.tablename = table.getName();
-		this.session = table.getSession();
+		super(table);
 		this.client = new SoapClient(table.getSession(), table.getName());
 	}
-
-	public Table getTable() {
-		return this.table;
-	}
 	
-	public String getName() {
-		return table.getName();
-	}
-	
-	public Session getSession() {
-		return this.session;
-	}
-
 	public TableWSDL getWSDL() throws IOException {
-		if (wsdl==null) wsdl = new TableWSDL(this.session, this.tablename);
+		if (wsdl==null) wsdl = new TableWSDL(this.session, getTableName());
 		return wsdl;
 	}
 

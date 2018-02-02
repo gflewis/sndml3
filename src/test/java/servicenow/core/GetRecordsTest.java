@@ -18,7 +18,8 @@ public class GetRecordsTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"mydevrest", "mydevsoap"};
+		return new String[] {"mydevjson"};
+//		return new String[] {"mydevjson", "mydevsoap", "mydevrest"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -37,6 +38,10 @@ public class GetRecordsTest {
 		Table tbl = session.table("cmn_department");
 		RecordList recs = tbl.api().getRecords("id", TestingManager.getProperty("some_department_id"));
 		assertTrue(recs.size() == 1);
+		Key sysid = recs.get(0).getKey();
+		assertTrue(Key.isGUID(sysid.toString()));
+		Record rec0 = tbl.api().getRecord(sysid);
+		assertTrue(rec0.getKey().equals(sysid));
 	}
 	
 	@Test

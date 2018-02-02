@@ -11,7 +11,7 @@ public class JsonRecord extends Record {
 
 	final JSONObject obj;
 	
-	protected JsonRecord(Table table, JSONObject obj) {
+	public JsonRecord(Table table, JSONObject obj) {
 		this.table = table;
 		this.obj = obj;		
 	}

@@ -6,7 +6,7 @@ public class JsonResponseError extends ServiceNowError {
 
 	private static final long serialVersionUID = 1L;
 
-	JsonResponseError(String message) {
+	public JsonResponseError(String message) {
 		super(message);
 	}
 

@@ -9,11 +9,28 @@ import servicenow.soap.SoapResponseException;
 
 public abstract class TableAPI {
 
+	final protected Table table;
+	final protected Session session;
+	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public abstract Table getTable();
-	public abstract Session getSession();
-	
+	public TableAPI(Table table) {
+		this.table = table;
+		this.session = table.getSession();
+	}
+
+	public Table getTable() {
+		return this.table;
+	}
+
+	public Session getSession() {
+		return this.session;
+	}
+
+	public String getTableName() {
+		return table.getName();
+	}
+		
  	public abstract KeySet getKeys(EncodedQuery query) throws IOException;
  	
  	public abstract Record getRecord(Key sys_id) throws IOException;

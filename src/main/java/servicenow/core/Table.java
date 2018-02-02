@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import servicenow.json.JsonTableAPI;
 import servicenow.rest.RestTableAPI;
 import servicenow.soap.SoapTableAPI;
 import servicenow.soap.TableWSDL;
@@ -17,9 +18,13 @@ public class Table {
 	protected final Session session;
 	protected final String tablename;
 	
-	private final SoapTableAPI apiSOAP;
-	private final RestTableAPI apiREST;
-	TableAPI api;
+	// enum APIType {SOAP, REST};
+	// private EnumMap<APIType, TableAPI> apiset;
+	
+	private SoapTableAPI apiSOAP;
+	private RestTableAPI apiREST;
+	private JsonTableAPI apiJSON;
+	private TableAPI api;
 		
 	final private Logger log = LoggerFactory.getLogger(this.getClass());
 	final Marker mrkRequest = MarkerFactory.getMarker("REQUEST");
@@ -29,12 +34,18 @@ public class Table {
 		this.session = session;
 		this.tablename = tablename;
 		this.instance = session.getInstance();
-		this.apiSOAP = new SoapTableAPI(this);
-		this.apiREST = new RestTableAPI(this);
-		if ("soap".equals(session.getProperty("api"))) 
-			this.api = apiSOAP;
-		else
-			this.api = apiREST;
+		String apiName = session.getProperty("api");
+		if (apiName == null)
+			this.api = rest();
+		else {
+			switch (apiName) {
+			case "soap" : this.api = soap(); break;
+			case "rest" : this.api = rest(); break;
+			case "json" : this.api = json(); break;
+			default:
+				throw new IllegalArgumentException(String.format("api=\"%s\"",  apiName));
+			}
+		}
 	}
 
 	public Session getSession() {
@@ -45,10 +56,26 @@ public class Table {
 		return this.tablename;
 	}
 
+	/*
+	public TableAPI getAPI(APIType t) {
+		if (!apiset.containsKey(t)) {
+			switch(t) {
+			case SOAP: apiset.put(t,  new SoapTableAPI(this)); break;
+			case REST: apiset.put(t,  new RestTableAPI(this)); break;
+			default: throw new AssertionError();
+			}
+		}
+		TableAPI api = apiset.get(t);
+		assert api != null;
+		return api;
+	}
+	*/
+	
 	/**
 	 * Return the SOAP API.
 	 */
 	public SoapTableAPI soap() {
+		if (this.apiSOAP == null) this.apiSOAP = new SoapTableAPI(this);
 		return this.apiSOAP;
 	}
 	
@@ -56,14 +83,19 @@ public class Table {
 	 * return the REST API.
 	 */
 	public RestTableAPI rest() {
+		if (this.apiREST == null) this.apiREST = new RestTableAPI(this);
 		return this.apiREST;
 	}
 	
+	public JsonTableAPI json() {
+		if (this.apiJSON == null) this.apiJSON = new JsonTableAPI(this);
+		return this.apiJSON;
+	}
 	/**
 	 * Set the default API to SOAP Web Services (XML).
 	 */
 	public TableAPI setSOAP() {
-		this.api = apiSOAP;
+		this.api = soap();
 		return api;
 	}
 	
@@ -71,7 +103,7 @@ public class Table {
 	 * Set the default API to the REST Table API (JSON).
 	 */
 	public TableAPI setREST() {
-		this.api = apiREST;
+		this.api = rest();
 		return api;
 	}
 	
@@ -79,6 +111,7 @@ public class Table {
 	 * Return the default API.
 	 */
 	public TableAPI api() {
+		assert api != null;
 		return api;
 	}
 	

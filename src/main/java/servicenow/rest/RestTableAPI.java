@@ -1,5 +1,7 @@
 package servicenow.rest;
 
+import servicenow.core.*;
+
 import java.io.IOException;
 import java.net.URI;
 
@@ -13,28 +15,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import servicenow.core.*;
-
 public class RestTableAPI extends TableAPI {
-
-	final Table table;
-	final Session session;
 
 	final private Logger logger = Log.logger(this.getClass());
 	
 	public RestTableAPI(Table table) {
-		this.table = table;
-		this.session = table.getSession();		
+		super(table);
 	}
 
-	public Table getTable() {
-		return this.table;
-	}
-
-	public Session getSession() {
-		return this.session;
-	}
-	
 	public Instance getInstance() {
 		return getSession().getInstance();
 	}
