@@ -11,7 +11,7 @@ public class TableConfig extends Config {
 	private Boolean truncate;
 	private DateTimeRange created;
 	private DateTimeRange updated;
-	private DateTimeRange since;
+	private DateTime since;
 	private EncodedQuery filter;
 	private DateTime.Interval partition;
 	private Integer pagesize = null;
@@ -58,7 +58,7 @@ public class TableConfig extends Config {
 			    		this.updated = asDateRange(val);
 			    		break;
 			    case "since":
-			    		this.since = asDateRange(val);
+			    		this.since = asDate(val);
 			    		break;
 			    case "filter":
 			    		this.filter = new EncodedQuery(val.toString());
@@ -125,11 +125,12 @@ public class TableConfig extends Config {
 		return this.created;
 	}
 	
+	@Deprecated
 	public DateTimeRange getUpdated() {
 		return this.updated;
 	}
 	
-	public DateTimeRange getSince() {
+	public DateTime getSince() {
 		return this.since;
 	}
 	
@@ -158,6 +159,10 @@ public class TableConfig extends Config {
 			throw new ConfigParseException("Invalid partition: " + obj.toString());
 		}
 		return result;
+	}
+	
+	public DateTime asDate(Object obj) {
+		return dateFactory.getDate(obj);
 	}
 	
 	public DateTimeRange asDateRange(Object obj) throws ConfigParseException {

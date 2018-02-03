@@ -1,8 +1,9 @@
 package servicenow.datamart;
 
 import servicenow.core.*;
+import servicenow.json.JsonKeyReader;
 import servicenow.rest.MultiDatePartReader;
-import servicenow.rest.RestTableAPI;
+import servicenow.rest.RestTableReader;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -60,7 +61,6 @@ public class TableLoader implements Callable<WriterMetrics> {
 		
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		Log.setTableContext(table);
-		RestTableAPI impl = table.rest();
 		String targetName = config.getTargetName();
 		assert targetName != null;
 		assert targetName.length() > 0;
@@ -83,21 +83,23 @@ public class TableLoader implements Callable<WriterMetrics> {
 		writer.open();
 		if (config.getTruncate()) db.truncateTable(targetName);
 		EncodedQuery filter;
+		DateTime since = config.getSince();
 		DateTime.Interval partitionInterval = config.getPartitionInterval();
 		if (action == LoaderAction.PRUNE) {
 			Table audit = session.table("sys_audit_delete");
 			reader = audit.getDefaultReader();
-			reader.setBaseQuery(new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName()));
-			reader.setCreatedRange(config.getSince());			
+			reader.setBaseQuery(new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName()));			
+			reader.setCreatedRange(new DateTimeRange(since, null));			
 		}
 		else {
 			DateTimeRange created = config.getCreated();
-			DateTimeRange updated = DateTimeRange.all().
-					intersect(config.getUpdated()).
-					intersect(config.getSince());
+			DateTimeRange updated = new DateTimeRange(since, null);
 			filter = config.getFilter();
 			if (partitionInterval == null) {
-				reader = table.getDefaultReader();
+				if (since == null)
+					reader = new RestTableReader(table.rest());
+				else
+					reader = new JsonKeyReader(table.json());
 				reader.setBaseQuery(filter);
 				reader.setCreatedRange(created);
 				reader.setUpdatedRange(updated);
@@ -105,9 +107,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 			}
 			else {
 				Integer threads = config.getThreads();
-				reader = new MultiDatePartReader(impl, partitionInterval, filter, created, updated, threads, writer);			
+				reader = new MultiDatePartReader(table.rest(), partitionInterval, filter, created, updated, threads, writer);			
 			}
 		}
+		assert reader != null;
 		if (config.getPageSize() != null) reader.setPageSize(config.getPageSize());
 		reader.initialize();
 		logger.info(Log.INIT, String.format("begin load %s (%d rows)", targetName, reader.getMetrics().getExpected()));
