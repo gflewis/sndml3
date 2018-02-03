@@ -6,18 +6,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.slf4j.MDC;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import servicenow.core.*;
 
 public class TableWSDL {
 
-	static Logger logger = LogManager.getLogger(TableWSDL.class);
+	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	final String tablename;
 	final URI uri;
@@ -40,14 +39,15 @@ public class TableWSDL {
 
 	public TableWSDL(Session session, String tablename, boolean displayvalues) throws IOException {
 		this.tablename = tablename;
-		MDC.put("user", session.getUsername());
-		MDC.put("table", tablename);
-		MDC.put("method", "WSDL");
-
+		Log.clearContext();
+		Log.setSessionContext(session);
+		Log.setTableContext(tablename);
+		Log.setMethodContext("WSDL");		
 		String path = tablename + ".do?WSDL";
 		if (displayvalues) path += "&displayvalue=all";
 		uri = session.getURI(path);
-		MDC.put("uri", uri.toString());
+		Log.setURIContext(uri);
+		logger.debug(Log.INIT, uri.toString());
 
 		XmlRequest request = new XmlRequest(session.getClient(), uri, null);
 		try {
@@ -60,7 +60,7 @@ public class TableWSDL {
 		readColumnTypes = getColumnTypes("getResponse");
 		writeColumnNames = getColumnNames("update");
 		writeColumnTypes = getColumnTypes("update");
-		MDC.clear();
+		Log.clearContext();
 	}
 
 	public Document getDocument() {
