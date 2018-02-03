@@ -54,7 +54,7 @@ public class Instance {
 		assert path.length() > 0;
 		URI result;
 		try {
-			String base = url.toString();
+			String base = url.toString() + path;
 			URIBuilder builder = new URIBuilder(base);
 			if (params != null) builder.addParameters(params.nvpList());
 			result = builder.build();			
