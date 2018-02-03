@@ -3,6 +3,9 @@ package servicenow.core;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * Holds a list of <b>sys_id</b>s (GUIDs) 
  * as returned from a <b>getKeys</b> Web Services call. 
@@ -24,11 +27,26 @@ public class KeySet extends ArrayList<Key> {
 		super(size);
 	}
 	
+	public KeySet(JSONArray array) {
+		this(array.length());
+		for (int i = 0; i < array.length(); ++i) {
+			Object obj = array.get(i);
+			if (obj instanceof String) 
+				this.add(new Key((String) obj));
+			else
+				throw new JsonResponseError("Expected sys_id; found: " + obj.toString());
+		}		
+	}
+	
+	public KeySet(JSONObject obj, String fieldname) {
+		this(obj.getJSONArray(fieldname));
+	}
+	
 	/**
 	 * Returns the complete list as a comma separated list of sys_ids.
 	 */
 	public String toString() {	
-		StringBuilder result = new StringBuilder();
+		StringBuffer result = new StringBuffer();
 		for (int i = 0; i < size(); ++i) {
 			if (i > 0) result.append(",");
 			result.append(get(i).toString());
@@ -62,13 +80,13 @@ public class KeySet extends ArrayList<Key> {
 	 * @param fromIndex Zero based starting index (inclusive).
 	 * @param toIndex Zero based ending index (exclusive).
 	 */
-	public EncodedQuery filter(int fromIndex, int toIndex) {
-		String queryStr = "sys_idIN" + this.getSlice(fromIndex, toIndex);
+	public EncodedQuery encodedQuery(int fromIndex, int toIndex) {
+		String queryStr = "sys_idIN" + this.getSlice(fromIndex, toIndex).toString();
 		return new EncodedQuery(queryStr);
 	}
 	
-	public EncodedQuery queryFilter() {
-		return this.filter(0,  this.size());
+	public EncodedQuery encodedQuery() {
+		return this.encodedQuery(0,  this.size());
 	}
 	
 	/**

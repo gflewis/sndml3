@@ -8,7 +8,7 @@
       </PatternLayout>
     </Console>
     <File name="File" fileName="/tmp/log/sndml3.log" append="false">
-      <ThresholdFilter level="debug" />
+      <ThresholdFilter level="trace" />
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level [%thread] %logger %X{table} %marker: %msg%n</Pattern>  
       </PatternLayout>
@@ -22,6 +22,6 @@
     <Logger name="org.apache.http.headers" level="info" />
     <Logger name="org.apache.http.impl" level="info" />
     <Logger name="org.apache.http.wire" level="info" />
-    <Logger name="servicenow" level="trace" />>
+    <Logger name="servicenow" level="debug" />>
   </Loggers>
 </Configuration>

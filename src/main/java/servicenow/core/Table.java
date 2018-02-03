@@ -36,7 +36,7 @@ public class Table {
 		this.instance = session.getInstance();
 		String apiName = session.getProperty("api");
 		if (apiName == null)
-			this.api = rest();
+			this.api = json();
 		else {
 			switch (apiName) {
 			case "soap" : this.api = soap(); break;
@@ -87,13 +87,18 @@ public class Table {
 		return this.apiREST;
 	}
 	
+	/**
+	 * Return the JSONv2 API
+	 */
 	public JsonTableAPI json() {
 		if (this.apiJSON == null) this.apiJSON = new JsonTableAPI(this);
 		return this.apiJSON;
 	}
+	
 	/**
 	 * Set the default API to SOAP Web Services (XML).
 	 */
+	@Deprecated
 	public TableAPI setSOAP() {
 		this.api = soap();
 		return api;
@@ -102,6 +107,7 @@ public class Table {
 	/**
 	 * Set the default API to the REST Table API (JSON).
 	 */
+	@Deprecated
 	public TableAPI setREST() {
 		this.api = rest();
 		return api;
@@ -116,7 +122,10 @@ public class Table {
 	}
 	
 	public TableReader getDefaultReader() throws IOException {
-		return api().getDefaultReader();
+		if (api == apiJSON) return apiJSON.getDefaultReader();
+		if (api == apiREST) return apiREST.getDefaultReader();
+		if (api == apiSOAP) return apiSOAP.getDefaultReader();
+		throw new IllegalStateException();
 	}
 		
 	public KeySet getKeys() throws IOException {

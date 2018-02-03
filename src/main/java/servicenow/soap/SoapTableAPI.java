@@ -27,7 +27,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 
 	public TableReader getDefaultReader() throws IOException {
-		return new KeyedTableReader(this);
+		return new SoapKeyReader(this);
 	}
 			
 	public KeySet getKeys() throws IOException {

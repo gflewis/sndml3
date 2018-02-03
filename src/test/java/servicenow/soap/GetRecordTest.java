@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import servicenow.core.*;
@@ -14,6 +15,7 @@ public class GetRecordTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		TestingManager.loadDefaultProfile();
 		session = TestingManager.getSession();
 	}
 
@@ -21,8 +23,17 @@ public class GetRecordTest {
 	public void tearDown() throws Exception {
 	}
 
+	@Ignore @Test
+	public void testRecordByKey() throws IOException {
+		String sys_id = TestingManager.getProperty("some_incident_sys_id");
+		Key key = new Key(sys_id);
+		Table inc = session.table("incident");
+		Record rec = inc.getRecord(key);
+		assertNotNull(rec);
+	}
+	
 	@Test
-	public void testGetRecord() throws IOException {
+	public void testGetRecordByNumber() throws IOException {
 		Table inc = session.table("incident");
 		String number = TestingManager.getProperty("some_incident_number");
 		Record rec1 = inc.getRecord("number", number);
@@ -32,7 +43,7 @@ public class GetRecordTest {
 		assertEquals(number, rec2.getValue("number"));
 	}
 	
-	@Test
+	@Ignore @Test
 	public void testGetNullRecord() throws IOException {
 		Key key = new Key("00000000000000000000000000000000");
 		Table inc = session.table("incident");

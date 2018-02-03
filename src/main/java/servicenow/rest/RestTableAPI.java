@@ -11,7 +11,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -130,14 +129,9 @@ public class RestTableAPI extends TableAPI {
 	public RecordList getRecords(Parameters params) throws IOException {		
 		URI uri = getURI("table", null, params);
 		JSONObject obj = getResponseObject(uri);
-		JSONArray result = (JSONArray) obj.get("result");
-		RecordList list = new RecordList(this.table, result.length());
-		for (int i = 0; i < result.length(); ++i) {
-			JSONObject entry = (JSONObject) result.get(i);
-			JsonRecord rec = new JsonRecord(this.table, entry);
-			list.add(rec);
-		}
-		return list;	
+		assert obj.has("result");
+		RecordList list = new RecordList(table, obj, "result");
+		return list;
 	}
 
 	public KeySet getKeys(EncodedQuery filter) throws IOException {

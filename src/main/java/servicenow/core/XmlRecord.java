@@ -1,8 +1,8 @@
-package servicenow.soap;
+package servicenow.core;
 
 import org.jdom2.*;
 
-import servicenow.core.*;
+import servicenow.soap.SoapResponseException;
 
 import java.util.*;
 
@@ -21,7 +21,7 @@ public class XmlRecord extends Record {
 	final protected Element element;
 	final protected Namespace ns;
 	
-	protected XmlRecord(Table table, Element element) 
+	public XmlRecord(Table table, Element element) 
 			throws SoapResponseException {
 		this.table = table;
 		this.element = element;

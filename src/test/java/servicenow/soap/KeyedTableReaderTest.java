@@ -4,7 +4,7 @@ import java.io.File;
 import org.junit.Test;
 
 import servicenow.core.*;
-import servicenow.soap.KeyedTableReader;
+import servicenow.soap.SoapKeyReader;
 import servicenow.soap.SoapTableAPI;
 
 public class KeyedTableReaderTest {
@@ -21,7 +21,7 @@ public class KeyedTableReaderTest {
 		table = session.table("incident");
 		impl = table.soap();		
 		FileWriter writer = new FileWriter(new File(filename));
-		KeyedTableReader reader = new KeyedTableReader(impl);
+		SoapKeyReader reader = new SoapKeyReader(impl);
 		reader.setBaseQuery(EncodedQuery.all());
 		reader.setWriter(writer);
 		reader.setPageSize(20).initialize();

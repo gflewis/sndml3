@@ -2,6 +2,9 @@ package servicenow.core;
 
 import java.util.*;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * An array of Records.
  */
@@ -19,6 +22,19 @@ public class RecordList extends ArrayList<Record> {
 	public RecordList(Table table, int size) {
 		super(size);
 		this.table = table;
+	}
+
+	public RecordList(Table table, JSONArray array) {
+		this(table, array.length());
+		for (int i = 0; i < array.length(); ++i) {
+			JSONObject entry = (JSONObject) array.get(i);
+			JsonRecord rec = new JsonRecord(table, entry);
+			this.add(rec);
+		}
+	}
+	
+	public RecordList(Table table, JSONObject obj, String fieldname) {
+		this(table, (JSONArray) obj.get(fieldname));
 	}
 	
 	public RecordIterator iterator() {

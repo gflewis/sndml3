@@ -35,6 +35,10 @@ public abstract class TableAPI {
  	
  	public abstract Record getRecord(Key sys_id) throws IOException;
  	 	
+ 	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
+
+ 	public abstract TableReader getDefaultReader() throws IOException;
+
  	public RecordList getRecords() throws IOException {
  		return getRecords(false);
  	}
@@ -51,11 +55,10 @@ public abstract class TableAPI {
  		return getRecords(query, false);
  	}
  	
- 	public abstract RecordList getRecords(String fieldname, String fieldvalue, boolean displayVaue) throws IOException;
-
- 	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
-
- 	public abstract TableReader getDefaultReader() throws IOException;
+	public RecordList getRecords(String fieldname, String fieldvalue, boolean displayValue) throws IOException {
+		EncodedQuery query = new EncodedQuery(fieldname, fieldvalue);
+		return getRecords(query, displayValue);
+	}
 
 	/**
 	 * Retrieves a single record based on a unique field such as "name" or "number".  
@@ -81,6 +84,5 @@ public abstract class TableAPI {
 		if (size > 1) throw new RowCountExceededException(getTable(), msg);
 		return result.get(0);
 	}
-	
- 	
+	 	
 }

@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
 
-public class KeyedTableReader extends TableReader {
+public class SoapKeyReader extends TableReader {
 
-	final SoapTableAPI soapImpl;
+	final SoapTableAPI apiSOAP;
 	
 	private KeySet allKeys;
 
@@ -17,9 +17,9 @@ public class KeyedTableReader extends TableReader {
 		
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public KeyedTableReader(SoapTableAPI impl) {
-		super(impl);
-		soapImpl = impl;
+	public SoapKeyReader(SoapTableAPI api) {
+		super(api);
+		apiSOAP = api;
 	}
 	
 	public int getDefaultPageSize() {
@@ -29,7 +29,7 @@ public class KeyedTableReader extends TableReader {
 	@Override
 	public void initialize() throws IOException {
 		super.initialize();
-		allKeys = impl.getKeys(getQuery());
+		allKeys = api.getKeys(getQuery());
 		setExpected(allKeys.size());
 	}
 
@@ -38,7 +38,7 @@ public class KeyedTableReader extends TableReader {
 		return allKeys.size();
 	}
 	
-	public KeyedTableReader call() throws IOException, SQLException {
+	public SoapKeyReader call() throws IOException, SQLException {
 		Writer writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null: "not initialized";
@@ -55,7 +55,7 @@ public class KeyedTableReader extends TableReader {
 			params.add("__encoded_query", sliceQuery.toString());
 //			params.add("__limit", Integer.toString(getPageSize()));
 			if (viewName != null) params.add("__use_view", viewName);
-			RecordList recs = soapImpl.getRecords(params, this.displayValue);
+			RecordList recs = apiSOAP.getRecords(params, this.displayValue);
 			writer.processRecords(recs);
 			rowCount += recs.size();
 			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));

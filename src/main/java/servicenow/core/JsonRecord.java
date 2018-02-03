@@ -1,11 +1,9 @@
-package servicenow.rest;
+package servicenow.core;
 
 import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import servicenow.core.*;
 
 public class JsonRecord extends Record {
 
@@ -37,7 +35,13 @@ public class JsonRecord extends Record {
 
 	@Override
 	public String getDisplayValue(String fieldname) {
+		if (obj.has("dv_" + fieldname)) {
+			// JSONv2 API
+			String displayValue = obj.getString("dv_" + fieldname);
+			return displayValue;
+		}
 		if (obj.has(fieldname)) {
+			// REST Table API
 			try {
 				JSONObject field = obj.getJSONObject(fieldname);
 				String displayValue = field.getString("display_value");
@@ -48,7 +52,7 @@ public class JsonRecord extends Record {
 				return null;
 			}			
 		}
-		else return null;
+		return null;
 	}
 
 	@Override
@@ -65,5 +69,5 @@ public class JsonRecord extends Record {
 		}
 		return names;
 	}
-
+		
 }

@@ -2,6 +2,8 @@ package servicenow.core;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,5 +72,13 @@ public class Parameters extends LinkedHashMap<String, String> {
 			result.add(nvp);
 		}
 		return result;		
+	}
+	
+	public JSONObject toJSON() {
+		JSONObject obj = new JSONObject();
+		for (Map.Entry<String,String> entry : this.entrySet()) {
+			obj.put(entry.getKey(), entry.getValue());
+		}
+		return obj;		
 	}
 }

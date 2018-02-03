@@ -1,6 +1,4 @@
-package servicenow.rest;
-
-import servicenow.core.ServiceNowError;
+package servicenow.core;
 
 public class JsonResponseError extends ServiceNowError {
 

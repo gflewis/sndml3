@@ -1,12 +1,10 @@
 package servicenow.json;
 
 import servicenow.core.*;
-import servicenow.rest.JsonRecord;
-import servicenow.rest.JsonResponseError;
+import servicenow.soap.NoContentException;
 
 import java.io.IOException;
 import java.net.URI;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -15,59 +13,97 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
 public class JsonTableAPI extends TableAPI {
 
 	final URI uri;
-	final CloseableHttpClient client;
 
 	final private Logger logger = Log.logger(this.getClass());
 	
 	public JsonTableAPI(Table table) {
 		super(table);
-		String path = table.getName() + "?JSONv2";
+		String path = table.getName() + ".do?JSONv2";
 		this.uri = session.getURI(path);
-		this.client = session.getClient();
+		logger.debug(Log.INIT, this.uri.toString());
+	}
+	
+	private void setContext() {
+		Log.setSessionContext(session);
+		Log.setTableContext(table);
+		Log.setURIContext(uri);		
 	}
 	
 	@Override
 	public KeySet getKeys(EncodedQuery query) throws IOException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("not implemented");
+		setContext();
+		JSONObject requestObj = new JSONObject();
+		requestObj.put("sysparm_action",  "getKeys");
+		if (query != null && !query.isEmpty()) 
+			requestObj.put("sysparm_query", query.toString());
+		JSONObject responseObj = getResponseObject(requestObj);
+		assert responseObj.has("records");
+		KeySet keys = new KeySet(responseObj, "records");
+		return keys;
 	}
 
 	@Override
 	public Record getRecord(Key sys_id) throws IOException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("not implemented");
+		setContext();
+		Parameters params = new Parameters();
+		params.add("sysparm_action", "get");
+		params.add("sysparm_sys_id",  sys_id.toString());
+		RecordList recs = getResponseRecords(params);
+		assert recs != null;
+		if (recs.size() == 0) return null;
+		return recs.get(0);
 	}
 
-	@Override
-	public RecordList getRecords(String fieldname, String fieldvalue, boolean displayVaue) throws IOException {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("not implemented");
+	public RecordList getRecords(KeySet keys, boolean displayValue) throws IOException {
+		EncodedQuery query = keys.encodedQuery();
+		return getRecords(query, displayValue);
 	}
-
+	
 	@Override
 	public RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException {
-		Log.setSessionContext(session);
-		Log.setTableContext(table);
-		Log.setURIContext(uri);
-		JSONObject requestObj = new JSONObject();
-		requestObj.put("displayvalue", displayValue ? "all" : "false");
+		Parameters params = new Parameters();
+		params.add("sysparm_action", "getRecords");
+		params.add("displayvalue", displayValue ? "all" : "false");
 		if (query != null && !query.isEmpty()) 
-			requestObj.put("sysparm_query", query.toString());
+			params.add("sysparm_query", query.toString());
+		return getRecords(params);
+	}
+
+	public RecordList getRecords(Parameters params) throws IOException {
+		setContext();
+		return getResponseRecords(params);
+	}
+
+	private RecordList getResponseRecords(Parameters params) throws IOException {
+		JSONObject requestObj = params.toJSON();
+		JSONObject responseObj = getResponseObject(requestObj);
+		assert responseObj.has("records");
+		return new RecordList(table, responseObj, "records");
+	}
+
+	/*
+	private RecordList getResponseRecords(JSONObject responseObj) throws IOException {
+		assert responseObj.has("records");
+		return new RecordList(table, responseObj, "records");
+	}
+	*/
+	
+	private JSONObject getResponseObject(JSONObject requestObj) throws IOException {
 		String requestText = requestObj.toString();
 		logger.debug(Log.REQUEST, requestText);
 		HttpEntityEnclosingRequestBase request = new HttpPost(uri);
+		request.setHeader("Content-Type", "application/json");		
+		request.setHeader("Accept", "application/json");
 		HttpEntity requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
 		request.setEntity(requestEntity);
-		CloseableHttpResponse response = client.execute(request);		
+		CloseableHttpResponse response = session.getClient().execute(request);		
 		StatusLine statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
 		HttpEntity responseEntity = response.getEntity();
@@ -75,30 +111,36 @@ public class JsonTableAPI extends TableAPI {
 		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
 		String responseText = EntityUtils.toString(responseEntity);
 		int responseLen = responseText == null ? 0 : responseText.length();
-		String responseBody = EntityUtils.toString(responseEntity);
-		logger.debug(Log.RESPONSE, responseText);
-		JSONObject obj;
+		logger.debug(Log.RESPONSE,
+				String.format("status=\"%s\" contentType=%s len=%d", 
+					statusLine, contentType, responseLen));
+		if (statusCode == 401) {
+			logger.error(Log.RESPONSE, 
+				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
+			throw new InsufficientRightsException(uri, null, requestText);
+		}
+		if (contentType == null) {
+			logger.error(Log.RESPONSE, 
+				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
+			throw new NoContentException(uri);
+		}		
+		if ("text/html".equals(contentType) /* && responseText.contains("Hibernating") */)
+			throw new InstanceUnavailableException(this.uri, responseText);		
+		logger.trace(Log.RESPONSE, responseText);
+		JSONObject responseObj;
 		try {
-			obj = new JSONObject(responseBody);
+			responseObj = new JSONObject(responseText);
 		}
 		catch (org.json.JSONException e) {
-			throw new JsonResponseError(responseBody);
+			throw new JsonResponseError(responseText);
 		}
 		response.close();
-		JSONArray result = (JSONArray) obj.get("result");
-		RecordList list = new RecordList(this.table, result.length());
-		for (int i = 0; i < result.length(); ++i) {
-			JSONObject entry = (JSONObject) result.get(i);
-			JsonRecord rec = new JsonRecord(this.table, entry);
-			list.add(rec);
-		}
-		return list;	
+		return responseObj;
 	}
 
 	@Override
 	public TableReader getDefaultReader() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return new JsonKeyReader(this);
 	}
 
 }
