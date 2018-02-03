@@ -27,14 +27,14 @@ public class MultiDatePartReader extends RestTableReader {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public MultiDatePartReader(
-			RestTableAPI impl, 
+			Table table, 
 			DateTime.Interval interval, 
 			EncodedQuery baseQuery,
 			DateTimeRange createdRange,
 			DateTimeRange updatedRange,
 			Integer threads,
 			Writer writer) {
-		super(impl);
+		super(table);
 		this.setBaseQuery(baseQuery);
 		this.setCreatedRange(createdRange);
 		this.setUpdatedRange(updatedRange);
@@ -75,7 +75,7 @@ public class MultiDatePartReader extends RestTableReader {
 	@Override
 	public void initialize() throws IOException {
 		getWriter().setReader(this);
-		stats = this.restImpl.getStats(getQuery(), true);
+		stats = this.apiREST.getStats(getQuery(), true);
 		setExpected(stats.getCount());
 		range = stats.getCreated();
 		partition = new DatePartition(range, interval);

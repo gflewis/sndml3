@@ -26,10 +26,6 @@ public class SoapTableAPI extends TableAPI {
 		return wsdl;
 	}
 
-	public TableReader getDefaultReader() throws IOException {
-		return new SoapKeyReader(this);
-	}
-			
 	public KeySet getKeys() throws IOException {
 		return getKeys((Parameters) null);
 	}
@@ -133,4 +129,10 @@ public class SoapTableAPI extends TableAPI {
 		return list;		
 	}
 
+	public TableReader getDefaultReader() throws IOException {
+		return new SoapKeyedReader(this.table);
+	}
+
 }
+
+		

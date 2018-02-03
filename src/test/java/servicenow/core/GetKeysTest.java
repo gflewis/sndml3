@@ -16,7 +16,7 @@ public class GetKeysTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"mydevjson", "mydevsoap"};
+		return new String[] {"mydevsoap", "mydevjson"};
 	}
      
 	public GetKeysTest(String profile) {
@@ -28,7 +28,10 @@ public class GetKeysTest {
 	@Test
 	public void testAllKeys() throws IOException {
 		Table inc = session.table("cmn_department");
-		KeySet keys = inc.getKeys();
+		KeySet keys = null;
+		if (profile.equals("mydevsoap")) keys = inc.soap().getKeys();
+		if (profile.equals("mydevjson")) keys = inc.json().getKeys();
+		assertNotNull(keys);
 		assertTrue("keys.size() must be greater than 0", keys.size() > 0);
 	}
 

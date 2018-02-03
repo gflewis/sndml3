@@ -54,9 +54,9 @@ public class TableConfig extends Config {
 			    case "created":
 			    		this.created = asDateRange(val);
 			    		break;
-			    case "updated":
-			    		this.updated = asDateRange(val);
-			    		break;
+//			    case "updated":
+//			    		this.updated = asDateRange(val);
+//			    		break;
 			    case "since":
 			    		this.since = asDate(val);
 			    		break;

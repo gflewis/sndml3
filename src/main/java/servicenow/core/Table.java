@@ -128,13 +128,13 @@ public class Table {
 		throw new IllegalStateException();
 	}
 		
-	public KeySet getKeys() throws IOException {
-		return api.getKeys((EncodedQuery) null);
-	}
-	
-	public KeySet getKeys(EncodedQuery filter) throws IOException {
-		return api.getKeys(filter);
-	}
+//	public KeySet getKeys() throws IOException {
+//		return api.getKeys((EncodedQuery) null);
+//	}
+//	
+//	public KeySet getKeys(EncodedQuery filter) throws IOException {
+//		return api.getKeys(filter);
+//	}
 	
 	public Record getRecord(Key key) throws IOException {
 		return api.getRecord(key);

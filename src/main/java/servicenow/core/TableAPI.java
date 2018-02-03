@@ -1,6 +1,7 @@
 package servicenow.core;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,14 @@ public abstract class TableAPI {
 	public String getTableName() {
 		return table.getName();
 	}
+
+	protected void setContext(URI uri) {
+		Log.setSessionContext(session);
+		Log.setTableContext(table);
+		Log.setURIContext(uri);		
+	}
 		
- 	public abstract KeySet getKeys(EncodedQuery query) throws IOException;
+// 	public abstract KeySet getKeys(EncodedQuery query) throws IOException;
  	
  	public abstract Record getRecord(Key sys_id) throws IOException;
  	 	

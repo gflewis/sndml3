@@ -20,7 +20,7 @@ public class DatePartTest {
 		TableStats stats = table.rest().getStats(null, true);
 		logger.info(Log.TEST, "range=" + stats.getCreated().toString());
 		DateTime.Interval interval = DateTime.Interval.MONTH;
-		MultiDatePartReader reader = new MultiDatePartReader(table.rest(), interval, EncodedQuery.all(), null, null, 0, accumulator);
+		MultiDatePartReader reader = new MultiDatePartReader(table, interval, EncodedQuery.all(), null, null, 0, accumulator);
 		reader.initialize();
 	}
 

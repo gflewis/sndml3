@@ -9,24 +9,27 @@ import org.slf4j.LoggerFactory;
 import servicenow.core.EncodedQuery;
 import servicenow.core.KeySet;
 import servicenow.core.RecordList;
-import servicenow.core.TableAPI;
+import servicenow.core.Table;
 import servicenow.core.TableReader;
 import servicenow.core.Writer;
 
-public class JsonKeyReader extends TableReader {
+public class JsonKeyedReader extends TableReader {
 
-	private KeySet allKeys;
+	protected final JsonTableAPI api;
+	protected KeySet allKeys;
 
+	static final int DEFAULT_PAGE_SIZE = 200;
+	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	public JsonKeyReader(TableAPI api) {
-		super(api);
-		// TODO Auto-generated constructor stub
+	public JsonKeyedReader(Table table) {
+		super(table);
+		api = table.json();
 	}
 
 	@Override
 	public int getDefaultPageSize() {
-		return 200;
+		return DEFAULT_PAGE_SIZE;
 	}
 
 	@Override

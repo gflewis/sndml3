@@ -10,7 +10,7 @@ public class DatePartReader extends RestTableReader {
 	String partName;
 	
 	public DatePartReader(MultiDatePartReader parent, String partName, DateTimeRange partRange) {
-		super(parent.restImpl);
+		super(parent.table);
 		assert parent != null;
 		assert partName != null;
 		assert partRange != null;

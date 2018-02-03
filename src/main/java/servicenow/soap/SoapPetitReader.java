@@ -27,26 +27,26 @@ import servicenow.core.*;
  * then it assumes it has reached the end. 
  * <p/>
  * For small result sets {@link SoapPetitReader} will perform better than 
- * {@link SoapKeyReader} because it saves a Web Service call.
+ * {@link SoapKeyedReader} because it saves a Web Service call.
  * However, the performance of the {@link SoapPetitReader} will degrade exponentially
  * as the number of records grows.
  * <p/>
  * <b>Warning:</b> If access controls are in place, the <b>getRecords</b> method
  * will sometimes return fewer records than the limit even though
  * there are more records to be read.  This will cause the {@link SoapPetitReader}
- * to terminate prematurely. Use a {@link SoapKeyReader} 
+ * to terminate prematurely. Use a {@link SoapKeyedReader} 
  * if there is any possibility of access controls which could cause this behavior.
  * 
  */
 public class SoapPetitReader extends TableReader {
 
-	final SoapTableAPI soapImpl;
+	protected final SoapTableAPI apiSOAP;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public SoapPetitReader(SoapTableAPI impl) {
-		super(impl);
-		soapImpl = impl;
+	public SoapPetitReader(Table table) {
+		super(table);
+		apiSOAP = table.soap();
 	}
 	
 	@Override
@@ -80,7 +80,7 @@ public class SoapPetitReader extends TableReader {
 			params.add("__first_row", Integer.toString(firstRow));
 			params.add("__last_row", Integer.toString(lastRow));
 			if (this.viewName != null) params.add("__use_view", viewName);
-			RecordList recs = soapImpl.getRecords(params, this.displayValue);
+			RecordList recs = apiSOAP.getRecords(params, this.displayValue);
 			writer.processRecords(recs);
 			rowCount += recs.size();
 			finished = (recs.size() < pageSize);

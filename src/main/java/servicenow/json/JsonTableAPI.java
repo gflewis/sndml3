@@ -29,19 +29,16 @@ public class JsonTableAPI extends TableAPI {
 		this.uri = session.getURI(path);
 		logger.debug(Log.INIT, this.uri.toString());
 	}
-	
-	private void setContext() {
-		Log.setSessionContext(session);
-		Log.setTableContext(table);
-		Log.setURIContext(uri);		
+
+	public KeySet getKeys() throws IOException {
+		return getKeys(null);
 	}
-	
-	@Override
+		
 	public KeySet getKeys(EncodedQuery query) throws IOException {
-		setContext();
+		setContext(uri);
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action",  "getKeys");
-		if (query != null && !query.isEmpty()) 
+		if (!EncodedQuery.isEmpty(query))
 			requestObj.put("sysparm_query", query.toString());
 		JSONObject responseObj = getResponseObject(requestObj);
 		assert responseObj.has("records");
@@ -49,9 +46,8 @@ public class JsonTableAPI extends TableAPI {
 		return keys;
 	}
 
-	@Override
 	public Record getRecord(Key sys_id) throws IOException {
-		setContext();
+		setContext(uri);
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
 		params.add("sysparm_sys_id",  sys_id.toString());
@@ -66,18 +62,17 @@ public class JsonTableAPI extends TableAPI {
 		return getRecords(query, displayValue);
 	}
 	
-	@Override
 	public RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException {
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "getRecords");
 		params.add("displayvalue", displayValue ? "all" : "false");
-		if (query != null && !query.isEmpty()) 
+		if (!EncodedQuery.isEmpty(query))
 			params.add("sysparm_query", query.toString());
 		return getRecords(params);
 	}
 
 	public RecordList getRecords(Parameters params) throws IOException {
-		setContext();
+		setContext(uri);
 		return getResponseRecords(params);
 	}
 
@@ -87,13 +82,6 @@ public class JsonTableAPI extends TableAPI {
 		assert responseObj.has("records");
 		return new RecordList(table, responseObj, "records");
 	}
-
-	/*
-	private RecordList getResponseRecords(JSONObject responseObj) throws IOException {
-		assert responseObj.has("records");
-		return new RecordList(table, responseObj, "records");
-	}
-	*/
 	
 	private JSONObject getResponseObject(JSONObject requestObj) throws IOException {
 		String requestText = requestObj.toString();
@@ -140,7 +128,7 @@ public class JsonTableAPI extends TableAPI {
 
 	@Override
 	public TableReader getDefaultReader() throws IOException {
-		return new JsonKeyReader(this);
+		return new JsonKeyedReader(this.table);
 	}
 
 }

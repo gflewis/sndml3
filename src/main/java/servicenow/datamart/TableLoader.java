@@ -1,7 +1,7 @@
 package servicenow.datamart;
 
 import servicenow.core.*;
-import servicenow.json.JsonKeyReader;
+import servicenow.json.JsonKeyedReader;
 import servicenow.rest.MultiDatePartReader;
 import servicenow.rest.RestTableReader;
 
@@ -97,9 +97,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 			filter = config.getFilter();
 			if (partitionInterval == null) {
 				if (since == null)
-					reader = new RestTableReader(table.rest());
+					reader = new RestTableReader(table);
 				else
-					reader = new JsonKeyReader(table.json());
+					reader = new JsonKeyedReader(table);
 				reader.setBaseQuery(filter);
 				reader.setCreatedRange(created);
 				reader.setUpdatedRange(updated);
@@ -107,7 +107,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 			}
 			else {
 				Integer threads = config.getThreads();
-				reader = new MultiDatePartReader(table.rest(), partitionInterval, filter, created, updated, threads, writer);			
+				reader = new MultiDatePartReader(table, partitionInterval, filter, created, updated, threads, writer);			
 			}
 		}
 		assert reader != null;

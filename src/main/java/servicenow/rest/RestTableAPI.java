@@ -25,32 +25,16 @@ public class RestTableAPI extends TableAPI {
 	public Instance getInstance() {
 		return getSession().getInstance();
 	}
-
-	public RestTableReader getDefaultReader() throws IOException {
-		return new RestTableReader(this);
-	}
-		
-	@Deprecated
-	public RestTableReader getDefaultReader(EncodedQuery query, Writer writer) throws IOException {
-		RestTableReader reader;
-		reader = new RestTableReader(this);
-		reader.setBaseQuery(query);
-		reader.setWriter(writer);
-		return reader;
-	}
-
-	URI getURI(Parameters params) {
-		return getURI("table", null, params);
-	}
 	
-	URI getURI(String api, Key sys_id, Parameters params) {
+	private URI getURI(String api, Key sys_id, Parameters params) {
 		assert api != null;
 		String path = "api/now/" + api + "/" + table.getName();
 		if (sys_id != null) path += "/" + sys_id.toString();
 		URI uri = session.getURI(path, params);
-		Log.setTableContext(table);
-		Log.setSessionContext(session);;
-		Log.setURIContext(uri);
+		setContext(uri);
+//		Log.setTableContext(table);
+//		Log.setSessionContext(session);;
+//		Log.setURIContext(uri);
 		logger.debug(Log.REQUEST, uri.toString());
 		return uri;
 	}
@@ -66,9 +50,7 @@ public class RestTableAPI extends TableAPI {
 			params.add("sysparm_max_fields", aggregateFields);			
 		}
 		URI uri = getURI("stats", null, params);
-		Log.setSessionContext(session);
-		Log.setTableContext(table);
-		Log.setURIContext(uri);
+//		setContext(uri);
 		HttpGet request = new HttpGet(uri);
 		request.setHeader("Accept", "application/json");
 		CloseableHttpResponse response = getSession().getClient().execute(request);
@@ -78,11 +60,11 @@ public class RestTableAPI extends TableAPI {
 		JSONObject result = obj.getJSONObject("result").getJSONObject("stats");
 		stats.count = Integer.parseInt(result.getString("count"));
 		if (includeDates) {
-			JSONObject min = result.getJSONObject("min");
-			JSONObject max = result.getJSONObject("max");
-			stats.created = new DateTimeRange(
-					new DateTime(min.getString("sys_created_on")),
-					new DateTime(max.getString("sys_created_on")));
+			JSONObject minValues = result.getJSONObject("min");
+			JSONObject maxValues = result.getJSONObject("max");
+			DateTime minCreated = new DateTime(minValues.getString("sys_created_on"));
+			DateTime maxCreated = new DateTime(maxValues.getString("sys_created_on")); 
+			stats.created = new DateTimeRange(minCreated, maxCreated);
 		}
 		logger.info(Log.PROCESS, String.format("getStats query=%s count=%s", filter, stats.count));
 		return stats;		
@@ -134,19 +116,18 @@ public class RestTableAPI extends TableAPI {
 		return list;
 	}
 
-	public KeySet getKeys(EncodedQuery filter) throws IOException {
-		Parameters params = new Parameters();		
-		params.add("sysparm_query", filter.toString());
-		params.add("sysparm_fields", "sys_id");
-		RecordList recs = getRecords(params);
-		KeySet keys = recs.extractKeys();
-		return keys;
-	}
+//	@Deprecated
+//	public KeySet getKeys(EncodedQuery filter) throws IOException {
+//		Parameters params = new Parameters();		
+//		params.add("sysparm_query", filter.toString());
+//		params.add("sysparm_fields", "sys_id");
+//		RecordList recs = getRecords(params);
+//		KeySet keys = recs.extractKeys();
+//		return keys;
+//	}
 
 	private JSONObject getResponseObject(URI uri) throws IOException {
-		Log.setSessionContext(session);
-		Log.setTableContext(table);
-		Log.setURIContext(uri);
+		setContext(uri);
 		HttpGet request = new HttpGet(uri);
 		request.setHeader("Accept", "application/json");
 		JSONObject objResponse = getResponseObject(uri, request);
@@ -176,4 +157,9 @@ public class RestTableAPI extends TableAPI {
 		return obj;		
 	}
 
+	@Override
+	public RestTableReader getDefaultReader() throws IOException {
+		return new RestTableReader(this.table);
+	}
+	
 }

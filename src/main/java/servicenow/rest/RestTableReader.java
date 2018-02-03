@@ -6,11 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
-import servicenow.datamart.TableConfig;
 
 public class RestTableReader extends TableReader {
 
-	final RestTableAPI restImpl;
+	final protected RestTableAPI apiREST;
 	private boolean statsEnabled = true;
 	protected TableStats stats = null;
 	
@@ -18,20 +17,11 @@ public class RestTableReader extends TableReader {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public RestTableReader(RestTableAPI impl) {
-		super(impl);
-		restImpl = impl;
+	public RestTableReader(Table table) {
+		super(table);
+		this.apiREST = table.rest();
 	}
-	
-	public RestTableReader(RestTableAPI impl, TableConfig config) {
-		this(impl);
-		assert config != null;
-		setPageSize(config.getPageSize() == null ? DEFAULT_PAGE_SIZE : config.getPageSize());
-		setBaseQuery(config.getFilter());
-		setCreatedRange(config.getCreated());
-		setUpdatedRange(config.getUpdated());
-	}
-		
+			
 	public int getDefaultPageSize() {
 		return DEFAULT_PAGE_SIZE;
 	}
@@ -44,7 +34,7 @@ public class RestTableReader extends TableReader {
 	public void initialize() throws IOException {
 		super.initialize();
 		if (statsEnabled) {
-			stats = restImpl.getStats(getQuery(), false);
+			stats = apiREST.getStats(getQuery(), false);
 			setExpected(stats.getCount());
 		}
 	}
@@ -69,7 +59,7 @@ public class RestTableReader extends TableReader {
 			if (!EncodedQuery.isEmpty(getQuery())) params.add("sysparm_query", getQuery().toString());
 			if (fieldNames != null) params.add("sysparm_fields", fieldNames.toString());
 			if (viewName != null) params.add("sysparm_view", viewName);
-			RecordList recs = restImpl.getRecords(params);
+			RecordList recs = apiREST.getRecords(params);
 			getMetrics().increment(recs.size());
 			writer.processRecords(recs);			
 			rowCount += recs.size();
