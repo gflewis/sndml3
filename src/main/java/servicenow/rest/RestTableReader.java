@@ -60,7 +60,7 @@ public class RestTableReader extends TableReader {
 			if (fieldNames != null) params.add("sysparm_fields", fieldNames.toString());
 			if (viewName != null) params.add("sysparm_view", viewName);
 			RecordList recs = apiREST.getRecords(params);
-			getMetrics().increment(recs.size());
+			readerMetrics().increment(recs.size());
 			writer.processRecords(recs);			
 			rowCount += recs.size();
 			offset += recs.size();

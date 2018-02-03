@@ -7,7 +7,6 @@ import java.util.concurrent.Callable;
 public abstract class TableReader implements Callable<TableReader>{
  
 	public final Table table;
-//	protected final TableAPI api;
 	
 	private EncodedQuery baseQuery;
 	private DateTimeRange createdRange;
@@ -15,27 +14,18 @@ public abstract class TableReader implements Callable<TableReader>{
 	private TableReader parent;
 	
 	protected Writer writer;
-	private ReaderMetrics metrics;
 	protected int pageSize;
 	protected boolean displayValue = false;
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
+	protected ReaderMetrics metrics;
 
 	public TableReader(Table table) {
 		this.table = table;
 		this.pageSize = getDefaultPageSize();
 		this.metrics = new ReaderMetrics();
 	}
-	
-	/*
-	public TableReader(TableAPI api) {
-		this.api = api;
-		this.table = api.getTable();
-		this.pageSize = getDefaultPageSize();
-		this.metrics = new ReaderMetrics();
-	}
-	*/
-		
+			
 	public abstract int getDefaultPageSize();
 	
 	public void initialize() throws IOException {
@@ -48,7 +38,7 @@ public abstract class TableReader implements Callable<TableReader>{
 		Log.setTableContext(this.table);
 	}
 	
-	public ReaderMetrics getMetrics() {
+	public ReaderMetrics readerMetrics() {
 		return this.metrics;
 	}
 	
@@ -70,7 +60,7 @@ public abstract class TableReader implements Callable<TableReader>{
 	public TableReader setParent(TableReader parent) {
 		assert parent != null;
 		this.parent = parent;
-		this.metrics = new ReaderMetrics(parent.getMetrics());
+		this.metrics = new ReaderMetrics(parent.readerMetrics());
 		return this;
 	}
 

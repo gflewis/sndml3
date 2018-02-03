@@ -4,6 +4,8 @@ import servicenow.core.*;
 
 public class TableConfig extends Config {
 
+	private Map items;
+	
 	private String name;
 	private String source;
 	private String target;
@@ -14,7 +16,7 @@ public class TableConfig extends Config {
 	private DateTime since;
 	private EncodedQuery filter;
 	private DateTime.Interval partition;
-	private Integer pagesize = null;
+	private Integer pageSize = null;
 	private Integer threads = null;
 	private DateTimeFactory dateFactory;
 
@@ -26,7 +28,7 @@ public class TableConfig extends Config {
 		if (isMap(config)) {
 			assert parent != null;
 			dateFactory = new DateTimeFactory();
-			Map items = new Config.Map(config);
+			items = new Config.Map(config);
 			for (String key : items.keySet()) {
 			    Object val = items.get(key);
 			    switch (key.toLowerCase()) {
@@ -67,7 +69,7 @@ public class TableConfig extends Config {
 			    		this.partition = asInterval(val);
 			    		break;
 			    case "pagesize" :
-			    		this.pagesize = asInteger(val);
+			    		this.pageSize = asInteger(val);
 			    		break;
 			    case "threads" :
 			    		this.threads = asInteger(val);
@@ -88,7 +90,7 @@ public class TableConfig extends Config {
 	public void validate() throws ConfigParseException {
 		
 	}
-		
+			
 	public String getName() throws ConfigParseException {
 		if (this.name != null) return this.name;
 		if (this.target != null) return this.target;
@@ -143,7 +145,7 @@ public class TableConfig extends Config {
 	}
 	
 	public Integer getPageSize() {
-		return this.pagesize;
+		return this.pageSize;
 	}
 
 	public Integer getThreads() {

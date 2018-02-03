@@ -1,17 +1,11 @@
 package servicenow.json;
 
+import servicenow.core.*;
+
 import java.io.IOException;
 import java.sql.SQLException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import servicenow.core.EncodedQuery;
-import servicenow.core.KeySet;
-import servicenow.core.RecordList;
-import servicenow.core.Table;
-import servicenow.core.TableReader;
-import servicenow.core.Writer;
 
 public class JsonKeyedReader extends TableReader {
 
@@ -64,11 +58,15 @@ public class JsonKeyedReader extends TableReader {
 			if (toIndex > totalRows) toIndex = totalRows;
 			KeySet slice = allKeys.getSlice(fromIndex, toIndex);
 			EncodedQuery sliceQuery = new EncodedQuery(slice);
-//			if (viewName != null) params.add("__use_view", viewName);		
-			RecordList recs = api.getRecords(sliceQuery, this.displayValue);
+			Parameters params = new Parameters();
+			if (this.viewName != null) params.add("sysparm_view", this.viewName);
+			if (this.displayValue) params.add("displayvalue", "all");
+			params.add("sysparm_query", sliceQuery.toString());
+			RecordList recs = api.getRecords(params);
+			readerMetrics().increment(recs.size());			
 			writer.processRecords(recs);
 			rowCount += recs.size();
-			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));
+			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
 			fromIndex += pageSize;
 		}
 		return this;

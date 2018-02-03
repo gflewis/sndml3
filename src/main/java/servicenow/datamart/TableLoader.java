@@ -85,11 +85,16 @@ public class TableLoader implements Callable<WriterMetrics> {
 		EncodedQuery filter;
 		DateTime since = config.getSince();
 		DateTime.Interval partitionInterval = config.getPartitionInterval();
+		Integer pageSize = config.getPageSize();
 		if (action == LoaderAction.PRUNE) {
 			Table audit = session.table("sys_audit_delete");
+			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
 			reader = audit.getDefaultReader();
-			reader.setBaseQuery(new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName()));			
-			reader.setCreatedRange(new DateTimeRange(since, null));			
+			reader.setBaseQuery(auditQuery);			
+			reader.setCreatedRange(new DateTimeRange(since, null));
+			if (pageSize != null) reader.setPageSize(pageSize);
+			reader.setWriter(writer);
+			reader.initialize();
 		}
 		else {
 			DateTimeRange created = config.getCreated();
@@ -103,17 +108,23 @@ public class TableLoader implements Callable<WriterMetrics> {
 				reader.setBaseQuery(filter);
 				reader.setCreatedRange(created);
 				reader.setUpdatedRange(updated);
+				if (pageSize != null) reader.setPageSize(pageSize);
 				reader.setWriter(writer);
+				if (since != null) 
+					logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
+				reader.initialize();
 			}
 			else {
 				Integer threads = config.getThreads();
-				reader = new MultiDatePartReader(table, partitionInterval, filter, created, updated, threads, writer);			
+				MultiDatePartReader mReader = 
+						new MultiDatePartReader(table, partitionInterval, filter, created, updated, threads, writer);
+				if (pageSize != null) reader.setPageSize(pageSize);
+				mReader.initialize();				
+				logger.info(Log.INIT, mReader.getPartition().toString());
+				reader = mReader;
 			}
 		}
-		assert reader != null;
-		if (config.getPageSize() != null) reader.setPageSize(config.getPageSize());
-		reader.initialize();
-		logger.info(Log.INIT, String.format("begin load %s (%d rows)", targetName, reader.getMetrics().getExpected()));
+		logger.info(Log.INIT, String.format("begin load %s (%d rows)", targetName, reader.readerMetrics().getExpected()));
 		reader.call();
 		writer.close();
 		logger.info(Log.TERM, String.format("end load %s (%d rows)", targetName, writer.getMetrics().getProcessed()));

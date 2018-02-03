@@ -44,6 +44,7 @@ public class MultiDatePartReader extends RestTableReader {
 	}
 		
 	public DatePartition getPartition() {
+		if (this.partition == null) throw new IllegalStateException();
 		return this.partition;
 	}
 	
