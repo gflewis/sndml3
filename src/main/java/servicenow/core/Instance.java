@@ -46,17 +46,26 @@ public class Instance {
 	}
 	
 	public URI getURI(String path) {
-		return getURI(path, null, null);
+		return getURI(path, null);
 	}
-	
-	public URI getURI(String path, URIProtocol protocol) {
-		return getURI(path, protocol, null);
-	}
-	
+		
 	public URI getURI(String path, Parameters params) {
-		return getURI(path, null, params);
+		assert path != null;
+		assert path.length() > 0;
+		URI result;
+		try {
+			String base = url.toString();
+			URIBuilder builder = new URIBuilder(base);
+			if (params != null) builder.addParameters(params.nvpList());
+			result = builder.build();			
+		}
+		catch (URISyntaxException e) {
+			throw new ServiceNowError(e);
+		}
+		return result;
 	}
 	
+	@Deprecated
 	public URI getURI(String path, URIProtocol protocol, Parameters params) {
 		assert path != null;
 		assert path.length() > 0;

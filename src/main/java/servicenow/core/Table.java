@@ -171,7 +171,7 @@ public class Table {
 	}
 	
 	public TableWSDL getWSDL() throws IOException {
-		return apiSOAP.getWSDL();
+		return soap().getWSDL();
 	}
 	
 	public TableSchema getSchema() throws IOException, InterruptedException {
