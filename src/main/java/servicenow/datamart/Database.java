@@ -41,7 +41,9 @@ public class Database {
 		assert dburl != null;
 		assert dbuser != null;
 		assert schema==null || schema.length() > 0;
-		logger.info(Log.INIT, String.format("database=%s user=%s schema=%s", dburl, dbuser, schema));
+		String logmsg = "database=" + dburl + " user=" + dbuser;
+		if (schema != null) logmsg += " schema=" + schema;
+		logger.info(Log.INIT, logmsg);
 		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
 		if (dialect != null && dialect.length() > 0)
 			this.generator = new Generator(dialect, schema);
