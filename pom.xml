@@ -1,12 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
   <version>3.0.1-b.3</version>
   <packaging>jar</packaging>
-
   <name>sndml</name>
   <url>http://maven.apache.org</url>
 
@@ -16,7 +15,7 @@
     <maven.compiler.target>1.7</maven.compiler.target>
     <main.class>servicenow.datamart.Loader</main.class>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -90,11 +89,11 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-       <!--
+      <!--
         to add sqljdbc41 to local repo
           mvn install:install-file -Dfile=sqljdbc41.jar \
           -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc -Dversion=4.1 \
-          -Dpackaging=jar -DgeneratePom=true 
+          -Dpackaging=jar -DgeneratePom=true
         -->
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>sqljdbc</artifactId>
@@ -107,20 +106,18 @@
         to add ojdbc7 to local repo
           mvn install:install-file -Dfile=ojdbc7.jar \
           -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2 \
-          -Dpackaging=jar -DgeneratePom=true 
-      -->    
+          -Dpackaging=jar -DgeneratePom=true
+      -->
       <groupId>com.oracle</groupId>
       <artifactId>ojdbc7</artifactId>
       <version>12.1.0.2</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
-
   </dependencies>
 
   <build>
     <plugins>
-
       <plugin>
         <!-- Skip Unit Tests -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -130,7 +127,6 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -162,8 +158,7 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>mysql</shadedClassifierName>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
                 </transformer>
               </transformers>
@@ -193,8 +188,7 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>ora</shadedClassifierName>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
                 </transformer>
               </transformers>
@@ -224,22 +218,20 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>mssql</shadedClassifierName>
               <transformers>
-                <transformer
-                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
                 </transformer>
               </transformers>
-    <filters>
-        <filter>
-            <artifact>*:*</artifact>
-            <excludes>
-                <exclude>META-INF/*.SF</exclude>
-                <exclude>META-INF/*.DSA</exclude>
-                <exclude>META-INF/*.RSA</exclude>
-            </excludes>
-        </filter>
-    </filters>
-
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <artifactSet>
                 <includes>
                   <include>com.microsoft.*:*</include>
@@ -254,6 +246,7 @@
               </artifactSet>
             </configuration>
           </execution>
+          
         </executions>
       </plugin>
 
@@ -275,7 +268,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
