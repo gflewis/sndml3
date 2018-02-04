@@ -17,6 +17,7 @@
   </properties>
 
   <dependencies>
+  
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -88,32 +89,6 @@
       <version>5.1.32</version>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <!--
-        to add sqljdbc41 to local repo
-          mvn install:install-file -Dfile=sqljdbc41.jar \
-          -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc -Dversion=4.1 \
-          -Dpackaging=jar -DgeneratePom=true
-        -->
-      <groupId>com.microsoft.sqlserver</groupId>
-      <artifactId>sqljdbc</artifactId>
-      <version>4.1</version>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <!--
-        to add ojdbc7 to local repo
-          mvn install:install-file -Dfile=ojdbc7.jar \
-          -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2 \
-          -Dpackaging=jar -DgeneratePom=true
-      -->
-      <groupId>com.oracle</groupId>
-      <artifactId>ojdbc7</artifactId>
-      <version>12.1.0.2</version>
-      <scope>compile</scope>
-      <optional>true</optional>
-    </dependency>
   </dependencies>
 
   <build>
@@ -146,7 +121,6 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>2.4.3</version>
         <executions>
-
           <!-- MySQL JAR -->
           <execution>
             <id>mysql</id>
@@ -176,99 +150,148 @@
               </artifactSet>
             </configuration>
           </execution>
-
-          <!-- Oracle JAR -->
-          <execution>
-            <id>ora</id>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>ora</shadedClassifierName>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>${main.class}</mainClass>
-                </transformer>
-              </transformers>
-              <artifactSet>
-                <includes>
-                  <include>com.oracle:*</include>
-                  <include>org.apache.*:*</include>
-                  <include>commons-*:*</include>
-                  <include>org.jdom:*</include>
-                  <include>org.json:*</include>
-                  <include>org.yaml:*</include>
-                  <include>org.slf4j:*</include>
-                  <include>log4j:*</include>
-                </includes>
-              </artifactSet>
-            </configuration>
-          </execution>
-
-          <!-- MS SQL Server JAR -->
-          <execution>
-            <id>mssql</id>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>mssql</shadedClassifierName>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>${main.class}</mainClass>
-                </transformer>
-              </transformers>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <artifactSet>
-                <includes>
-                  <include>com.microsoft.*:*</include>
-                  <include>org.apache.*:*</include>
-                  <include>commons-*:*</include>
-                  <include>org.jdom:*</include>
-                  <include>org.json:*</include>
-                  <include>org.yaml:*</include>
-                  <include>org.slf4j:*</include>
-                  <include>log4j:*</include>
-                </includes>
-              </artifactSet>
-            </configuration>
-          </execution>
-          
-        </executions>
-      </plugin>
-
-      <!-- zip file for release -->
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>bin</descriptorRef>
-          </descriptorRefs>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>assembly</goal>
-            </goals>
-          </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>      
+    <profile>
+      <id>github.release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>github.release</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <!--
+            to add ojdbc7 to local repo
+              mvn install:install-file -Dfile=ojdbc7.jar \
+              -DgroupId=com.oracle -DartifactId=ojdbc7 -Dversion=12.1.0.2 \
+              -Dpackaging=jar -DgeneratePom=true
+          -->
+          <groupId>com.oracle</groupId>
+          <artifactId>ojdbc7</artifactId>
+          <version>12.1.0.2</version>
+          <scope>compile</scope>
+          <optional>true</optional>
+        </dependency>
+        <dependency>
+          <!--
+            to add sqljdbc41 to local repo
+              mvn install:install-file -Dfile=sqljdbc41.jar \
+              -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc -Dversion=4.1 \
+              -Dpackaging=jar -DgeneratePom=true
+            -->
+          <groupId>com.microsoft.sqlserver</groupId>
+          <artifactId>sqljdbc</artifactId>
+          <version>4.1</version>
+          <scope>compile</scope>
+          <optional>true</optional>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>2.4.3</version>
+            <executions>
+              <!-- Oracle JAR -->
+              <execution>
+                <id>ora</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <shadedArtifactAttached>true</shadedArtifactAttached>
+                  <shadedClassifierName>ora</shadedClassifierName>
+                  <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>${main.class}</mainClass>
+                    </transformer>
+                  </transformers>
+                  <artifactSet>
+                    <includes>
+                      <include>com.oracle:*</include>
+                      <include>org.apache.*:*</include>
+                      <include>commons-*:*</include>
+                      <include>org.jdom:*</include>
+                      <include>org.json:*</include>
+                      <include>org.yaml:*</include>
+                      <include>org.slf4j:*</include>
+                      <include>log4j:*</include>
+                    </includes>
+                  </artifactSet>
+                </configuration>
+              </execution>         
+              <!-- MS SQL Server JAR -->
+              <execution>
+                <id>mssql</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <shadedArtifactAttached>true</shadedArtifactAttached>
+                  <shadedClassifierName>mssql</shadedClassifierName>
+                  <transformers>
+                    <transformer
+                      implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>${main.class}</mainClass>
+                    </transformer>
+                  </transformers>
+                  <filters>
+                    <filter>
+                      <artifact>*:*</artifact>
+                      <excludes>
+                        <exclude>META-INF/*.SF</exclude>
+                        <exclude>META-INF/*.DSA</exclude>
+                        <exclude>META-INF/*.RSA</exclude>
+                      </excludes>
+                    </filter>
+                  </filters>
+                  <artifactSet>
+                    <includes>
+                      <include>com.microsoft.*:*</include>
+                      <include>org.apache.*:*</include>
+                      <include>commons-*:*</include>
+                      <include>org.jdom:*</include>
+                      <include>org.json:*</include>
+                      <include>org.yaml:*</include>
+                      <include>org.slf4j:*</include>
+                      <include>log4j:*</include>
+                    </includes>
+                  </artifactSet>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- zip file for github release -->
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>bin</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>make-assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>assembly</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
