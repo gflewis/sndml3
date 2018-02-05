@@ -58,11 +58,14 @@ public class Session {
 	}
 
 	/**
-	 * Return property value if constructed with a property of this name else null.
+	 * Return the value of a property with the name "servicenow." + propname
+	 * if it is defined, otherwise return null.
 	 */
 	public String getProperty(String propname) {
-		if (properties == null) return null;
-		return properties.getProperty("servicenow." + propname);
+		propname = "servicenow." + propname;
+		String value = System.getProperty(propname);
+		if (value == null && properties != null)	value = properties.getProperty(propname);
+		return value;
 	}
 	
 	public Session setCredentials(String username, String password) {
@@ -122,7 +125,14 @@ public class Session {
 	
 	public Table validate(String tablename) throws IOException, InterruptedException {
 		Table table = this.table(tablename);
-		TableWSDL wsdl = table.getWSDL();
+		TableWSDL wsdl;
+		try {
+			wsdl = table.getWSDL();			
+		}
+		catch (Exception e) {
+			logger.error(Log.INIT, "Unable to access WSDL for table " + tablename);
+			throw new InsufficientRightsException(tablename, "WSDL");
+		}
 		TableSchema schema = table.getSchema();
 		if (wsdl.getReadFieldNames().size() != schema.numFields())
 			throw new AssertionError("field count mismatch");

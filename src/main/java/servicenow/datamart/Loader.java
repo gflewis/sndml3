@@ -39,15 +39,20 @@ public class Loader {
 		Globals.initialize(options, args);				
 		if (Globals.hasOptionValue("t") && Globals.hasOptionValue("y"))
 			throw new CommandOptionsException("Cannot specify both --table and --config");
-		ResourceManager.setSession(new Session(Globals.getProperties()));
-		ResourceManager.setDatabase(new Database(Globals.getProperties()));
+		Session session = new Session(Globals.getProperties());
+		Database datamart = new Database(Globals.getProperties());
+		ResourceManager.setSession(session);
+		ResourceManager.setDatabase(datamart);
 		if (Globals.hasOptionValue("t")) {
+			// Single table load
 			String tablename = Globals.getOptionValue("t");
-			Table table = ResourceManager.getSession().table(tablename);
+			session.validate();
+			Table table = session.table(tablename);
 			Loader loader = new Loader(table);
 			loader.loadTables();
 		}
 		if (Globals.hasOptionValue("y")) {
+			// YAML config file
 			File configFile = new File(Globals.getOptionValue("y"));
 			LoaderConfig config = new LoaderConfig(configFile);
 			Loader loader = new Loader(config);

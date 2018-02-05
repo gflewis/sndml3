@@ -36,7 +36,7 @@ public class Table {
 		this.instance = session.getInstance();
 		String apiName = session.getProperty("api");
 		if (apiName == null)
-			this.api = json();
+			this.api = rest();
 		else {
 			switch (apiName) {
 			case "soap" : this.api = soap(); break;

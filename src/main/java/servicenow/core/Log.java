@@ -57,4 +57,46 @@ public class Log {
 	static public synchronized void clearContext() {
 		org.slf4j.MDC.clear();
 	}
+	
+	@Deprecated
+	static private String getContext(String name) {
+		return org.slf4j.MDC.get(name);
+	}
+	
+	@Deprecated
+	static private boolean hasContext(String name) {
+		String context = getContext(name);
+		return context != null && context.length() > 0;
+	}
+	
+	static class MessageBuilder {
+		StringBuilder msg = new StringBuilder();
+		String lastSeparator = "";
+		public MessageBuilder(String text) {
+			if (text != null) msg.append(text);
+		}
+		public void addContext(String name, String separator) {
+			if (hasContext(name)) {
+				msg.append(lastSeparator);
+				msg.append(name + "=" + getContext(name));
+				lastSeparator = separator;
+			}
+		}
+		public String toString() { 
+			return msg.toString(); 
+		}
+	}
+	
+	@Deprecated
+	static public String getContextMessage() {
+		return getContextMessage("");
+	}
+	
+	@Deprecated
+	static public String getContextMessage(String message) {
+		MessageBuilder msg = new MessageBuilder(message);
+		msg.addContext("table",  " ");
+		msg.addContext("method",  " ");
+		return msg.toString();
+	}
 }

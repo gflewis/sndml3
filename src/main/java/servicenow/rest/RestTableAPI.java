@@ -32,9 +32,6 @@ public class RestTableAPI extends TableAPI {
 		if (sys_id != null) path += "/" + sys_id.toString();
 		URI uri = session.getURI(path, params);
 		setContext(uri);
-//		Log.setTableContext(table);
-//		Log.setSessionContext(session);;
-//		Log.setURIContext(uri);
 		logger.debug(Log.REQUEST, uri.toString());
 		return uri;
 	}
@@ -50,7 +47,6 @@ public class RestTableAPI extends TableAPI {
 			params.add("sysparm_max_fields", aggregateFields);			
 		}
 		URI uri = getURI("stats", null, params);
-//		setContext(uri);
 		HttpGet request = new HttpGet(uri);
 		request.setHeader("Accept", "application/json");
 		CloseableHttpResponse response = getSession().getClient().execute(request);
@@ -77,7 +73,7 @@ public class RestTableAPI extends TableAPI {
 			obj = getResponseObject(uri);
 		}
 		catch (JsonResponseException e) {
-			JSONObject err = e.obj;
+			JSONObject err = e.getObject();
 			String msg = err.getString("message");
 			if (msg.toLowerCase().equals("no record found")) return null;
 			throw new JsonResponseError(err.toString());
@@ -116,23 +112,18 @@ public class RestTableAPI extends TableAPI {
 		return list;
 	}
 
-//	@Deprecated
-//	public KeySet getKeys(EncodedQuery filter) throws IOException {
-//		Parameters params = new Parameters();		
-//		params.add("sysparm_query", filter.toString());
-//		params.add("sysparm_fields", "sys_id");
-//		RecordList recs = getRecords(params);
-//		KeySet keys = recs.extractKeys();
-//		return keys;
-//	}
-
 	private JSONObject getResponseObject(URI uri) throws IOException {
 		setContext(uri);
 		HttpGet request = new HttpGet(uri);
 		request.setHeader("Accept", "application/json");
 		JSONObject objResponse = getResponseObject(uri, request);
-		if (objResponse.has("error")) {			
-			throw new JsonResponseException(objResponse.getJSONObject("error"));
+		if (objResponse.has("error")) {
+			JSONObject error = objResponse.getJSONObject("error");
+			String errorMessage = error.has("message") ? error.getString("message") : "";
+			if (errorMessage.equalsIgnoreCase("User Not Authorized"))
+				throw new InsufficientRightsException(uri);
+			else 
+				throw new JsonResponseException(objResponse);
 		}
 		return objResponse;		
 	}
@@ -143,7 +134,7 @@ public class RestTableAPI extends TableAPI {
 		Header contentTypeHeader = responseEntity.getContentType();
 		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
 		String responseBody = EntityUtils.toString(responseEntity);
-		if ("text/html".equals(contentType) /* && responseText.contains("Hibernating") */)
+		if ("text/html".equals(contentType))
 			throw new InstanceUnavailableException(uri, responseBody);
 		logger.trace(Log.RESPONSE, responseBody);
 		JSONObject obj;

@@ -101,8 +101,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 			DateTimeRange updated = new DateTimeRange(since, null);
 			filter = config.getFilter();
 			if (partitionInterval == null) {
-				if (since == null)
-					reader = new RestTableReader(table);
+				if (since == null) {
+					reader = new RestTableReader(table).enableStats(true);
+				}
 				else
 					reader = new JsonKeyedReader(table);
 				reader.setBaseQuery(filter);

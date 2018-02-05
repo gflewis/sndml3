@@ -1,7 +1,6 @@
 package servicenow.json;
 
 import servicenow.core.*;
-import servicenow.soap.NoContentException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,6 +35,7 @@ public class JsonTableAPI extends TableAPI {
 		
 	public KeySet getKeys(EncodedQuery query) throws IOException {
 		setContext(uri);
+		Log.setMethodContext("getKeys");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action",  "getKeys");
 		if (!EncodedQuery.isEmpty(query))
@@ -48,6 +48,7 @@ public class JsonTableAPI extends TableAPI {
 
 	public Record getRecord(Key sys_id) throws IOException {
 		setContext(uri);
+		Log.setMethodContext("get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
 		params.add("sysparm_sys_id",  sys_id.toString());
@@ -64,7 +65,6 @@ public class JsonTableAPI extends TableAPI {
 	
 	public RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException {
 		Parameters params = new Parameters();
-		params.add("sysparm_action", "getRecords");
 		params.add("displayvalue", displayValue ? "all" : "false");
 		if (!EncodedQuery.isEmpty(query))
 			params.add("sysparm_query", query.toString());
@@ -73,6 +73,8 @@ public class JsonTableAPI extends TableAPI {
 
 	public RecordList getRecords(Parameters params) throws IOException {
 		setContext(uri);
+		params.add("sysparm_action", "getRecords");
+		Log.setMethodContext("getRecords");
 		return getResponseRecords(params);
 	}
 
@@ -102,17 +104,15 @@ public class JsonTableAPI extends TableAPI {
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
 					statusLine, contentType, responseLen));
-		if (statusCode == 401) {
-			logger.error(Log.RESPONSE, 
-				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
-			throw new InsufficientRightsException(uri, null, requestText);
+		if (statusCode == 401 || statusCode == 403) {
+			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			throw new InsufficientRightsException(uri, requestText);
 		}
 		if (contentType == null) {
-			logger.error(Log.RESPONSE, 
-				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
-			throw new NoContentException(uri);
+			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			throw new NoContentException(uri, requestText);
 		}		
-		if ("text/html".equals(contentType) /* && responseText.contains("Hibernating") */)
+		if ("text/html".equals(contentType))
 			throw new InstanceUnavailableException(this.uri, responseText);		
 		logger.trace(Log.RESPONSE, responseText);
 		JSONObject responseObj;
@@ -121,6 +121,14 @@ public class JsonTableAPI extends TableAPI {
 		}
 		catch (org.json.JSONException e) {
 			throw new JsonResponseError(responseText);
+		}
+		if (responseObj.has("error")) {
+			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			String errorMessage = responseObj.getString("error");
+			if (errorMessage.toLowerCase().startsWith("insufficient rights"))
+				throw new InsufficientRightsException(uri, requestText);
+			else 
+				throw new JsonResponseException(responseObj);
 		}
 		response.close();
 		return responseObj;

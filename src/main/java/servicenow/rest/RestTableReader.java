@@ -10,7 +10,7 @@ import servicenow.core.*;
 public class RestTableReader extends TableReader {
 
 	final protected RestTableAPI apiREST;
-	private boolean statsEnabled = true;
+	private boolean statsEnabled = false;
 	protected TableStats stats = null;
 	
 	static final int DEFAULT_PAGE_SIZE = 200;

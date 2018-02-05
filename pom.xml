@@ -4,7 +4,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.0.1-b.3</version>
+  <version>3.0.1-b.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
@@ -166,6 +166,7 @@
         </property>
       </activation>
       <dependencies>
+        <!-- Database Dependencies -->
         <dependency>
           <!--
             to add ojdbc7 to local repo

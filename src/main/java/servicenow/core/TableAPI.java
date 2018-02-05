@@ -37,9 +37,7 @@ public abstract class TableAPI {
 		Log.setTableContext(table);
 		Log.setURIContext(uri);		
 	}
-		
-// 	public abstract KeySet getKeys(EncodedQuery query) throws IOException;
- 	
+		 	
  	public abstract Record getRecord(Key sys_id) throws IOException;
  	 	
  	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;

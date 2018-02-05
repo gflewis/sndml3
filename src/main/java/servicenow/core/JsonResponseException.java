@@ -1,8 +1,6 @@
-package servicenow.rest;
+package servicenow.core;
 
 import org.json.JSONObject;
-
-import servicenow.core.ServiceNowException;
 
 public class JsonResponseException extends ServiceNowException {
 
@@ -10,12 +8,12 @@ public class JsonResponseException extends ServiceNowException {
 	
 	final JSONObject obj;
 
-	JsonResponseException(JSONObject obj) {
+	public JsonResponseException(JSONObject obj) {
 		super(obj.toString());
 		this.obj = obj;
 	}
 	
-	JSONObject getObject() {
+	public JSONObject getObject() {
 		return this.obj;
 	}
 
