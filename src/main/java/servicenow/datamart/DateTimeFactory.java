@@ -80,7 +80,7 @@ public class DateTimeFactory {
 				result = getExpr(expr);
 			else
 				throw new ConfigParseException("Invalid datetime: " + expr);
-			logger.debug(Log.INIT, String.format("getDate(%s)=%s", expr, result.toString()));
+			logger.debug(Log.INIT, String.format("getDate(%s)=%s", expr, result));
 		}
 		return result;
 	}
