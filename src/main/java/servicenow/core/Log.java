@@ -38,6 +38,10 @@ public class Log {
 		setContext("table", tablename);
 	}
 	
+	static public synchronized void setWriterContext(Writer writer) {
+		setContext("writer", writer.getName());
+	}
+	
 	static public synchronized void setPartitionContext(String partname) {
 		setContext("partition", partname);
 	}

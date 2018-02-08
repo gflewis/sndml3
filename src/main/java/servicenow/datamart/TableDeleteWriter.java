@@ -10,8 +10,8 @@ import servicenow.core.Table;
 
 public class TableDeleteWriter extends TableWriter {
 
-	public TableDeleteWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(db, table, sqlTableName);
+	public TableDeleteWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
+		super(name, db, table, sqlTableName);
 	}
 
 	@Override
@@ -19,9 +19,9 @@ public class TableDeleteWriter extends TableWriter {
 		assert rec.getTable().getName().equals("sys_audit_delete");
 		Key key = rec.getKey("document_key");
 		if (deleteStmt.deleteRecord(key))
-			metrics.incrementDeleted();
+			writerMetrics.incrementDeleted();
 		else
-			metrics.incrementSkipped();
+			writerMetrics.incrementSkipped();
 	}
 
 }

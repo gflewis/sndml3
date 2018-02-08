@@ -20,7 +20,8 @@ public abstract class TableWriter extends Writer {
 	
 	final private Logger logger = Log.logger(this.getClass());
 	
-	public TableWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
+	public TableWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
+		super(name);
 		this.db = db;
 		this.table = table;
 		this.sqlTableName = sqlTableName == null ? table.getName() : sqlTableName;
@@ -33,7 +34,7 @@ public abstract class TableWriter extends Writer {
 		insertStmt = new InsertStatement(this.db, this.sqlTableName, columns);
 		updateStmt = new UpdateStatement(this.db, this.sqlTableName, columns);
 		deleteStmt = new DeleteStatement(this.db, this.sqlTableName);
-		metrics.start();
+		writerMetrics.start();
 	}
 
 	/*
@@ -55,21 +56,22 @@ public abstract class TableWriter extends Writer {
 	
 	@Override
 	public synchronized void processRecords(RecordList recs) throws IOException, SQLException {
-		metrics.start();
+		Log.setWriterContext(this);
+		writerMetrics.start();
 		for (Record rec : recs) {
 			writeRecord(rec);
 			logger.debug(Log.PROCESS, String.format("processing %s", rec.getKey().toString()));
 		}
-		metrics.finish();
+		writerMetrics.finish();
 		logProgress("loaded");
 		db.commit();
 	}
 	
 	private synchronized void logProgress(String status) {
-		assert getReader() != null;
-		assert getReader().readerMetrics() != null;
+		assert this.reader != null;
 		getReader().setLogContext();
 		ReaderMetrics readerMetrics = getReader().readerMetrics();
+		assert readerMetrics != null;
 		if (readerMetrics.getParent() == null) 
 			logger.info(Log.PROCESS, String.format("%s %s", status, readerMetrics.getProgress()));
 		else

@@ -5,22 +5,29 @@ import java.sql.SQLException;
 
 public abstract class Writer {
 
-	protected WriterMetrics metrics = new WriterMetrics();
+	protected final String name;
+	protected WriterMetrics writerMetrics;
 	protected TableReader reader;
+
+	
+	public Writer(String name) {
+		this.name = name;
+		this.writerMetrics = new WriterMetrics(name);
+	}
 	
 	public abstract void processRecords(RecordList recs) throws IOException, SQLException;	
 
 	public void open() throws IOException, SQLException {
-		metrics.start();
+		writerMetrics.start();
 	}
 	
 	public void close() {
-		metrics.finish();
+		writerMetrics.finish();
 	}
-	
+
 	public WriterMetrics getMetrics() {
-		if (this.metrics.getFinished() == null) this.metrics.finish();
-		return metrics;
+		if (this.writerMetrics.getFinished() == null) this.writerMetrics.finish();
+		return writerMetrics;
 	}
 	
 	public void setReader(TableReader reader) {
@@ -29,6 +36,10 @@ public abstract class Writer {
 	
 	public TableReader getReader() {
 		return this.reader;
+	}
+	
+	public String getName() {
+		return this.name;
 	}
 
 }

@@ -5,19 +5,20 @@ package servicenow.core;
  */
 public class RecordListAccumulator extends Writer {
 
-	RecordList all;
+	RecordList allRecords;
 			
 	public RecordListAccumulator(Table table) {
-		all = new RecordList(table);
+		super("_accumulator_");
+		allRecords = new RecordList(table);
 	}
 	
 	public void processRecords(RecordList recs) {
-		all.addAll(recs);
-		metrics.addInserted(recs.size());
+		allRecords.addAll(recs);
+		writerMetrics.addInserted(recs.size());
 	}
 	
 	public RecordList getRecords() {
-		return all;
+		return allRecords;
 	}
 
 }

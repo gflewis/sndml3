@@ -18,12 +18,12 @@ public abstract class TableReader implements Callable<TableReader>{
 	protected boolean displayValue = false;
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
-	protected ReaderMetrics metrics;
+	protected ReaderMetrics readerMetrics;
 
 	public TableReader(Table table) {
 		this.table = table;
 		this.pageSize = getDefaultPageSize();
-		this.metrics = new ReaderMetrics();
+		this.readerMetrics = new ReaderMetrics();
 	}
 			
 	public abstract int getDefaultPageSize();
@@ -36,23 +36,24 @@ public abstract class TableReader implements Callable<TableReader>{
 	
 	public void setLogContext() {
 		Log.setTableContext(this.table);
+		Log.setWriterContext(this.writer);
 	}
 	
 	public ReaderMetrics readerMetrics() {
-		return this.metrics;
+		return this.readerMetrics;
 	}
 	
 	public void setExpected(Integer value) {
-		metrics.setExpected(value);
+		readerMetrics.setExpected(value);
 	}
 
 	/**
 	 * Return number of expected rows, if available. 
 	 */
 	public Integer getExpected() {
-		if (metrics.getExpected() == null)
+		if (readerMetrics.getExpected() == null)
 			throw new IllegalStateException(this.getClass().getName() + " not initialized");
-		return metrics.getExpected();
+		return readerMetrics.getExpected();
 	}
 		
 	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
@@ -60,7 +61,7 @@ public abstract class TableReader implements Callable<TableReader>{
 	public TableReader setParent(TableReader parent) {
 		assert parent != null;
 		this.parent = parent;
-		this.metrics = new ReaderMetrics(parent.readerMetrics());
+		this.readerMetrics = new ReaderMetrics(parent.readerMetrics());
 		return this;
 	}
 

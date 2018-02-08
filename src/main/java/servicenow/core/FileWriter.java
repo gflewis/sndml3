@@ -57,6 +57,7 @@ public class FileWriter extends Writer {
 	}
 
 	public FileWriter(File file) {
+		super(file.getPath());
 		this.file = file;
 	}
 
@@ -67,7 +68,7 @@ public class FileWriter extends Writer {
 	
 	@Override
 	public void open() throws IOException {
-		metrics.start();
+		writerMetrics.start();
 		if (file == null)
 			writer = new PrintWriter(System.out);
 		else
@@ -105,14 +106,14 @@ public class FileWriter extends Writer {
 		else
 			writer.println(",");
 		writer.flush();
-		metrics.incrementInserted();
+		writerMetrics.incrementInserted();
 	}
 
 	@Override
 	public void close() {
 		if (format == Format.List) writer.println("]");
 		writer.close();
-		metrics.finish();
+		writerMetrics.finish();
 	}
 	
 }

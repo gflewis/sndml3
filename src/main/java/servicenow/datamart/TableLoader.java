@@ -19,6 +19,8 @@ public class TableLoader implements Callable<WriterMetrics> {
 	private final Session session;
 	private final Database db;
 	private final Table table;
+	private final String sqlTableName;
+	private final String tableLoaderName;
 	private final TableConfig config;
 	
 	TableReader reader;
@@ -47,7 +49,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 	TableLoader(TableConfig config) {		
 		this.session = ResourceManager.getSession();
 		this.db = ResourceManager.getDatabaseWriter();
-		this.table = session.table(config.getName());
+		this.table = session.table(config.getSource());
+		this.sqlTableName = config.getTargetName();
+		this.tableLoaderName = config.getName();
 		this.config = config;
 	}
 	
@@ -61,27 +65,26 @@ public class TableLoader implements Callable<WriterMetrics> {
 		
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		Log.setTableContext(table);
-		String targetName = config.getTargetName();
-		assert targetName != null;
-		assert targetName.length() > 0;
+		assert sqlTableName != null;
+		assert sqlTableName.length() > 0;
 		LoaderAction action = config.getAction();
 		assert action != null;
 		logger.debug(Log.INIT, 
 			String.format("call table=%s action=%s", table.getName(), action.toString()));;
 		switch (action) {
 		case UPDATE: 
-			writer = new TableUpdateWriter(db, table, targetName);
+			writer = new TableUpdateWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		case INSERT:
-			writer = new TableInsertWriter(db, table, targetName);
+			writer = new TableInsertWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		case PRUNE:
-			writer = new TableDeleteWriter(db, table, targetName);
+			writer = new TableDeleteWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		}
-		db.createMissingTable(table, targetName);
+		db.createMissingTable(table, sqlTableName);
 		writer.open();
-		if (config.getTruncate()) db.truncateTable(targetName);
+		if (config.getTruncate()) db.truncateTable(sqlTableName);
 		EncodedQuery filter;
 		DateTime since = config.getSince();
 		DateTime.Interval partitionInterval = config.getPartitionInterval();
@@ -125,10 +128,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 				reader = mReader;
 			}
 		}
-		logger.info(Log.INIT, String.format("begin load %s (%d rows)", targetName, reader.readerMetrics().getExpected()));
+		logger.info(Log.INIT, String.format("begin load %s (%d rows)", tableLoaderName, reader.readerMetrics().getExpected()));
 		reader.call();
 		writer.close();
-		logger.info(Log.TERM, String.format("end load %s (%d rows)", targetName, writer.getMetrics().getProcessed()));
+		logger.info(Log.TERM, String.format("end load %s (%d rows)", tableLoaderName, writer.getMetrics().getProcessed()));
 		return writer.getMetrics();
 	}
 

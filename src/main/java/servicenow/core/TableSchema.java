@@ -25,11 +25,11 @@ public class TableSchema extends Writer {
 	
 	private boolean empty = true;
 	private TreeMap<String,FieldDefinition> fields;
-	WriterMetrics stats = new WriterMetrics();
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	protected TableSchema(Table table) 
 			throws IOException, 	InvalidTableNameException, InterruptedException {
+		super(table.getName() + ".schema");		
 		this.table = table;
 		this.session = table.session;
 		this.tablename = table.getName();
@@ -85,7 +85,7 @@ public class TableSchema extends Writer {
 			if (fieldname != null) {
 				FieldDefinition fieldDef = new FieldDefinition(table, rec);
 				fields.put(fieldname, fieldDef);
-				stats.incrementInserted();
+				writerMetrics.incrementInserted();
 				logger.debug(String.format("%s.%s %s(%d)", 
 						tablename, fieldname, fieldDef.getType(), fieldDef.getLength()));
 				this.empty = false;

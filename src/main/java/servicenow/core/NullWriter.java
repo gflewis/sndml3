@@ -5,9 +5,13 @@ import java.sql.SQLException;
 
 public class NullWriter extends Writer {
 
+	public NullWriter() {
+		super(null);
+	}
+
 	@Override
 	public void processRecords(RecordList recs) throws IOException, SQLException {
-		metrics.addSkipped(recs.size());
+		writerMetrics.addSkipped(recs.size());
 	}
 
 }

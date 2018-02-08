@@ -6,13 +6,22 @@ import java.util.Date;
 
 public class WriterMetrics {
 
+	private final String name;
 	private int inserted = 0;
 	private int updated = 0;
 	private int deleted = 0;
 	private int skipped = 0;
 	private Date started = null;
 	private Date finished = null;
-			
+
+	public WriterMetrics(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
 	public WriterMetrics start() {
 		if (started == null) started = new Date();
 		return this;

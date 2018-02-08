@@ -9,18 +9,18 @@ import servicenow.core.Table;
 
 public class TableInsertWriter extends TableWriter {
 
-	public TableInsertWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(db, table, sqlTableName);
+	public TableInsertWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
+		super(name, db, table, sqlTableName);
 	}
 
 	@Override
 	void writeRecord(Record rec) throws SQLException {
 		try {
 			insertStmt.insert(rec);
-			metrics.incrementInserted();
+			writerMetrics.incrementInserted();
 		}
 		catch (SQLIntegrityConstraintViolationException e) {
-			metrics.incrementSkipped();
+			writerMetrics.incrementSkipped();
 		}
 	}
 
