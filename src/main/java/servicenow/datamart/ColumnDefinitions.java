@@ -27,8 +27,6 @@ public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 		logger.debug(Log.INIT, String.format("schema=%s table=%s", schema, sqlTableName));
 		Generator generator = db.getGenerator();
 		TableWSDL wsdl = table.getWSDL();
-		Log.clearContext();
-		Log.setTableContext(table);
 		ResultSet columns = db.getColumnDefinitions(sqlTableName);
 
 		while (columns.next()) {
