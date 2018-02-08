@@ -64,10 +64,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 	}
 		
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
-		Log.setWriterContext(writer);
-		Log.resetContext(table, writer);
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
+		Log.clearContext();
+		Log.setTableContext(table);
 		LoaderAction action = config.getAction();
 		assert action != null;
 		logger.debug(Log.INIT, 
@@ -83,6 +83,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 			writer = new TableDeleteWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		}
+		Log.setWriterContext(writer);
 		db.createMissingTable(table, sqlTableName);
 		writer.open();
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
