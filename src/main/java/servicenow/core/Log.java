@@ -49,9 +49,12 @@ public class Log {
 	}
 	
 	static public synchronized void setWriterContext(Writer writer) {
-		setContext("writer", writer.getName());
+		setWriterContext(writer.getName());
 	}
 	
+	static public synchronized void setWriterContext(String writername) {
+		setContext("writer", writername);
+	}
 	static public synchronized void setPartitionContext(String partname) {
 		setContext("partition", partname);
 	}

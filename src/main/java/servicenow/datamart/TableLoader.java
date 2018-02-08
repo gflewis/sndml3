@@ -67,7 +67,8 @@ public class TableLoader implements Callable<WriterMetrics> {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		Log.clearContext();
-		Log.setTableContext(table);
+		Log.setTableContext(table.getName());
+		Log.setWriterContext(tableLoaderName);
 		LoaderAction action = config.getAction();
 		assert action != null;
 		logger.debug(Log.INIT, 
@@ -83,7 +84,6 @@ public class TableLoader implements Callable<WriterMetrics> {
 			writer = new TableDeleteWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		}
-		Log.setWriterContext(writer);
 		db.createMissingTable(table, sqlTableName);
 		writer.open();
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
