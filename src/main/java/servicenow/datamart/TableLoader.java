@@ -64,7 +64,8 @@ public class TableLoader implements Callable<WriterMetrics> {
 	}
 		
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
-		Log.setTableContext(table);
+		Log.setWriterContext(writer);
+		Log.resetContext(table, writer);
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		LoaderAction action = config.getAction();

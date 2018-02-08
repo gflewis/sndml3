@@ -34,7 +34,7 @@ public class DatePartReader extends RestTableReader {
 	
 	@Override
 	public void setLogContext() {
-		Log.setTableContext(this.table);
+		Log.resetContext(table, writer);
 		Log.setPartitionContext(partName);
 	}
 		

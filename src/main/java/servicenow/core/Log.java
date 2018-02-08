@@ -20,13 +20,23 @@ public class Log {
 		return org.slf4j.LoggerFactory.getLogger(name);
 	}
 	
+	static public synchronized void clearContext() {
+		org.slf4j.MDC.clear();
+	}
+	
 	static public synchronized void setGlobalContext() {
 		clearContext();
 		setContext("table", "_global_");
 	}
-	
-	static public synchronized void setTableContext(Table table) {
+
+	static public synchronized void resetContext(Table table, Writer writer) {
 		clearContext();
+		setTableContext(table);
+		setWriterContext(writer);
+	}
+	static public synchronized void setTableContext(Table table) {
+//		clearContext();
+		setSessionContext(table.getSession());
 		setTableContext(table.getName());
 	}
 	
@@ -56,10 +66,6 @@ public class Log {
 	
 	static private synchronized void setContext(String name, String value) {
 		org.slf4j.MDC.put(name, value);		
-	}
-	
-	static public synchronized void clearContext() {
-		org.slf4j.MDC.clear();
 	}
 	
 	@Deprecated
