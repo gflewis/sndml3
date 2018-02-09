@@ -46,6 +46,7 @@ public class JsonKeyedReader extends TableReader {
 		
 	@Override
 	public TableReader call() throws IOException, SQLException, InterruptedException {
+		setLogContext();
 		Writer writer = this.getWriter();
 		if (writer == null) throw new IllegalStateException("writer not defined");
 		if (allKeys == null) throw new IllegalStateException("not initialized");

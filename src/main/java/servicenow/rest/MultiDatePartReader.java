@@ -91,6 +91,7 @@ public class MultiDatePartReader extends RestTableReader {
 
 	@Override
 	public MultiDatePartReader call() throws IOException, SQLException, InterruptedException {
+		setLogContext();
 		if (threads > 1) {			
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads); 

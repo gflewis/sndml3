@@ -69,7 +69,7 @@ public abstract class TableWriter extends Writer {
 	
 	private synchronized void logProgress(String status) {
 		assert this.reader != null;
-		Log.setContext(table,  this);
+		reader.setLogContext();
 		ReaderMetrics readerMetrics = getReader().readerMetrics();
 		assert readerMetrics != null;
 		if (readerMetrics.getParent() == null) 
