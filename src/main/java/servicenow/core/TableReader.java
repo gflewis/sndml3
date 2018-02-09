@@ -35,7 +35,7 @@ public abstract class TableReader implements Callable<TableReader>{
 	}
 	
 	public void setLogContext() {
-		Log.resetContext(table, writer);
+		Log.setContext(table, writer);
 	}
 	
 	public ReaderMetrics readerMetrics() {

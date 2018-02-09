@@ -26,11 +26,10 @@ public class Log {
 	
 	static public synchronized void setGlobalContext() {
 		clearContext();
-		setTableContext("_global_");
-		setWriterContext("_global_");
+		setContextValue("context", "_global_");
 	}
 
-	static public synchronized void resetContext(Table table, Writer writer) {
+	static public synchronized void setContext(Table table, Writer writer) {
 		clearContext();
 		setTableContext(table);
 		setWriterContext(writer);
@@ -41,11 +40,12 @@ public class Log {
 	}
 	
 	static public synchronized void setSessionContext(Session session) {
-		setContext("user", session.getUsername());
+		setContextValue("user", session.getUsername());
 	}
 
 	static public synchronized void setTableContext(String tablename) {
-		setContext("table", tablename);
+		setContextValue("table", tablename);
+		setContextValue("context", tablename);
 	}
 	
 	static public synchronized void setWriterContext(Writer writer) {
@@ -53,63 +53,23 @@ public class Log {
 	}
 	
 	static public synchronized void setWriterContext(String writername) {
-		setContext("writer", writername);
+		setContextValue("writer", writername);
+		setContextValue("context", writername);
 	}
 	static public synchronized void setPartitionContext(String partname) {
-		setContext("partition", partname);
+		setContextValue("partition", partname);
 	}
 	
 	static public synchronized void setMethodContext(String method) {
-		setContext("method", method);
+		setContextValue("method", method);
 	}
 	
 	static public synchronized void setURIContext(URI uri) {
-		setContext("uri", uri.toString());
+		setContextValue("uri", uri.toString());
 	}
 	
-	static private synchronized void setContext(String name, String value) {
+	static private synchronized void setContextValue(String name, String value) {
 		org.slf4j.MDC.put(name, value);		
 	}
-	
-	@Deprecated
-	static private String getContext(String name) {
-		return org.slf4j.MDC.get(name);
-	}
-	
-	@Deprecated
-	static private boolean hasContext(String name) {
-		String context = getContext(name);
-		return context != null && context.length() > 0;
-	}
-	
-	static class MessageBuilder {
-		StringBuilder msg = new StringBuilder();
-		String lastSeparator = "";
-		public MessageBuilder(String text) {
-			if (text != null) msg.append(text);
-		}
-		public void addContext(String name, String separator) {
-			if (hasContext(name)) {
-				msg.append(lastSeparator);
-				msg.append(name + "=" + getContext(name));
-				lastSeparator = separator;
-			}
-		}
-		public String toString() { 
-			return msg.toString(); 
-		}
-	}
-	
-	@Deprecated
-	static public String getContextMessage() {
-		return getContextMessage("");
-	}
-	
-	@Deprecated
-	static public String getContextMessage(String message) {
-		MessageBuilder msg = new MessageBuilder(message);
-		msg.addContext("table",  " ");
-		msg.addContext("method",  " ");
-		return msg.toString();
-	}
+		
 }
