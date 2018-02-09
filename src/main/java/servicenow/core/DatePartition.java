@@ -32,7 +32,7 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 		DateTimeRange first = get(0);
 		DateTimeRange last = get(size() - 1);
 		return String.format("%s[interval=%s size=%d min=%s max=%s]", 
-				this.getClass().getName(), interval.toString(), size(), first.getStart(), last.getEnd());
+				this.getClass().getSimpleName(), interval.toString(), size(), first.getStart(), last.getEnd());
 	}
 	
 }
