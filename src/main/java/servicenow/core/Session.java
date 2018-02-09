@@ -113,8 +113,8 @@ public class Session {
 		return getInstance().getHost();
 	}
 
-	public Session validate() throws IOException, InterruptedException {
-		Table user = validate("sys_user");
+	public Session verify() throws IOException, InterruptedException {
+		Table user = verify("sys_user");
 		assert this.username != null;
 		Record profile = user.getRecord("user_name", this.username);
 		String timezone = profile.getValue("time_zone");
@@ -123,15 +123,15 @@ public class Session {
 		return this;
 	}
 	
-	public Table validate(String tablename) throws IOException, InterruptedException {
+	public Table verify(String tablename) throws IOException, InterruptedException {
 		Table table = this.table(tablename);
 		TableWSDL wsdl;
 		try {
 			wsdl = table.getWSDL();			
 		}
-		catch (Exception e) {
+		catch (IOException e) {
 			logger.error(Log.INIT, "Unable to access WSDL for table " + tablename);
-			throw new InsufficientRightsException(tablename, "WSDL");
+			throw e;
 		}
 		TableSchema schema = table.getSchema();
 		if (wsdl.getReadFieldNames().size() != schema.numFields())

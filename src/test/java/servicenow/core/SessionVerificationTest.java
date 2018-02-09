@@ -10,7 +10,7 @@ import servicenow.soap.TableWSDL;
 
 import static org.junit.Assert.*;
 
-public class SessionValidateTest {
+public class SessionVerificationTest {
 
 	Logger logger = TestingManager.getLogger(this.getClass());
 	
@@ -37,7 +37,7 @@ public class SessionValidateTest {
 		TableSchema schema = user.getSchema();
 		int schemaCount = schema.getFieldNames().size();
 		logger.info("schema fields=" + schemaCount);
-		session.validate();
+		session.verify();
 		assertEquals(wsdlCount, schemaCount);
 	}
 

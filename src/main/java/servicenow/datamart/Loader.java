@@ -46,7 +46,7 @@ public class Loader {
 		if (Globals.hasOptionValue("t")) {
 			// Single table load
 			String tablename = Globals.getOptionValue("t");
-			session.validate();
+			session.verify();
 			Table table = session.table(tablename);
 			Loader loader = new Loader(table);
 			loader.loadTables();
