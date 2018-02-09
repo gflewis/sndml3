@@ -26,7 +26,8 @@ public class Log {
 	
 	static public synchronized void setGlobalContext() {
 		clearContext();
-		setContext("table", "_global_");
+		setTableContext("_global_");
+		setWriterContext("_global_");
 	}
 
 	static public synchronized void resetContext(Table table, Writer writer) {
@@ -35,7 +36,6 @@ public class Log {
 		setWriterContext(writer);
 	}
 	static public synchronized void setTableContext(Table table) {
-//		clearContext();
 		setSessionContext(table.getSession());
 		setTableContext(table.getName());
 	}
