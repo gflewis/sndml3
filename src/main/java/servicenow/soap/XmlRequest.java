@@ -75,8 +75,9 @@ public class XmlRequest {
 			log.error(Log.RESPONSE, 
 				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
 			throw new NoContentException(uri);
-		}		
-		if ("text/html".equals(contentType) /* && responseText.contains("Hibernating") */)
+		}
+		// If we asked for XML and we got HTML, it must be an error page
+		if ("text/html".equals(contentType))
 			throw new InstanceUnavailableException(this.uri, responseText);
 		SAXBuilder parser = new SAXBuilder();
 		Document responseDoc = null;	

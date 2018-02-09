@@ -60,6 +60,7 @@ public class TableSchema extends Writer {
 		reader.setWriter(this);
 		reader.setBaseQuery(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
+		reader.setPageSize(1000);
 		reader.initialize();
 		try {
 			reader.call();
