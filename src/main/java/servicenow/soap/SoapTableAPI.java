@@ -14,7 +14,7 @@ public class SoapTableAPI extends TableAPI {
 	final SoapClient client;
 	TableWSDL wsdl = null;
 	
-	final Logger log = Log.logger(this.getClass());
+	final Logger logger = Log.logger(this.getClass());
 	
 	public SoapTableAPI(Table table) {
 		super(table);
@@ -46,7 +46,7 @@ public class SoapTableAPI extends TableAPI {
 		Element responseElement = client.executeRequest("getKeys", params, null, "getKeysResponse");
 		Namespace ns = responseElement.getNamespace();
 		int size = Integer.parseInt(responseElement.getChildText("count", ns));
-		log.trace(Log.RESPONSE, "getKeys returned " + size + " keys");
+		logger.trace(Log.RESPONSE, "getKeys returned " + size + " keys");
 		KeySet result = new KeySet();
 		if (size > 0) {
 			result.ensureCapacity(size);
@@ -66,6 +66,7 @@ public class SoapTableAPI extends TableAPI {
 	public Record getRecord(Key key) throws IOException {
 		Parameters params = new Parameters("sys_id", key.toString());
 		Element responseElement = client.executeRequest("get", params, null, "getResponse");
+		if (responseElement.getContentSize() == 0) return null;
 		Record rec = new XmlRecord(getTable(), responseElement);
 		return rec;		
 	}
@@ -89,7 +90,7 @@ public class SoapTableAPI extends TableAPI {
 		RecordList result = getRecords(fieldname, fieldvalue, displayValues);
 		int size = result.size();
 		String msg = String.format("get %s=%s returned %d records", fieldname, fieldvalue,size);
-		log.info(Log.RESPONSE, msg);
+		logger.info(Log.RESPONSE, msg);
 		if (size == 0) return null;
 		if (size > 1) throw new RowCountExceededException(getTable(), msg);
 		return result.get(0);

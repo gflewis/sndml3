@@ -3,6 +3,19 @@ package servicenow.core;
 import java.io.IOException;
 import java.net.URI;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,10 +51,20 @@ public abstract class TableAPI {
 		Log.setTableContext(table);
 		Log.setURIContext(uri);		
 	}
-		 	
+	
+	/**
+	 * Gets a record using the sys_id. 
+	 * If the record is not found then null is returned.
+	 * 
+	 * @param sys_id
+	 * @return Record if found otherwise null.
+	 * @throws IOException
+	 */
  	public abstract Record getRecord(Key sys_id) throws IOException;
- 	 	
+ 	
  	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
+ 	
+// 	public abstract Key insertRecord(Parameters fields) throws IOException;
 
  	public abstract TableReader getDefaultReader() throws IOException;
 
@@ -91,19 +114,107 @@ public abstract class TableAPI {
 		return result.get(0);
 	}
 
-	protected void checkResponseJSON(URI uri, JSONObject objResponse) throws IOException {
-		if (objResponse.has("error")) {
-			logger.error(Log.RESPONSE, objResponse.toString());
-			JSONObject error = objResponse.getJSONObject("error");
-			String errorMessage = error.has("message") ? 
-					error.getString("message").toLowerCase() : "";
-			if (errorMessage.startsWith("user not authorized") || 
-					errorMessage.startsWith("insufficient rights") ||
-					errorMessage.startsWith("no permission"))
-				throw new InsufficientRightsException(uri);
-			else 
-				throw new JsonResponseException(objResponse);
+	protected JSONObject getResponseJSON(URI uri, HttpMethod method, JSONObject requestObj) throws IOException {
+		String requestText = null;
+		if (requestObj != null) {
+			requestText = requestObj.toString();
 		}		
+		String responseText = getResponseText(uri, method, requestText);
+		JSONObject responseObj;
+		try {
+			responseObj = new JSONObject(responseText);
+		}
+		catch (org.json.JSONException e) {
+			throw new JsonResponseError(responseText);
+		}
+		if (responseObj.has("error")) {
+			logger.warn(Log.RESPONSE, responseObj.toString());
+		}
+		return responseObj;		
+	}
+	
+	protected String getResponseText(URI uri, HttpMethod method, String requestText) throws IOException {
+		HttpUriRequest request;
+		HttpEntity requestEntity = null;
+		if (requestText != null) {
+			requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
+		}
+		switch (method) {
+		case DELETE:
+			assert requestText == null;
+			HttpDelete httpDelete = new HttpDelete(uri);
+			request = httpDelete;
+			break;
+		case GET:
+			assert requestText == null;
+			HttpGet httpGet = new HttpGet(uri);
+			request = httpGet;
+			break;
+		case PATCH:
+			assert requestText != null;
+			HttpPatch httpPatch = new HttpPatch(uri);
+			httpPatch.setEntity(requestEntity);
+			httpPatch.setHeader("Content-Type", "application/json");
+			request = httpPatch;
+			break;
+		case POST:
+			assert requestText != null;
+			HttpPost httpPost = new HttpPost(uri);
+			httpPost.setEntity(requestEntity);
+			httpPost.setHeader("Content-Type", "application/json");
+			request = httpPost;
+			break;
+		case PUT:
+			assert requestText != null;
+			HttpPut httpPut = new HttpPut(uri);
+			httpPut.setEntity(requestEntity);
+			httpPut.setHeader("Content-Type", "application/json");
+			request = httpPut;
+			break;
+		default:
+			throw new AssertionError();
+		}
+		request.setHeader("Accept", "application/json");		
+		CloseableHttpResponse response = session.getClient().execute(request);		
+		StatusLine statusLine = response.getStatusLine();		
+		int statusCode = statusLine.getStatusCode();
+		HttpEntity responseEntity = response.getEntity();
+		Header contentTypeHeader = responseEntity.getContentType();
+		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
+		String responseText = EntityUtils.toString(responseEntity);
+		response.close();
+		int responseLen = responseText == null ? 0 : responseText.length();
+		logger.debug(Log.RESPONSE,
+				String.format("status=\"%s\" contentType=%s len=%d", 
+					statusLine, contentType, responseLen));
+		if (statusCode == 401 || statusCode == 403) {
+			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			throw new InsufficientRightsException(uri, requestText);
+		}
+		if (contentType == null) {
+			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			throw new NoContentException(uri, requestText);
+		}		
+		if ("text/html".equals(contentType))
+			throw new InstanceUnavailableException(request.getURI(), responseText);		
+		logger.trace(Log.RESPONSE, responseText);
+		return responseText;
+	}
+	
+	static protected String errorMessageLowerCase(JSONObject objResponse) {
+		if (!objResponse.has("error")) return null;
+		JSONObject error = objResponse.getJSONObject("error");
+		if (!error.has("message")) return null;
+		return error.getString("message").toLowerCase();
+	}
+		
+	protected void checkForInsufficientRights(URI uri, JSONObject objResponse) throws IOException {
+		String err = errorMessageLowerCase(objResponse);
+		if (err == null) return;
+		if (err.startsWith("user not authorized") ||
+				err.startsWith("insufficient rights") ||
+				err.startsWith("no permission"))
+			throw new InsufficientRightsException(uri);
 	}
 	
 }

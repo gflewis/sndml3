@@ -12,15 +12,15 @@ public class ServiceNowException extends IOException {
 	}
 	
 	public ServiceNowException(URI uri, String requestText) {
-		super(concat(uri.toString(), requestText));
+		super(join(uri.toString(), requestText));
 	}
 	
 	public ServiceNowException(String message) {
 		super(message);
 	}
 
-	private static String concat(String str1, String str2) {
-		if (str2 == null) return str1;
+	private static String join(String str1, String str2) {
+		if (str2 == null || str2.length() == 0) return str1;
 		return (str1 + "\n" + truncate(str2));
 	}
 	

@@ -40,7 +40,7 @@ public class JsonTableAPI extends TableAPI {
 		requestObj.put("sysparm_action",  "getKeys");
 		if (!EncodedQuery.isEmpty(query))
 			requestObj.put("sysparm_query", query.toString());
-		JSONObject responseObj = getResponseObject(requestObj);
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
 		assert responseObj.has("records");
 		KeySet keys = new KeySet(responseObj, "records");
 		return keys;
@@ -80,19 +80,22 @@ public class JsonTableAPI extends TableAPI {
 
 	private RecordList getResponseRecords(Parameters params) throws IOException {
 		JSONObject requestObj = params.toJSON();
-		JSONObject responseObj = getResponseObject(requestObj);
+		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.POST, requestObj);
 		assert responseObj.has("records");
 		return new RecordList(table, responseObj, "records");
 	}
 	
+	/*
 	private JSONObject getResponseObject(JSONObject requestObj) throws IOException {
 		String requestText = requestObj.toString();
 		logger.debug(Log.REQUEST, requestText);
 		HttpEntityEnclosingRequestBase request = new HttpPost(uri);
-		request.setHeader("Content-Type", "application/json");		
-		request.setHeader("Accept", "application/json");
 		HttpEntity requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
 		request.setEntity(requestEntity);
+		request.setHeader("Content-Type", "application/json");
+		return super.getResponseJSON(request, requestText);
+		
+		request.setHeader("Accept", "application/json");
 		CloseableHttpResponse response = session.getClient().execute(request);		
 		StatusLine statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
@@ -126,6 +129,7 @@ public class JsonTableAPI extends TableAPI {
 		response.close();
 		return responseObj;
 	}
+	*/
 
 	@Override
 	public TableReader getDefaultReader() throws IOException {

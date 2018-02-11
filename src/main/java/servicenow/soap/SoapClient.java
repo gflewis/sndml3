@@ -20,7 +20,7 @@ public class SoapClient {
 	final String uriPath;
 	
 	final Namespace nsTNS;
-	final Logger log = Log.logger(this.getClass());
+	final Logger logger = Log.logger(this.getClass());
 	
 	final static Namespace nsSoapEnv = 
 		Namespace.getNamespace("env", "http://schemas.xmlsoap.org/soap/envelope/");
@@ -62,7 +62,7 @@ public class SoapClient {
 		Log.setMethodContext(methodName);
 		Log.setURIContext(uri);
 		Element method = createXmlElement(methodName, docParams);
-		Document requestDoc = createSoapDocument(method);						
+		Document requestDoc = createSoapDocument(method);		
 		Document responseDoc = executeRequest(uri, requestDoc, methodName);
 		Element responseBody = responseDoc.getRootElement().getChild("Body", nsSoapEnv);
 		Element responseElement = responseBody.getChildren().get(0);
@@ -73,8 +73,12 @@ public class SoapClient {
 	}
 
 	public Document executeRequest(URI uri, Document requestDoc, String methodName) throws IOException {
+		if (logger.isTraceEnabled())
+			logger.trace(Log.REQUEST, XmlFormatter.format(requestDoc));
 		XmlRequest xmlRequest = new XmlRequest(session.getClient(), uri, requestDoc);
 		Document responseDoc = xmlRequest.execute();
+		if (logger.isTraceEnabled())
+			logger.trace(Log.RESPONSE, XmlFormatter.format(responseDoc));
 		return responseDoc;
 	}
 	

@@ -9,7 +9,10 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -53,7 +56,7 @@ public class RestTableAPI extends TableAPI {
 		String responseBody = EntityUtils.toString(response.getEntity());
 		logger.debug(Log.PROCESS, "getStats\n" + responseBody);
 		JSONObject obj = new JSONObject(responseBody);
-		checkResponseJSON(uri, obj);
+		checkForInsufficientRights(uri, obj);
 		JSONObject result = obj.getJSONObject("result").getJSONObject("stats");
 		stats.count = Integer.parseInt(result.getString("count"));
 		if (includeDates) {
@@ -69,6 +72,19 @@ public class RestTableAPI extends TableAPI {
 	
 	public Record getRecord(Key key) throws IOException {
 		URI uri = getURI("table", key, null);
+		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.GET, null);
+		checkForInsufficientRights(uri, responseObj);		
+		if (responseObj.has("error")) {
+			JSONObject errorObj = responseObj.getJSONObject("error");
+			String message = errorObj.getString("message");
+			if (message.equalsIgnoreCase("No record found")) return null;
+			throw new JsonResponseError(responseObj.toString());
+		}
+		JSONObject resultObj =  responseObj.getJSONObject("result");
+		if (resultObj == null) return null;
+		JsonRecord rec = new JsonRecord(this.table, resultObj);
+		return rec;
+		/*
 		JSONObject obj;
 		try {
 			obj = getResponseObject(uri);
@@ -83,6 +99,7 @@ public class RestTableAPI extends TableAPI {
 		if (result == null) return null;
 		JsonRecord rec = new JsonRecord(this.table, result);
 		return rec;
+		*/
 	}
 
 	public RecordList getRecords() throws IOException {
@@ -107,36 +124,37 @@ public class RestTableAPI extends TableAPI {
 	
 	public RecordList getRecords(Parameters params) throws IOException {		
 		URI uri = getURI("table", null, params);
-		JSONObject obj = getResponseObject(uri);
-		assert obj.has("result");
-		RecordList list = new RecordList(table, obj, "result");
+		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.GET, null);
+		checkForInsufficientRights(uri, responseObj);		
+		assert responseObj.has("result");
+		RecordList list = new RecordList(table, responseObj, "result");
 		return list;
 	}
 
+	public Key insertRecord(Parameters fields) throws IOException {
+		URI uri = getURI("table", null, null);
+		JSONObject requestObj = fields.toJSON();
+		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.PUT, requestObj);
+		checkForInsufficientRights(uri, responseObj);		
+		assert responseObj.has("result");
+		JSONObject resultObj = responseObj.getJSONObject("result");
+		String sys_id = resultObj.getString("sys_id");
+		Key key = new Key(sys_id);
+		return key;
+	}
+
+	/*
 	private JSONObject getResponseObject(URI uri) throws IOException {
 		setAPIContext(uri);
 		HttpGet request = new HttpGet(uri);
 		request.setHeader("Accept", "application/json");
+		return super.getResponseJSON(request,  null);
 		JSONObject objResponse = getResponseObject(uri, request);
 		checkResponseJSON(uri, objResponse);
-		return objResponse;		
+		return objResponse;
 	}
-	
-//	private void checkResponseObject(URI uri, JSONObject objResponse) throws IOException {
-//		if (objResponse.has("error")) {
-//			logger.error(Log.RESPONSE, objResponse.toString());
-//			JSONObject error = objResponse.getJSONObject("error");
-//			String errorMessage = error.has("message") ? 
-//					error.getString("message").toLowerCase() : "";
-//			if (errorMessage.startsWith("user not authorized") || 
-//					errorMessage.startsWith("insufficient rights") ||
-//					errorMessage.startsWith("no permission"))
-//				throw new InsufficientRightsException(uri);
-//			else 
-//				throw new JsonResponseException(objResponse);
-//		}		
-//	}
-	
+
+	/*
 	private JSONObject getResponseObject(URI uri, HttpRequestBase request) throws IOException {
 		CloseableHttpResponse response = getSession().getClient().execute(request);
 		HttpEntity responseEntity = response.getEntity();
@@ -156,6 +174,7 @@ public class RestTableAPI extends TableAPI {
 		response.close();
 		return obj;		
 	}
+	*/
 
 	@Override
 	public RestTableReader getDefaultReader() throws IOException {

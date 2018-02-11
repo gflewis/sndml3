@@ -2,6 +2,8 @@ package servicenow.core;
 
 import static org.junit.Assert.*;
 import java.io.IOException;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -49,6 +51,23 @@ public class GetRecordsTest {
 		Table tbl = session.table("sys_user");
 		RecordList recs = tbl.api().getRecords("name", "Zebra Elephant");
 		assertTrue(recs.size() == 0);
+	}
+	
+	@Test
+	public void getGoodKey() throws Exception {
+		String goodKey = TestingManager.getProperty("some_incident_sys_id");
+		Table tbl = session.table("incident");
+		Record rec = tbl.getRecord(new Key(goodKey));
+		assertNotNull(rec);
+		assertEquals(goodKey, rec.getValue("sys_id"));
+	}
+	
+	@Test 
+	public void testGetBadKey() throws Exception {
+		String badKey = "00000000000000000000000000000000";
+		Table tbl = session.table("incident");
+		Record rec = tbl.getRecord(new Key(badKey));
+		assertNull(rec);
 	}
 	
 }
