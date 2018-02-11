@@ -130,6 +130,14 @@ public class SoapTableAPI extends TableAPI {
 		return list;		
 	}
 
+	// TODO: This should return an InsertResponse 
+	public Key insertRecord(Parameters docParams) throws IOException {
+		Element responseElement = 
+			client.executeRequest("insert", docParams, null, "insertResponse");
+		String sys_id = responseElement.getChildText("sys_id");
+		return new Key(sys_id);		
+	}
+	
 	public TableReader getDefaultReader() throws IOException {
 		return new SoapKeyedReader(this.table);
 	}
