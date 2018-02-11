@@ -40,9 +40,9 @@ public class RestTableReader extends TableReader {
 	}
 	
 	public RestTableReader call() throws IOException, SQLException, InterruptedException {
-		setLogContext();
 		Writer writer = getWriter();
 		assert writer != null : "Writer not set";
+		setLogContext();
 		int rowCount = 0;
 		boolean finished = false;
 		if (statsEnabled && stats.count == 0) {

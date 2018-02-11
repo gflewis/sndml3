@@ -29,7 +29,7 @@ public class TableSchema extends Writer {
 	
 	protected TableSchema(Table table) 
 			throws IOException, 	InvalidTableNameException, InterruptedException {
-		super(table.getName() + ".schema");		
+		super("sys_dictionary." + table.getName());		
 		this.table = table;
 		this.session = table.session;
 		this.tablename = table.getName();
@@ -57,6 +57,7 @@ public class TableSchema extends Writer {
 			addEquals("active", "true");
 		
 		TableReader reader = dictionary.getDefaultReader();
+		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
 		reader.setWriter(this);
 		reader.setBaseQuery(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
@@ -68,7 +69,7 @@ public class TableSchema extends Writer {
 			throw new ServiceNowError(e);
 		}
 		
-		if (empty) {
+		if (this.empty) {
 			logger.error(Log.INIT, "Unable to read schema for: " + tablename +
 				" (check access controls for sys_dictionary and sys_db_object)");
 			if (tablename.equals("sys_db_object") || tablename.equals("sys_dictionary"))
@@ -96,6 +97,7 @@ public class TableSchema extends Writer {
 	
 	private String determineParentName() throws IOException {
 		if (tablename.startsWith("sys_")) return null;
+		Log.setContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
 		Record myRec = hierarchy.getRecord("name", this.tablename, false);
 		if (myRec == null) {
 			logger.error(Log.INIT, "Unable to read schema for: " + tablename +

@@ -67,8 +67,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		Log.clearContext();
-		Log.setTableContext(table.getName());
-		Log.setWriterContext(tableLoaderName);
+		Log.setContext(table, tableLoaderName);
+//		Log.setTableContext(table.getName());
+//		Log.setWriterContext(tableLoaderName);
 		LoaderAction action = config.getAction();
 		assert action != null;
 		logger.debug(Log.INIT, 

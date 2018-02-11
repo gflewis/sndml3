@@ -37,26 +37,8 @@ public abstract class TableWriter extends Writer {
 		writerMetrics.start();
 	}
 
-	/*
-	void insertRecord(Record rec) throws SQLException {
-		insertStmt.insert(rec);
-		metrics.incrementInserted();
-	}
-	
-	void updateRecord(Record rec) throws SQLException {
-		if (updateStmt.update(rec))
-			metrics.incrementUpdated();
-	}
-	
-	void deleteRecord(Key key) throws SQLException {
-		if (deleteStmt.deleteRecord(key))
-			metrics.incrementDeleted();
-	}
-	*/
-	
 	@Override
 	public synchronized void processRecords(RecordList recs) throws IOException, SQLException {
-		Log.setWriterContext(this);
 		writerMetrics.start();
 		for (Record rec : recs) {
 			writeRecord(rec);
@@ -80,5 +62,22 @@ public abstract class TableWriter extends Writer {
 	}
 
 	abstract void writeRecord(Record rec) throws SQLException;
-					
+
+	/*
+	void insertRecord(Record rec) throws SQLException {
+		insertStmt.insert(rec);
+		metrics.incrementInserted();
+	}
+	
+	void updateRecord(Record rec) throws SQLException {
+		if (updateStmt.update(rec))
+			metrics.incrementUpdated();
+	}
+	
+	void deleteRecord(Key key) throws SQLException {
+		if (deleteStmt.deleteRecord(key))
+			metrics.incrementDeleted();
+	}
+	*/
+	
 }

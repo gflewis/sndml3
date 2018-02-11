@@ -31,7 +31,7 @@ public class RestTableAPI extends TableAPI {
 		String path = "api/now/" + api + "/" + table.getName();
 		if (sys_id != null) path += "/" + sys_id.toString();
 		URI uri = session.getURI(path, params);
-		setContext(uri);
+		setAPIContext(uri);
 		logger.debug(Log.REQUEST, uri.toString());
 		return uri;
 	}
@@ -53,6 +53,7 @@ public class RestTableAPI extends TableAPI {
 		String responseBody = EntityUtils.toString(response.getEntity());
 		logger.debug(Log.PROCESS, "getStats\n" + responseBody);
 		JSONObject obj = new JSONObject(responseBody);
+		checkResponseJSON(uri, obj);
 		JSONObject result = obj.getJSONObject("result").getJSONObject("stats");
 		stats.count = Integer.parseInt(result.getString("count"));
 		if (includeDates) {
@@ -113,20 +114,28 @@ public class RestTableAPI extends TableAPI {
 	}
 
 	private JSONObject getResponseObject(URI uri) throws IOException {
-		setContext(uri);
+		setAPIContext(uri);
 		HttpGet request = new HttpGet(uri);
 		request.setHeader("Accept", "application/json");
 		JSONObject objResponse = getResponseObject(uri, request);
-		if (objResponse.has("error")) {
-			JSONObject error = objResponse.getJSONObject("error");
-			String errorMessage = error.has("message") ? error.getString("message") : "";
-			if (errorMessage.equalsIgnoreCase("User Not Authorized"))
-				throw new InsufficientRightsException(uri);
-			else 
-				throw new JsonResponseException(objResponse);
-		}
+		checkResponseJSON(uri, objResponse);
 		return objResponse;		
 	}
+	
+//	private void checkResponseObject(URI uri, JSONObject objResponse) throws IOException {
+//		if (objResponse.has("error")) {
+//			logger.error(Log.RESPONSE, objResponse.toString());
+//			JSONObject error = objResponse.getJSONObject("error");
+//			String errorMessage = error.has("message") ? 
+//					error.getString("message").toLowerCase() : "";
+//			if (errorMessage.startsWith("user not authorized") || 
+//					errorMessage.startsWith("insufficient rights") ||
+//					errorMessage.startsWith("no permission"))
+//				throw new InsufficientRightsException(uri);
+//			else 
+//				throw new JsonResponseException(objResponse);
+//		}		
+//	}
 	
 	private JSONObject getResponseObject(URI uri, HttpRequestBase request) throws IOException {
 		CloseableHttpResponse response = getSession().getClient().execute(request);

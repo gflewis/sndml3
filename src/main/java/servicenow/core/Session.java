@@ -38,7 +38,7 @@ public class Session {
 	public Session(Instance instance, String username, String password) {
 		this(instance);
 		this.setCredentials(username, password);
-		logger.debug(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
+		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
 	}
 
 	public Session(Instance instance) {
@@ -46,7 +46,7 @@ public class Session {
 		this.instance = instance;
 		this.properties = null;
 		this.authScope = new AuthScope(instance.getHost());		
-		logger.debug(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
+		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
 	}
 
 	public Session(Properties props) {
@@ -54,7 +54,7 @@ public class Session {
 		this.instance = new Instance(getProperty("instance"));
 		this.authScope = new AuthScope(instance.getHost());
 		this.setCredentials(getProperty("username"), getProperty("password"));
-		logger.debug(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
+		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
 	}
 
 	/**

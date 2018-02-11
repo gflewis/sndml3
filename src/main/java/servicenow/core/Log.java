@@ -26,17 +26,17 @@ public class Log {
 	
 	static public synchronized void setGlobalContext() {
 		clearContext();
-		setContextValue("context", "_global_");
+		setContextValue("context", "GLOBAL");
 	}
 
-	static public synchronized void setContext(Table table, Writer writer) {
+	static public synchronized void setContext(Table table, String context) {
 		clearContext();
-		setTableContext(table);
-		setWriterContext(writer);
+		setContextValue("table", table.getName());
+		setContextValue("context", context);
 	}
+	
 	static public synchronized void setTableContext(Table table) {
 		setSessionContext(table.getSession());
-		setTableContext(table.getName());
 	}
 	
 	static public synchronized void setSessionContext(Session session) {
@@ -45,17 +45,8 @@ public class Log {
 
 	static public synchronized void setTableContext(String tablename) {
 		setContextValue("table", tablename);
-		setContextValue("context", tablename);
 	}
-	
-	static public synchronized void setWriterContext(Writer writer) {
-		setWriterContext(writer.getName());
-	}
-	
-	static public synchronized void setWriterContext(String writername) {
-		setContextValue("writer", writername);
-		setContextValue("context", writername);
-	}
+		
 	static public synchronized void setPartitionContext(String partname) {
 		setContextValue("partition", partname);
 	}

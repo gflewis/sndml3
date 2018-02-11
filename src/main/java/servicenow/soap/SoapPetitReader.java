@@ -52,7 +52,7 @@ public class SoapPetitReader extends TableReader {
 	@Override
 	public void initialize() {
 		assert writer != null : "Writer not initialized";
-		Log.setContext(table, writer);
+		Log.setContext(table, writer.getWriterName());
 		writer.setReader(this);		
 	}
 

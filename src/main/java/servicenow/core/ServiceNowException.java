@@ -12,14 +12,20 @@ public class ServiceNowException extends IOException {
 	}
 	
 	public ServiceNowException(URI uri, String requestText) {
-		super(uri.toString() + "\n" + truncate(requestText));
+		super(concat(uri.toString(), requestText));
 	}
 	
 	public ServiceNowException(String message) {
 		super(message);
 	}
 
-	public static String truncate(String message) {
+	private static String concat(String str1, String str2) {
+		if (str2 == null) return str1;
+		return (str1 + "\n" + truncate(str2));
+	}
+	
+	protected static String truncate(String message) {
+		if (message == null) return null;
 		final int limit = 200;
 		if (message.length() < limit) 
 			return message;

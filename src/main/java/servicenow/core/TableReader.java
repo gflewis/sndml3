@@ -34,8 +34,11 @@ public abstract class TableReader implements Callable<TableReader>{
 		writer.setReader(this);
 	}
 	
+	/*
+	 * This method may be overridden, e.g. by DatePartReader
+	 */
 	public void setLogContext() {
-		Log.setContext(table, writer);
+		Log.setContext(table, writer.getWriterName());
 	}
 	
 	public ReaderMetrics readerMetrics() {

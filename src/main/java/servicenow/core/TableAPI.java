@@ -3,6 +3,7 @@ package servicenow.core;
 import java.io.IOException;
 import java.net.URI;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public abstract class TableAPI {
 		return table.getName();
 	}
 
-	protected void setContext(URI uri) {
+	protected void setAPIContext(URI uri) {
 		Log.setSessionContext(session);
 		Log.setTableContext(table);
 		Log.setURIContext(uri);		
@@ -89,5 +90,20 @@ public abstract class TableAPI {
 		if (size > 1) throw new RowCountExceededException(getTable(), msg);
 		return result.get(0);
 	}
-	 	
+
+	protected void checkResponseJSON(URI uri, JSONObject objResponse) throws IOException {
+		if (objResponse.has("error")) {
+			logger.error(Log.RESPONSE, objResponse.toString());
+			JSONObject error = objResponse.getJSONObject("error");
+			String errorMessage = error.has("message") ? 
+					error.getString("message").toLowerCase() : "";
+			if (errorMessage.startsWith("user not authorized") || 
+					errorMessage.startsWith("insufficient rights") ||
+					errorMessage.startsWith("no permission"))
+				throw new InsufficientRightsException(uri);
+			else 
+				throw new JsonResponseException(objResponse);
+		}		
+	}
+	
 }

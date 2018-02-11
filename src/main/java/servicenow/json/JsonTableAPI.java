@@ -34,7 +34,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 		
 	public KeySet getKeys(EncodedQuery query) throws IOException {
-		setContext(uri);
+		setAPIContext(uri);
 		Log.setMethodContext("getKeys");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action",  "getKeys");
@@ -47,7 +47,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public Record getRecord(Key sys_id) throws IOException {
-		setContext(uri);
+		setAPIContext(uri);
 		Log.setMethodContext("get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
@@ -72,7 +72,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public RecordList getRecords(Parameters params) throws IOException {
-		setContext(uri);
+		setAPIContext(uri);
 		params.add("sysparm_action", "getRecords");
 		Log.setMethodContext("getRecords");
 		return getResponseRecords(params);
@@ -122,14 +122,7 @@ public class JsonTableAPI extends TableAPI {
 		catch (org.json.JSONException e) {
 			throw new JsonResponseError(responseText);
 		}
-		if (responseObj.has("error")) {
-			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
-			String errorMessage = responseObj.getString("error");
-			if (errorMessage.toLowerCase().startsWith("insufficient rights"))
-				throw new InsufficientRightsException(uri, requestText);
-			else 
-				throw new JsonResponseException(responseObj);
-		}
+		checkResponseJSON(uri, responseObj);
 		response.close();
 		return responseObj;
 	}
