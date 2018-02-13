@@ -46,6 +46,7 @@ public abstract class TableAPI {
 		return table.getName();
 	}
 
+	@Deprecated
 	protected void setAPIContext(URI uri) {
 		Log.setSessionContext(session);
 		Log.setTableContext(table);
@@ -64,7 +65,7 @@ public abstract class TableAPI {
  	
  	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
  	
-// 	public abstract Key insertRecord(Parameters fields) throws IOException;
+ 	public abstract InsertResponse insertRecord(Parameters fields) throws IOException;
 
  	public abstract TableReader getDefaultReader() throws IOException;
 
@@ -133,10 +134,15 @@ public abstract class TableAPI {
 		return responseObj;		
 	}
 	
-	protected String getResponseText(URI uri, HttpMethod method, String requestText) throws IOException {
+	protected String getResponseText(URI uri, HttpMethod method, String requestText) throws IOException {		
+		Log.setSessionContext(session);
+		Log.setTableContext(table);
+		Log.setURIContext(uri);		
 		HttpUriRequest request;
 		HttpEntity requestEntity = null;
+		logger.debug(Log.REQUEST, method.name() + " " + uri.toURL());
 		if (requestText != null) {
+			if (logger.isTraceEnabled()) logger.trace(Log.REQUEST, requestText);
 			requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
 		}
 		switch (method) {
@@ -174,7 +180,7 @@ public abstract class TableAPI {
 		default:
 			throw new AssertionError();
 		}
-		request.setHeader("Accept", "application/json");		
+		request.setHeader("Accept", "application/json");
 		CloseableHttpResponse response = session.getClient().execute(request);		
 		StatusLine statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();

@@ -4,7 +4,7 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import org.json.JSONWriter;
 
-public abstract class Record {
+public abstract class Record implements InsertResponse {
 
 	protected Table table;
 
@@ -56,6 +56,13 @@ public abstract class Record {
 		String fieldvalue = getValue(fieldname);
 		if (fieldvalue==null) return null;
 		return new Key(fieldvalue);
+	}
+
+	/**
+	 * Return number if it exists otherwise null
+	 */
+	public String getNumber() {
+		return getValue("number");
 	}
 	
 	/**

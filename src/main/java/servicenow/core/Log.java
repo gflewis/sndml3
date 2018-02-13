@@ -36,6 +36,7 @@ public class Log {
 	}
 	
 	static public synchronized void setTableContext(Table table) {
+		setTableContext(table.getName());
 		setSessionContext(table.getSession());
 	}
 	

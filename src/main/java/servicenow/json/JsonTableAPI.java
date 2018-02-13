@@ -78,13 +78,19 @@ public class JsonTableAPI extends TableAPI {
 		return getResponseRecords(params);
 	}
 
+	public InsertResponse insertRecord(Parameters fields) throws IOException {
+		setAPIContext(uri);
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, fields.toJSON());
+		return new JsonRecord(this.table, responseObj);
+	}
+	
 	private RecordList getResponseRecords(Parameters params) throws IOException {
 		JSONObject requestObj = params.toJSON();
 		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.POST, requestObj);
 		assert responseObj.has("records");
 		return new RecordList(table, responseObj, "records");
 	}
-	
+		
 	/*
 	private JSONObject getResponseObject(JSONObject requestObj) throws IOException {
 		String requestText = requestObj.toString();

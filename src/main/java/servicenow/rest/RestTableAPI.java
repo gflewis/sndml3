@@ -34,8 +34,8 @@ public class RestTableAPI extends TableAPI {
 		String path = "api/now/" + api + "/" + table.getName();
 		if (sys_id != null) path += "/" + sys_id.toString();
 		URI uri = session.getURI(path, params);
-		setAPIContext(uri);
-		logger.debug(Log.REQUEST, uri.toString());
+//		setAPIContext(uri);
+//		logger.debug(Log.REQUEST, uri.toString());
 		return uri;
 	}
 		
@@ -84,22 +84,6 @@ public class RestTableAPI extends TableAPI {
 		if (resultObj == null) return null;
 		JsonRecord rec = new JsonRecord(this.table, resultObj);
 		return rec;
-		/*
-		JSONObject obj;
-		try {
-			obj = getResponseObject(uri);
-		}
-		catch (JsonResponseException e) {
-			JSONObject err = e.getObject();
-			String msg = err.getString("message");
-			if (msg.toLowerCase().equals("no record found")) return null;
-			throw new JsonResponseError(err.toString());
-		}
-		JSONObject result =  (JSONObject) obj.get("result");
-		if (result == null) return null;
-		JsonRecord rec = new JsonRecord(this.table, result);
-		return rec;
-		*/
 	}
 
 	public RecordList getRecords() throws IOException {
@@ -124,58 +108,31 @@ public class RestTableAPI extends TableAPI {
 	
 	public RecordList getRecords(Parameters params) throws IOException {		
 		URI uri = getURI("table", null, params);
-		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.GET, null);
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.GET, null);
 		checkForInsufficientRights(uri, responseObj);		
 		assert responseObj.has("result");
 		RecordList list = new RecordList(table, responseObj, "result");
 		return list;
 	}
 
-	public Key insertRecord(Parameters fields) throws IOException {
+	public InsertResponse insertRecord(Parameters fields) throws IOException {
 		URI uri = getURI("table", null, null);
 		JSONObject requestObj = fields.toJSON();
-		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.PUT, requestObj);
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
 		checkForInsufficientRights(uri, responseObj);		
 		assert responseObj.has("result");
 		JSONObject resultObj = responseObj.getJSONObject("result");
-		String sys_id = resultObj.getString("sys_id");
-		Key key = new Key(sys_id);
-		return key;
+		JsonRecord rec = new JsonRecord(this.table, resultObj);
+		return rec;
 	}
 
-	/*
-	private JSONObject getResponseObject(URI uri) throws IOException {
-		setAPIContext(uri);
-		HttpGet request = new HttpGet(uri);
-		request.setHeader("Accept", "application/json");
-		return super.getResponseJSON(request,  null);
-		JSONObject objResponse = getResponseObject(uri, request);
-		checkResponseJSON(uri, objResponse);
-		return objResponse;
+	
+	public boolean deleteRecord(Key key) throws IOException {
+		URI uri = getURI("table", key, null);
+		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.DELETE, null);
+		return true;
 	}
-
-	/*
-	private JSONObject getResponseObject(URI uri, HttpRequestBase request) throws IOException {
-		CloseableHttpResponse response = getSession().getClient().execute(request);
-		HttpEntity responseEntity = response.getEntity();
-		Header contentTypeHeader = responseEntity.getContentType();
-		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
-		String responseBody = EntityUtils.toString(responseEntity);
-		if ("text/html".equals(contentType))
-			throw new InstanceUnavailableException(uri, responseBody);
-		logger.trace(Log.RESPONSE, responseBody);
-		JSONObject obj;
-		try {
-			obj = new JSONObject(responseBody);
-		}
-		catch (org.json.JSONException e) {
-			throw new JsonResponseError(responseBody);
-		}
-		response.close();
-		return obj;		
-	}
-	*/
-
+	
 	@Override
 	public RestTableReader getDefaultReader() throws IOException {
 		return new RestTableReader(this.table);
