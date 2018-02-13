@@ -4,15 +4,6 @@ import servicenow.core.*;
 
 import java.io.IOException;
 import java.net.URI;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -34,7 +25,6 @@ public class JsonTableAPI extends TableAPI {
 	}
 		
 	public KeySet getKeys(EncodedQuery query) throws IOException {
-		setAPIContext(uri);
 		Log.setMethodContext("getKeys");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action",  "getKeys");
@@ -47,12 +37,14 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public Record getRecord(Key sys_id) throws IOException {
-		setAPIContext(uri);
 		Log.setMethodContext("get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
 		params.add("sysparm_sys_id",  sys_id.toString());
-		RecordList recs = getResponseRecords(params);
+		JSONObject requestObj = params.toJSON();		
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
+		assert responseObj.has("records");
+		RecordList recs = new RecordList(table, responseObj, "records");
 		assert recs != null;
 		if (recs.size() == 0) return null;
 		return recs.get(0);
@@ -72,70 +64,38 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public RecordList getRecords(Parameters params) throws IOException {
-		setAPIContext(uri);
-		params.add("sysparm_action", "getRecords");
 		Log.setMethodContext("getRecords");
-		return getResponseRecords(params);
-	}
-
-	public InsertResponse insertRecord(Parameters fields) throws IOException {
-		setAPIContext(uri);
-		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, fields.toJSON());
-		return new JsonRecord(this.table, responseObj);
-	}
-	
-	private RecordList getResponseRecords(Parameters params) throws IOException {
 		JSONObject requestObj = params.toJSON();
-		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.POST, requestObj);
+		requestObj.put("sysparm_action", "getRecords");
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
 		assert responseObj.has("records");
 		return new RecordList(table, responseObj, "records");
 	}
-		
+
 	/*
-	private JSONObject getResponseObject(JSONObject requestObj) throws IOException {
-		String requestText = requestObj.toString();
-		logger.debug(Log.REQUEST, requestText);
-		HttpEntityEnclosingRequestBase request = new HttpPost(uri);
-		HttpEntity requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
-		request.setEntity(requestEntity);
-		request.setHeader("Content-Type", "application/json");
-		return super.getResponseJSON(request, requestText);
-		
-		request.setHeader("Accept", "application/json");
-		CloseableHttpResponse response = session.getClient().execute(request);		
-		StatusLine statusLine = response.getStatusLine();		
-		int statusCode = statusLine.getStatusCode();
-		HttpEntity responseEntity = response.getEntity();
-		Header contentTypeHeader = responseEntity.getContentType();
-		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
-		String responseText = EntityUtils.toString(responseEntity);
-		int responseLen = responseText == null ? 0 : responseText.length();
-		logger.debug(Log.RESPONSE,
-				String.format("status=\"%s\" contentType=%s len=%d", 
-					statusLine, contentType, responseLen));
-		if (statusCode == 401 || statusCode == 403) {
-			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
-			throw new InsufficientRightsException(uri, requestText);
-		}
-		if (contentType == null) {
-			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
-			throw new NoContentException(uri, requestText);
-		}		
-		if ("text/html".equals(contentType))
-			throw new InstanceUnavailableException(this.uri, responseText);		
-		logger.trace(Log.RESPONSE, responseText);
-		JSONObject responseObj;
-		try {
-			responseObj = new JSONObject(responseText);
-		}
-		catch (org.json.JSONException e) {
-			throw new JsonResponseError(responseText);
-		}
-		checkResponseJSON(uri, responseObj);
-		response.close();
-		return responseObj;
+	private RecordList getResponseRecords(Parameters params) throws IOException {
+		JSONObject requestObj = params.toJSON();
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
+		assert responseObj.has("records");
+		return new RecordList(table, responseObj, "records");
 	}
 	*/
+		
+	public InsertResponse insertRecord(Parameters fields) throws IOException {
+		Log.setMethodContext("insert");
+		JSONObject requestObj = fields.toJSON();
+		requestObj.put("sysparm_action", "insert");
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
+		return new JsonRecord(this.table, responseObj);
+	}
+	
+	public void deleteRecord(Key key) throws IOException {
+		Log.setMethodContext("deleteRecord");
+		JSONObject requestObj = new JSONObject(); 
+		requestObj.put("sysparm_action", "getRecords");
+		requestObj.put("sysparm_sys_id",  key.toString());
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);		
+	}
 
 	@Override
 	public TableReader getDefaultReader() throws IOException {
