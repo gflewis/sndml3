@@ -4,6 +4,8 @@ import servicenow.core.*;
 
 import java.io.IOException;
 import java.net.URI;
+
+import org.apache.commons.lang3.NotImplementedException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -71,30 +73,34 @@ public class JsonTableAPI extends TableAPI {
 		assert responseObj.has("records");
 		return new RecordList(table, responseObj, "records");
 	}
-
-	/*
-	private RecordList getResponseRecords(Parameters params) throws IOException {
-		JSONObject requestObj = params.toJSON();
-		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
-		assert responseObj.has("records");
-		return new RecordList(table, responseObj, "records");
-	}
-	*/
 		
 	public InsertResponse insertRecord(Parameters fields) throws IOException {
 		Log.setMethodContext("insert");
 		JSONObject requestObj = fields.toJSON();
 		requestObj.put("sysparm_action", "insert");
 		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
-		return new JsonRecord(this.table, responseObj);
+		RecordList list = new RecordList(table, responseObj, "records");
+		assert list.size() > 0;
+		assert list.size() == 1;
+		return list.get(0);
 	}
 	
-	public void deleteRecord(Key key) throws IOException {
+	public boolean deleteRecord(Key key) throws IOException {
 		Log.setMethodContext("deleteRecord");
 		JSONObject requestObj = new JSONObject(); 
-		requestObj.put("sysparm_action", "getRecords");
+		requestObj.put("sysparm_action", "deleteRecord");
 		requestObj.put("sysparm_sys_id",  key.toString());
-		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);		
+		JSONObject responseObj = getResponseJSON(uri, HttpMethod.POST, requestObj);
+		RecordList list = new RecordList(table, responseObj, "records");
+		if (list.size() == 0) return false;
+		if (list.size() > 1) throw new JsonResponseException(responseObj);
+		if (list.get(0).getKey().equals(key)) return true;
+		throw new JsonResponseException(responseObj);
+	}
+
+	public void updateRecord(Key key, Parameters fields) throws IOException {
+		// TODO Auto-generated method stub
+		throw new NotImplementedException("updateRecord");		
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package servicenow.core;
 
 import java.net.URI;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Log {
 
 	static public final org.slf4j.Marker INIT     = org.slf4j.MarkerFactory.getMarker("INIT");
@@ -63,5 +65,28 @@ public class Log {
 	static private synchronized void setContextValue(String name, String value) {
 		org.slf4j.MDC.put(name, value);		
 	}
-		
+
+	public static String join(URI uri, String requestText) {
+		StringBuilder result = new StringBuilder(uri.toString());
+		if (requestText != null) {
+			result.append("\n");
+			result.append(requestText);
+		}
+		return result.toString();
+	}
+	
+	public static String joinLines(String str1, String str2) {
+		if (str2 == null || str2.length() == 0) return str1;
+		return (str1 + "\n" + truncate(str2));
+	}
+	
+	public static String truncate(String message) {
+		final int default_limit = 300;
+		return truncate(message, default_limit);
+	}
+	
+	public static String truncate(String message, int limit) {
+		return StringUtils.abbreviate(message,  limit);
+	}
+	
 }

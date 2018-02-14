@@ -3,7 +3,11 @@ package servicenow.soap;
 import java.io.IOException;
 import java.net.URI;
 
+import org.jdom2.Element;
+
+import servicenow.core.Log;
 import servicenow.core.Table;
+import servicenow.core.XmlFormatter;
 
 /**
  * Exception thrown when there is an undetermined problem with a SOAP response.
@@ -20,8 +24,14 @@ public class SoapResponseException extends IOException {
 		super(uri.toString());
 	}
 	
-	SoapResponseException(Table table, String message) {
-		super("table=" + table.getName() + " " + message);
+	SoapResponseException(Table table, String method, String message, Element responseElement) {
+		super(Log.joinLines(
+				String.format("table=%s method=%s %s", table.getName(), method, message), 
+				XmlFormatter.format(responseElement)));
+	}
+	
+	SoapResponseException(String tablename, String message) {
+		super("table=" + tablename + " " + message);
 	}
 	
 	SoapResponseException(Table table, Exception cause, String response) {

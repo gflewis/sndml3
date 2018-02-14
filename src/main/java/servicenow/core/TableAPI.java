@@ -66,6 +66,10 @@ public abstract class TableAPI {
  	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
  	
  	public abstract InsertResponse insertRecord(Parameters fields) throws IOException;
+ 	
+ 	public abstract void updateRecord(Key key, Parameters fields) throws IOException;
+ 	
+ 	public abstract boolean deleteRecord(Key key) throws IOException;
 
  	public abstract TableReader getDefaultReader() throws IOException;
 
@@ -121,6 +125,10 @@ public abstract class TableAPI {
 			requestText = requestObj.toString();
 		}		
 		String responseText = getResponseText(uri, method, requestText);
+		if (responseText == null) {
+			// Success - No Content
+			return null;
+		}
 		JSONObject responseObj;
 		try {
 			responseObj = new JSONObject(responseText);
@@ -185,25 +193,35 @@ public abstract class TableAPI {
 		StatusLine statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
 		HttpEntity responseEntity = response.getEntity();
-		Header contentTypeHeader = responseEntity.getContentType();
-		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
-		String responseText = EntityUtils.toString(responseEntity);
+		String contentType = null;
+		String responseText = null;
+		if (responseEntity != null) {
+			Header contentTypeHeader = responseEntity.getContentType();
+			if (contentTypeHeader != null) contentType = contentTypeHeader.getValue();
+			responseText = EntityUtils.toString(responseEntity);			
+		}
 		response.close();
 		int responseLen = responseText == null ? 0 : responseText.length();
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
 					statusLine, contentType, responseLen));
+		logger.trace(Log.RESPONSE, responseText);
+		if (statusCode == 204) {
+			// Success - No Content
+			return null;
+		}
 		if (statusCode == 401 || statusCode == 403) {
-			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			logger.error(Log.REQUEST, Log.join(uri, requestText));
+			logger.error(Log.RESPONSE, statusLine.toString());
 			throw new InsufficientRightsException(uri, requestText);
 		}
 		if (contentType == null) {
-			logger.error(Log.RESPONSE, String.format("%s\nREQUEST:\n%s\n", statusLine, requestText));
+			logger.error(Log.REQUEST, Log.join(uri, requestText));
+			logger.error(Log.RESPONSE, statusLine.toString());
 			throw new NoContentException(uri, requestText);
 		}		
 		if ("text/html".equals(contentType))
 			throw new InstanceUnavailableException(request.getURI(), responseText);		
-		logger.trace(Log.RESPONSE, responseText);
 		return responseText;
 	}
 	
@@ -217,9 +235,9 @@ public abstract class TableAPI {
 	protected void checkForInsufficientRights(URI uri, JSONObject objResponse) throws IOException {
 		String err = errorMessageLowerCase(objResponse);
 		if (err == null) return;
-		if (err.startsWith("user not authorized") ||
-				err.startsWith("insufficient rights") ||
-				err.startsWith("no permission"))
+		if (err.contains("not authorized") ||
+				err.contains("insufficient rights") ||
+				err.contains("no permission"))
 			throw new InsufficientRightsException(uri);
 	}
 	

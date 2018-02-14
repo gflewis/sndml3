@@ -42,6 +42,7 @@ public class XmlFormatter {
 	 * Returns a JDOM Element formatted as an XML string with the option of raw or pretty.
 	 */
 	public static String format(Element element, boolean pretty) {
+		if (element == null) return null;
 		XMLOutputter formatter = pretty ? 
 			prettyFormatter.get() : rawFormatter.get();
 		return formatter.outputString(element);		
@@ -51,6 +52,7 @@ public class XmlFormatter {
 	 * Returns a JDOM Document formatted as an XML string with the option of raw or pretty.
 	 */
 	public static String format(Document document, boolean pretty) {
+		if (document == null) return null;
 		XMLOutputter formatter = pretty ? 
 			prettyFormatter.get() : rawFormatter.get();
 		return formatter.outputString(document);				

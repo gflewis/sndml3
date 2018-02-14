@@ -1,13 +1,14 @@
 package servicenow.soap;
 
+import servicenow.core.*;
+
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
-
-import servicenow.core.*;
 
 public class SoapTableAPI extends TableAPI {
 
@@ -52,10 +53,11 @@ public class SoapTableAPI extends TableAPI {
 			result.ensureCapacity(size);
 			String listStr = responseElement.getChildText("sys_id", ns);
 			String list[] = listStr.split(",");
-			if (list.length != size)
-				throw new SoapResponseException(this.table, 
-					"getKeys expected: " + size + ", found=" + list.length + "\n" +
-					XmlFormatter.format(responseElement));
+			if (list.length != size) {
+				logger.error(Log.RESPONSE, XmlFormatter.format(responseElement));
+				throw new SoapResponseException(this.table, "getKeys",
+					"expected: " + size + ", found=" + list.length, responseElement);
+			}
 			for (int i = 0; i < list.length; ++i) {
 				result.add(new Key(list[i]));
 			}
@@ -136,7 +138,25 @@ public class SoapTableAPI extends TableAPI {
 		Record rec = new XmlRecord(getTable(), responseElement);
 		return rec;
 	}
+
+	public void updateRecord(Key key, Parameters fields) throws IOException {
+		// TODO Auto-generated method stub
+		throw new NotImplementedException("updateRecord");		
+	}
 	
+	public boolean deleteRecord(Key key) throws IOException {
+		Parameters docParams = new Parameters("sys_id", key.toString());
+		Element responseElement =
+			client.executeRequest("deleteRecord", docParams, null, "deleteRecordResponse");
+		Element countElement = responseElement.getChild("count");
+		int count = Integer.parseInt(countElement.getText());
+		if (count == 0) return false;
+		if (count == 1) return true;
+		logger.error(Log.RESPONSE, XmlFormatter.format(responseElement));
+		throw new SoapResponseException(this.table, "deleteRecord", 
+				"element \"count\" not found", responseElement);
+	}
+
 	public TableReader getDefaultReader() throws IOException {
 		return new SoapKeyedReader(this.table);
 	}

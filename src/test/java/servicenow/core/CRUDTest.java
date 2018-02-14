@@ -16,8 +16,8 @@ public class CRUDTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-//		return new String[] {"mydevjson", "mydevsoap", "mydevrest"};
-		return new String[] {"mydevrest"};
+		return new String[] {"mydevjson", "mydevsoap", "mydevrest"};
+//		return new String[] {"mydevsoap"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -27,20 +27,21 @@ public class CRUDTest {
 	public CRUDTest(String profile) throws IOException {
 		this.profile = profile;
 		TestingManager.loadProfile(profile);
-		session = new Session(TestingManager.getProperties());
+		session = TestingManager.getSession();
 	}
 	
 	@Test
 	public void testInsertDelete() throws Exception {
 		Table tbl = session.table("incident");
+		TableAPI api = tbl.api();
 	    FieldValues values = new FieldValues();
 	    values.put("short_description", "This is a test");
 	    values.put("cmdb_ci",  TestingManager.getProperty("some_ci"));
-	    Key key = tbl.api().insertRecord(values).getKey();
+	    Key key = api.insertRecord(values).getKey();
 	    logger.info("inserted " + key);
 	    assertNotNull(key);
-//	    assertTrue("Delete record just inserted", tbl.deleteRecord(key));
-//	    assertFalse("Delete non-existent record", tbl.deleteRecord(key));
+	    assertTrue("Delete record just inserted", api.deleteRecord(key));
+	    assertFalse("Delete non-existent record", api.deleteRecord(key));
 	}
 
 	

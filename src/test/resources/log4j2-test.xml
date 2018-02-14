@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
   <Appenders>
-    <Console name="Console">
-      <ThresholdFilter level="debug" />
-      <PatternLayout>
-        <Pattern>%d{HH:mm:ss} %level %logger %X{table} %marker: %msg%n</Pattern>  
-      </PatternLayout>
-    </Console>
     <File name="File" fileName="/tmp/log/sndml3.log" append="false">
       <ThresholdFilter level="trace" />
       <PatternLayout>
-        <Pattern>%d{MM-dd HH:mm:ss} %level [%thread] %logger %X{table} %marker: %msg%n</Pattern>  
+        <Pattern>%d{MM-dd HH:mm:ss} %level [%thread] %location %X{table}:%X{partition} %marker: %msg%n</Pattern>  
       </PatternLayout>
     </File>    
+    <Console name="Console">
+      <ThresholdFilter level="debug" />
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss} %level %logger{1} %X{table}:%X{partition} %marker: %msg%n</Pattern>  
+      </PatternLayout>
+    </Console>
   </Appenders>
   <Loggers>
     <Root level="info">

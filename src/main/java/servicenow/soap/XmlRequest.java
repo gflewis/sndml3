@@ -23,19 +23,21 @@ import org.slf4j.Logger;
 
 import servicenow.core.*;
 
-public class XmlRequest {
+class XmlRequest {
 
-	final Logger log = Log.logger(this.getClass());
+	final Logger logger = Log.logger(this.getClass());
 
 	CloseableHttpClient client;
 	URI uri;
+	final Document requestDoc;
 	final String requestText;
 	final HttpRequestBase request;
 	
 	public XmlRequest(CloseableHttpClient client, URI uri, Document requestDoc) {
 		this.client = client;
 		this.uri = uri;
-		log.debug(Log.REQUEST, uri.toString());
+		this.requestDoc = requestDoc;
+		logger.debug(Log.REQUEST, uri.toString());
 		// if requestDoc is null then use GET
 		// this is only applicable for WSDL
 		if (requestDoc == null) {
@@ -45,7 +47,6 @@ public class XmlRequest {
 		// otherwise use POST
 		else {
 			requestText = XmlFormatter.format(requestDoc);	
-			log.trace(Log.REQUEST, requestText);			
 			HttpEntity requestEntity = new StringEntity(requestText, ContentType.TEXT_XML);
 			HttpEntityEnclosingRequestBase httpPost = new HttpPost(uri);
 			httpPost.setEntity(requestEntity);
@@ -54,6 +55,8 @@ public class XmlRequest {
 	}
 	
 	public Document execute() throws IOException {
+		if (logger.isTraceEnabled() && requestDoc != null) 
+			logger.trace(Log.REQUEST, "\n" + XmlFormatter.format(requestDoc));
 		CloseableHttpResponse response = client.execute(request);		
 		StatusLine statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
@@ -63,16 +66,16 @@ public class XmlRequest {
 		String responseText = EntityUtils.toString(responseEntity);
 		int responseLen = responseText == null ? 0 : responseText.length();
 		String errmsg = statusLine.toString();
-		log.debug(Log.RESPONSE,
+		logger.debug(Log.RESPONSE,
 			String.format("status=\"%s\" contentType=%s len=%d", 
 				statusLine, contentType, responseLen));
 		if (statusCode == 401 || statusCode == 403) {
 			if (requestText != null) errmsg += "\nREQUEST:\n" + requestText + "\n";
-			log.error(Log.RESPONSE, errmsg);
+			logger.error(Log.RESPONSE, errmsg);
 			throw new InsufficientRightsException(uri, requestText);
 		}
 		if (contentType == null) {
-			log.error(Log.RESPONSE, 
+			logger.error(Log.RESPONSE, 
 				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
 			throw new NoContentException(uri);
 		}
@@ -84,10 +87,11 @@ public class XmlRequest {
 		try {
 			responseDoc = parser.build(new StringReader(responseText));
 		} catch (JDOMException e) {
-			log.error(Log.RESPONSE, "REQUEST:\n" + requestText + "\nRESPONSE:\n" + responseText, e);
+			logger.error(Log.RESPONSE, "REQUEST:\n" + requestText + "\nRESPONSE:\n" + responseText, e);
 			throw new XmlParseException(uri, e);
 		}
-		if (log.isTraceEnabled()) log.trace(Log.RESPONSE, XmlFormatter.format(responseDoc));
+		if (logger.isTraceEnabled()) 
+			logger.trace(Log.RESPONSE, "\n" + XmlFormatter.format(responseDoc));
 		return responseDoc;		
 	}
 

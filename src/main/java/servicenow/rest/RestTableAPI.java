@@ -5,14 +5,9 @@ import servicenow.core.*;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -126,11 +121,17 @@ public class RestTableAPI extends TableAPI {
 		return rec;
 	}
 
+	public void updateRecord(Key key, Parameters fields) throws IOException {
+		// TODO Auto-generated method stub
+		throw new NotImplementedException("updateRecord");		
+	}
 	
 	public boolean deleteRecord(Key key) throws IOException {
 		URI uri = getURI("table", key, null);
 		JSONObject responseObj = super.getResponseJSON(uri, HttpMethod.DELETE, null);
-		return true;
+		if (responseObj == null) return true;
+		if (TableAPI.errorMessageLowerCase(responseObj).equals("no record found")) return false;
+		throw new JsonResponseException(responseObj);
 	}
 	
 	@Override

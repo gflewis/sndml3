@@ -1,17 +1,15 @@
 package servicenow.soap;
 
+import servicenow.core.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-
 import org.slf4j.Logger;
-
-import servicenow.core.*;
 
 public class SoapClient {
 
@@ -63,23 +61,22 @@ public class SoapClient {
 		Log.setURIContext(uri);
 		Element method = createXmlElement(methodName, docParams);
 		Document requestDoc = createSoapDocument(method);		
-		Document responseDoc = executeRequest(uri, requestDoc, methodName);
+		XmlRequest xmlRequest = new XmlRequest(session.getClient(), uri, requestDoc);
+		Document responseDoc = xmlRequest.execute();				
 		Element responseBody = responseDoc.getRootElement().getChild("Body", nsSoapEnv);
 		Element responseElement = responseBody.getChildren().get(0);
+		if (responseElement.getName().equals("Fault")) {
+			String faultString = responseElement.getChildText("faultstring");
+			logger.error(Log.RESPONSE, faultString);
+			if (faultString != null && faultString.toLowerCase().indexOf("insufficient rights") > -1)
+				throw new InsufficientRightsException(tablename, methodName);
+			else
+				throw new SoapResponseException(tablename, faultString);			
+		}
 		if (responseElementName != null && !responseElementName.equals(responseElement.getName()))
 			throw new ServiceNowError(
 					"responseElementName expected=" + responseElementName + "; found=" + responseElement.getName());
 		return responseElement;		
-	}
-
-	public Document executeRequest(URI uri, Document requestDoc, String methodName) throws IOException {
-		if (logger.isTraceEnabled())
-			logger.trace(Log.REQUEST, XmlFormatter.format(requestDoc));
-		XmlRequest xmlRequest = new XmlRequest(session.getClient(), uri, requestDoc);
-		Document responseDoc = xmlRequest.execute();
-		if (logger.isTraceEnabled())
-			logger.trace(Log.RESPONSE, XmlFormatter.format(responseDoc));
-		return responseDoc;
 	}
 	
 	Document createSoapDocument(Element content) {
