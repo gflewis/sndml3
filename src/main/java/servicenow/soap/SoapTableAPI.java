@@ -140,8 +140,11 @@ public class SoapTableAPI extends TableAPI {
 	}
 
 	public void updateRecord(Key key, Parameters fields) throws IOException {
-		// TODO Auto-generated method stub
-		throw new NotImplementedException("updateRecord");		
+		Parameters docParams = new Parameters();
+		docParams.add(fields);
+		docParams.add("sys_id", key.toString());
+		Element responseElement =
+			client.executeRequest("update", docParams, null, "updateResponse");
 	}
 	
 	public boolean deleteRecord(Key key) throws IOException {

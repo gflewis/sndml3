@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -65,13 +67,15 @@ public class SoapClient {
 		Document responseDoc = xmlRequest.execute();				
 		Element responseBody = responseDoc.getRootElement().getChild("Body", nsSoapEnv);
 		Element responseElement = responseBody.getChildren().get(0);
-		if (responseElement.getName().equals("Fault")) {
-			String faultString = responseElement.getChildText("faultstring");
+		if (responseElement.getName().equals("Fault")) { 
+			String faultString = getFaultString(responseElement);
+			assert faultString != null;
 			logger.error(Log.RESPONSE, faultString);
-			if (faultString != null && faultString.toLowerCase().indexOf("insufficient rights") > -1)
+			if (StringUtils.containsIgnoreCase(faultString, "insufficient rights"))
 				throw new InsufficientRightsException(tablename, methodName);
-			else
-				throw new SoapResponseException(tablename, faultString);			
+			if (StringUtils.containsIgnoreCase(faultString,  "missing record"))
+				throw new NoSuchRecordException(faultString);
+			throw new SoapResponseException(tablename, faultString);			
 		}
 		if (responseElementName != null && !responseElementName.equals(responseElement.getName()))
 			throw new ServiceNowError(
@@ -90,6 +94,13 @@ public class SoapClient {
 		envelope.addContent(requestHeader);
 		envelope.addContent(requestBody);
 		return new Document(envelope);
+	}
+	
+	static String getFaultString(Element responseElement) {
+		if (responseElement.getName().equals("Fault")) 
+			return responseElement.getChildText("faultstring");
+		else
+			return null;		
 	}
 	
 	private Element createXmlElement(String methodName, Parameters params) {

@@ -19,13 +19,4 @@ public class ServiceNowException extends IOException {
 		super(message);
 	}
 	
-//	protected static String truncate(String message) {
-//		if (message == null) return null;
-//		final int limit = 200;
-//		if (message.length() < limit) 
-//			return message;
-//		else
-//			return message.substring(0,  limit) + "...";					
-//		
-//	}
 }
