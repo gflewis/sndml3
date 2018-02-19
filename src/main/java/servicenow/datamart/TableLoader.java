@@ -125,7 +125,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 				Integer threads = config.getThreads();
 				MultiDatePartReader mReader = 
 						new MultiDatePartReader(table, partitionInterval, filter, created, updated, threads, writer);
-				if (pageSize != null) reader.setPageSize(pageSize);
+				if (pageSize != null) mReader.setPageSize(pageSize);
 				mReader.initialize();				
 				logger.info(Log.INIT, mReader.getPartition().toString());
 				reader = mReader;
