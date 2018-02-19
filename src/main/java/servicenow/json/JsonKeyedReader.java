@@ -29,7 +29,9 @@ public class JsonKeyedReader extends TableReader {
 	@Override
 	public void initialize() throws IOException {
 		super.initialize();
-		allKeys = api.getKeys(getQuery());
+		// allKeys = api.getKeys(getQuery());
+		// JSONv2 API limits the number of keys to 10000, so use SOAP instead
+		allKeys = table.soap().getKeys(getQuery());
 		setExpected(allKeys.size());
 	}
 
