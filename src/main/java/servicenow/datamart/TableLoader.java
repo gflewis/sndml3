@@ -89,14 +89,14 @@ public class TableLoader implements Callable<WriterMetrics> {
 		EncodedQuery filter;
 		DateTime since = config.getSince();
 		DateTime.Interval partitionInterval = config.getPartitionInterval();
-		Integer pageSize = config.getPageSize();
+		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 		if (action == LoaderAction.PRUNE) {
 			Table audit = session.table("sys_audit_delete");
 			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
 			reader = audit.getDefaultReader();
 			reader.setBaseQuery(auditQuery);			
 			reader.setCreatedRange(new DateTimeRange(since, null));
-			if (pageSize != null) reader.setPageSize(pageSize);
+			if (pageSize > 0) reader.setPageSize(pageSize);
 			reader.setWriter(writer);
 			reader.initialize();
 		}
@@ -113,7 +113,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 			factory.setReaderName(tableLoaderName);
 			factory.setBaseQuery(filter);
 			factory.setCreated(config.getCreated());
-			factory.setPageSize(pageSize);;
+			factory.setPageSize(pageSize);
 			if (partitionInterval == null) {
 				reader = factory.createReader();
 				if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
