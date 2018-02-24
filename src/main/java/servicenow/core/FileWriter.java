@@ -57,7 +57,7 @@ public class FileWriter extends Writer {
 	}
 
 	public FileWriter(File file) {
-		super(file.getPath());
+		super();
 		this.file = file;
 	}
 

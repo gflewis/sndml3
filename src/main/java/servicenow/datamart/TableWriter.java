@@ -21,7 +21,7 @@ public abstract class TableWriter extends Writer {
 	final private Logger logger = Log.logger(this.getClass());
 	
 	public TableWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(name);
+		super();
 		this.db = db;
 		this.table = table;
 		this.sqlTableName = sqlTableName == null ? table.getName() : sqlTableName;
@@ -62,22 +62,5 @@ public abstract class TableWriter extends Writer {
 	}
 
 	abstract void writeRecord(Record rec) throws SQLException;
-
-	/*
-	void insertRecord(Record rec) throws SQLException {
-		insertStmt.insert(rec);
-		metrics.incrementInserted();
-	}
-	
-	void updateRecord(Record rec) throws SQLException {
-		if (updateStmt.update(rec))
-			metrics.incrementUpdated();
-	}
-	
-	void deleteRecord(Key key) throws SQLException {
-		if (deleteStmt.deleteRecord(key))
-			metrics.incrementDeleted();
-	}
-	*/
 	
 }

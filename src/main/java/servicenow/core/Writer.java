@@ -5,14 +5,12 @@ import java.sql.SQLException;
 
 public abstract class Writer {
 
-	protected final String writerName;
 	protected WriterMetrics writerMetrics;
 	protected TableReader reader;
 
 	
-	public Writer(String name) {
-		this.writerName = name;
-		this.writerMetrics = new WriterMetrics(name);
+	public Writer() {
+		this.writerMetrics = new WriterMetrics(null);
 	}
 	
 	public abstract void processRecords(RecordList recs) throws IOException, SQLException;	
@@ -38,8 +36,4 @@ public abstract class Writer {
 		return this.reader;
 	}
 	
-	public String getWriterName() {
-		return this.writerName;
-	}
-
 }

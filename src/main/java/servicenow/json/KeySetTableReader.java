@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonKeyedReader extends TableReader {
+public class KeySetTableReader extends TableReader {
 
 	protected final JsonTableAPI api;
 	protected KeySet allKeys;
@@ -16,7 +16,7 @@ public class JsonKeyedReader extends TableReader {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	public JsonKeyedReader(Table table) {
+	public KeySetTableReader(Table table) {
 		super(table);
 		api = table.json();
 	}
@@ -29,8 +29,8 @@ public class JsonKeyedReader extends TableReader {
 	@Override
 	public void initialize() throws IOException {
 		super.initialize();
-		// allKeys = api.getKeys(getQuery());
-		// JSONv2 API limits the number of keys to 10000, so use SOAP instead
+		// JSONv2 API limits the number of keys to 10000
+		// so use SOAP API which has no limit
 		allKeys = table.soap().getKeys(getQuery());
 		setExpected(allKeys.size());
 	}

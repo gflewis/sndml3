@@ -6,7 +6,7 @@ import java.sql.SQLException;
 public class NullWriter extends Writer {
 
 	public NullWriter() {
-		super(null);
+		super();
 	}
 
 	@Override

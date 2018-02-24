@@ -8,7 +8,7 @@ public class RecordListAccumulator extends Writer {
 	RecordList allRecords;
 			
 	public RecordListAccumulator(Table table) {
-		super("_accumulator_");
+		super();
 		allRecords = new RecordList(table);
 	}
 	

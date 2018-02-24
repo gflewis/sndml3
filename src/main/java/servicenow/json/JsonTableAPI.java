@@ -105,7 +105,7 @@ public class JsonTableAPI extends TableAPI {
 
 	@Override
 	public TableReader getDefaultReader() throws IOException {
-		return new JsonKeyedReader(this.table);
+		return new KeySetTableReader(this.table);
 	}
 
 }

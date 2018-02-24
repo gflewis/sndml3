@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
 
-public class SoapKeyedReader extends TableReader {
+public class SoapKeySetTableReader extends TableReader {
 
 	protected final SoapTableAPI apiSOAP;
 	private KeySet allKeys;
@@ -16,7 +16,7 @@ public class SoapKeyedReader extends TableReader {
 	
 	static final int DEFAULT_PAGE_SIZE = 200;
 		
-	public SoapKeyedReader(Table table) {
+	public SoapKeySetTableReader(Table table) {
 		super(table);
 		apiSOAP = table.soap();
 	}
@@ -37,7 +37,7 @@ public class SoapKeyedReader extends TableReader {
 		return allKeys.size();
 	}
 	
-	public SoapKeyedReader call() throws IOException, SQLException {
+	public SoapKeySetTableReader call() throws IOException, SQLException {
 		Writer writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null: "not initialized";

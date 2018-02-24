@@ -4,12 +4,13 @@ import java.io.IOException;
 
 import servicenow.core.*;
 
+@Deprecated
 public class DatePartReader extends RestTableReader {
 
 	DateTimeRange partRange;
 	String partName;
 	
-	public DatePartReader(MultiDatePartReader parent, String partName, DateTimeRange partRange) {
+	public DatePartReader(PartSumTableReader parent, String partName, DateTimeRange partRange) {
 		super(parent.table);
 		assert parent != null;
 		assert partName != null;
@@ -20,7 +21,7 @@ public class DatePartReader extends RestTableReader {
 		this.setBaseQuery(parent.getBaseQuery());
 		this.setUpdatedRange(parent.getUpdatedRange());
 		this.setCreatedRange(partRange.intersect(parent.getCreatedRange()));
-		this.setParent(parent);
+//		this.setParent(parent);
 		this.setWriter(parent.getWriter());
 	}
 	
@@ -34,7 +35,7 @@ public class DatePartReader extends RestTableReader {
 	
 	@Override
 	public void setLogContext() {
-		Log.setContext(table, writer.getWriterName());
+		Log.setContext(table, getName());
 		Log.setPartitionContext(partName);
 	}
 		

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
+import servicenow.datamart.Globals;
 
 public class RestTableReader extends TableReader {
 
@@ -13,7 +14,7 @@ public class RestTableReader extends TableReader {
 	private boolean statsEnabled = false;
 	protected TableStats stats = null;
 	
-	static final int DEFAULT_PAGE_SIZE = 200;
+//	static final int DEFAULT_PAGE_SIZE = 200;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -23,7 +24,7 @@ public class RestTableReader extends TableReader {
 	}
 			
 	public int getDefaultPageSize() {
-		return DEFAULT_PAGE_SIZE;
+		return Globals.getInteger("rest_default_page_size", 200);
 	}
 	
 	public RestTableReader enableStats(boolean value) {

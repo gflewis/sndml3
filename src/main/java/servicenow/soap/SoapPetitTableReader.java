@@ -12,39 +12,39 @@ import servicenow.core.*;
  * A {@link TableReader} which attempts to read a set of records
  * using a single Web Service call.
  * <p/>
- * Use a {@link SoapPetitReader} only if...
+ * Use a {@link SoapPetitTableReader} only if...
  * <ul>
  * <li>the number of records to be read is small, and</li>
  * <li>there is no possibility of an access control
  * which could block the ability to read some of the records.</li>
  * </ul>
  * <p/>
- * A {@link SoapPetitReader} does NOT precede the first read with a getKeys call.
+ * A {@link SoapPetitTableReader} does NOT precede the first read with a getKeys call.
  * It simply starts reading the rows using first_row / last_row windowing.
  * If the number of records returned is equal to the limit,  
  * then it assumes there are more records and it keeps on reading.
  * If the number of records returned is less than the limit,
  * then it assumes it has reached the end. 
  * <p/>
- * For small result sets {@link SoapPetitReader} will perform better than 
- * {@link SoapKeyedReader} because it saves a Web Service call.
- * However, the performance of the {@link SoapPetitReader} will degrade exponentially
+ * For small result sets {@link SoapPetitTableReader} will perform better than 
+ * {@link SoapKeySetTableReader} because it saves a Web Service call.
+ * However, the performance of the {@link SoapPetitTableReader} will degrade exponentially
  * as the number of records grows.
  * <p/>
  * <b>Warning:</b> If access controls are in place, the <b>getRecords</b> method
  * will sometimes return fewer records than the limit even though
- * there are more records to be read.  This will cause the {@link SoapPetitReader}
- * to terminate prematurely. Use a {@link SoapKeyedReader} 
+ * there are more records to be read.  This will cause the {@link SoapPetitTableReader}
+ * to terminate prematurely. Use a {@link SoapKeySetTableReader} 
  * if there is any possibility of access controls which could cause this behavior.
  * 
  */
-public class SoapPetitReader extends TableReader {
+public class SoapPetitTableReader extends TableReader {
 
 	protected final SoapTableAPI apiSOAP;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public SoapPetitReader(Table table) {
+	public SoapPetitTableReader(Table table) {
 		super(table);
 		apiSOAP = table.soap();
 	}
@@ -52,8 +52,7 @@ public class SoapPetitReader extends TableReader {
 	@Override
 	public void initialize() {
 		assert writer != null : "Writer not initialized";
-		Log.setContext(table, writer.getWriterName());
-		writer.setReader(this);		
+		Log.setContext(table, getReaderName());
 	}
 
 	@Override
@@ -66,7 +65,7 @@ public class SoapPetitReader extends TableReader {
 		throw new UnsupportedOperationException();
 	}
 
-	public SoapPetitReader call() throws IOException, SQLException {
+	public SoapPetitTableReader call() throws IOException, SQLException {
 		Writer writer = this.getWriter();
 		assert writer != null;
 		assert pageSize > 1;

@@ -113,8 +113,12 @@ public class Globals {
 	}
 	
 	public static Integer getInteger(String varname) {
+		return getInteger(varname, null);
+	}
+	
+	public static Integer getInteger(String varname, Integer defaultValue) {
 		String value = getValue(varname);
-		return (value == null) ? null : new Integer(value);
+		return (value == null) ? defaultValue : new Integer(value);		
 	}
 	
 	public static Properties getProperties() {

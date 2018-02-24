@@ -29,7 +29,7 @@ public class TableSchema extends Writer {
 	
 	protected TableSchema(Table table) 
 			throws IOException, 	InvalidTableNameException, InterruptedException {
-		super("sys_dictionary." + table.getName());		
+		super();
 		this.table = table;
 		this.session = table.session;
 		this.tablename = table.getName();

@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
 
-public abstract class TableReader implements Callable<TableReader>{
+public abstract class TableReader implements Callable<TableReader> {
  
 	public final Table table;
 	
+	private String readerName;
 	private EncodedQuery baseQuery;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
-	private TableReader parent;
 	
 	protected Writer writer;
 	protected int pageSize;
@@ -31,14 +31,18 @@ public abstract class TableReader implements Callable<TableReader>{
 	public void initialize() throws IOException {
 		assert writer != null : "Writer not initialized";
 		setLogContext();
-		writer.setReader(this);
 	}
 	
-	/*
-	 * This method may be overridden, e.g. by DatePartReader
-	 */
+	public void setReaderName(String name) {
+		this.readerName = name;
+	}
+	
+	public String getReaderName() {
+		return readerName == null ? table.getName() : readerName;
+	}
+	
 	public void setLogContext() {
-		Log.setContext(table, writer.getWriterName());
+		Log.setContext(table, getReaderName());
 	}
 	
 	public ReaderMetrics readerMetrics() {
@@ -60,34 +64,23 @@ public abstract class TableReader implements Callable<TableReader>{
 		
 	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
 			
-	public TableReader setParent(TableReader parent) {
-		assert parent != null;
-		this.parent = parent;
-		this.readerMetrics = new ReaderMetrics(parent.readerMetrics());
-		return this;
-	}
-
-	public TableReader getParent() {
-		return parent;
-	}
-
 	public TableReader setPageSize(int size) {
 		this.pageSize = size;
 		return this;
 	}
 	
 	public int getPageSize() {
-		return this.pageSize;
+		return pageSize > 0 ? pageSize : getDefaultPageSize();
 	}
 	
 	public TableReader setBaseQuery(EncodedQuery value) {
-		// argument may be null to clear the query
-		this.baseQuery = (value == null ? EncodedQuery.all() : value);
+		// argument may be null to clear
+		this.baseQuery = value;
 		return this;
 	}
 
 	public EncodedQuery getBaseQuery() {
-		return this.baseQuery;
+		return baseQuery == null ? EncodedQuery.all() : baseQuery;
 	}
 	
 	public TableReader setCreatedRange(DateTimeRange range) {
@@ -149,7 +142,7 @@ public abstract class TableReader implements Callable<TableReader>{
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		RecordListAccumulator accumulator = new RecordListAccumulator(this.table);
-		this.setWriter(accumulator);
+		setWriter(accumulator);
 		try {
 			this.call();
 		} catch (SQLException e) {

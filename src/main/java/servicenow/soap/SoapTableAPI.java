@@ -4,8 +4,6 @@ import servicenow.core.*;
 
 import java.io.IOException;
 import java.util.Iterator;
-
-import org.apache.commons.lang3.NotImplementedException;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
@@ -31,9 +29,9 @@ public class SoapTableAPI extends TableAPI {
 		return getKeys((Parameters) null);
 	}
 	
-	public KeySet getKeys(EncodedQuery filter) throws IOException {
+	public KeySet getKeys(EncodedQuery query) throws IOException {
 		Parameters params = new Parameters();
-		if (filter != null) params.add("__encoded_query", filter.toString());
+		if (query != null) params.add("__encoded_query", query.toString());
 		return getKeys(params);
 	}
 	
@@ -143,6 +141,7 @@ public class SoapTableAPI extends TableAPI {
 		Parameters docParams = new Parameters();
 		docParams.add(fields);
 		docParams.add("sys_id", key.toString());
+		@SuppressWarnings("unused")
 		Element responseElement =
 			client.executeRequest("update", docParams, null, "updateResponse");
 	}
@@ -161,7 +160,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 
 	public TableReader getDefaultReader() throws IOException {
-		return new SoapKeyedReader(this.table);
+		return new SoapKeySetTableReader(this.table);
 	}
 
 }

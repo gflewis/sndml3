@@ -13,39 +13,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import servicenow.core.*;
+import servicenow.datamart.Globals;
 
-public class MultiDatePartReader extends RestTableReader {
+public class PartSumTableReader extends TableReader {
 
+	final TableReaderFactory factory;
+	protected TableStats stats = null;
 	final int threads;
 	final DateTime.Interval interval;
 	DateTimeRange range;
 	DatePartition partition;
 	WriterMetrics processStats;
-	List<DatePartReader> readers = new ArrayList<DatePartReader>();
-	List<Future<TableReader>> futures = new ArrayList<Future<TableReader>>();
+	List<TableReader> partReaders;
+	List<Future<TableReader>> futures;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public MultiDatePartReader(
-			Table table, 
-			DateTime.Interval interval, 
-			EncodedQuery baseQuery,
-			DateTimeRange createdRange,
-			DateTimeRange updatedRange,
-			Integer threads,
-			Writer writer) {
-		super(table);
-		this.setBaseQuery(baseQuery);
-		this.setCreatedRange(createdRange);
-		this.setUpdatedRange(updatedRange);
-		this.setWriter(writer);
+	public PartSumTableReader(TableReaderFactory factory, DateTime.Interval interval, Integer threads) {
+		super(factory.getTable());
+		this.factory = factory;
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
+		setWriter(factory.getWriter());
 	}
-		
+
+	public int getDefaultPageSize() {
+		return Globals.getInteger("rest_default_page_size", 200);
+	}
+	
 	public DatePartition getPartition() {
 		if (this.partition == null) throw new IllegalStateException();
 		return this.partition;
+	}
+	
+	public List<TableReader> getReaders() {
+		return this.partReaders;
 	}
 	
 	public int getThreadCount() {
@@ -71,32 +73,34 @@ public class MultiDatePartReader extends RestTableReader {
 		}
 		return count;
 	}
-
 	
 	@Override
 	public void initialize() throws IOException {
-		getWriter().setReader(this);
-		stats = this.apiREST.getStats(getQuery(), true);
+		stats = table.rest().getStats(getQuery(), true);
 		setExpected(stats.getCount());
 		range = stats.getCreated();
 		partition = new DatePartition(range, interval);
+		partReaders = new ArrayList<TableReader>();
 		logger.debug(Log.INIT, "partition=" + partition.toString());		
 		for (DateTimeRange partRange : partition) {
 			String partName = interval.toString().substring(0, 1) + partRange.getStart().toString();
-			DatePartReader reader = new DatePartReader(this, partName, partRange);
+			TableReader partReader = factory.createReader();
+			partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
+			partReader.setReaderName(partReader.getReaderName() + "." + partName);
 			// add to the beginning of the list so it will be sorted by decreasing date
-			readers.add(0, reader);			
+			partReaders.add(0, partReader);			
 		}
 	}
 
 	@Override
-	public MultiDatePartReader call() throws IOException, SQLException, InterruptedException {
+	public PartSumTableReader call() throws IOException, SQLException, InterruptedException {
 		setLogContext();
+		futures = new ArrayList<Future<TableReader>>();
 		if (threads > 1) {			
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads); 
-			for (DatePartReader reader : readers) {
-				logger.debug("Submit " + reader.getName());
+			for (TableReader reader : partReaders) {
+				logger.debug("Submit " + reader.getReaderName());
 				reader.initialize();
 				Future<TableReader> future = executor.submit(reader);
 				futures.add(future);
@@ -107,12 +111,12 @@ public class MultiDatePartReader extends RestTableReader {
 			}
 		}
 		else {
-			for (TableReader reader : readers) {
+			for (TableReader reader : partReaders) {
 				reader.initialize();
 				reader.call();
 			}
 		}
 		return this;
 	}
-	
+
 }

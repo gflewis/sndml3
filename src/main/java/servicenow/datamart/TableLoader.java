@@ -1,9 +1,9 @@
 package servicenow.datamart;
 
 import servicenow.core.*;
-import servicenow.json.JsonKeyedReader;
-import servicenow.rest.MultiDatePartReader;
-import servicenow.rest.RestTableReader;
+import servicenow.json.KeySetTableReaderFactory;
+import servicenow.rest.PartSumTableReader;
+import servicenow.rest.RestTableReaderFactory;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -68,8 +68,6 @@ public class TableLoader implements Callable<WriterMetrics> {
 		assert sqlTableName.length() > 0;
 		Log.clearContext();
 		Log.setContext(table, tableLoaderName);
-//		Log.setTableContext(table.getName());
-//		Log.setWriterContext(tableLoaderName);
 		LoaderAction action = config.getAction();
 		assert action != null;
 		logger.debug(Log.INIT, 
@@ -103,32 +101,29 @@ public class TableLoader implements Callable<WriterMetrics> {
 			reader.initialize();
 		}
 		else {
-			DateTimeRange created = config.getCreated();
-			DateTimeRange updated = new DateTimeRange(since, null);
 			filter = config.getFilter();
+			TableReaderFactory factory;
+			if (since != null) {
+				factory = new KeySetTableReaderFactory(table, writer);
+				factory.setUpdated(since);				
+			}
+			else {
+				factory = new RestTableReaderFactory(table, writer);
+			}
+			factory.setReaderName(tableLoaderName);
+			factory.setBaseQuery(filter);
+			factory.setCreated(config.getCreated());
+			factory.setPageSize(pageSize);;
 			if (partitionInterval == null) {
-				if (since == null) {
-					reader = new RestTableReader(table).enableStats(true);
-				}
-				else
-					reader = new JsonKeyedReader(table);
-				reader.setBaseQuery(filter);
-				reader.setCreatedRange(created);
-				reader.setUpdatedRange(updated);
-				if (pageSize != null) reader.setPageSize(pageSize);
-				reader.setWriter(writer);
-				if (since != null) 
-					logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
+				reader = factory.createReader();
+				if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 				reader.initialize();
 			}
 			else {
 				Integer threads = config.getThreads();
-				MultiDatePartReader mReader = 
-						new MultiDatePartReader(table, partitionInterval, filter, created, updated, threads, writer);
-				if (pageSize != null) mReader.setPageSize(pageSize);
-				mReader.initialize();				
-				logger.info(Log.INIT, mReader.getPartition().toString());
-				reader = mReader;
+				PartSumTableReader reader = new PartSumTableReader(factory, partitionInterval, threads);
+				reader.initialize();				
+				logger.info(Log.INIT, reader.getPartition().toString());
 			}
 		}
 		logger.info(Log.INIT, String.format("begin load %s (%d rows)", tableLoaderName, reader.readerMetrics().getExpected()));
