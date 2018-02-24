@@ -126,6 +126,8 @@ public class TableLoader implements Callable<WriterMetrics> {
 				logger.info(Log.INIT, reader.getPartition().toString());
 			}
 		}
+		assert reader != null;
+		assert reader.readerMetrics() != null;
 		logger.info(Log.INIT, String.format("begin load %s (%d rows)", tableLoaderName, reader.readerMetrics().getExpected()));
 		reader.call();
 		writer.close();
