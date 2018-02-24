@@ -55,8 +55,6 @@ class XmlRequest {
 	}
 	
 	public Document execute() throws IOException {
-		if (logger.isTraceEnabled() && requestDoc != null) 
-			logger.trace(Log.REQUEST, "\n" + XmlFormatter.format(requestDoc));
 		CloseableHttpResponse response = client.execute(request);		
 		StatusLine statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
@@ -90,8 +88,6 @@ class XmlRequest {
 			logger.error(Log.RESPONSE, "REQUEST:\n" + requestText + "\nRESPONSE:\n" + responseText, e);
 			throw new XmlParseException(uri, e);
 		}
-		if (logger.isTraceEnabled()) 
-			logger.trace(Log.RESPONSE, "\n" + XmlFormatter.format(responseDoc));
 		return responseDoc;		
 	}
 

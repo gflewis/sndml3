@@ -4,7 +4,7 @@
     <Console name="Console">
       <ThresholdFilter level="info" />
       <PatternLayout>
-        <Pattern>%d{HH:mm:ss} %level [%thread] %logger{1} %X{context}:%X{partition} %marker: %msg%n</Pattern>  
+        <Pattern>%d{HH:mm:ss} %level [%thread] %logger{1} %X{context} %marker: %msg%n</Pattern>  
       </PatternLayout>
     </Console>
   </Appenders>

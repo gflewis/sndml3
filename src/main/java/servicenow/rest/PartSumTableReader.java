@@ -107,7 +107,7 @@ public class PartSumTableReader extends TableReader {
 				futures.add(future);
 			}
 			while (!	executor.awaitTermination(60, TimeUnit.SECONDS)) {
-				logger.debug(Log.TERM, String.format("Waiting for %d / %d partitions to complete", 
+				logger.debug(Log.FINISH, String.format("Waiting for %d / %d partitions to complete", 
 						numPartsIncomplete(), numPartsTotal()));
 			}
 		}

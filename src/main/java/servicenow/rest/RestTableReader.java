@@ -68,6 +68,12 @@ public class RestTableReader extends TableReader {
 			finished = (recs.size() < pageSize);
 			logger.debug(Log.PROCESS, String.format("processed %d rows", rowCount));
 		}
+		if (statsEnabled) {
+			if (rowCount != getExpected()) {
+				logger.error(Log.PROCESS, 
+					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
+			}
+		}
 		return this;
 	}
 		

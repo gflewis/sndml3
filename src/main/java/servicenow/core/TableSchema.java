@@ -1,9 +1,7 @@
 package servicenow.core;
 
 import java.io.*;
-import java.sql.SQLException;
 import java.util.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * @author Giles Lewis
  *
  */
-public class TableSchema extends Writer {
+public class TableSchema /* extends Writer */ {
 
 	private final Table table;
 	private final Session session;
@@ -58,17 +56,12 @@ public class TableSchema extends Writer {
 		
 		TableReader reader = dictionary.getDefaultReader();
 		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
-		reader.setWriter(this);
 		reader.setBaseQuery(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(1000);
-		reader.initialize();
-		try {
-			reader.call();
-		} catch (SQLException e) {
-			throw new ServiceNowError(e);
-		}
-		
+		RecordList recs = reader.getAllRecords();
+		processRecords(recs);
+				
 		if (this.empty) {
 			logger.error(Log.INIT, "Unable to read schema for: " + tablename +
 				" (check access controls for sys_dictionary and sys_db_object)");
@@ -80,14 +73,12 @@ public class TableSchema extends Writer {
 		}
 	}
 
-	@Override
-	public void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
+	public void processRecords(RecordList recs) throws IOException {
 		for (Record rec : recs) {
 			String fieldname = rec.getValue("element");
 			if (fieldname != null) {
 				FieldDefinition fieldDef = new FieldDefinition(table, rec);
 				fields.put(fieldname, fieldDef);
-				writerMetrics.incrementInserted();
 				logger.debug(Log.INIT, String.format("%s.%s %s(%d)", 
 						tablename, fieldname, fieldDef.getType(), fieldDef.getLength()));
 				this.empty = false;
@@ -170,6 +161,7 @@ public class TableSchema extends Writer {
 		return fields.size();
 	}
 
+	@Deprecated
 	public void report(PrintStream out) {
 		String tablename = table.getName();
 		out.println("Schema report for " + tablename);

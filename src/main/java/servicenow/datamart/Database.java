@@ -193,6 +193,7 @@ public class Database {
 	void createMissingTable(Table table, String sqlTableName) 
 			throws SQLException, IOException, InterruptedException  {
 		assert table != null;
+		Log.setTableContext(table);
 		if (sqlTableName == null) sqlTableName = table.getName();
 		if (tableExists(sqlTableName)) return;
 		Statement stmt = dbc.createStatement();

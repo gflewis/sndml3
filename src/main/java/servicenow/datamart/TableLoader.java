@@ -82,9 +82,13 @@ public class TableLoader implements Callable<WriterMetrics> {
 		case PRUNE:
 			writer = new TableDeleteWriter(tableLoaderName, db, table, sqlTableName);
 			break;
+		default:
+			throw new AssertionError();
 		}
 		db.createMissingTable(table, sqlTableName);
 		writer.open();
+
+		Log.setContext(table, tableLoaderName);		
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
 		EncodedQuery filter;
 		DateTime since = config.getSince();
@@ -130,12 +134,11 @@ public class TableLoader implements Callable<WriterMetrics> {
 		}
 		assert reader != null;
 		assert writer != null;
-//		writer.setReader(reader);
 		assert reader.readerMetrics() != null;
 		logger.info(Log.INIT, String.format("begin load %s (%d rows)", tableLoaderName, reader.readerMetrics().getExpected()));
 		reader.call();
 		writer.close();
-		logger.info(Log.TERM, String.format("end load %s (%d rows)", tableLoaderName, writer.getMetrics().getProcessed()));
+		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, writer.getMetrics().getProcessed()));
 		return writer.getMetrics();
 	}
 

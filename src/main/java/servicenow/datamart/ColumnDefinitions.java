@@ -22,13 +22,14 @@ public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 	 */	
 	public ColumnDefinitions(Database db, Table table, String sqlTableName) 
 			throws SQLException, IOException {
-		super();
+		super();		
 		String schema = db.getSchema();
-		logger.debug(Log.INIT, String.format("schema=%s table=%s", schema, sqlTableName));
+		logger.debug(Log.SCHEMA, String.format("schema=%s table=%s", schema, sqlTableName));
 		Generator generator = db.getGenerator();
 		TableWSDL wsdl = table.getWSDL();
-		ResultSet columns = db.getColumnDefinitions(sqlTableName);
 
+		Log.setSchemaContext(table);		
+		ResultSet columns = db.getColumnDefinitions(sqlTableName);
 		while (columns.next()) {
 			String name = columns.getString(4);
 			int type = columns.getInt(5);
@@ -38,10 +39,10 @@ public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 				SqlFieldDefinition defn =
 					new SqlFieldDefinition(name, type, size, glidename);
 				this.add(defn);
-				logger.debug(Log.INIT, name + " type=" + type + " size=" + size);				
+				logger.debug(Log.SCHEMA, name + " type=" + type + " size=" + size);				
 			}
 			else {
-				logger.warn(Log.INIT, name + " type=" + type + " size=" + size + " (not mapped)");				
+				logger.warn(Log.SCHEMA, name + " type=" + type + " size=" + size + " (not mapped)");				
 			}				
 		}
 		if (this.size() < 1)
@@ -51,7 +52,7 @@ public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 			throw new RuntimeException(
 				"expected SYS_ID, found " + this.get(0).getName() + 
 				" in first column of table \"" + sqlTableName + "\"");
-		logger.debug(Log.INIT, this.size() + " columns");
+		logger.debug(Log.SCHEMA, this.size() + " columns");
 		columns.close();
 	
 	}

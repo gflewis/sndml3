@@ -39,7 +39,7 @@ public abstract class SqlStatement {
 		Connection dbc = dbw.getConnection();
 		this.columns = columns;
 		this.stmtText = buildStatement();
-		logger.debug(Log.INIT, stmtText);
+		logger.debug(Log.SCHEMA, stmtText);
 		this.stmt = dbc.prepareStatement(stmtText);		
 	}
 

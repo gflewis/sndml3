@@ -67,7 +67,7 @@ public class Loader {
 	Loader(LoaderConfig config) {
 		this.config = config;
 		this.threads = config.getThreads();
-		logger.debug(String.format("starting loader threads=%d", this.threads));
+		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = Globals.getMetricsFile();
 		for (TableConfig jobConfig : config.getJobs()) {
 			jobs.add(new TableLoader(jobConfig));
@@ -86,7 +86,7 @@ public class Loader {
 			}
 	        executor.shutdown();
 	        while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-	        		logger.debug(Log.TERM, "awaiting job completion");
+	        		logger.debug(Log.FINISH, "awaiting job completion");
 	        }	 			
 		}
 		else {
@@ -101,7 +101,7 @@ public class Loader {
 	}
 	
 	void writeAllMetrics() throws IOException {
-		logger.info(Log.TERM, "Writing " + metricsFile.getPath());
+		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
 		statsWriter = new PrintWriter(metricsFile);
 		loaderMetrics.write(statsWriter);
 		for (TableLoader job : jobs) {			

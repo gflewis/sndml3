@@ -12,8 +12,6 @@ public class KeySetTableReader extends TableReader {
 	protected final JsonTableAPI api;
 	protected KeySet allKeys;
 
-	static final int DEFAULT_PAGE_SIZE = 200;
-	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 		
 	public KeySetTableReader(Table table) {
@@ -21,17 +19,29 @@ public class KeySetTableReader extends TableReader {
 		api = table.json();
 	}
 
-	@Override
 	public int getDefaultPageSize() {
-		return DEFAULT_PAGE_SIZE;
+		return 200;
 	}
 
-	@Override
 	public void initialize() throws IOException {
 		super.initialize();
+		EncodedQuery query = getQuery();
+		allKeys = table.json().getKeys(query);
 		// JSONv2 API limits the number of keys to 10000
-		// so use SOAP API which has no limit
-		allKeys = table.soap().getKeys(getQuery());
+		// If we got more than 999 then check the result
+		if (allKeys.size() > 999) {
+			TableStats stats = table.rest().getStats(query, false);
+			int expected = stats.getCount();
+			if (allKeys.size() != expected) {
+				logger.warn(Log.PROCESS, 
+						String.format("Expected %d keys but JSON only returned %d; reverting to SOAP", expected, allKeys.size()));
+				allKeys = table.soap().getKeys(getQuery());
+				if (allKeys.size() != expected) {
+					throw new ServiceNowException(
+						String.format("Expected %d keys but SOAP only returned %d", expected, allKeys.size()));
+				}
+			}
+		}
 		setExpected(allKeys.size());
 	}
 

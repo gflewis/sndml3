@@ -2,13 +2,16 @@
 <Configuration>
   <Appenders>
     <File name="File" fileName="/tmp/log/sndml3.log" append="false">
-      <ThresholdFilter level="trace" />
+      <ThresholdFilter level="debug" />
       <PatternLayout>
-        <Pattern>%d{MM-dd HH:mm:ss} %level [%thread] %location %X{table}:%X{context} %marker: %msg%n</Pattern>  
+        <Pattern>%d{MM-dd HH:mm:ss} %level [%thread] %logger %X{table}:%X{context} %marker: %msg%n</Pattern>  
       </PatternLayout>
     </File>    
     <Console name="Console">
-      <ThresholdFilter level="debug" />
+      <Filters>
+        <ThresholdFilter level="info" />
+        <MarkerFilter marker="SCHEMA" onMatch="NEUTRAL" onMismatch="NEUTRAL" />
+      </Filters>
       <PatternLayout>
         <Pattern>%d{HH:mm:ss} %level %logger{1} %X{context} %marker: %msg%n</Pattern>  
       </PatternLayout>

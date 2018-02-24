@@ -56,15 +56,26 @@ public class SoapClient {
 			Parameters docParams, 
 			Parameters uriParams, 
 			String responseElementName) throws IOException {
+		
 		URI uri = session.getURI(this.uriPath, uriParams);
 		Log.setSessionContext(session);
 		Log.setTableContext(tablename);
 		Log.setMethodContext(methodName);
 		Log.setURIContext(uri);
 		Element method = createXmlElement(methodName, docParams);
-		Document requestDoc = createSoapDocument(method);		
+		Document requestDoc = createSoapDocument(method);	
+		if (logger.isDebugEnabled()) {
+			String requestText = XmlFormatter.format(requestDoc);
+			logger.debug(Log.REQUEST, "\n" + requestText);
+		}
+		
 		XmlRequest xmlRequest = new XmlRequest(session.getClient(), uri, requestDoc);
-		Document responseDoc = xmlRequest.execute();				
+		Document responseDoc = xmlRequest.execute();
+		if (logger.isDebugEnabled()) {
+			String responseText = XmlFormatter.format(responseDoc);
+			logger.debug(Log.RESPONSE, "\n" + Log.abbreviate(responseText));
+		}
+		
 		Element responseBody = responseDoc.getRootElement().getChild("Body", nsSoapEnv);
 		Element responseElement = responseBody.getChildren().get(0);
 		if (responseElement.getName().equals("Fault")) { 

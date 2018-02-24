@@ -28,10 +28,6 @@ public class TableWSDL {
 
 	static Namespace nsWSDL = Namespace.getNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/");
 	static Namespace nsXSD = Namespace.getNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
-
-	public TableWSDL(Table table) throws IOException {
-		this(table.getSession(), table.getName());
-	}
 	
 	public TableWSDL(Session session, String tablename) throws IOException {
 		this(session, tablename, false);
@@ -39,15 +35,11 @@ public class TableWSDL {
 
 	public TableWSDL(Session session, String tablename, boolean displayvalues) throws IOException {
 		this.tablename = tablename;
-		Log.clearContext();
-		Log.setSessionContext(session);
-		Log.setTableContext(tablename);
-		Log.setMethodContext("WSDL");		
 		String path = tablename + ".do?WSDL";
 		if (displayvalues) path += "&displayvalue=all";
 		uri = session.getURI(path);
 		Log.setURIContext(uri);
-		logger.debug(Log.INIT, uri.toString());
+		logger.debug(Log.SCHEMA, uri.toString());
 
 		XmlRequest request = new XmlRequest(session.getClient(), uri, null);
 		try {
@@ -55,6 +47,8 @@ public class TableWSDL {
 		} catch (NoContentException e) {
 			throw new InvalidTableNameException(tablename);
 		}
+		if (logger.isTraceEnabled()) 
+			logger.trace(Log.SCHEMA, "\n" + XmlFormatter.format(doc));
 
 		readColumnNames = getColumnNames("getResponse");
 		readColumnTypes = getColumnTypes("getResponse");
