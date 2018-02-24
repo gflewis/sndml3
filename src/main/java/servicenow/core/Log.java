@@ -31,6 +31,10 @@ public class Log {
 		setContextValue("context", "GLOBAL");
 	}
 
+	static public void setSchemaContext(Table table) {
+		setContext(table, table.getName() + ".schema");
+	}
+	
 	static public synchronized void setContext(Table table, String context) {
 		clearContext();
 		setContextValue("table", table.getName());

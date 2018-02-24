@@ -185,7 +185,7 @@ public class Generator {
 	/**
 	 * Return the SQL Type corresponding to a Glide Type
 	 */
-	String sqlType(String glidetype, int size) {
+	private String sqlType(String glidetype, int size) {
 		String sqltype = null;
 		ListIterator<Element> alltypes = dialectTree.getChild("datatypes").
 			getChildren("typemap").listIterator();
@@ -223,6 +223,8 @@ public class Generator {
 	}
 	
 	String getCreateTable(Table table, String sqlTableName) throws IOException, InterruptedException {
+		Log.setSchemaContext(table);
+		// TODO: Dead code?
 		// We may be pulling the schema from a different ServiceNow instance
 		TableSchema tableSchema = table.getSchema();
 		TableWSDL tableWSDL = table.getWSDL();
@@ -253,7 +255,7 @@ public class Generator {
 		return result;
 	}
 
-	String sqlFieldDefinition(FieldDefinition fd) {
+	private String sqlFieldDefinition(FieldDefinition fd) {
 		String fieldname = fd.getName();
 		String fieldtype = fd.getType();
 		assert fieldname != null;
@@ -261,10 +263,10 @@ public class Generator {
 		int size = fd.getLength();
 		String sqlname = sqlName(fieldname);
 		String sqltype = sqlType(fieldtype, size);
-		logger.trace(fieldname + " " + fieldtype + "->" + sqltype);
+		logger.trace(Log.INIT, fieldname + " " + fieldtype + "->" + sqltype);
 		if (sqltype == null) {
 			String descr = sqlname + " " + fieldtype + "(" + size + ")";
-			logger.warn("Field type not mapped " + descr);
+			logger.warn(Log.INIT, "Field type not mapped " + descr);
 			return "-- " + descr;
 		}
 		String result = sqlname + " " + sqltype;

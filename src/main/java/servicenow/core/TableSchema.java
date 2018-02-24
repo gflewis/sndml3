@@ -88,7 +88,7 @@ public class TableSchema extends Writer {
 				FieldDefinition fieldDef = new FieldDefinition(table, rec);
 				fields.put(fieldname, fieldDef);
 				writerMetrics.incrementInserted();
-				logger.debug(String.format("%s.%s %s(%d)", 
+				logger.debug(Log.INIT, String.format("%s.%s %s(%d)", 
 						tablename, fieldname, fieldDef.getType(), fieldDef.getLength()));
 				this.empty = false;
 			}
