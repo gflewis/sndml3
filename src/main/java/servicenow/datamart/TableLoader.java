@@ -121,9 +121,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 			}
 			else {
 				Integer threads = config.getThreads();
-				PartSumTableReader reader = new PartSumTableReader(factory, partitionInterval, threads);
-				reader.initialize();				
-				logger.info(Log.INIT, reader.getPartition().toString());
+				reader = new PartSumTableReader(factory, partitionInterval, threads);
+				reader.initialize();
+				String partitionDescr = ((PartSumTableReader) reader).getPartition().toString();
+				logger.info(Log.INIT, partitionDescr);
 			}
 		}
 		assert reader != null;
