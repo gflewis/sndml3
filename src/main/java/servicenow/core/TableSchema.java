@@ -81,7 +81,7 @@ public class TableSchema extends Writer {
 	}
 
 	@Override
-	public void processRecords(RecordList recs) throws IOException, SQLException {
+	public void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
 		for (Record rec : recs) {
 			String fieldname = rec.getValue("element");
 			if (fieldname != null) {

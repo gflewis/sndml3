@@ -9,7 +9,7 @@ public class ReaderMetrics {
 	ReaderMetrics() {		
 	}
 	
-	ReaderMetrics(ReaderMetrics parent) {
+	public void setParent(ReaderMetrics parent) {
 		this.parent = parent;
 	}
 	

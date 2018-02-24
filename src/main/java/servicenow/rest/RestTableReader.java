@@ -14,8 +14,6 @@ public class RestTableReader extends TableReader {
 	private boolean statsEnabled = false;
 	protected TableStats stats = null;
 	
-//	static final int DEFAULT_PAGE_SIZE = 200;
-	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public RestTableReader(Table table) {
@@ -51,6 +49,8 @@ public class RestTableReader extends TableReader {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing query");
 		}
 		int offset = 0;
+		int pageSize = getPageSize();
+		assert pageSize > 0;
 		while (!finished) {
 			Parameters params = new Parameters();
 			params.add("sysparm_offset", Integer.toString(offset));
@@ -62,7 +62,7 @@ public class RestTableReader extends TableReader {
 			if (viewName != null) params.add("sysparm_view", viewName);
 			RecordList recs = apiREST.getRecords(params);
 			readerMetrics().increment(recs.size());
-			writer.processRecords(recs);			
+			writer.processRecords(this, recs);			
 			rowCount += recs.size();
 			offset += recs.size();
 			finished = (recs.size() < pageSize);

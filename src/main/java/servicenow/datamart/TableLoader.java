@@ -122,12 +122,15 @@ public class TableLoader implements Callable<WriterMetrics> {
 			else {
 				Integer threads = config.getThreads();
 				reader = new PartSumTableReader(factory, partitionInterval, threads);
+				factory.setParent(reader);
 				reader.initialize();
 				String partitionDescr = ((PartSumTableReader) reader).getPartition().toString();
 				logger.info(Log.INIT, partitionDescr);
 			}
 		}
 		assert reader != null;
+		assert writer != null;
+//		writer.setReader(reader);
 		assert reader.readerMetrics() != null;
 		logger.info(Log.INIT, String.format("begin load %s (%d rows)", tableLoaderName, reader.readerMetrics().getExpected()));
 		reader.call();

@@ -9,6 +9,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	public final Table table;
 	
 	private String readerName;
+	private TableReader parent;
 	private EncodedQuery baseQuery;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
@@ -39,6 +40,15 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	public String getReaderName() {
 		return readerName == null ? table.getName() : readerName;
+	}
+	
+	public void setParent(TableReader parent) {
+		this.parent = parent;
+		this.readerMetrics.setParent(parent.readerMetrics);
+	}
+	
+	public TableReader getParent() {
+		return this.parent;
 	}
 	
 	public void setLogContext() {

@@ -38,21 +38,21 @@ public abstract class TableWriter extends Writer {
 	}
 
 	@Override
-	public synchronized void processRecords(RecordList recs) throws IOException, SQLException {
+	public synchronized void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
 		writerMetrics.start();
 		for (Record rec : recs) {
 			writeRecord(rec);
 			logger.debug(Log.PROCESS, String.format("processing %s", rec.getKey().toString()));
 		}
 		writerMetrics.finish();
-		logProgress("loaded");
+		logProgress(reader, "loaded");
 		db.commit();
 	}
 	
-	private synchronized void logProgress(String status) {
-		assert this.reader != null;
+	private synchronized void logProgress(TableReader reader, String status) {
+		assert reader != null;
 		reader.setLogContext();
-		ReaderMetrics readerMetrics = getReader().readerMetrics();
+		ReaderMetrics readerMetrics = reader.readerMetrics();
 		assert readerMetrics != null;
 		if (readerMetrics.getParent() == null) 
 			logger.info(Log.PROCESS, String.format("%s %s", status, readerMetrics.getProgress()));

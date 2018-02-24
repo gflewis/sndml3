@@ -56,7 +56,7 @@ public class SoapKeySetTableReader extends TableReader {
 			if (viewName != null) params.add("__use_view", viewName);
 			RecordList recs = apiSOAP.getRecords(params, this.displayValue);
 			readerMetrics().increment(recs.size());						
-			writer.processRecords(recs);
+			writer.processRecords(this, recs);
 			rowCount += recs.size();
 			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));
 			fromIndex += pageSize;

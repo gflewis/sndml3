@@ -5,6 +5,7 @@ public abstract class TableReaderFactory {
 	protected final Table table;
 	protected final Writer writer;
 
+	protected TableReader parent;
 	protected EncodedQuery baseQuery;
 	protected DateTimeRange createdRange;
 	protected DateTimeRange updatedRange;
@@ -21,7 +22,11 @@ public abstract class TableReaderFactory {
 	public Table getTable() { 
 		return this.table; 
 	}
-		
+
+	public void setParent(TableReader parent) {
+		this.parent = parent;
+	}
+
 	public void setBaseQuery(EncodedQuery query) {
 		this.baseQuery = query;
 	}

@@ -67,7 +67,7 @@ public class KeySetTableReader extends TableReader {
 			params.add("sysparm_query", sliceQuery.toString());
 			RecordList recs = api.getRecords(params);
 			readerMetrics().increment(recs.size());			
-			writer.processRecords(recs);
+			writer.processRecords(this, recs);
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
 			fromIndex += pageSize;

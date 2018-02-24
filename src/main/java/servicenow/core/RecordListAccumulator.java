@@ -12,7 +12,7 @@ public class RecordListAccumulator extends Writer {
 		allRecords = new RecordList(table);
 	}
 	
-	public void processRecords(RecordList recs) {
+	public void processRecords(TableReader reader, RecordList recs) {
 		allRecords.addAll(recs);
 		writerMetrics.addInserted(recs.size());
 	}
