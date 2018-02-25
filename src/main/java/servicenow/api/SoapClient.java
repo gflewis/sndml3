@@ -56,10 +56,10 @@ public class SoapClient {
 			String responseElementName) throws IOException {
 		
 		URI uri = session.getURI(this.uriPath, uriParams);
-		Log.setSessionContext(session);
-		Log.setTableContext(tablename);
-		Log.setMethodContext(methodName);
-		Log.setURIContext(uri);
+//		Log.setSessionContext(session);
+//		Log.setTableContext(tablename);
+//		Log.setMethodContext(methodName);
+//		Log.setURIContext(uri);
 		Element method = createXmlElement(methodName, docParams);
 		Document requestDoc = createSoapDocument(method);	
 		if (logger.isDebugEnabled()) {

@@ -22,8 +22,8 @@ public class JsonTableAPI extends TableAPI {
 		return getKeys(null);
 	}
 		
-	public KeySet getKeys(EncodedQuery query) throws IOException {
-		Log.setMethodContext("getKeys");
+	public KeySet getKeys(EncodedQuery query) throws IOException {		
+		Log.setMethodContext(table, "getKeys");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action",  "getKeys");
 		if (!EncodedQuery.isEmpty(query))
@@ -36,7 +36,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public Record getRecord(Key sys_id) throws IOException {
-		Log.setMethodContext("get");
+		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
 		params.add("sysparm_sys_id",  sys_id.toString());
@@ -64,7 +64,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public RecordList getRecords(Parameters params) throws IOException {
-		Log.setMethodContext("getRecords");
+		Log.setMethodContext(table, "getRecords");
 		JSONObject requestObj = params.toJSON();
 		requestObj.put("sysparm_action", "getRecords");
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
@@ -74,7 +74,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 		
 	public InsertResponse insertRecord(Parameters fields) throws IOException {
-		Log.setMethodContext("insert");
+		Log.setMethodContext(table, "insert");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action", "insert");
 		Parameters.appendToObject(fields, requestObj);
@@ -86,8 +86,20 @@ public class JsonTableAPI extends TableAPI {
 		return list.get(0);
 	}
 	
+	public void updateRecord(Key key, Parameters fields) throws IOException {
+		Log.setMethodContext(table, "update");
+		JSONObject requestObj = new JSONObject();
+		requestObj.put("sysparm_action", "update");
+		requestObj.put("sysparm_sys_id",  key.toString());
+		Parameters.appendToObject(fields, requestObj);
+		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
+		JSONObject responseObj = request.execute();
+		RecordList list = new RecordList(table, responseObj, "records");
+		if (list.size() != 1) throw new JsonResponseException(request);
+	}
+
 	public boolean deleteRecord(Key key) throws IOException {
-		Log.setMethodContext("deleteRecord");
+		Log.setMethodContext(table, "deleteRecord");
 		JSONObject requestObj = new JSONObject(); 
 		requestObj.put("sysparm_action", "deleteRecord");
 		requestObj.put("sysparm_sys_id",  key.toString());
@@ -98,18 +110,6 @@ public class JsonTableAPI extends TableAPI {
 		if (list.size() > 1) throw new JsonResponseException(request);
 		if (list.get(0).getKey().equals(key)) return true;
 		throw new JsonResponseException(request);
-	}
-
-	public void updateRecord(Key key, Parameters fields) throws IOException {
-		Log.setMethodContext("update");
-		JSONObject requestObj = new JSONObject();
-		requestObj.put("sysparm_action", "update");
-		requestObj.put("sysparm_sys_id",  key.toString());
-		Parameters.appendToObject(fields, requestObj);
-		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
-		JSONObject responseObj = request.execute();
-		RecordList list = new RecordList(table, responseObj, "records");
-		if (list.size() != 1) throw new JsonResponseException(request);
 	}
 
 	@Override

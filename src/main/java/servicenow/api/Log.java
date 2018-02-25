@@ -43,6 +43,11 @@ public class Log {
 		setContextValue("context", context);
 	}
 	
+	static public synchronized void setMethodContext(Table table, String method) {
+		setTableContext(table);
+		setContextValue("method", method);
+	}
+	
 	static public synchronized void setTableContext(Table table) {
 		setTableContext(table.getName());
 		setSessionContext(table.getSession());
@@ -56,10 +61,6 @@ public class Log {
 		setContextValue("table", tablename);
 	}
 			
-	static public synchronized void setMethodContext(String method) {
-		setContextValue("method", method);
-	}
-	
 	static public synchronized void setURIContext(URI uri) {
 		setContextValue("uri", uri.toString());
 	}

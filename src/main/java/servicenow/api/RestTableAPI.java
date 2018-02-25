@@ -26,6 +26,7 @@ public class RestTableAPI extends TableAPI {
 	}
 		
 	public TableStats getStats(EncodedQuery filter, boolean includeDates) throws IOException {
+		Log.setMethodContext(table, "STATS");
 		TableStats stats = new TableStats();
 		Parameters params = new Parameters();
 		if (filter != null) params.add("sysparm_query", filter.toString());
@@ -53,6 +54,7 @@ public class RestTableAPI extends TableAPI {
 	}
 	
 	public Record getRecord(Key key) throws IOException {
+		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
 		JSONObject responseObj = request.execute();
@@ -90,6 +92,7 @@ public class RestTableAPI extends TableAPI {
 	}
 	
 	public RecordList getRecords(Parameters params) throws IOException {		
+		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", null, params);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
 		JSONObject responseObj = request.execute();
@@ -100,6 +103,7 @@ public class RestTableAPI extends TableAPI {
 	}
 
 	public InsertResponse insertRecord(Parameters fields) throws IOException {
+		Log.setMethodContext(table, "POST");
 		URI uri = getURI("table", null, null);
 		JSONObject requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
@@ -112,6 +116,7 @@ public class RestTableAPI extends TableAPI {
 	}
 
 	public void updateRecord(Key key, Parameters fields) throws IOException {
+		Log.setMethodContext(table, "PUT");
 		URI uri = getURI("table", key, null);
 		JSONObject requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.PUT, requestObj);
@@ -123,6 +128,7 @@ public class RestTableAPI extends TableAPI {
 	}
 	
 	public boolean deleteRecord(Key key) throws IOException {
+		Log.setMethodContext(table, "DELETE");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.DELETE, null);
 		JSONObject responseObj = request.execute();

@@ -26,7 +26,7 @@ public class CRUDTest {
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
 		return new String[] {"mydevjson", "mydevsoap", "mydevrest"};
-//		return new String[] {"mydevrest"};
+//		return new String[] {"mydevsoap"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());

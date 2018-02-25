@@ -21,7 +21,7 @@ public class SoapTableAPI extends TableAPI {
 	public TableWSDL getWSDL() throws IOException {
 		if (wsdl==null) {
 			Log.setContext(this.table, getTableName() + ".WSDL");
-			Log.setMethodContext("WSDL");					
+			Log.setMethodContext(table, "WSDL");					
 			wsdl = new TableWSDL(this.session, getTableName());
 		}
 		return wsdl;
@@ -44,6 +44,7 @@ public class SoapTableAPI extends TableAPI {
 	 * This method is called by {@link KeyReader}.
 	 */
 	public KeySet getKeys(Parameters params) throws IOException {
+		Log.setMethodContext(table, "getKeys");
 		Element responseElement = client.executeRequest("getKeys", params, null, "getKeysResponse");
 		Namespace ns = responseElement.getNamespace();
 		int size = Integer.parseInt(responseElement.getChildText("count", ns));
@@ -66,6 +67,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 	
 	public Record getRecord(Key key) throws IOException {
+		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters("sys_id", key.toString());
 		Element responseElement = client.executeRequest("get", params, null, "getResponse");
 		if (responseElement.getContentSize() == 0) return null;
@@ -117,6 +119,7 @@ public class SoapTableAPI extends TableAPI {
 	 */
 	
 	public RecordList getRecords(Parameters docParams, boolean displayValue) throws IOException {
+		Log.setMethodContext(table, "getRecords");
 		Parameters uriParams = new Parameters();
 		uriParams.add("displayvalue", displayValue ? "all" : "false");
 		Element responseElement = 
@@ -133,6 +136,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 
 	public InsertResponse insertRecord(Parameters docParams) throws IOException {
+		Log.setMethodContext(table, "insert");
 		Element responseElement = 
 			client.executeRequest("insert", docParams, null, "insertResponse");
 		Record rec = new XmlRecord(getTable(), responseElement);
@@ -140,6 +144,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 
 	public void updateRecord(Key key, Parameters fields) throws IOException {
+		Log.setMethodContext(table, "update");
 		Parameters docParams = new Parameters();
 		docParams.add(fields);
 		docParams.add("sys_id", key.toString());
@@ -149,6 +154,7 @@ public class SoapTableAPI extends TableAPI {
 	}
 	
 	public boolean deleteRecord(Key key) throws IOException {
+		Log.setMethodContext(table, "deleteRecord");
 		Parameters docParams = new Parameters("sys_id", key.toString());
 		Element responseElement =
 			client.executeRequest("deleteRecord", docParams, null, "deleteRecordResponse");
