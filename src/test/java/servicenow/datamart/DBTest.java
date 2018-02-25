@@ -7,8 +7,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import servicenow.core.TestingException;
-import servicenow.core.TestingManager;
+import servicenow.api.TestingException;
+import servicenow.api.TestingManager;
 import servicenow.datamart.Database;
 
 import java.net.URISyntaxException;

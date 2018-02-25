@@ -18,8 +18,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 
-import servicenow.core.*;
-import servicenow.soap.TableWSDL;
+import servicenow.api.*;
 
 public class Generator {
 

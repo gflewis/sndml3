@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.core.DateTime;
+import servicenow.api.DateTime;
 import servicenow.datamart.ConfigParseException;
 import servicenow.datamart.LoaderConfig;
 

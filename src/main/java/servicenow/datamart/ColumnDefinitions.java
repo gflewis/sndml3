@@ -7,8 +7,7 @@ import java.util.ArrayList;
 
 import org.slf4j.Logger;
 
-import servicenow.core.*;
-import servicenow.soap.TableWSDL;
+import servicenow.api.*;
 
 public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 

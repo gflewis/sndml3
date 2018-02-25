@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import servicenow.core.*;
+import servicenow.api.*;
 import servicenow.datamart.Database;
 
 public class CreateTableTest {

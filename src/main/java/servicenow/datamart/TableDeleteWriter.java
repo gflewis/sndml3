@@ -1,12 +1,9 @@
 package servicenow.datamart;
 
-import servicenow.core.*;
-
 import java.io.IOException;
 import java.sql.SQLException;
 
-import servicenow.core.Record;
-import servicenow.core.Table;
+import servicenow.api.*;
 
 public class TableDeleteWriter extends TableWriter {
 

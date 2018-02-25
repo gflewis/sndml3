@@ -1,9 +1,9 @@
 package servicenow.datamart;
 
-import servicenow.core.*;
-
 import java.sql.SQLException;
 import java.util.HashMap;
+
+import servicenow.api.*;
 
 public class DeleteStatement extends SqlStatement {
 

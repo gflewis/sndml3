@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
-import servicenow.core.Record;
-import servicenow.core.Table;
+import servicenow.api.Record;
+import servicenow.api.Table;
 
 public class TableInsertWriter extends TableWriter {
 

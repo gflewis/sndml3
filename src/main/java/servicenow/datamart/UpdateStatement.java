@@ -3,7 +3,7 @@ package servicenow.datamart;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import servicenow.core.Record;
+import servicenow.api.Record;
 
 public class UpdateStatement extends SqlStatement {
 

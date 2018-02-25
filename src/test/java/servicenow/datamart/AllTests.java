@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import servicenow.core.*;
+import servicenow.api.*;
 import servicenow.datamart.Database;
 
 
@@ -42,7 +42,7 @@ public class AllTests {
 
 	@SuppressWarnings("rawtypes")
 	public static Logger getLogger(Class cls) {
-		return servicenow.core.TestingManager.getLogger(cls);
+		return servicenow.api.TestingManager.getLogger(cls);
 	}
 
 	

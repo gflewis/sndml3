@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import java.util.Properties;
 import org.junit.Test;
 
-import servicenow.core.*;
+import servicenow.api.*;
 import servicenow.datamart.DateTimeFactory;
 
 public class DateTimeFactoryTest {

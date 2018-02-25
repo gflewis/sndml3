@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.slf4j.Logger;
 
-import servicenow.core.*;
+import servicenow.api.*;
 
 public abstract class TableWriter extends Writer {
 

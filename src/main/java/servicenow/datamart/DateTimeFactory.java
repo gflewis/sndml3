@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.core.DateTime;
-import servicenow.core.Log;
+import servicenow.api.DateTime;
+import servicenow.api.Log;
 
 public class DateTimeFactory {
 

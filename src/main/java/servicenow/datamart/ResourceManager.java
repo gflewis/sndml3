@@ -2,7 +2,7 @@ package servicenow.datamart;
 
 import java.util.Properties;
 
-import servicenow.core.*;
+import servicenow.api.*;
 
 public class ResourceManager {
 

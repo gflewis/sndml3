@@ -16,7 +16,7 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 
-import servicenow.core.*;
+import servicenow.api.*;
 
 public class Database {
 

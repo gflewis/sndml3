@@ -1,9 +1,6 @@
 package servicenow.datamart;
 
-import servicenow.core.*;
-import servicenow.json.KeySetTableReaderFactory;
-import servicenow.rest.PartSumTableReader;
-import servicenow.rest.RestTableReaderFactory;
+import servicenow.api.*;
 
 import java.io.IOException;
 import java.sql.SQLException;

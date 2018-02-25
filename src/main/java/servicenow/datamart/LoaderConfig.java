@@ -8,7 +8,7 @@ import java.io.Reader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.core.*;
+import servicenow.api.*;
 
 public class LoaderConfig extends Config {
 

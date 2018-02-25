@@ -1,6 +1,6 @@
 package servicenow.datamart;
 
-import servicenow.core.*;
+import servicenow.api.*;
 
 public class TableConfig extends Config {
 
