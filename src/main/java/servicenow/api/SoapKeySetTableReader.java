@@ -25,9 +25,12 @@ public class SoapKeySetTableReader extends TableReader {
 
 	@Override
 	public void initialize() throws IOException {
+		EncodedQuery query = getQuery();
+		logger.debug(Log.INIT, "initialize query=" + query);
 		super.initialize();
-		allKeys = apiSOAP.getKeys(getQuery());
+		allKeys = apiSOAP.getKeys(query);
 		setExpected(allKeys.size());
+		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 	}
 
 	public Integer getExpected() {

@@ -29,11 +29,14 @@ public class RestTableReader extends TableReader {
 		return this;
 	}
 
-	public void initialize() throws IOException {
+	public void initialize() throws IOException {		
+		EncodedQuery query = getQuery();
+		logger.debug(Log.INIT, String.format("initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));
 		super.initialize();
 		if (statsEnabled) {
-			stats = apiREST.getStats(getQuery(), false);
+			stats = apiREST.getStats(query, false);
 			setExpected(stats.getCount());
+			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 		}
 	}
 	

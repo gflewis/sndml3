@@ -22,8 +22,6 @@ public class RestTableAPI extends TableAPI {
 		String path = "api/now/" + api + "/" + table.getName();
 		if (sys_id != null) path += "/" + sys_id.toString();
 		URI uri = session.getURI(path, params);
-//		setAPIContext(uri);
-//		logger.debug(Log.REQUEST, uri.toString());
 		return uri;
 	}
 		
@@ -40,14 +38,6 @@ public class RestTableAPI extends TableAPI {
 		URI uri = getURI("stats", null, params);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
 		JSONObject responseObj = request.execute();
-				
-//		HttpGet request = new HttpGet(uri);
-//		request.setHeader("Accept", "application/json");
-//		CloseableHttpResponse response = getSession().getClient().execute(request);
-//		String responseBody = EntityUtils.toString(response.getEntity());
-//		logger.debug(Log.PROCESS, "getStats\n" + responseBody);
-//		JSONObject obj = new JSONObject(responseBody);
-		
 		request.checkForInsufficientRights();
 		JSONObject result = responseObj.getJSONObject("result").getJSONObject("stats");
 		stats.count = Integer.parseInt(result.getString("count"));
@@ -58,7 +48,7 @@ public class RestTableAPI extends TableAPI {
 			DateTime maxCreated = new DateTime(maxValues.getString("sys_created_on")); 
 			stats.created = new DateTimeRange(minCreated, maxCreated);
 		}
-		logger.info(Log.PROCESS, String.format("getStats query=%s count=%s", filter, stats.count));
+		logger.info(Log.PROCESS, String.format("getStats query=\"%s\" count=%s", filter, stats.count));
 		return stats;		
 	}
 	

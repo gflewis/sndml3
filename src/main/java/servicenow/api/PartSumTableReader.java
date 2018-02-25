@@ -31,6 +31,9 @@ public class PartSumTableReader extends TableReader {
 	public PartSumTableReader(TableReaderFactory factory, DateTime.Interval interval, Integer threads) {
 		super(factory.getTable());
 		this.factory = factory;
+		setBaseQuery(factory.baseQuery);
+		setCreatedRange(factory.createdRange);
+		setUpdatedRange(factory.updatedRange);
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
 		setWriter(factory.getWriter());
@@ -75,8 +78,11 @@ public class PartSumTableReader extends TableReader {
 	
 	@Override
 	public void initialize() throws IOException {
-		stats = table.rest().getStats(getQuery(), true);
+		EncodedQuery query = getQuery();
+		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
+		stats = table.rest().getStats(query, true);
 		setExpected(stats.getCount());
+		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 		range = stats.getCreated();
 		partition = new DatePartition(range, interval);
 		partReaders = new ArrayList<TableReader>();
