@@ -5,7 +5,6 @@ import servicenow.api.*;
 public class TableConfig extends Config {
 
 	private Map items;
-	
 	private String name;
 	private String source;
 	private String target;
@@ -112,11 +111,19 @@ public class TableConfig extends Config {
 		throw new ConfigParseException("Target not specified");
 	}
 
+	public void setAction(LoaderAction action) {
+		this.action = action;
+	}
+	
 	public LoaderAction getAction() {
 		if (this.action == null) 
 			return this.getTruncate() ? LoaderAction.INSERT : LoaderAction.UPDATE;
 		else
 			return this.action;
+	}
+	
+	public void setTruncate(boolean truncate) {
+		this.truncate = truncate;
 	}
 	
 	public boolean getTruncate() {
@@ -130,6 +137,10 @@ public class TableConfig extends Config {
 	@Deprecated
 	public DateTimeRange getUpdated() {
 		return this.updated;
+	}
+	
+	public void setSince(DateTime since) {
+		this.since = since;
 	}
 	
 	public DateTime getSince() {

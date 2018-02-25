@@ -2,12 +2,9 @@ package servicenow.api;
 
 import org.junit.*;
 import org.slf4j.Logger;
-
-import servicenow.api.*;
 import servicenow.datamart.AllTests;
 
 import static org.junit.Assert.*;
-
 
 public class RestTableReaderTest {
 

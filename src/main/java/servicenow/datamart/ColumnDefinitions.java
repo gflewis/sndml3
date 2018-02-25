@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
-public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
+public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,10 +35,10 @@ public class ColumnDefinitions extends ArrayList<SqlFieldDefinition> {
 			int size = columns.getInt(7);
 			String glidename = generator.glideName(name);
 			if (wsdl.canReadField(glidename)) {
-				SqlFieldDefinition defn =
-					new SqlFieldDefinition(name, type, size, glidename);
+				DatabaseFieldDefinition defn =
+					new DatabaseFieldDefinition(name, type, size, glidename);
 				this.add(defn);
-				logger.debug(Log.SCHEMA, name + " type=" + type + " size=" + size);				
+				logger.trace(Log.SCHEMA, name + " type=" + type + " size=" + size);				
 			}
 			else {
 				logger.warn(Log.SCHEMA, name + " type=" + type + " size=" + size + " (not mapped)");				

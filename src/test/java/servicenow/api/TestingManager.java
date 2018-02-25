@@ -4,18 +4,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
-import servicenow.api.Log;
-import servicenow.api.Session;
+import servicenow.datamart.ResourceManager;
 
 public class TestingManager {
 
 	static final Logger logger = LoggerFactory.getLogger(TestingManager.class);
-	public static final Marker mrkTest = MarkerFactory.getMarker("TEST");
 	
 	static final String TEST_PROFILES_DIR = "profiles/";
 	static final String DEFAULT_PROFILE = "mydev";
@@ -40,6 +38,7 @@ public class TestingManager {
 		catch (IOException e) {
 			throw new TestingException("Unable to load testing profile: " + name, e);
 		}
+		ResourceManager.initialize(properties);
 	}
 	
 	public static void loadDefaultProfile() throws TestingException {
@@ -90,5 +89,27 @@ public class TestingManager {
 		if (value == null) throw new IllegalArgumentException(propname);
 		return value;
 	}
+
+	public static void banner(Logger logger, String msg) {
+		int len = msg.length();
+		String bar = "\n" + StringUtils.repeat("*", len + 4);
+		logger.info(Log.TEST, DateTime.now() + " " + msg + bar + "\n* " + msg + " *" + bar);
+	}
+
+	public static void banner(Logger logger, String classname, String msg) {
+		banner(logger, classname + " - " + msg);
+	}
+	
+	public static void banner(Logger logger, @SuppressWarnings("rawtypes") Class klass, String msg) {
+		banner(logger, klass.getSimpleName(), msg);
+	}
+	
+	
+	public static void sleep(int sleepSeconds) throws InterruptedException {
+		String msg = "Sleeping " + sleepSeconds + " sec...";
+		logger.info(Log.TEST, msg);
+		Thread.sleep(1000 * sleepSeconds);
+	}
+	
 	
 }

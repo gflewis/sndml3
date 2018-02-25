@@ -2,7 +2,10 @@
 <Configuration>
   <Appenders>
     <Console name="Console">
-      <ThresholdFilter level="debug" />
+      <Filters>
+        <ThresholdFilter level="debug" />
+        <MarkerFilter marker="SCHEMA" onMatch="DENY" onMismatch="NEUTRAL" />
+      </Filters>
       <PatternLayout>
         <Pattern>%d{HH:mm:ss} %level %logger{1} %X{context} %marker: %msg%n</Pattern>  
       </PatternLayout>

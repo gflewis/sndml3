@@ -21,7 +21,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	private final TableConfig config;
 	
 	TableReader reader;
-	TableWriter writer;
+	DatabaseTableWriter writer;
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -45,7 +45,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	
 	TableLoader(TableConfig config) {		
 		this.session = ResourceManager.getSession();
-		this.db = ResourceManager.getDatabaseWriter();
+		this.db = ResourceManager.getDatabase();
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTargetName();
 		this.tableLoaderName = config.getName();
@@ -71,13 +71,13 @@ public class TableLoader implements Callable<WriterMetrics> {
 			String.format("call table=%s action=%s", table.getName(), action.toString()));;
 		switch (action) {
 		case UPDATE: 
-			writer = new TableUpdateWriter(tableLoaderName, db, table, sqlTableName);
+			writer = new DatabaseUpdateWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		case INSERT:
-			writer = new TableInsertWriter(tableLoaderName, db, table, sqlTableName);
+			writer = new DatabaseInsertWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		case PRUNE:
-			writer = new TableDeleteWriter(tableLoaderName, db, table, sqlTableName);
+			writer = new DatabaseDeleteWriter(tableLoaderName, db, table, sqlTableName);
 			break;
 		default:
 			throw new AssertionError();

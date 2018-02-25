@@ -30,7 +30,7 @@ public class ResourceManager {
 		session = s;
 	}
 	
-	public static Database getDatabaseWriter() {
+	public static Database getDatabase() {
 		assert db != null;
 		return db;
 	}

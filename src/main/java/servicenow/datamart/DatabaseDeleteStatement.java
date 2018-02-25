@@ -5,9 +5,9 @@ import java.util.HashMap;
 
 import servicenow.api.*;
 
-public class DeleteStatement extends SqlStatement {
+public class DatabaseDeleteStatement extends DatabaseStatement {
 
-	public DeleteStatement(Database db, String sqlTableName) throws SQLException {
+	public DatabaseDeleteStatement(Database db, String sqlTableName) throws SQLException {
 		super(db, "delete", sqlTableName, null);
 	}
 	

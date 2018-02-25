@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
-public abstract class SqlStatement {
+public abstract class DatabaseStatement {
 
 	final Database dbw;
 	final String sqlTableName;
@@ -31,7 +31,7 @@ public abstract class SqlStatement {
     
 	final private Logger logger = Log.logger(this.getClass());
 	
-	public SqlStatement(Database dbw, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
+	public DatabaseStatement(Database dbw, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
 		this.dbw = dbw;
 		this.sqlTableName = sqlTableName;
 		this.templateName = templateName;
@@ -58,7 +58,7 @@ public abstract class SqlStatement {
 	 * @throws SQLException
 	 */	
 	public void bindField(int bindCol, Record rec, int glideCol) throws SQLException {
-		SqlFieldDefinition defn = columns.get(glideCol);
+		DatabaseFieldDefinition defn = columns.get(glideCol);
 		String glidename = defn.getGlideName();
 		String value = rec.getValue(glidename);
 		try {
@@ -71,7 +71,7 @@ public abstract class SqlStatement {
 		}		
 	}
 	
-	public void bindField(int bindCol, Record rec, SqlFieldDefinition d, String value) throws SQLException {
+	public void bindField(int bindCol, Record rec, DatabaseFieldDefinition d, String value) throws SQLException {
 		String glidename = d.getGlideName();
 		int sqltype = d.sqltype;
 		// If value is null then bind to null and exit

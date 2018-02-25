@@ -7,20 +7,17 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
-public abstract class TableWriter extends Writer {
+public abstract class DatabaseTableWriter extends Writer {
 
-	final private Database db;
-	final private Table table;
-	final private String sqlTableName;
+	final protected Database db;
+	final protected Table table;
+	final protected String sqlTableName;
 	
-	private ColumnDefinitions columns;
-	protected InsertStatement insertStmt;
-	protected UpdateStatement updateStmt;
-	protected DeleteStatement deleteStmt;
+	protected ColumnDefinitions columns;
 	
 	final private Logger logger = Log.logger(this.getClass());
 	
-	public TableWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
+	public DatabaseTableWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
 		super();
 		this.db = db;
 		this.table = table;
@@ -31,9 +28,6 @@ public abstract class TableWriter extends Writer {
 	@Override
 	public void open() throws SQLException, IOException {
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
-		insertStmt = new InsertStatement(this.db, this.sqlTableName, columns);
-		updateStmt = new UpdateStatement(this.db, this.sqlTableName, columns);
-		deleteStmt = new DeleteStatement(this.db, this.sqlTableName);
 		writerMetrics.start();
 	}
 

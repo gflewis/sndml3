@@ -3,14 +3,14 @@ package servicenow.datamart;
 /**
  * Contains the JDBC/SQL type and the Glide type for a single field.
  */
-public class SqlFieldDefinition {
+public class DatabaseFieldDefinition {
 
 	final String name;
 	final int sqltype;
 	final int size;
 	final String glidename;
 	
-	SqlFieldDefinition(String name, int sqltype, int size, String glidename) {
+	DatabaseFieldDefinition(String name, int sqltype, int size, String glidename) {
 		this.name = name;
 		this.sqltype = sqltype;
 		this.size = size;	

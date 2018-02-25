@@ -5,9 +5,9 @@ import java.util.HashMap;
 
 import servicenow.api.Record;
 
-public class UpdateStatement extends SqlStatement {
+public class DatabaseUpdateStatement extends DatabaseStatement {
 
-	public UpdateStatement(Database db, String sqlTableName, ColumnDefinitions columns)
+	public DatabaseUpdateStatement(Database db, String sqlTableName, ColumnDefinitions columns)
 			throws SQLException {
 		super(db, "update", sqlTableName, columns);
 	}

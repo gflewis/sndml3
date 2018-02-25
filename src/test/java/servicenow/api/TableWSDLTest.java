@@ -5,14 +5,11 @@ import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
 
-import servicenow.api.*;
-import servicenow.datamart.AllTests;
-
 import static org.junit.Assert.*;
 
 public class TableWSDLTest {
 
-	static Logger logger = AllTests.getLogger(TableWSDLTest.class);
+	static Logger logger = TestingManager.getLogger(TableWSDLTest.class);
 
 	Session session;
 	String tablename;
