@@ -66,8 +66,7 @@ public class TableSchema /* extends Writer */ {
 			logger.error(Log.INIT, "Unable to read schema for: " + tablename +
 				" (check access controls for sys_dictionary and sys_db_object)");
 			if (tablename.equals("sys_db_object") || tablename.equals("sys_dictionary"))
-				throw new InsufficientRightsException(dictionary.getName(), 
-						"Unable to generate schema for " + tablename);
+				throw new InsufficientRightsException("Unable to generate schema for " + tablename);
 			else
 				throw new InvalidTableNameException(tablename);
 		}

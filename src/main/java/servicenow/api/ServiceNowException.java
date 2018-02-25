@@ -19,4 +19,8 @@ public class ServiceNowException extends IOException {
 		super(message);
 	}
 	
+	public ServiceNowException(ServiceNowRequest request) {
+		super(request.toString());
+	}
+	
 }

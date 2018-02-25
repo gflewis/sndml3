@@ -11,8 +11,6 @@ import java.util.Map;
 
 /**
  * This class holds a list of name/value pairs.
- * 
- * @author Giles Lewis
  */
 public class Parameters extends LinkedHashMap<String, String> {
 
@@ -76,9 +74,18 @@ public class Parameters extends LinkedHashMap<String, String> {
 	
 	public JSONObject toJSON() {
 		JSONObject obj = new JSONObject();
-		for (Map.Entry<String,String> entry : this.entrySet()) {
+		appendToObject(this, obj);
+		return obj;
+	}
+	
+	/**
+	 * Append a list of parameters to a JSON Object
+	 * @param params - The parameters which are to be appended
+	 * @param obj - The JSON Object to which the parameters are appended
+	 */
+	public static void appendToObject(Parameters params, JSONObject obj) {
+		for (Map.Entry<String,String> entry : params.entrySet()) {
 			obj.put(entry.getKey(), entry.getValue());
-		}
-		return obj;		
+		}		
 	}
 }

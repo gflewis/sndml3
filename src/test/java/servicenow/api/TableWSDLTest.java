@@ -17,6 +17,7 @@ public class TableWSDLTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		TestingManager.loadDefaultProfile();
 	}
 
 	@AfterClass
@@ -35,7 +36,7 @@ public class TableWSDLTest {
 		session = TestingManager.getSession();
 	}
 
-	@Test 
+	@Test
 	public void testGoodTable() throws Exception {
 		TableWSDL wsdl = getWSDL("incident");
 		List<String> columns = wsdl.getReadFieldNames();
@@ -45,14 +46,14 @@ public class TableWSDLTest {
 	}
 
 	@Test (expected = InvalidTableNameException.class)
-	public void badTableTest() throws Exception {
+	public void testBadTableName() throws Exception {
 		String tablename = "incidentxxx";
 		@SuppressWarnings("unused")
 		TableWSDL wsdl = getWSDL(tablename);
 		fail();
 	}
 
-	@Test 
+	@Test
 	public void testDefaultWSDL() throws Exception {
 		TableWSDL wsdl = getWSDL("incident");
 		assertTrue(wsdl.canReadField("sys_updated_on"));

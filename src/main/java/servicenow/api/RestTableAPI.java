@@ -128,7 +128,7 @@ public class RestTableAPI extends TableAPI {
 		JSONObject responseObj = request.execute();
 		if (responseObj == null) return true;
 		if (request.recordNotFound()) return false;
-		throw new JsonResponseException(responseObj);
+		throw new JsonResponseException(request);
 	}
 	
 	@Override

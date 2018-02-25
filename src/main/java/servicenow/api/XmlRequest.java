@@ -6,12 +6,11 @@ import java.net.URI;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -21,24 +20,20 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 
-class XmlRequest {
+class XmlRequest extends ServiceNowRequest {
 
 	final Logger logger = Log.logger(this.getClass());
 
-	CloseableHttpClient client;
-	URI uri;
 	final Document requestDoc;
-	final String requestText;
-	final HttpRequestBase request;
+	final HttpUriRequest request;
 	
 	public XmlRequest(CloseableHttpClient client, URI uri, Document requestDoc) {
-		this.client = client;
-		this.uri = uri;
+		super(client, uri, getMethod(requestDoc));
 		this.requestDoc = requestDoc;
 		logger.debug(Log.REQUEST, uri.toString());
 		// if requestDoc is null then use GET
 		// this is only applicable for WSDL
-		if (requestDoc == null) {
+		if (method == HttpMethod.GET) {
 			requestText = null;
 			request = new HttpGet(uri);
 		}
@@ -52,32 +47,36 @@ class XmlRequest {
 		}		
 	}
 	
+	private static HttpMethod getMethod(Document requestDoc) {
+		if (requestDoc == null) 
+			return HttpMethod.GET;
+		else 
+			return HttpMethod.POST;
+	}
+	
 	public Document execute() throws IOException {
 		CloseableHttpResponse response = client.execute(request);		
-		StatusLine statusLine = response.getStatusLine();		
+		statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
 		HttpEntity responseEntity = response.getEntity();
 		Header contentTypeHeader = responseEntity.getContentType();
-		String contentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
-		String responseText = EntityUtils.toString(responseEntity);
+		responseContentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();
+		responseText = EntityUtils.toString(responseEntity);
 		int responseLen = responseText == null ? 0 : responseText.length();
-		String errmsg = statusLine.toString();
 		logger.debug(Log.RESPONSE,
 			String.format("status=\"%s\" contentType=%s len=%d", 
-				statusLine, contentType, responseLen));
+				statusLine, responseContentType, responseLen));
 		if (statusCode == 401 || statusCode == 403) {
-			if (requestText != null) errmsg += "\nREQUEST:\n" + requestText + "\n";
-			logger.error(Log.RESPONSE, errmsg);
-			throw new InsufficientRightsException(uri, requestText);
+			logger.error(Log.RESPONSE, this.toString());
+			throw new InsufficientRightsException(this);
 		}
-		if (contentType == null) {
-			logger.error(Log.RESPONSE, 
-				String.format("STATUS=\"%s\"\nREQUEST:\n%s\n", statusLine, requestText));
-			throw new NoContentException(uri);
+		if (responseContentType == null) {
+			logger.error(Log.RESPONSE, this.toString());
+			throw new NoContentException(this);
 		}
 		// If we asked for XML and we got HTML, it must be an error page
-		if ("text/html".equals(contentType))
-			throw new InstanceUnavailableException(this.uri, responseText);
+		if ("text/html".equals(responseContentType))
+			throw new InstanceUnavailableException(this);
 		SAXBuilder parser = new SAXBuilder();
 		Document responseDoc = null;	
 		try {

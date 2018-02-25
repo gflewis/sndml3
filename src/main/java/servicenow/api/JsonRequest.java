@@ -5,7 +5,6 @@ import java.net.URI;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -21,22 +20,15 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonRequest {
+public class JsonRequest extends ServiceNowRequest {
 
-	final CloseableHttpClient client;
-	final URI uri;
-	final HttpMethod method;
 	final JSONObject requestObj;
-	String requestText;
-	String responseText;
 	JSONObject responseObj;
 	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	JsonRequest(CloseableHttpClient client, URI uri, HttpMethod method, JSONObject requestObj) {
-		this.client = client;
-		this.uri = uri;
-		this.method = method;
+		super(client, uri, method);
 		this.requestObj = requestObj;
 	}
 
@@ -88,38 +80,40 @@ public class JsonRequest {
 		}
 		request.setHeader("Accept", "application/json");
 		CloseableHttpResponse response = client.execute(request);		
-		StatusLine statusLine = response.getStatusLine();		
+		statusLine = response.getStatusLine();		
 		int statusCode = statusLine.getStatusCode();
 		HttpEntity responseEntity = response.getEntity();
-		String contentType = null;
+		responseContentType = null;
 		if (responseEntity != null) {
 			Header contentTypeHeader = responseEntity.getContentType();
-			if (contentTypeHeader != null) contentType = contentTypeHeader.getValue();
+			if (contentTypeHeader != null) responseContentType = contentTypeHeader.getValue();
 			responseText = EntityUtils.toString(responseEntity);			
 		}
 		response.close();
 		int responseLen = responseText == null ? 0 : responseText.length();
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
-					statusLine, contentType, responseLen));
+					statusLine, responseContentType, responseLen));
 		logger.trace(Log.RESPONSE, responseText);
 		if (statusCode == 204) {
 			// Success - No Content
 			return null;
 		}
 		if (statusCode == 401 || statusCode == 403) {
-			logger.error(Log.REQUEST, Log.join(uri, requestText));
-			logger.error(Log.RESPONSE, statusLine.toString());
-			throw new InsufficientRightsException(uri, requestText);
+//			logger.error(Log.REQUEST, Log.join(uri, requestText));
+//			logger.error(Log.RESPONSE, statusLine.toString());
+			logger.error(Log.RESPONSE, this.toString());
+			throw new InsufficientRightsException(this);
 		}
-		if (responseText == null || contentType == null) {
+		if (responseText == null || responseContentType == null) {
 			// should have gotten an HTTP 204 for No Content
-			logger.error(Log.REQUEST, Log.join(uri, requestText));
-			logger.error(Log.RESPONSE, statusLine.toString());
-			throw new NoContentException(uri, requestText);
+//			logger.error(Log.REQUEST, Log.join(uri, requestText));
+//			logger.error(Log.RESPONSE, statusLine.toString());
+			logger.error(Log.RESPONSE, this.toString());
+			throw new NoContentException(this);
 		}		
-		if ("text/html".equals(contentType))
-			throw new InstanceUnavailableException(request.getURI(), responseText);						
+		if ("text/html".equals(responseContentType))
+			throw new InstanceUnavailableException(this);						
 		try {
 			responseObj = new JSONObject(responseText);
 		}
@@ -146,7 +140,7 @@ public class JsonRequest {
 		if (err.contains("not authorized") ||
 				err.contains("insufficient rights") ||
 				err.contains("no permission"))
-			throw new InsufficientRightsException(uri);
+			throw new InsufficientRightsException(this);
 	}
 	
 	protected boolean recordNotFound() {

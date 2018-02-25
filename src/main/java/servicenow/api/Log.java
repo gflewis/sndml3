@@ -1,18 +1,19 @@
 package servicenow.api;
 
 import java.net.URI;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 public class Log {
 
-	static public final org.slf4j.Marker INIT     = org.slf4j.MarkerFactory.getMarker("INIT");
-	static public final org.slf4j.Marker SCHEMA   = org.slf4j.MarkerFactory.getMarker("SCHEMA");
-	static public final org.slf4j.Marker REQUEST  = org.slf4j.MarkerFactory.getMarker("REQUEST");
-	static public final org.slf4j.Marker RESPONSE = org.slf4j.MarkerFactory.getMarker("RESPONSE");
-	static public final org.slf4j.Marker PROCESS  = org.slf4j.MarkerFactory.getMarker("PROCESS");
-	static public final org.slf4j.Marker FINISH   = org.slf4j.MarkerFactory.getMarker("FINISH");
-	static public final org.slf4j.Marker TEST     = org.slf4j.MarkerFactory.getMarker("TEST");
+	static public final Marker INIT     = MarkerFactory.getMarker("INIT");
+	static public final Marker SCHEMA   = MarkerFactory.getMarker("SCHEMA");
+	static public final Marker REQUEST  = MarkerFactory.getMarker("REQUEST");
+	static public final Marker RESPONSE = MarkerFactory.getMarker("RESPONSE");
+	static public final Marker PROCESS  = MarkerFactory.getMarker("PROCESS");
+	static public final Marker FINISH   = MarkerFactory.getMarker("FINISH");
+	static public final Marker TEST     = MarkerFactory.getMarker("TEST");
 	
 	@SuppressWarnings("rawtypes")
 	static public org.slf4j.Logger logger(Class cls) {
@@ -85,5 +86,5 @@ public class Log {
 		final int default_limit = 2048;
 		return StringUtils.abbreviate(message, default_limit);
 	}
-		
+
 }

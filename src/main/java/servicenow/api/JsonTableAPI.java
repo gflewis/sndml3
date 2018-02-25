@@ -2,8 +2,6 @@ package servicenow.api;
 
 import java.io.IOException;
 import java.net.URI;
-
-import org.apache.commons.lang3.NotImplementedException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -77,8 +75,9 @@ public class JsonTableAPI extends TableAPI {
 		
 	public InsertResponse insertRecord(Parameters fields) throws IOException {
 		Log.setMethodContext("insert");
-		JSONObject requestObj = fields.toJSON();
+		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action", "insert");
+		Parameters.appendToObject(fields, requestObj);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
 		JSONObject responseObj = request.execute();
 		RecordList list = new RecordList(table, responseObj, "records");
@@ -96,14 +95,21 @@ public class JsonTableAPI extends TableAPI {
 		JSONObject responseObj = request.execute();
 		RecordList list = new RecordList(table, responseObj, "records");
 		if (list.size() == 0) return false;
-		if (list.size() > 1) throw new JsonResponseException(responseObj);
+		if (list.size() > 1) throw new JsonResponseException(request);
 		if (list.get(0).getKey().equals(key)) return true;
-		throw new JsonResponseException(responseObj);
+		throw new JsonResponseException(request);
 	}
 
 	public void updateRecord(Key key, Parameters fields) throws IOException {
-		// TODO Auto-generated method stub
-		throw new NotImplementedException("updateRecord");		
+		Log.setMethodContext("update");
+		JSONObject requestObj = new JSONObject();
+		requestObj.put("sysparm_action", "update");
+		requestObj.put("sysparm_sys_id",  key.toString());
+		Parameters.appendToObject(fields, requestObj);
+		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
+		JSONObject responseObj = request.execute();
+		RecordList list = new RecordList(table, responseObj, "records");
+		if (list.size() != 1) throw new JsonResponseException(request);
 	}
 
 	@Override
