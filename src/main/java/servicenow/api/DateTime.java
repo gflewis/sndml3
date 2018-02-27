@@ -73,7 +73,7 @@ public class DateTime implements Comparable<DateTime> {
 			df = dateTimeFormat.get();
 			break;
 		default :
-			throw new InvalidDateTimeException(value);
+			throw new InvalidDateTimeException(String.format("\"%s\" len=%d", value, fmtlen));
 		}
 		this.str = value;
 		try {
@@ -84,6 +84,17 @@ public class DateTime implements Comparable<DateTime> {
 		}
 	}
 
+	/**
+	 * Static function to convert a string to DateTime.
+	 * @param s - String to be converted.
+	 * @return null if argument is null or zero length, otherwise a DateTime
+	 */
+	static public DateTime from(String s) {
+		if (s == null) return null;
+		if (s.length() == 0) return null;
+		return new DateTime(s);
+	}
+	
 	/**
 	 * Construct a DateTime from a year, month and day.
 	 * @param year - 4 digit year with century included

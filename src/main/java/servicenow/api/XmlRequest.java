@@ -67,11 +67,11 @@ class XmlRequest extends ServiceNowRequest {
 			String.format("status=\"%s\" contentType=%s len=%d", 
 				statusLine, responseContentType, responseLen));
 		if (statusCode == 401 || statusCode == 403) {
-			logger.error(Log.RESPONSE, this.toString());
+			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);
 		}
 		if (responseContentType == null) {
-			logger.error(Log.RESPONSE, this.toString());
+			logger.error(Log.RESPONSE, this.dump());
 			throw new NoContentException(this);
 		}
 		// If we asked for XML and we got HTML, it must be an error page

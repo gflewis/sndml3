@@ -90,8 +90,8 @@ public abstract class DatabaseStatement {
 				try {
 					DateTime timestamp = new DateTime(value, DateTime.DATE_TIME);
 					long seconds = timestamp.toDate().getTime() / 1000L;
-					if (logger.isTraceEnabled())
-						logger.trace(Log.PROCESS, glidename + " " + value + "=" + seconds);
+					if (logger.isTraceEnabled(Log.BIND))
+						logger.trace(Log.BIND, glidename + " " + value + "=" + seconds);
 					if (seconds < 0L) {
 						logger.warn(Log.PROCESS, rec.getKey() + " duration underflow: " +
 							glidename + "=" + value);
@@ -150,9 +150,9 @@ public abstract class DatabaseStatement {
 					logger.debug(Log.PROCESS, message);
 			}
 		}
-		if (logger.isTraceEnabled()) {
+		if (logger.isTraceEnabled(Log.BIND)) {
 			int len = (value == null ? 0 : value.length());
-			logger.trace(Log.PROCESS, String.format("bind (%d:%d) %s=%s [%d]",
+			logger.trace(Log.BIND, String.format("bind (%d:%d) %s=%s [%d]",
 					bindCol, sqltype, glidename, value, len));
 		}
 		assert value != null;

@@ -20,8 +20,16 @@ public abstract class ServiceNowRequest {
 		this.uri = uri;
 		this.method = method;
 	}
-		
-	public String toString() {
+
+	public String dumpRequestText() {
+		return requestText;
+	}
+	
+	public String dumpResponseText() {
+		return responseText;
+	}
+	
+	public String dump() {
 		StringBuilder text = new StringBuilder();
 		text.append(uri.toString());
 		text.append(" ");
@@ -32,12 +40,13 @@ public abstract class ServiceNowRequest {
 		}
 		if (requestText != null) {
 			text.append("\nREQUEST:\n");
-			text.append(requestText);
+			text.append(dumpRequestText());
 		}
 		if (responseText != null) {
 			text.append("\nRESPONSE:\n");
-			text.append(responseText);
+			text.append(dumpResponseText());
 		}
 		return text.toString();
 	}
+	
 }

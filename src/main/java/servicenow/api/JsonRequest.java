@@ -102,14 +102,14 @@ public class JsonRequest extends ServiceNowRequest {
 		if (statusCode == 401 || statusCode == 403) {
 //			logger.error(Log.REQUEST, Log.join(uri, requestText));
 //			logger.error(Log.RESPONSE, statusLine.toString());
-			logger.error(Log.RESPONSE, this.toString());
+			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);
 		}
 		if (responseText == null || responseContentType == null) {
 			// should have gotten an HTTP 204 for No Content
 //			logger.error(Log.REQUEST, Log.join(uri, requestText));
 //			logger.error(Log.RESPONSE, statusLine.toString());
-			logger.error(Log.RESPONSE, this.toString());
+			logger.error(Log.RESPONSE, this.dump());
 			throw new NoContentException(this);
 		}		
 		if ("text/html".equals(responseContentType))

@@ -39,17 +39,26 @@ public class RestTableAPI extends TableAPI {
 		URI uri = getURI("stats", null, params);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
 		JSONObject responseObj = request.execute();
+		if (logger.isDebugEnabled()) logger.debug(Log.PROCESS, request.dumpResponseText());
 		request.checkForInsufficientRights();
 		JSONObject result = responseObj.getJSONObject("result").getJSONObject("stats");
 		stats.count = Integer.parseInt(result.getString("count"));
 		if (includeDates) {
 			JSONObject minValues = result.getJSONObject("min");
 			JSONObject maxValues = result.getJSONObject("max");
-			DateTime minCreated = new DateTime(minValues.getString("sys_created_on"));
-			DateTime maxCreated = new DateTime(maxValues.getString("sys_created_on")); 
+			DateTime minCreated = DateTime.from(minValues.getString("sys_created_on"));
+			DateTime maxCreated = DateTime.from(maxValues.getString("sys_created_on"));
+			if (minCreated == null || maxCreated == null) 
+				logger.warn(Log.PROCESS, String.format(
+					"getStats query=\"%s\" minCreated=%s maxCreated=%s", filter, minCreated, maxCreated));
 			stats.created = new DateTimeRange(minCreated, maxCreated);
+			logger.info(Log.PROCESS, String.format(
+				"getStats query=\"%s\" count=%s createdRange=%s", filter, stats.count, stats.created));			
 		}
-		logger.info(Log.PROCESS, String.format("getStats query=\"%s\" count=%s", filter, stats.count));
+		else {
+			logger.info(Log.PROCESS, String.format(
+				"getStats query=\"%s\" count=%s", filter, stats.count));			
+		}
 		return stats;		
 	}
 	

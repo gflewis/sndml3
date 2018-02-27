@@ -20,7 +20,7 @@ public class ServiceNowException extends IOException {
 	}
 	
 	public ServiceNowException(ServiceNowRequest request) {
-		super(request.toString());
+		super(request.dump());
 	}
 	
 }

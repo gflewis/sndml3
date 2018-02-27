@@ -12,6 +12,7 @@ public class Log {
 	static public final Marker REQUEST  = MarkerFactory.getMarker("REQUEST");
 	static public final Marker RESPONSE = MarkerFactory.getMarker("RESPONSE");
 	static public final Marker PROCESS  = MarkerFactory.getMarker("PROCESS");
+	static public final Marker BIND     = MarkerFactory.getMarker("BIND");
 	static public final Marker FINISH   = MarkerFactory.getMarker("FINISH");
 	static public final Marker TEST     = MarkerFactory.getMarker("TEST");
 	
