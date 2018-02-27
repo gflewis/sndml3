@@ -10,10 +10,15 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 
 	public DatePartition(DateTimeRange range, DateTime.Interval interval) {
 		super();
-		this.interval = interval;
-		assert range.getStart() != null;
-		assert range.getEnd() != null;
-		assert range.getEnd().compareTo(range.getStart()) >= 0;
+		assert range != null;
+		assert interval != null;
+		this.interval = interval;		
+		if (range.getStart() == null)
+			throw new IllegalArgumentException("start date is null");
+		if (range.getEnd() == null)
+			throw new IllegalArgumentException("end date is null");
+		if (range.getEnd().compareTo(range.getStart()) < 0)
+			throw new IllegalArgumentException("end date is before start date");
 		DateTime start = range.getStart().truncate(interval);
 		DateTime end;
 		do {

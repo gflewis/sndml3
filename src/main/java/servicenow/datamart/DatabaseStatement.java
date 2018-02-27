@@ -30,6 +30,7 @@ public abstract class DatabaseStatement {
 	public final Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     
 	final private Logger logger = Log.logger(this.getClass());
+	final boolean traceEnabled;
 	
 	public DatabaseStatement(Database dbw, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
 		this.dbw = dbw;
@@ -40,12 +41,13 @@ public abstract class DatabaseStatement {
 		this.columns = columns;
 		this.stmtText = buildStatement();
 		logger.debug(Log.SCHEMA, stmtText);
-		this.stmt = dbc.prepareStatement(stmtText);		
+		this.stmt = dbc.prepareStatement(stmtText);
+		traceEnabled = logger.isTraceEnabled(Log.BIND);
 	}
 
 	abstract String buildStatement() throws SQLException;
 		
-	public void bindField(int bindCol, String value) throws SQLException {
+	protected void bindField(int bindCol, String value) throws SQLException {
 		stmt.setString(bindCol, value);
 	}
 	
@@ -57,7 +59,7 @@ public abstract class DatabaseStatement {
 	 * @param glideCol Index (starting with 0) of the variable in the columns array.
 	 * @throws SQLException
 	 */	
-	public void bindField(int bindCol, Record rec, int glideCol) throws SQLException {
+	protected void bindField(int bindCol, Record rec, int glideCol) throws SQLException {
 		DatabaseFieldDefinition defn = columns.get(glideCol);
 		String glidename = defn.getGlideName();
 		String value = rec.getValue(glidename);
@@ -71,7 +73,7 @@ public abstract class DatabaseStatement {
 		}		
 	}
 	
-	public void bindField(int bindCol, Record rec, DatabaseFieldDefinition d, String value) throws SQLException {
+	protected void bindField(int bindCol, Record rec, DatabaseFieldDefinition d, String value) throws SQLException {
 		String glidename = d.getGlideName();
 		int sqltype = d.sqltype;
 		// If value is null then bind to null and exit
@@ -90,8 +92,8 @@ public abstract class DatabaseStatement {
 				try {
 					DateTime timestamp = new DateTime(value, DateTime.DATE_TIME);
 					long seconds = timestamp.toDate().getTime() / 1000L;
-					if (logger.isTraceEnabled(Log.BIND))
-						logger.trace(Log.BIND, glidename + " " + value + "=" + seconds);
+					if (traceEnabled)
+						logger.trace(Log.BIND, "date " + glidename + " " + value + "=" + seconds);
 					if (seconds < 0L) {
 						logger.warn(Log.PROCESS, rec.getKey() + " duration underflow: " +
 							glidename + "=" + value);
@@ -150,7 +152,7 @@ public abstract class DatabaseStatement {
 					logger.debug(Log.PROCESS, message);
 			}
 		}
-		if (logger.isTraceEnabled(Log.BIND)) {
+		if (traceEnabled) {
 			int len = (value == null ? 0 : value.length());
 			logger.trace(Log.BIND, String.format("bind (%d:%d) %s=%s [%d]",
 					bindCol, sqltype, glidename, value, len));
