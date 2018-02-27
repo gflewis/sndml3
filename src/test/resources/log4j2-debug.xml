@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
   <Appenders>
-    <File name="File" fileName="/tmp/log/sndml3.log" append="false">
+    <File name="File" fileName="${sys:logFileName}" append="false">
       <Filters>
         <ThresholdFilter level="trace" />
         <MarkerFilter marker="SCHEMA" onMatch="NEUTRAL" onMismatch="NEUTRAL" />
