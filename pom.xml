@@ -90,7 +90,8 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.8.2</version>
-    </dependency>    
+    </dependency>
+    <!--    
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -101,6 +102,7 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.9.4</version>
     </dependency>
+    -->
     
     <!-- Database Dependencies -->
     <dependency>
@@ -164,6 +166,7 @@
                   <include>org.jdom:*</include>
                   <include>org.json:*</include>
                   <include>org.yaml:*</include>
+                  <include>com.google.code.gson:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -244,6 +247,7 @@
                       <include>org.jdom:*</include>
                       <include>org.json:*</include>
                       <include>org.yaml:*</include>
+                      <include>com.google.code.gson:*</include>
                       <include>org.slf4j:*</include>
                       <include>log4j:*</include>
                     </includes>
@@ -284,6 +288,7 @@
                       <include>org.jdom:*</include>
                       <include>org.json:*</include>
                       <include>org.yaml:*</include>
+                      <include>com.google.code.gson:*</include>
                       <include>org.slf4j:*</include>
                       <include>log4j:*</include>
                     </includes>
