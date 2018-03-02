@@ -88,6 +88,7 @@ public class DateTimeFactory {
 	private DateTime getName(String name) throws ConfigParseException {
 		assert name != null;
 		if (name.equalsIgnoreCase("void")) return null;
+		if (name.equalsIgnoreCase("empty")) return null;
 		if (name.equalsIgnoreCase("start")) return getStart();
 		if (name.equalsIgnoreCase("today")) return getStart().truncate();
 		if (name.equalsIgnoreCase("last")) return getLast("start");

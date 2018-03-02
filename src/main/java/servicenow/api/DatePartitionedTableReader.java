@@ -12,10 +12,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PartSumTableReader extends TableReader {
+public class DatePartitionedTableReader extends TableReader {
 
 	final TableReaderFactory factory;
-	protected TableStats stats = null;
 	final int threads;
 	final DateTime.Interval interval;
 	DateTimeRange range;
@@ -28,7 +27,7 @@ public class PartSumTableReader extends TableReader {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public PartSumTableReader(TableReaderFactory factory, DateTime.Interval interval, Integer threads) {
+	public DatePartitionedTableReader(TableReaderFactory factory, DateTime.Interval interval, Integer threads) {
 		super(factory.getTable());
 		this.factory = factory;
 		setBaseQuery(factory.baseQuery);
@@ -80,10 +79,16 @@ public class PartSumTableReader extends TableReader {
 	public void initialize() throws IOException {
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
-		stats = table.rest().getStats(query, true);
+		TableStats stats = table.rest().getStats(query, true);
 		setExpected(stats.getCount());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
+		if (getExpected() == 0) {
+			logger.debug(Log.PROCESS, "expecting 0 rows; no readers created");
+			return;
+		}
 		range = stats.getCreated();
+		assert range.getStart() != null;
+		assert range.getEnd() != null;
 		partition = new DatePartition(range, interval);
 		partReaders = new ArrayList<TableReader>();
 		logger.debug(Log.INIT, "partition=" + partition.toString());		
@@ -99,8 +104,12 @@ public class PartSumTableReader extends TableReader {
 	}
 
 	@Override
-	public PartSumTableReader call() throws IOException, SQLException, InterruptedException {
+	public DatePartitionedTableReader call() throws IOException, SQLException, InterruptedException {
 		setLogContext();
+		if (getExpected() == 0) {
+			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
+			return this;
+		}
 		futures = new ArrayList<Future<TableReader>>();
 		if (threads > 1) {			
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			

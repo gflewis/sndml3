@@ -11,12 +11,14 @@ public class TableConfig extends Config {
 	private LoaderAction action;
 	private Boolean truncate;
 	private DateTimeRange created;
-	private DateTimeRange updated;
+//	private DateTimeRange updated;
 	private DateTime since;
 	private EncodedQuery filter;
+	private String orderBy;
+	private String orderByDesc;
 	private DateTime.Interval partition;
-	private Integer pageSize = null;
-	private Integer threads = null;
+	private Integer pageSize;
+	private Integer threads;
 	private DateTimeFactory dateFactory;
 
 	public TableConfig(Table table) {
@@ -86,7 +88,20 @@ public class TableConfig extends Config {
 		}		
 	}
 	
+	void configError(String msg) {
+		throw new ConfigParseException(msg);
+	}
+	
 	public void validate() throws ConfigParseException {
+		if (name == null && source == null && target == null) 
+			configError("Must specify at least one of Name, Source, Target");
+		if (action.equals(LoaderAction.PRUNE)) {
+			if (since != null) configError("Since not valid with Action: Prune");
+			if (created != null) configError("Created not valid with Action: Prune");
+			if (threads != null) configError("Threads not valid with Action: Prune");
+		}
+		if (orderBy != null && orderByDesc != null)
+			configError("Cannot specify both OrderBy and OrderByDesc");
 		
 	}
 			
@@ -131,13 +146,16 @@ public class TableConfig extends Config {
 	}
 	
 	public DateTimeRange getCreated() {
-		return this.created;
+		if (this.created == null)
+			return getDefaultRange();
+		else
+			return this.created;
 	}
 	
-	@Deprecated
-	public DateTimeRange getUpdated() {
-		return this.updated;
-	}
+//	@Deprecated
+//	public DateTimeRange getUpdated() {
+//		return this.updated;
+//	}
 	
 	public void setSince(DateTime since) {
 		this.since = since;
@@ -192,6 +210,10 @@ public class TableConfig extends Config {
 			start = dateFactory.getDate(obj);
 		}
 		return new DateTimeRange(start, end);
+	}
+	
+	public DateTimeRange getDefaultRange() {
+		return new DateTimeRange(null, dateFactory.getStart());
 	}
 	
 }

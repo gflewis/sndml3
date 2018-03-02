@@ -18,7 +18,7 @@ public abstract class Writer {
 		writerMetrics.start();
 	}
 	
-	public void close() {
+	public void close() throws SQLException {
 		writerMetrics.finish();
 	}
 

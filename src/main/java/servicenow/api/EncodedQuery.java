@@ -34,7 +34,7 @@ package servicenow.api;
  * 
  * @author Giles Lewis
  */
-public class EncodedQuery {
+public class EncodedQuery implements Cloneable {
 
 	// Here are some commonly used encoded query operators
 	final public static String EQUALS                 = "=";
@@ -47,6 +47,8 @@ public class EncodedQuery {
 	final public static String CONTAINS               = "LIKE";
 	final public static String IN                     = "IN";
 	final public static String NOT_IN                 = "NOT IN";
+	final public static String IS_EMPTY               = "ISEMPTY";
+	final public static String IS_NOT_EMPTY           = "ISNOTEMPTY";
 	final public static String ORDER_BY               = "ORDERBY";
 	final public static String ORDER_BY_DESC          = "ORDERBYDESC";
 	
@@ -96,8 +98,16 @@ public class EncodedQuery {
 	/**
 	 * Make a copy of an EncodedQuery
 	 */	
-	public EncodedQuery copy() {
+	public EncodedQuery clone() {
 		return new EncodedQuery(this);
+	}
+
+	public String toString() {
+		return buf.toString();
+	}
+	
+	public boolean equals(Object other) {
+		return this.toString().equals(other.toString());
 	}
 	
 	public EncodedQuery(String field, String relop, String value) {
@@ -217,10 +227,6 @@ public class EncodedQuery {
 	public EncodedQuery addOrderByDesc(String fieldname) {
 		this.addQuery(ORDER_BY_DESC + fieldname);
 		return this;
-	}
-	
-	public String toString() {
-		return buf.toString();
 	}
 	
 }

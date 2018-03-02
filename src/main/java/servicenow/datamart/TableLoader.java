@@ -43,7 +43,8 @@ public class TableLoader implements Callable<WriterMetrics> {
 		this(new TableConfig(null, table.getName()));
 	}
 	
-	TableLoader(TableConfig config) {		
+	TableLoader(TableConfig config) throws ConfigParseException {
+		config.validate();
 		this.session = ResourceManager.getSession();
 		this.db = ResourceManager.getDatabase();
 		this.table = session.table(config.getSource());
@@ -122,10 +123,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 			}
 			else {
 				Integer threads = config.getThreads();
-				reader = new PartSumTableReader(factory, partitionInterval, threads);
+				reader = new DatePartitionedTableReader(factory, partitionInterval, threads);
 				factory.setParent(reader);
 				reader.initialize();
-				String partitionDescr = ((PartSumTableReader) reader).getPartition().toString();
+				String partitionDescr = ((DatePartitionedTableReader) reader).getPartition().toString();
 				logger.info(Log.INIT, partitionDescr);
 			}
 		}

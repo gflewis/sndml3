@@ -13,6 +13,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	private EncodedQuery baseQuery;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
+	private EncodedQuery orderByQuery;
 	
 	protected Writer writer;
 	protected int pageSize;
@@ -46,6 +47,10 @@ public abstract class TableReader implements Callable<TableReader> {
 		return readerName == null ? table.getName() : readerName;
 	}
 	
+	public void setLogContext() {
+		Log.setContext(table, getReaderName());
+	}
+	
 	public void setParent(TableReader parent) {
 		if (initialized) throw new IllegalStateException();
 		this.parent = parent;
@@ -54,10 +59,6 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	public TableReader getParent() {
 		return this.parent;
-	}
-	
-	public void setLogContext() {
-		Log.setContext(table, getReaderName());
 	}
 	
 	public ReaderMetrics readerMetrics() {
@@ -122,6 +123,16 @@ public abstract class TableReader implements Callable<TableReader> {
 		return this.updatedRange;
 	}
 	
+	public TableReader setOrderBy(String fieldname) {
+		orderByQuery = new EncodedQuery().addOrderBy(fieldname);
+		return this;
+	}
+	
+	public TableReader setOrderByDesc(String fieldname) {
+		orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
+		return this;
+	}
+	
 	/**
 	 * Return a composite query built from base query, created range and updated range.
 	 */
@@ -129,6 +140,7 @@ public abstract class TableReader implements Callable<TableReader> {
 		EncodedQuery query = new EncodedQuery(baseQuery);
 		if (createdRange != null) query.addCreated(createdRange);
 		if (updatedRange != null) query.addUpdated(updatedRange);
+		if (orderByQuery != null) query.addQuery(orderByQuery);
 		return query;
 	}
 	

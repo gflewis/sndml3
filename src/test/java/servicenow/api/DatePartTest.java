@@ -24,7 +24,7 @@ public class DatePartTest {
 		factory.setReaderName(parentName);
 		logger.info(Log.TEST, "range=" + stats.getCreated().toString());
 		DateTime.Interval interval = DateTime.Interval.MONTH;
-		PartSumTableReader parentReader = new PartSumTableReader(factory, interval, 0);
+		DatePartitionedTableReader parentReader = new DatePartitionedTableReader(factory, interval, 0);
 		DatePartition partition;
 		parentReader.initialize();
 		partition = parentReader.getPartition();
