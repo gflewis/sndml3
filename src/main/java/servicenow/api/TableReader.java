@@ -124,10 +124,20 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 	
 	public TableReader setOrderBy(String fieldname) {
-		orderByQuery = new EncodedQuery().addOrderBy(fieldname);
+		boolean desc = false;
+		char c1 = fieldname.charAt(0);
+		if (c1 == '+' || c1 =='-') {
+			if (c1 == '-') desc = true;
+			fieldname = fieldname.substring(1);
+		}
+		if (desc) 
+			orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
+		else 
+			orderByQuery = new EncodedQuery().addOrderBy(fieldname);
 		return this;
 	}
 	
+	@Deprecated
 	public TableReader setOrderByDesc(String fieldname) {
 		orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
 		return this;
