@@ -68,42 +68,42 @@ public class TableLoader implements Callable<WriterMetrics> {
 		Log.setContext(table, tableLoaderName);
 		LoaderAction action = config.getAction();
 		assert action != null;
+
 		logger.debug(Log.INIT, 
-			String.format("call table=%s action=%s", table.getName(), action.toString()));;
-		switch (action) {
-		case UPDATE: 
-			writer = new DatabaseUpdateWriter(tableLoaderName, db, table, sqlTableName);
-			break;
-		case INSERT:
-			writer = new DatabaseInsertWriter(tableLoaderName, db, table, sqlTableName);
-			break;
-		case PRUNE:
-			writer = new DatabaseDeleteWriter(tableLoaderName, db, table, sqlTableName);
-			break;
-		default:
-			throw new AssertionError();
+			String.format("call table=%s action=%s", table.getName(), action.toString()));
+		if (config.getSqlBefore() != null) {
+			db.executeStatement(config.getSqlBefore());
 		}
 		db.createMissingTable(table, sqlTableName);
-		writer.open();
 
 		Log.setContext(table, tableLoaderName);		
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
-		EncodedQuery filter;
 		DateTime since = config.getSince();
-		DateTime.Interval partitionInterval = config.getPartitionInterval();
-		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
-		if (action == LoaderAction.PRUNE) {
+		
+		if (LoaderAction.PRUNE.equals(action)) {
+			writer = new DatabaseDeleteWriter(tableLoaderName, db, table, sqlTableName);
+			writer.open();
 			Table audit = session.table("sys_audit_delete");
 			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
 			reader = audit.getDefaultReader();
 			reader.setBaseQuery(auditQuery);			
 			reader.setCreatedRange(new DateTimeRange(since, null));
-			if (pageSize > 0) reader.setPageSize(pageSize);
+			reader.setMaxRows(config.getMaxRows());
 			reader.setWriter(writer);
 			reader.initialize();
+			
 		}
 		else {
-			filter = config.getFilter();
+			if (LoaderAction.UPDATE.equals(action))
+				writer = new DatabaseUpdateWriter(tableLoaderName, db, table, sqlTableName);
+			else if (LoaderAction.INSERT.equals(action))
+				writer = new DatabaseInsertWriter(tableLoaderName, db, table, sqlTableName);
+			else
+				throw new AssertionError();
+			writer.open();
+			
+			DateTime.Interval partitionInterval = config.getPartitionInterval();
+			int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();								
 			TableReaderFactory factory;
 			if (since != null) {
 				factory = new KeySetTableReaderFactory(table, writer);
@@ -113,30 +113,42 @@ public class TableLoader implements Callable<WriterMetrics> {
 				factory = new RestTableReaderFactory(table, writer);
 			}
 			factory.setReaderName(tableLoaderName);
-			factory.setBaseQuery(filter);
+			factory.setBaseQuery(config.getFilter());
 			factory.setCreated(config.getCreated());
+			factory.setOrderBy(config.getOrderBy());
 			factory.setPageSize(pageSize);
 			if (partitionInterval == null) {
 				reader = factory.createReader();
+				reader.setMaxRows(config.getMaxRows());
 				if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 				reader.initialize();
 			}
 			else {
 				Integer threads = config.getThreads();
-				reader = new DatePartitionedTableReader(factory, partitionInterval, threads);
-				factory.setParent(reader);
-				reader.initialize();
-				String partitionDescr = ((DatePartitionedTableReader) reader).getPartition().toString();
-				logger.info(Log.INIT, partitionDescr);
+				DatePartitionedTableReader preader = 
+						new DatePartitionedTableReader(factory, partitionInterval, threads);
+				reader = preader;
+				factory.setParent(preader);
+				preader.initialize();
+				logger.info(Log.INIT, "partition=" + preader.getPartition());
 			}
 		}
 		assert reader != null;
 		assert writer != null;
 		assert reader.readerMetrics() != null;
-		logger.info(Log.INIT, String.format("begin load %s (%d rows)", tableLoaderName, reader.readerMetrics().getExpected()));
+		logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+				tableLoaderName, reader.readerMetrics().getExpected()));
 		reader.call();
 		writer.close();
-		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, writer.getMetrics().getProcessed()));
+		int processed = writer.getMetrics().getProcessed();
+		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, processed));
+		Integer minRows = config.getMinRows();
+		if (minRows != null && processed < minRows)
+			throw new ServiceNowException(
+				String.format("%d rows were processed (MinRows=%d)",  processed, minRows));		
+		if (config.getSqlAfter() != null) {
+			db.executeStatement(config.getSqlAfter());
+		}
 		return writer.getMetrics();
 	}
 

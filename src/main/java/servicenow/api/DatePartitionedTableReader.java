@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class DatePartitionedTableReader extends TableReader {
 
 	final TableReaderFactory factory;
@@ -44,7 +43,7 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 	
 	public DatePartition getPartition() {
-		if (this.partition == null) throw new IllegalStateException();
+//		if (this.partition == null) throw new IllegalStateException();
 		return this.partition;
 	}
 	
@@ -78,6 +77,7 @@ public class DatePartitionedTableReader extends TableReader {
 	
 	@Override
 	public void initialize() throws IOException {
+		super.initialize();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, true);

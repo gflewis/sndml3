@@ -22,9 +22,9 @@ public class KeySetTableReader extends TableReader {
 	}
 
 	public void initialize() throws IOException {
+		super.initialize();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
-		super.initialize();
 		allKeys = table.json().getKeys(query);
 		// JSONv2 API limits the number of keys to 10000
 		// If we got more than 999 then check the result
@@ -46,8 +46,8 @@ public class KeySetTableReader extends TableReader {
 	}
 
 	public void initialize(KeySet keys) throws IOException {
-		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		super.initialize();
+		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;
 		setExpected(allKeys.size());
 	}
@@ -82,6 +82,9 @@ public class KeySetTableReader extends TableReader {
 			writer.processRecords(this, recs);
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
+			if (maxRows != null && rowCount > maxRows)
+				throw new RowCountExceededException(table, 
+					String.format("processed %d rows (MaxRows=%d)", rowCount, maxRows));
 			fromIndex += pageSize;
 		}
 		return this;

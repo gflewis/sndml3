@@ -21,6 +21,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
 	protected ReaderMetrics readerMetrics;
+	protected Integer maxRows;
 	protected boolean initialized = false;
 
 	public TableReader(Table table) {
@@ -122,27 +123,32 @@ public abstract class TableReader implements Callable<TableReader> {
 	public DateTimeRange getUpdatedRange() {
 		return this.updatedRange;
 	}
-	
+
+	/**
+	 * Specify an "OrderBy" or "OrderByDesc" clause for the reader.
+	 * @param fieldname - Name of field which may be prefixed with "+" or "-" 
+	 * to indicate ascending or descending respectively. 
+	 * @return
+	 */
 	public TableReader setOrderBy(String fieldname) {
-		boolean desc = false;
-		char c1 = fieldname.charAt(0);
-		if (c1 == '+' || c1 =='-') {
-			if (c1 == '-') desc = true;
-			fieldname = fieldname.substring(1);
+		if (fieldname == null) {
+			orderByQuery = null;
 		}
-		if (desc) 
-			orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
-		else 
-			orderByQuery = new EncodedQuery().addOrderBy(fieldname);
+		else {
+			boolean desc = false;
+			char c1 = fieldname.charAt(0);
+			if (c1 == '+' || c1 =='-') {
+				if (c1 == '-') desc = true;
+				fieldname = fieldname.substring(1);
+			}
+			if (desc) 
+				orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
+			else 
+				orderByQuery = new EncodedQuery().addOrderBy(fieldname);
+		}
 		return this;
 	}
-	
-	@Deprecated
-	public TableReader setOrderByDesc(String fieldname) {
-		orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
-		return this;
-	}
-	
+		
 	/**
 	 * Return a composite query built from base query, created range and updated range.
 	 */
@@ -165,7 +171,7 @@ public abstract class TableReader implements Callable<TableReader> {
 		this.viewName = name;
 		return this;
 	}
-
+	
 	public String getView() {
 		return this.viewName;
 	}
@@ -176,6 +182,15 @@ public abstract class TableReader implements Callable<TableReader> {
 		return this;
 	}
 	
+	public TableReader setMaxRows(Integer value) {
+		this.maxRows = value;
+		return this;
+	}
+	
+	public Integer getMaxRows() {
+		return this.maxRows;
+	}
+
 	public TableReader setWriter(Writer value) {
 		if (initialized) throw new IllegalStateException();
 		assert value != null;

@@ -4,7 +4,7 @@
     <File name="File" fileName="${sys:logFileName}" append="false">
       <Filters>
         <ThresholdFilter level="trace" />
-        <MarkerFilter marker="SCHEMA" onMatch="NEUTRAL" onMismatch="NEUTRAL" />
+        <MarkerFilter marker="SCHEMA" onMatch="DENY" onMismatch="NEUTRAL" />
         <MarkerFilter marker="BIND" onMatch="DENY" onMismatch="NEUTRAL" />
       </Filters>
       <PatternLayout>

@@ -30,9 +30,9 @@ public class RestTableReader extends TableReader {
 	}
 
 	public void initialize() throws IOException {		
+		super.initialize();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));
-		super.initialize();
 		if (statsEnabled) {
 			stats = apiREST.getStats(query, false);
 			setExpected(stats.getCount());
@@ -70,6 +70,9 @@ public class RestTableReader extends TableReader {
 			offset += recs.size();
 			finished = (recs.size() < pageSize);
 			logger.debug(Log.PROCESS, String.format("processed %d rows", rowCount));
+			if (maxRows != null && rowCount > maxRows)
+				throw new RowCountExceededException(table, 
+					String.format("processed %d rows (MaxRows=%d)", rowCount, maxRows));
 		}
 		if (statsEnabled) {
 			if (rowCount != getExpected()) {

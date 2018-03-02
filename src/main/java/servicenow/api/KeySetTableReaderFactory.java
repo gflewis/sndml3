@@ -11,6 +11,7 @@ public class KeySetTableReaderFactory extends TableReaderFactory {
 		reader.setBaseQuery(baseQuery);
 		reader.setUpdatedRange(updatedRange);
 		reader.setCreatedRange(createdRange);
+		reader.setOrderBy(orderBy);
 		reader.setWriter(writer);
 		reader.setReaderName(readerName);
 		return reader;

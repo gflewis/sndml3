@@ -2,6 +2,8 @@ package servicenow.datamart;
 
 import servicenow.api.*;
 
+import java.util.regex.Pattern;
+
 public class TableConfig extends Config {
 
 	private Map items;
@@ -15,9 +17,12 @@ public class TableConfig extends Config {
 	private DateTime since;
 	private EncodedQuery filter;
 	private String orderBy;
-	private String orderByDesc;
 	private DateTime.Interval partition;
 	private Integer pageSize;
+	private Integer minRows;
+	private Integer maxRows;
+	private String sqlBefore;
+	private String sqlAfter;
 	private Integer threads;
 	private DateTimeFactory dateFactory;
 
@@ -30,14 +35,15 @@ public class TableConfig extends Config {
 			assert parent != null;
 			dateFactory = new DateTimeFactory();
 			items = new Config.Map(config);
-			for (String key : items.keySet()) {
-			    Object val = items.get(key);
-			    switch (key.toLowerCase()) {
+			for (String origkey : items.keySet()) {
+			    Object val = items.get(origkey);
+			    String key = origkey.toLowerCase(); 
+			    switch (key) {
 			    case "name":
-			    		this.name = val.toString();
+			    		this.name = val.toString(); 
 			    		break;
 			    case "source":
-			    		this.source = val.toString();
+			    		this.source = val.toString(); 
 			    		break;
 			    case "target": 
 			    		this.target = val.toString(); 
@@ -52,31 +58,43 @@ public class TableConfig extends Config {
 			    		}
 			    		break;
 			    case "truncate":
-			    		this.truncate = (Boolean) val;
+			    		this.truncate = (Boolean) val; 
 			    		break;
 			    case "created":
-			    		this.created = asDateRange(val);
+			    		this.created = asDateRange(val); 
 			    		break;
-//			    case "updated":
-//			    		this.updated = asDateRange(val);
-//			    		break;
 			    case "since":
-			    		this.since = asDate(val);
+			    		this.since = asDate(val); 
 			    		break;
 			    case "filter":
-			    		this.filter = new EncodedQuery(val.toString());
+			    		this.filter = new EncodedQuery(val.toString()); 
 			    		break;
 			    case "partition":
-			    		this.partition = asInterval(val);
+			    		this.partition = asInterval(val); 
+			    		break;
+			    case "orderby":
+			    		this.orderBy = val.toString(); 
 			    		break;
 			    case "pagesize" :
-			    		this.pageSize = asInteger(val);
+			    		this.pageSize = asInteger(val); 
+			    		break;
+			    case "sqlbefore" :
+			    		this.sqlBefore = val.toString(); 
+			    		break;
+			    case "sqlafter" :
+			    		this.sqlAfter = val.toString(); 
+			    		break;
+			    case "minrows" :
+			    		this.minRows = asInteger(val);
+			    		break;
+			    case "maxrows" :
+			    		this.maxRows = asInteger(val);
 			    		break;
 			    case "threads" :
-			    		this.threads = asInteger(val);
+			    		this.threads = asInteger(val); 
 			    		break;
 			    	default:
-			    		throw new ConfigParseException("Not recognized: " + key);
+			    		throw new ConfigParseException("Not recognized: " + origkey);
 			    }
 			}
 		}
@@ -95,14 +113,14 @@ public class TableConfig extends Config {
 	public void validate() throws ConfigParseException {
 		if (name == null && source == null && target == null) 
 			configError("Must specify at least one of Name, Source, Target");
-		if (action.equals(LoaderAction.PRUNE)) {
-			if (since != null) configError("Since not valid with Action: Prune");
+		if (getAction().equals(LoaderAction.PRUNE)) {
 			if (created != null) configError("Created not valid with Action: Prune");
-			if (threads != null) configError("Threads not valid with Action: Prune");
+			if (filter != null)  configError("Filter not valid with Action: Prune");
+			if (orderBy != null) configError("OrderBy not valid with Action: Prune");
+			if (threads != null) configError("Threads not valid with Action: Prune");			
 		}
-		if (orderBy != null && orderByDesc != null)
-			configError("Cannot specify both OrderBy and OrderByDesc");
-		
+		if (orderBy != null && !Pattern.matches("(\\+|\\-)?\\w+", orderBy))
+			configError("Invalid OrderBy");				
 	}
 			
 	public String getName() throws ConfigParseException {
@@ -151,12 +169,7 @@ public class TableConfig extends Config {
 		else
 			return this.created;
 	}
-	
-//	@Deprecated
-//	public DateTimeRange getUpdated() {
-//		return this.updated;
-//	}
-	
+		
 	public void setSince(DateTime since) {
 		this.since = since;
 	}
@@ -173,13 +186,13 @@ public class TableConfig extends Config {
 		return this.partition;
 	}
 	
-	public Integer getPageSize() {
-		return this.pageSize;
-	}
-
-	public Integer getThreads() {
-		return this.threads;
-	}
+	public String  getOrderBy()   { return this.orderBy; }	
+	public String  getSqlBefore() { return this.sqlBefore; }
+	public String  getSqlAfter()  { return this.sqlAfter; }
+	public Integer getPageSize()  { return this.pageSize;	}
+	public Integer getMinRows()   { return this.minRows; }
+	public Integer getMaxRows()   { return this.maxRows; }
+	public Integer getThreads()   { return this.threads; }
 	
 	public DateTime.Interval asInterval(Object obj) throws ConfigParseException {
 		DateTime.Interval result;

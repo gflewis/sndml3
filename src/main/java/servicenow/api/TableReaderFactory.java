@@ -9,6 +9,7 @@ public abstract class TableReaderFactory {
 	protected EncodedQuery baseQuery;
 	protected DateTimeRange createdRange;
 	protected DateTimeRange updatedRange;
+	protected String orderBy;
 	protected int pageSize;
 	protected String readerName;
 	
@@ -41,6 +42,10 @@ public abstract class TableReaderFactory {
 
 	public void setCreated(DateTimeRange created) {
 		this.createdRange = created;
+	}
+	
+	public void setOrderBy(String fieldname) {
+		this.orderBy = fieldname;
 	}
 	
 	public void setPageSize(int size) {
