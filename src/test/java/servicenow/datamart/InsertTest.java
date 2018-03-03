@@ -3,10 +3,9 @@ package servicenow.datamart;
 import servicenow.api.*;
 
 import static org.junit.Assert.*;
+import org.junit.*;
 
 import java.io.File;
-import org.junit.Test;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -21,7 +20,8 @@ public class InsertTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"awsmysql","awsmssql"};
+		return new String[] {"awsmysql","awsmssql", "awspg", "awsora"};
+//		return new String[] {"awsora"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -34,7 +34,7 @@ public class InsertTest {
 		database = ResourceManager.getDatabase();
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testInsert() throws Exception {
 		LoaderConfig config = new LoaderConfig(new File("src/test/yaml/load_incident_truncate.yaml"));
 		TableConfig job = config.getJobs().get(0);
