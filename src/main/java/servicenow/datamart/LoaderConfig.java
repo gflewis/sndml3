@@ -23,15 +23,15 @@ public class LoaderConfig extends Config {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public LoaderConfig(Table table) throws IOException, ConfigParseException {
+	LoaderConfig(Table table) throws IOException, ConfigParseException {
 		tables.add(new TableConfig(table));		
 	}
 	
-	public LoaderConfig(File configFile) throws IOException, ConfigParseException {
+	LoaderConfig(File configFile) throws IOException, ConfigParseException {
 		this(new FileReader(configFile));
 	}
 	
-	public LoaderConfig(Reader reader) throws IOException, ConfigParseException {
+	LoaderConfig(Reader reader) throws IOException, ConfigParseException {
 		Globals.setLoaderConfig(this);
 		root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());
@@ -56,22 +56,33 @@ public class LoaderConfig extends Config {
 		return root.getString(key);
 	}
 		
-	public java.util.List<TableConfig> getJobs() {
+	java.util.List<TableConfig> getJobs() {
 		return this.tables;
 	}
 	
-	public int getThreads() {
+	/*
+	 * Used for JUnit tests
+	 */
+	TableConfig getJobByName(String name) {
+		assert name != null;
+		for (TableConfig job : tables) {
+			if (name.equals(job.getName())) return job;
+		}
+		return null;
+	}
+	
+	int getThreads() {
 		return this.threads==null ? 0 : this.threads.intValue();
 	}
 	
-	public File getMetricsFile() {
+	File getMetricsFile() {
 		return metricsFile;
 	}
 	
 	/**
 	 * Return the DateTime that this object was initialized.
 	 */
-	public DateTime getStart() {
+	DateTime getStart() {
 		return start;
 	}
 			

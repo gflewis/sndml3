@@ -26,6 +26,7 @@ public class Generator {
 	enum NameQuotes {DOUBLE, SQUARE, NONE};
 	
 	private final Element dialectTree;
+	private final boolean autocommit;
 	private final NameCase namecase; 
 	private final NameQuotes namequotes;
 	private final String schemaName;
@@ -60,6 +61,7 @@ public class Generator {
 		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
 		Element dialogProps = dialectTree.getChild("properties");
 				
+		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
 		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
 		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
 		
@@ -125,6 +127,10 @@ public class Generator {
 	
 	String getDialectName() { 
 		return getDialectName(dialectTree);
+	}
+	
+	boolean getAutoCommit() {
+		return this.autocommit;
 	}
 	
 	List<String> getInitializations() {

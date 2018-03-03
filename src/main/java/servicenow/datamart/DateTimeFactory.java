@@ -99,7 +99,11 @@ public class DateTimeFactory {
 		// System property or profile property will override metrics value
 		String propValue = Globals.getValue(name);
 		if (propValue != null) return new DateTime(propValue);
-		return getLast(name);
+		DateTime lastValue = getLast(name);
+		if (lastValue == null)
+			throw new ConfigParseException("Invalid datetime: " + name);
+		else
+			return lastValue;
 	}
 		
 	private DateTime getExpr(String text) throws ConfigParseException {

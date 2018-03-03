@@ -16,7 +16,7 @@ public class PruneTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"mydevrest"};
+		return new String[] {"awsmysql","awsmssql"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());

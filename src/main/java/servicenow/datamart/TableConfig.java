@@ -26,11 +26,11 @@ public class TableConfig extends Config {
 	private Integer threads;
 	private DateTimeFactory dateFactory;
 
-	public TableConfig(Table table) {
+	TableConfig(Table table) {
 		this.name = table.getName();
 	}
 	
-	public TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
+	TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
 		dateFactory = new DateTimeFactory();
 		if (isMap(config)) {
 			assert parent != null;
@@ -110,7 +110,7 @@ public class TableConfig extends Config {
 		throw new ConfigParseException(msg);
 	}
 	
-	public void validate() throws ConfigParseException {
+	void validate() throws ConfigParseException {
 		if (name == null && source == null && target == null) 
 			configError("Must specify at least one of Name, Source, Target");
 		if (getAction().equals(LoaderAction.PRUNE)) {
@@ -123,78 +123,75 @@ public class TableConfig extends Config {
 			configError("Invalid OrderBy");				
 	}
 			
-	public String getName() throws ConfigParseException {
+	String getName() throws ConfigParseException {
 		if (this.name != null) return this.name;
 		if (this.target != null) return this.target;
 		if (this.source != null) return this.source;
 		throw new ConfigParseException("Name not specified");
 	}
 
-	public String getSource() throws ConfigParseException {
+	String getSource() throws ConfigParseException {
 		if (this.source != null) return this.source;
 		if (this.target != null) return this.target;
 		if (this.name != null) return this.name;
 		throw new ConfigParseException("Source not specified");
 	}
 	
-	public String getTargetName() throws ConfigParseException {
+	String getTargetName() throws ConfigParseException {
 		if (this.target != null) return this.target;
 		if (this.source != null) return this.source;
 		if (this.name != null) return this.name;
 		throw new ConfigParseException("Target not specified");
 	}
 
-	public void setAction(LoaderAction action) {
+	void setAction(LoaderAction action) {
 		this.action = action;
 	}
 	
-	public LoaderAction getAction() {
+	LoaderAction getAction() {
 		if (this.action == null) 
 			return this.getTruncate() ? LoaderAction.INSERT : LoaderAction.UPDATE;
 		else
 			return this.action;
 	}
 	
-	public void setTruncate(boolean truncate) {
+	void setTruncate(boolean truncate) {
 		this.truncate = truncate;
 	}
 	
-	public boolean getTruncate() {
+	boolean getTruncate() {
 		return this.truncate == null ? false : this.truncate.booleanValue();
 	}
 	
-	public DateTimeRange getCreated() {
+	DateTimeRange getCreated() {
 		if (this.created == null)
 			return getDefaultRange();
 		else
 			return this.created;
 	}
 		
-	public void setSince(DateTime since) {
+	void setSince(DateTime since) {
 		this.since = since;
 	}
 	
-	public DateTime getSince() {
-		return this.since;
+	DateTime getSince()      { 
+		return this.since;	
 	}
 	
-	public EncodedQuery getFilter() {
-		return this.filter;
-	}
+	EncodedQuery getFilter() { return this.filter; }
+	String  getOrderBy()     { return this.orderBy; }	
+	String  getSqlBefore()   { return this.sqlBefore; }
+	String  getSqlAfter()    { return this.sqlAfter; }
+	Integer getPageSize()    { return this.pageSize;	}
+	Integer getMinRows()     { return this.minRows; }
+	Integer getMaxRows()     { return this.maxRows; }
+	Integer getThreads()     { return this.threads; }
 	
-	public DateTime.Interval getPartitionInterval() {
+	DateTime.Interval getPartitionInterval() {
 		return this.partition;
 	}
 	
-	public String  getOrderBy()   { return this.orderBy; }	
-	public String  getSqlBefore() { return this.sqlBefore; }
-	public String  getSqlAfter()  { return this.sqlAfter; }
-	public Integer getPageSize()  { return this.pageSize;	}
-	public Integer getMinRows()   { return this.minRows; }
-	public Integer getMaxRows()   { return this.maxRows; }
-	public Integer getThreads()   { return this.threads; }
-	
-	public DateTime.Interval asInterval(Object obj) throws ConfigParseException {
+	DateTime.Interval asInterval(Object obj) throws ConfigParseException {
 		DateTime.Interval result;
 		try {
 			result = DateTime.Interval.valueOf(obj.toString().toUpperCase());
@@ -205,11 +202,11 @@ public class TableConfig extends Config {
 		return result;
 	}
 	
-	public DateTime asDate(Object obj) {
+	DateTime asDate(Object obj) {
 		return dateFactory.getDate(obj);
 	}
 	
-	public DateTimeRange asDateRange(Object obj) throws ConfigParseException {
+	DateTimeRange asDateRange(Object obj) throws ConfigParseException {
 		DateTime start, end;
 		end = dateFactory.getStart();
 		if (isList(obj)) {
@@ -225,7 +222,8 @@ public class TableConfig extends Config {
 		return new DateTimeRange(start, end);
 	}
 	
-	public DateTimeRange getDefaultRange() {
+	DateTimeRange getDefaultRange() {
+		assert dateFactory != null;
 		return new DateTimeRange(null, dateFactory.getStart());
 	}
 	

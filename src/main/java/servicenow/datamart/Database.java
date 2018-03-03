@@ -23,6 +23,7 @@ public class Database {
 	private final Connection dbc;
 	private final URI dbURI;
 	private final String dbuser;
+	private final boolean autocommit;
 	private final String dialect;
 	private final String schema;
 	private final Generator generator;
@@ -49,6 +50,7 @@ public class Database {
 			this.generator = new Generator(dialect, schema);
 		else
 			this.generator = new Generator(dbURI, schema);
+		this.autocommit = this.generator.getAutoCommit();
 		this.initialize();
 		assert this.dbc != null;
 	}
@@ -59,7 +61,8 @@ public class Database {
 	 * Set the date format to YYYY-MM-DD
 	 */
 	private void initialize() throws SQLException {
-		dbc.setAutoCommit(false);
+		
+		dbc.setAutoCommit(this.autocommit);
 		Statement stmt = dbc.createStatement();
 		Iterator<String> iter = generator.getInitializations().listIterator();
 		while (iter.hasNext()) {
@@ -68,7 +71,7 @@ public class Database {
 			stmt.execute(sql);
 		}
 		stmt.close();
-		dbc.commit();
+		commit();
 		// TODO: batch inserts
 //		if (batchInserts) {
 //			if (!meta.supportsBatchUpdates()) {
@@ -132,7 +135,7 @@ public class Database {
 	}
 	
 	void commit() throws SQLException {
-		dbc.commit();
+		if (!autocommit) dbc.commit();
 	}
 	
 	void truncateTable(String sqlTableName) throws SQLException {
@@ -149,14 +152,6 @@ public class Database {
 	 */
 	boolean tableExists(String tablename) 
 			throws SQLException {
-		/*
-		assert tablename != null;
-		assert tablename.length() > 0;
-		DatabaseMetaData meta = getConnection().getMetaData();
-		String schema = getSchema();
-		if (this.isOracle()) tablename = tablename.toUpperCase();
-		ResultSet rs = meta.getTables(null, schema, tablename, null);
-		*/
 		ResultSet rs = getTableDefinition(tablename);
 		boolean result = (rs.next() ? true : false);
 		rs.close();

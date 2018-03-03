@@ -15,7 +15,7 @@ public abstract class DatabaseTableWriter extends Writer {
 	
 	protected ColumnDefinitions columns;
 	
-	final private Logger logger = Log.logger(this.getClass());
+	final Logger logger = Log.logger(this.getClass());
 	
 	public DatabaseTableWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
 		super();
@@ -35,8 +35,8 @@ public abstract class DatabaseTableWriter extends Writer {
 	public synchronized void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
 		writerMetrics.start();
 		for (Record rec : recs) {
-			writeRecord(rec);
 			logger.debug(Log.PROCESS, String.format("processing %s", rec.getKey().toString()));
+			writeRecord(rec);
 		}
 		writerMetrics.finish();
 		logProgress(reader, "loaded");

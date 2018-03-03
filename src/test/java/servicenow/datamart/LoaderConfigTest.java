@@ -1,16 +1,14 @@
 package servicenow.datamart;
 
+import servicenow.api.*;
+
 import static org.junit.Assert.*;
+import org.junit.*;
 
 import java.io.File;
 import java.io.StringReader;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import servicenow.api.DateTime;
-import servicenow.datamart.ConfigParseException;
-import servicenow.datamart.LoaderConfig;
 
 public class LoaderConfigTest {
 
@@ -27,29 +25,32 @@ public class LoaderConfigTest {
 	}
 
 	@Test
-	public void testConfig1() throws Exception {
-		File config1 = new File("src/test/resources/config1.yaml");
+	public void testGoodConfig1() throws Exception {
+		File config1 = new File("src/test/yaml/goodconfig1.yaml");
 		LoaderConfig config = new LoaderConfig(config1);
+		DateTime start = config.getStart();
+		DateTime today = DateTime.today();
 		assertEquals(8, config.getJobs().size());
-		assertEquals("sys_user", config.getJobs().get(0).getName());
-		assertEquals("rm_story", config.getJobs().get(4).getName());		
-		assertEquals(new DateTime("2017-01-01"), config.getJobs().get(4).getCreated().getStart());
-		assertEquals(null, config.getJobs().get(4).getCreated().getEnd());
-		assertEquals(DateTime.now(), config.getJobs().get(5).getCreated().getEnd());
-//		assertEquals(DateTime.today(), config.getJobs().get(7).getUpdated().getStart());
+		assertEquals("sys_user", config.getJobByName("sys_user").getTargetName());
+		assertEquals("rm_story", config.getJobByName("rm_story").getTargetName());		
+		assertEquals(new DateTime("2017-01-01"), config.getJobByName("rm_story").getCreated().getStart());
+		assertEquals(start, config.getJobByName("rm_story").getCreated().getEnd());
+		assertEquals(today, config.getJobByName("cmdb_ci_service").getSince());
 	}
 	
 	@Test(expected = ConfigParseException.class)
 	public void testBadDate() throws Exception {
-		File badConfig = new File("src/test/resources/baddate.yaml");
-		@SuppressWarnings("unused")
+		File badConfig = new File("src/test/yaml/baddate.yaml");
 		LoaderConfig config = new LoaderConfig(badConfig);
+		TableConfig job = config.getJobByName("incident");
+		assertNotNull(job);
+		logger.debug(Log.TEST, String.format("name=%s created=%s", job.getName(), job.getCreated()));
 		fail();
 	}
 
 	@Test(expected = ConfigParseException.class)
 	public void testBadInteger() throws Exception {
-		File badConfig = new File("src/test/resources/badinteger.yaml");
+		File badConfig = new File("src/test/yaml/badinteger.yaml");
 		@SuppressWarnings("unused")
 		LoaderConfig config = new LoaderConfig(badConfig);
 		fail();

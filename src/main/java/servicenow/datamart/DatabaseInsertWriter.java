@@ -5,13 +5,14 @@ import servicenow.api.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import org.slf4j.Logger;
+import java.util.regex.Pattern;
+//import org.slf4j.Logger;
 
 public class DatabaseInsertWriter extends DatabaseTableWriter {
 
 	protected DatabaseInsertStatement insertStmt;
 
-	final private Logger logger = Log.logger(this.getClass());
+//	final private Logger logger = Log.logger(this.getClass());
 	
 	public DatabaseInsertWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
 		super(name, db, table, sqlTableName);
@@ -23,6 +24,10 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
 	}
 	
+	Pattern primaryKeyViolation = 
+			Pattern.compile("\\b(primary key|unique constraint)\\b", Pattern.CASE_INSENSITIVE);
+	
+	
 	@Override
 	void writeRecord(Record rec) throws SQLException {
 		Key key = rec.getKey();
@@ -32,8 +37,19 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 			writerMetrics.incrementInserted();
 		}
 		catch (SQLIntegrityConstraintViolationException e) {
-			logger.trace(Log.PROCESS, "Failed/Skipped " + key);
+			logger.debug(Log.PROCESS, e.getClass().getName() + ": " + e.getMessage());
+			logger.info(Log.PROCESS, "Failed/Skipped " + key);
 			writerMetrics.incrementSkipped();
+		}
+		catch (SQLException e) {
+			logger.debug(Log.PROCESS, e.getClass().getName() + ": " + e.getMessage());
+			if (primaryKeyViolation.matcher(e.getMessage()).find()) {
+				logger.info(Log.PROCESS, "Failed/Skipped " + key);
+				writerMetrics.incrementSkipped();								
+			}
+			else {
+				throw e;
+			}
 		}
 	}
 

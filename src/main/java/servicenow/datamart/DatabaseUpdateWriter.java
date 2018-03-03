@@ -4,14 +4,14 @@ import servicenow.api.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import org.slf4j.Logger;
+//import org.slf4j.Logger;
 
 public class DatabaseUpdateWriter extends DatabaseTableWriter {
 
 	protected DatabaseInsertStatement insertStmt;
 	protected DatabaseUpdateStatement updateStmt;
 
-	final private Logger logger = Log.logger(this.getClass());
+//	final private Logger logger = Log.logger(this.getClass());
 	
 	public DatabaseUpdateWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
 		super(name, db, table, sqlTableName);

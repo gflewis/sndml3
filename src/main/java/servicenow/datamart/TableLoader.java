@@ -53,11 +53,15 @@ public class TableLoader implements Callable<WriterMetrics> {
 		this.config = config;
 	}
 	
-	public String getName() {
+	String getName() {
 		return this.table.getName();
 	}
 	
-	public WriterMetrics getMetrics() {
+	TableConfig getConfig() {
+		return this.config;
+	}
+	
+	WriterMetrics getMetrics() {
 		return writer.getMetrics();
 	}
 		

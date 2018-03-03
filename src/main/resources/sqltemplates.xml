@@ -4,7 +4,7 @@
 <!ELEMENT sql (drivers,properties,initialize,templates,datatypes,fieldnames)>
 <!ELEMENT drivers (driver*) >
 <!ELEMENT driver (#PCDATA)>
-<!ELEMENT properties (namecase,namequotes) >
+<!ELEMENT properties (autocommit,namecase,namequotes) >
 <!ELEMENT namecase (#PCDATA)>
 <!ELEMENT namequotes (#PCDATA)>
 <!ELEMENT initialize (statement*)>
@@ -38,6 +38,7 @@
     <properties>
       <!-- namecase   must be upper, lower or auto -->
       <!-- namequotes must be double, square or none -->
+      <autocommit>false</autocommit>
       <namecase>lower</namecase>
       <namequotes>double</namequotes>
     </properties>
@@ -92,7 +93,7 @@ where "sys_id" = $keyvalue</update>
   <sql dialect="oracle">
     <!--
       **************
-      *** oracle ***
+      *** Oracle ***
       **************
       This dialect quotes all column names, allowing Oracle reserved words to be used as column names.
       This dialect uses CLOB for any string with length greater than 4000.
@@ -103,6 +104,7 @@ where "sys_id" = $keyvalue</update>
     <properties>
       <!-- namecase   must be "upper" or "lower" -->
       <!-- namequotes must be "none", "double" or "square" -->
+      <autocommit>false</autocommit>
       <namecase>upper</namecase>
       <namequotes>double</namequotes>
     </properties>
@@ -167,9 +169,9 @@ WHERE SYS_ID=$keyvalue</update>
   
   <sql dialect="oracle_">
     <!-- 
-      ***************
-      *** oracle_ ***
-      ***************
+      ******************************************
+      *** Oracle with reserved words renamed ***
+      ******************************************
       This dialect appends an underscore to any field name which is an Oracle reserved word.
       For example, the field "number" is renamed to to "number_".
       This dialect generates VARCHAR2(3500) for any string with length greater than 3500.
@@ -178,6 +180,7 @@ WHERE SYS_ID=$keyvalue</update>
   	<properties>
       <!-- namecase   must be "upper" or "lower" -->
       <!-- namequotes must be "none", "double" or "square" -->
+      <autocommit>false</autocommit>
   	  <namecase>upper</namecase>
       <namequotes>none</namequotes>
   	</properties>
@@ -362,7 +365,7 @@ WHERE SYS_ID=$keyvalue</update>
   <sql dialect="mysql">
     <!--
       *************
-      *** mysql ***
+      *** MySQL ***
       *************
      -->
     <drivers>
@@ -371,11 +374,11 @@ WHERE SYS_ID=$keyvalue</update>
   	<properties>
       <!-- namecase   must be "upper" or "lower" -->
       <!-- namequotes must be "none", "double" or "square" -->
+      <autocommit>false</autocommit>
   	  <namecase>lower</namecase>
       <namequotes>double</namequotes>
     </properties>
     <initialize>
-      <statement>set autocommit = 0</statement>     
       <statement>set sql_mode = 'ANSI_QUOTES'</statement>
       <statement>set time_zone = '+0:00'</statement>
     </initialize>
@@ -431,10 +434,9 @@ WHERE sys_id = $keyvalue</update>
 
   <sql dialect="mssql">
     <!--
-      *************
-      *** mssql ***
-      *************
-      Dialect for Microsoft SQL Server 
+      ****************************
+      *** Microsoft SQL Server ***
+      ****************************
     -->
     <drivers>
       <driver>sqlserver</driver>
@@ -442,6 +444,7 @@ WHERE sys_id = $keyvalue</update>
     <properties>
       <!-- namecase   must be "upper" or "lower" -->
       <!-- namequotes must be "none", "double" or "square" -->
+      <autocommit>false</autocommit>
       <namecase>lower</namecase>
       <namequotes>square</namequotes>
     </properties>
@@ -497,9 +500,9 @@ where [sys_id] = $keyvalue</update>
   
   <sql dialect="pg">
     <!--
-      ****************
+      ******************
       *** PostgreSQL ***
-      ****************
+      ******************
       Dialect for H2 and other Postgress compatible databases 
     -->
     <drivers>
@@ -509,11 +512,12 @@ where [sys_id] = $keyvalue</update>
     <properties>
       <!-- namecase   must be upper, lower or auto -->
       <!-- namequotes must be double, square or none -->
+      <autocommit>true</autocommit>
       <namecase>lower</namecase>
       <namequotes>double</namequotes>
     </properties>
     <initialize>
-      <statement>set time zone 'UTC'</statement>
+      <statement>SET TIME ZONE 'UTC'</statement>
     </initialize>
     <templates>
       <create>create table $schema.$table (
@@ -573,6 +577,7 @@ where sys_id = $keyvalue</update>
     <properties>
       <!-- namecase   must be upper, lower or auto -->
       <!-- namequotes must be double, square or none -->
+      <autocommit>true</autocommit>
       <namecase>lower</namecase>
       <namequotes>double</namequotes>
     </properties>

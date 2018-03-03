@@ -8,7 +8,11 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
 	DateTimeTest.class, 
 	InstanceTest.class, 
-	ParametersTest.class })
+	ParametersTest.class,
+	SessionIDTest.class,
+	TableSchemaTest.class,
+	RestTableReaderTest.class,
+	})
 public class AllTests {
 
 }
