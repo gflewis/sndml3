@@ -31,9 +31,9 @@ public class TableConfig extends Config {
 	}
 	
 	public TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
+		dateFactory = new DateTimeFactory();
 		if (isMap(config)) {
 			assert parent != null;
-			dateFactory = new DateTimeFactory();
 			items = new Config.Map(config);
 			for (String origkey : items.keySet()) {
 			    Object val = items.get(origkey);

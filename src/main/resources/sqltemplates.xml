@@ -509,7 +509,7 @@ where [sys_id] = $keyvalue</update>
     <properties>
       <!-- namecase   must be upper, lower or auto -->
       <!-- namequotes must be double, square or none -->
-      <namecase>auto</namecase>
+      <namecase>lower</namecase>
       <namequotes>double</namequotes>
     </properties>
     <initialize>
@@ -518,7 +518,7 @@ where [sys_id] = $keyvalue</update>
     <templates>
       <create>create table $schema.$table (
 $fielddefinitions,
-primary key (sys_id))</create>
+primary key ("sys_id"))</create>
       <grant>grant select on $schema.$table to public</grant>
       <timestamp>select sys_updated_on from $schema.$table where sys_id = $keyvalue</timestamp>
       <insert>insert into $schema.$table (
