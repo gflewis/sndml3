@@ -160,7 +160,9 @@ public class TableSchema /* extends Writer */ {
 		return fields.size();
 	}
 
-	@Deprecated
+	/**
+	 * Used for testing
+	 */
 	public void report(PrintStream out) {
 		String tablename = table.getName();
 		out.println("Schema report for " + tablename);

@@ -495,10 +495,10 @@ where [sys_id] = $keyvalue</update>
     <fieldnames/>
   </sql>  
   
-  <sql dialect="postgres">
+  <sql dialect="pg">
     <!--
       ****************
-      *** postgres ***
+      *** PostgreSQL ***
       ****************
       Dialect for H2 and other Postgress compatible databases 
     -->

@@ -5,16 +5,11 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
-
-import servicenow.api.InvalidTableNameException;
-import servicenow.api.Session;
-import servicenow.api.Table;
-import servicenow.api.TableSchema;
-import servicenow.datamart.AllTests;
+import org.slf4j.LoggerFactory;
 
 public class TableSchemaTest {
 
-	static Logger logger = AllTests.getLogger(TableSchemaTest.class);
+	static Logger logger = LoggerFactory.getLogger(TableSchemaTest.class);
 	
 	@Before
 	public void setUp() throws Exception {

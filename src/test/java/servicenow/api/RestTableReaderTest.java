@@ -2,13 +2,13 @@ package servicenow.api;
 
 import org.junit.*;
 import org.slf4j.Logger;
-import servicenow.datamart.AllTests;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
 public class RestTableReaderTest {
 
-	Logger logger = AllTests.getLogger(this.getClass());
+	Logger logger = LoggerFactory.getLogger(this.getClass());
 	static Session session;
 	
 	@BeforeClass

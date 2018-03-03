@@ -6,6 +6,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import servicenow.api.TestingException;
 import servicenow.api.TestingManager;
@@ -20,7 +21,7 @@ import java.util.Properties;
 public class DBTest {
 
 	static private Database db = null;
-	static private Logger logger = AllTests.getLogger(DBTest.class);
+	static private Logger logger = LoggerFactory.getLogger(DBTest.class);
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
