@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import servicenow.datamart.Globals;
 import servicenow.datamart.ResourceManager;
 
 public class TestingManager {
@@ -39,6 +40,7 @@ public class TestingManager {
 			throw new TestingException("Unable to load testing profile: " + name, e);
 		}
 		ResourceManager.initialize(properties);
+		Globals.setStart(DateTime.now());
 	}
 	
 	public static void loadDefaultProfile() throws TestingException {

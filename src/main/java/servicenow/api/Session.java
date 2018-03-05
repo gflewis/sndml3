@@ -52,7 +52,7 @@ public class Session {
 		this.instance = new Instance(getProperty("instance"));
 		this.authScope = new AuthScope(instance.getHost());
 		this.setCredentials(getProperty("username"), getProperty("password"));
-		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
+		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);
 	}
 
 	/**
@@ -66,7 +66,17 @@ public class Session {
 		return value;
 	}
 	
-	public Session setCredentials(String username, String password) {
+	private boolean getPropertyBoolean(String propname, boolean defaultValue) {
+		String propvalue = getProperty(propname);
+		if (propvalue == null) return defaultValue;
+		return Boolean.parseBoolean(propvalue);
+	}
+	
+	private boolean getPropertyBoolean(String propname) {
+		return getPropertyBoolean(propname, false);
+	}
+	
+	private Session setCredentials(String username, String password) {
 		assert username != null;
 		this.username = username;
 		this.credsProvider = new BasicCredentialsProvider();
@@ -116,8 +126,16 @@ public class Session {
 		assert this.username != null;
 		Record profile = user.getRecord("user_name", this.username);
 		String timezone = profile.getValue("time_zone");
-		if (!"GMT".equals(timezone)) 
-			logger.warn(Log.INIT, "Time zone not GMT for user " + this.username);
+		if (!"GMT".equals(timezone)) { 
+			String message = "Time zone not GMT for user " + this.username;
+			if (getPropertyBoolean("verify_session")) {
+				logger.error(Log.INIT, message);				
+				throw new ServiceNowException(message);				
+			}
+			else {
+				logger.warn(Log.INIT, message);				
+			}
+		}
 		return this;
 	}
 	

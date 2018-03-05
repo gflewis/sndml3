@@ -97,6 +97,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 			reader.initialize();
 			
 		}
+		else if (LoaderAction.COMPARE.equals(action)) {
+			
+		}
 		else {
 			if (LoaderAction.UPDATE.equals(action))
 				writer = new DatabaseUpdateWriter(tableLoaderName, db, table, sqlTableName);

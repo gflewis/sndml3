@@ -40,7 +40,7 @@ public class JsonRequest extends ServiceNowRequest {
 		logger.debug(Log.REQUEST, method.name() + " " + uri.toURL());
 		if (requestObj != null) {
 			requestText = requestObj.toString();
-			if (logger.isTraceEnabled()) logger.trace(Log.REQUEST, requestText);
+			if (logger.isTraceEnabled()) logger.trace(Log.REQUEST, JsonFormatter.format(requestText));
 			requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
 		}
 		switch (method) {
@@ -94,7 +94,8 @@ public class JsonRequest extends ServiceNowRequest {
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
 					statusLine, responseContentType, responseLen));
-		logger.trace(Log.RESPONSE, responseText);
+		if (logger.isTraceEnabled())
+			logger.trace(Log.RESPONSE, JsonFormatter.format(responseText));
 		if (statusCode == 204) {
 			// Success - No Content
 			return null;

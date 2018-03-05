@@ -5,7 +5,7 @@
       <Filters>
         <ThresholdFilter level="trace" />
         <MarkerFilter marker="SCHEMA" onMatch="DENY" onMismatch="NEUTRAL" />
-        <MarkerFilter marker="BIND" onMatch="DENY" onMismatch="NEUTRAL" />
+        <MarkerFilter marker="BIND" onMatch="ALLOW" onMismatch="NEUTRAL" />
       </Filters>
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %marker [%thread] %logger{1} %X{context}:%X{table}: %msg%n</Pattern>  

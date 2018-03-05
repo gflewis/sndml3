@@ -163,6 +163,10 @@ public class TableConfig extends Config {
 		return this.truncate == null ? false : this.truncate.booleanValue();
 	}
 	
+	void setCreated(DateTimeRange value) {
+		this.created = value;
+	}
+	
 	DateTimeRange getCreated() {
 		if (this.created == null)
 			return getDefaultRange();
@@ -178,7 +182,14 @@ public class TableConfig extends Config {
 		return this.since;	
 	}
 	
-	EncodedQuery getFilter() { return this.filter; }
+	void setFilter(EncodedQuery value) {
+		this.filter = value;
+	}
+	
+	EncodedQuery getFilter() { 
+		return this.filter; 
+	}
+	
 	String  getOrderBy()     { return this.orderBy; }	
 	String  getSqlBefore()   { return this.sqlBefore; }
 	String  getSqlAfter()    { return this.sqlAfter; }

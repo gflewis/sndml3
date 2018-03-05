@@ -1,5 +1,7 @@
 package servicenow.datamart;
 
+import servicenow.api.*;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,14 +10,11 @@ import java.sql.Types;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
-
-import servicenow.api.*;
 
 public abstract class DatabaseStatement {
 
-	final Database dbw;
+	final Database db;
 	final String sqlTableName;
 	final Generator generator;
 	final ColumnDefinitions columns;
@@ -32,12 +31,12 @@ public abstract class DatabaseStatement {
 	final private Logger logger = Log.logger(this.getClass());
 	final boolean traceEnabled;
 	
-	public DatabaseStatement(Database dbw, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
-		this.dbw = dbw;
+	public DatabaseStatement(Database db, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
+		this.db = db;
 		this.sqlTableName = sqlTableName;
 		this.templateName = templateName;
-		this.generator = dbw.getGenerator();
-		Connection dbc = dbw.getConnection();
+		this.generator = db.getGenerator();
+		Connection dbc = db.getConnection();
 		this.columns = columns;
 		this.stmtText = buildStatement();
 		logger.debug(Log.SCHEMA, stmtText);
@@ -141,8 +140,7 @@ public abstract class DatabaseStatement {
 				catch (UnsupportedEncodingException e) {
 					throw new RuntimeException(e);
 				}
-			}
-			
+			}			
 			if (value.length() != oldSize) {
 				String message = rec.getKey() + " truncated: " + glidename +
 					" from " + oldSize + " to " + value.length();
@@ -154,8 +152,8 @@ public abstract class DatabaseStatement {
 		}
 		if (traceEnabled) {
 			int len = (value == null ? 0 : value.length());
-			logger.trace(Log.BIND, String.format("bind (%d:%d) %s=%s [%d]",
-					bindCol, sqltype, glidename, value, len));
+			logger.trace(Log.BIND, String.format("bind %d %s %s=%s (len=%d)",
+					bindCol, sqlTypeName(sqltype), glidename, value, len));
 		}
 		assert value != null;
 		switch (sqltype) {
@@ -179,6 +177,9 @@ public abstract class DatabaseStatement {
 			try { 
 				ts = new DateTime(value);
 				java.sql.Timestamp sqlts = new java.sql.Timestamp(ts.getMillisec());
+				assert sqlts.getTime() == ts.getMillisec();
+				if (traceEnabled)
+					logger.trace(Log.BIND, String.format("timestamp %s=%s", glidename, sqlts.toString()));
 				stmt.setTimestamp(bindCol, sqlts, GMT);
 			}
 			catch (InvalidDateTimeException e) {
@@ -239,5 +240,46 @@ public abstract class DatabaseStatement {
 			stmt.setString(bindCol, value);			
 		}
 	}
-	
+
+	private static String sqlTypeName(int sqltype) {
+		switch (sqltype) {
+			case Types.ARRAY:         return "ARRAY";
+			case Types.BIGINT:        return "BIGINT";
+			case Types.BINARY:        return "BINARY";
+			case Types.BIT:           return "BIT";
+			case Types.BLOB:          return "BLOB";
+			case Types.BOOLEAN:       return "BOOLEAN";
+			case Types.CHAR:          return "CHAR";
+			case Types.CLOB:          return "CLOB";
+			case Types.DATALINK:      return "DATALINK";
+			case Types.DATE:          return "DATE";
+			case Types.DECIMAL:       return "DECIMAL";
+			case Types.DISTINCT:      return "DISTINCT";
+			case Types.DOUBLE:        return "DOUBLE";
+			case Types.FLOAT:         return "FLOAT";
+			case Types.INTEGER:       return "INTEGER";
+			case Types.JAVA_OBJECT:   return "JAVA_OBJECT";
+			case Types.LONGNVARCHAR:  return "LONGNVARCHAR";
+			case Types.LONGVARBINARY: return "LONGVARBINARY";
+			case Types.LONGVARCHAR:   return "LONGVARCHAR";
+			case Types.NCHAR:         return "NCHAR";
+			case Types.NCLOB:         return "NCLOB";
+			case Types.NULL:          return "NULL";
+			case Types.NUMERIC:       return "NUMERIC";
+			case Types.NVARCHAR:      return "NVARCHAR";
+			case Types.OTHER:         return "OTHER";
+			case Types.REAL:          return "REAL";
+			case Types.REF:           return "REF";
+			case Types.ROWID:         return "ROWID";
+			case Types.SMALLINT:      return "SMALLINT";
+			case Types.SQLXML:        return "SQLXML";
+			case Types.STRUCT:        return "STRUCT";
+			case Types.TIME:          return "TIME";
+			case Types.TIMESTAMP:     return "TIMESTAMP";
+			case Types.TINYINT:       return "TINYINT";
+			case Types.VARBINARY:     return "VARBINARY";
+			case Types.VARCHAR:       return "VARCHAR";
+			default: return Integer.toString(sqltype);
+		}
+	}
 }

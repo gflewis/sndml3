@@ -24,7 +24,8 @@ public class Globals {
 
 	private static CommandLine cmdline;
 	private static Properties properties = new Properties();
-	private static LoaderConfig config  = null;
+	private static DateTime start;
+	private static LoaderConfig config;
 	
 	public static Boolean warnOnTruncate = true;
 	static Logger logger = LoggerFactory.getLogger(Globals.class);
@@ -69,40 +70,59 @@ public class Globals {
 
 	static void setLoaderConfig(LoaderConfig value) {
 		config = value;
-		logger.debug(Log.INIT, String.format("setLoaderConfig start=%s metrics=%s",  getStart(), getMetricsFile()));
+		start = config.getStart();
+		logger.debug(Log.INIT, String.format("setLoaderConfig start=%s metrics=%s",  
+				getStart(), getMetricsFile()));
 	}
 	
 	static LoaderConfig getLoaderConfig() {
 		return config;
 	}
 	
+	/**
+	 * Used for testing.
+	 * @see servicenow.datamart.TestingManager
+	 * @see servicenow.datamart.DateTimeFactoryTest
+	 */
+	public static void setStart(DateTime value) {
+		Globals.start = value;
+	}
+	
 	public static DateTime getStart() {
-		return config.start;
+		assert start != null;
+		return start;
 	}
 
-	public static File getMetricsFile() {
+	static File getMetricsFile() {
 		String filename = getProperty("metrics");
 		if (filename != null) return new File(filename);
 		return config.metricsFile;
 	}
 
-	private static String getProperty(String name) {
+	static String getProperty(String name) {
+		assert name != null;
+		String propname;
+		if (name.indexOf(".") > 0) {
+			propname = name;
+		}
+		else {
+			String prefix = (name.matches("templates|dialect")) ? "datamart" : "loader";
+			propname = prefix + "." + name;			
+		}
 		String value = null;
-		String prefix = (name.matches("templates|dialect")) ? "datamart" : "loader";
-		String propname = prefix + "." + name;
 		value = System.getProperty(propname);
 		if (value != null) value = properties.getProperty(propname);
 		return value;
 	}
 	
-	public static String getValue(String name) {
+	static String getValue(String name) {
 		assert name != null;
 		String value = getProperty(name);
 		if (value != null) value = config.getString(name);
 		return value;
 	}
 
-	public static File getFile(String varname) {
+	static File getFile(String varname) {
 		String path = getValue(varname);
 		return (path == null) ? null : new File(path); 
 	}
@@ -112,44 +132,44 @@ public class Globals {
 		return (value == null) ? null : new Boolean(value);
 	}
 	
-	public static Integer getInteger(String varname) {
+	static Integer getInteger(String varname) {
 		return getInteger(varname, null);
 	}
 	
-	public static Integer getInteger(String varname, Integer defaultValue) {
+	static Integer getInteger(String varname, Integer defaultValue) {
 		String value = getValue(varname);
 		return (value == null) ? defaultValue : new Integer(value);		
 	}
 	
-	public static Properties getProperties() {
+	static Properties getProperties() {
 		return properties;
 	}
 
-	public static CommandLine getCommand() {
+	static CommandLine getCommand() {
 		return cmdline;
 	}
 	
-	public static boolean hasOptionValue(String name) {
+	static boolean hasOptionValue(String name) {
 		return cmdline.getOptionValue(name) != null;
 	}
 	
-	public static String getOptionValue(String name) {
+	static String getOptionValue(String name) {
 		return cmdline.getOptionValue(name);
 	}
 	
-	public static String[] getArgs() {
+	static String[] getArgs() {
 		return cmdline.getArgs();
 	}
 	
-	public static List<String> getArgList() {
+	static List<String> getArgList() {
 		return cmdline.getArgList();
 	}
 	
-	public static String getArg(int index) {
+	static String getArg(int index) {
 		return getArgList().get(index);
 	}
 		
-	public static Session getSession() {
+	static Session getSession() {
 		return new Session(getProperties());
 	}
 	

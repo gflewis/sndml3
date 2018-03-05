@@ -83,6 +83,10 @@ public class Database {
 	}
 	
 	
+	void close() throws SQLException {
+		dbc.close();
+	}
+	
 	boolean isOracle() {
 		String protocol = getProtocol(getURI());
 		return "oracle".equalsIgnoreCase(protocol);

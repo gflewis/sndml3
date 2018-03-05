@@ -1,58 +1,62 @@
 package servicenow.datamart;
 
+import servicenow.api.*;
+
 import static org.junit.Assert.*;
 
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import servicenow.api.TestingException;
-import servicenow.api.TestingManager;
-import servicenow.datamart.Database;
-
-import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
+@RunWith(Parameterized.class)
 public class DBTest {
-
-	static private Database db = null;
-	static private Logger logger = LoggerFactory.getLogger(DBTest.class);
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		initialize();
+	@Parameters(name = "{index}:{0}")
+	public static String[] profiles() {
+		return new String[] {"awspg"};
 	}
+
+	static Logger logger = TestingManager.getLogger(DBTest.class);
+	
+	public DBTest(String profile) throws Exception {
+		TestingManager.loadProfile(profile);
+//		session = ResourceManager.getSession();
+//		database = ResourceManager.getDatabase();
+	}
+		
+	
+//	@BeforeClass
+//	public static void setUpBeforeClass() throws Exception {
+//		initialize();
+//	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		disconnect();
+		ResourceManager.getDatabase().close();
 	}
 
 	static void initialize() throws TestingException, SQLException {
-		logger.info("initialize");
-		Properties props = TestingManager.getDefaultProperties();
-		try {
-			db = new Database(props);
-		} catch (URISyntaxException e) {
-			throw new TestingException(e);
-		}
+		Database db = ResourceManager.getDatabase();
 		assert db != null;
 		assert db.getConnection() != null;
 	}
 
-	static Connection getConnection() throws SQLException {
-		initialize();
-		return db.getConnection();
-	}
+//	static Connection getConnection() throws SQLException {
+//		Database db = ResourceManager.getDatabase();
+//		return db.getConnection();
+//	}
 	
 	static int sqlUpdate(String sql) throws SQLException {
-		initialize();
-		Connection dbc = getConnection();
+		Database db = ResourceManager.getDatabase();
+		Connection dbc = db.getConnection();
 		assertNotNull(dbc);
 		logger.debug("sqlUpdate \"" + sql + "\"");
 		Statement stmt = dbc.createStatement();
@@ -69,30 +73,27 @@ public class DBTest {
 	}
 
 	static boolean tableExists(String tablename) throws SQLException {
+		Database db = ResourceManager.getDatabase();
 		return db.tableExists(tablename);
 	}
-	
+
+	@Deprecated
 	static void rollback() throws SQLException {
-		if (db == null) return;
-		db.getConnection().rollback();		
+		ResourceManager.getDatabase().getConnection().rollback();		
 	}
 	
 	static void commit() throws SQLException {
-		if (db == null) return;
-		getConnection().commit();
-	}
-	
-	static void disconnect() throws SQLException {
-		logger.info("disconnect");
-		getConnection().close();
-		db = null;
+		ResourceManager.getDatabase().commit();
 	}
 	
 	@Test
 	public void testTableExistsTrue() throws Exception {
 		logger.info("testTableExistsTrue");
-		String tablename = "core_company";
+		Database db = ResourceManager.getDatabase();
+		String tablename = "core_company";		
+		Table table = ResourceManager.getSession().table(tablename);
 		assertNotNull(db);
+		db.createMissingTable(table, tablename);
 		assertTrue(db.tableExists(tablename));
 		assertFalse(db.tableExists(tablename.toUpperCase()));
 	}
@@ -100,10 +101,40 @@ public class DBTest {
 	@Test
 	public void testTableExistsFalse() throws Exception {
 		logger.info("testTableExistsFalse");
+		Database db = ResourceManager.getDatabase();
 		String tablename = "some_nonexistent_table";
 		assertNotNull(db);
 		assertFalse(db.tableExists(tablename));
 		assertFalse(db.tableExists(tablename.toUpperCase()));
+	}
+
+	static int sqlCount(String tablename, String where) throws SQLException {
+		String query = "select count(*) from " + tablename;
+		if (where != null) query += " where " + where;
+		return sqlCount(query);
+	}
+	
+	static int sqlCount(String query) throws SQLException {		
+		Database db = ResourceManager.getDatabase();
+		db.commit();
+		Statement stmt = db.getConnection().createStatement();
+		ResultSet rs = stmt.executeQuery(query);
+		rs.next();
+		int count = rs.getInt(1);
+		rs.close();
+		db.commit();
+		logger.info(query + " (" + count + ")");
+		return count;
+	}
+
+	
+	static ResultSet getRow(String query) throws SQLException {
+		Database db = ResourceManager.getDatabase();
+		db.commit();
+		Statement stmt = db.getConnection().createStatement();
+		ResultSet rs = stmt.executeQuery(query);
+		rs.next();
+		return rs;		
 	}
 	
 	/*
@@ -137,19 +168,6 @@ public class DBTest {
 		return sqlCount(sql);
 	}
 	
-	static int sqlCount(String query) throws SQLException, IOException {
-		initialize();
-		connection.commit();
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery(query);
-		rs.next();
-		int count = rs.getInt(1);
-		rs.close();
-		connection.commit();
-		logger.info(query + " (" + count + ")");
-		return count;
-	}
-
 	static void sqlDeleteJupiter() throws IOException, SQLException {
 		String tablename = tableName("cmn_location");
 		sqlUpdate("delete from " + tablename +" where name='Jupiter'");

@@ -2,6 +2,7 @@ package servicenow.api;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,6 +41,13 @@ public class KeySet extends ArrayList<Key> {
 	
 	public KeySet(JSONObject obj, String fieldname) {
 		this(obj.getJSONArray(fieldname));
+	}
+	
+	public KeySet(Set<Key> set) {
+		super(set.size());
+		for (Key key : set) {
+			this.add(key);
+		}
 	}
 	
 	/**

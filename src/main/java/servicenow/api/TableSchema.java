@@ -88,7 +88,7 @@ public class TableSchema /* extends Writer */ {
 	private String determineParentName() throws IOException {
 		if (tablename.startsWith("sys_")) return null;
 		Log.setContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
-		Record myRec = hierarchy.getRecord("name", this.tablename, false);
+		Record myRec = hierarchy.getRecord("name", this.tablename);
 		if (myRec == null) {
 			logger.error(Log.INIT, "Unable to read schema for: " + tablename +
 					" (check access controls for sys_dictionary and sys_db_object)");

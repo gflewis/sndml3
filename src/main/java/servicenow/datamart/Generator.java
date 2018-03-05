@@ -210,6 +210,10 @@ public class Generator {
 		return sqltype;
 	}
 	
+	String getTemplate(String templateName, Table table, Map<String,String> vars) {
+		return getTemplate(templateName, table.getName(), vars);
+	}
+	
 	String getTemplate(String templateName, String tableName) {
 		return getTemplate(templateName, tableName, null);
 	}

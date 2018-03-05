@@ -122,22 +122,14 @@ public class Table {
 		if (api == apiSOAP) return apiSOAP.getDefaultReader();
 		throw new IllegalStateException();
 	}
-		
-//	public KeySet getKeys() throws IOException {
-//		return api.getKeys((EncodedQuery) null);
-//	}
-//	
-//	public KeySet getKeys(EncodedQuery filter) throws IOException {
-//		return api.getKeys(filter);
-//	}
-	
+			
 	public Record getRecord(Key key) throws IOException {
 		return api.getRecord(key);
 	}
 	
-	public Record getRecord(String fieldname, String fieldvalue, boolean displayValue)  throws IOException {
-		return api.getRecord(fieldname, fieldvalue, displayValue);
-	}
+//	public Record getRecord(String fieldname, String fieldvalue, boolean displayValue)  throws IOException {
+//		return api.getRecord(fieldname, fieldvalue, displayValue);
+//	}
 		
 	/**
 	 * Retrieves a single record based on a unique field such as "name" or "number".  

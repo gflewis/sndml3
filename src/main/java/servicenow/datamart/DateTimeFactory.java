@@ -15,7 +15,6 @@ import servicenow.api.Log;
 
 public class DateTimeFactory {
 
-	final DateTime start;
 	final Properties lastMetrics;
 	
 	final Pattern datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2}:\\d{2})?");
@@ -24,9 +23,7 @@ public class DateTimeFactory {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public DateTimeFactory() throws ConfigParseException {
-		start = Globals.getStart();
-		assert start != null;
+	DateTimeFactory() throws ConfigParseException {
 		File metricsFile = Globals.getMetricsFile();
 		if (metricsFile == null || !metricsFile.exists()) {
 			this.lastMetrics = null;
@@ -41,21 +38,26 @@ public class DateTimeFactory {
 			throw new ConfigParseException(e);
 		}
 	}
-	
-	public DateTimeFactory(DateTime start, Properties lastMetrics) {
-		this.start = start;
+
+	/**
+	 * Used for testing
+	 * @see DateTimeFactoryTest
+	 */
+	DateTimeFactory(DateTime start, Properties lastMetrics) {
+		Globals.setStart(start);
 		this.lastMetrics = lastMetrics;
 	}
 
 	DateTime getStart() {
-		return this.start;
+		return Globals.getStart();
 	}
 	
 	DateTime getLast(String propName) throws ConfigParseException {
 		assert propName != null;
 		if (lastMetrics == null) {
-			logger.error(Log.INIT, "Metrics file not specified; " + propName + " will default to \"void\"");
-			return null;
+			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
+			logger.error(Log.INIT, message);
+			throw new IllegalArgumentException(message);
 		}
 		String propValue = lastMetrics.getProperty(propName);
 		if (propValue == null) 
@@ -63,7 +65,7 @@ public class DateTimeFactory {
 		return new DateTime(propValue);
 	}
 	
-	public DateTime getDate(Object obj) throws ConfigParseException {
+	DateTime getDate(Object obj) throws ConfigParseException {
 		assert obj != null;
 		DateTime result;
 		logger.debug(Log.INIT, 
