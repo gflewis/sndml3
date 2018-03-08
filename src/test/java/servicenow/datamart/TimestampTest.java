@@ -18,7 +18,7 @@ public class TimestampTest {
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
 //		return new String[] {"awsmysql","awspg", "awsora"};
-		return new String[] {"awsmysql"};
+		return new String[] {"awsmysql", "awspg"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +47,8 @@ public class TimestampTest {
 	
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		ResourceManager.getDatabase().close();
+		Database db = ResourceManager.getDatabase();
+		if (db != null) db.close();
 	}
 	
 	void loadTable() throws Exception {
@@ -81,8 +82,10 @@ public class TimestampTest {
 	
 	@Test
 	public void testGetTimestamps() throws Exception {
+		String tablename = "incident";
+		database.createMissingTable(session.table(tablename), tablename);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
-		TimestampLookup timestamps = reader.getTimestamps("incident");
+		TimestampLookup timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));
 		assertTrue(timestamps.size() > 0);
 		KeySet keys = timestamps.getKeys();
@@ -91,6 +94,9 @@ public class TimestampTest {
 		DateTime firstTimestamp = timestamps.get(firstKey);
 		logger.info(Log.TEST, String.format("%s=%s", firstKey, firstTimestamp));
 		Record firstRec = session.table("incident").api().getRecord(firstKey);
+		logger.info(Log.TEST, String.format(
+				"number=%s created=%s updated=%s", firstRec.getValue("number"), 
+				firstRec.getValue("sys_created_on"), firstRec.getValue("sys_updated_on")));
 		DateTime firstRecUpdated = firstRec.getUpdatedTimestamp();
 		assertEquals(firstRecUpdated, firstTimestamp);
 	}

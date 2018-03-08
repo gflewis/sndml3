@@ -73,7 +73,7 @@ public class DatabaseTimestampReader {
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next() ) {
 			String sys_id = rs.getString(1);
-			java.util.Date sys_updated_on = rs.getDate(2);
+			java.sql.Timestamp sys_updated_on = rs.getTimestamp(2);
 			Key key = new Key(sys_id);
 			DateTime value = new DateTime(sys_updated_on);
 			result.put(key, value);

@@ -31,7 +31,6 @@ public class ResourceManager {
 	}
 	
 	public static Database getDatabase() {
-		assert db != null;
 		return db;
 	}
 	
