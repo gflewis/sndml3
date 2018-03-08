@@ -1,8 +1,6 @@
 package servicenow.api;
 
 import java.io.IOException;
-import java.net.URI;
-
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +31,12 @@ public abstract class TableAPI {
 		return table.getName();
 	}
 
-	@Deprecated
-	protected void setAPIContext(URI uri) {
-		Log.setSessionContext(session);
-		Log.setTableContext(table);
-		Log.setURIContext(uri);		
-	}
+//	@Deprecated
+//	protected void setAPIContext(URI uri) {
+//		Log.setSessionContext(session);
+//		Log.setTableContext(table);
+//		Log.setURIContext(uri);		
+//	}
 	
 	/**
 	 * Gets a record using the sys_id. 

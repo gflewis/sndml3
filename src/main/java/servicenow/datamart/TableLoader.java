@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 		}
 		db.createMissingTable(table, sqlTableName);
 
-		Log.setContext(table, tableLoaderName);		
+		Log.setContext(table, tableLoaderName);	
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
 		DateTime since = config.getSince();
 		
@@ -98,6 +99,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 			
 		}
 		else if (LoaderAction.COMPARE.equals(action)) {
+			throw new NotImplementedException("LoadeAction.COMPARE");
 			
 		}
 		else {
@@ -127,17 +129,19 @@ public class TableLoader implements Callable<WriterMetrics> {
 			if (partitionInterval == null) {
 				reader = factory.createReader();
 				reader.setMaxRows(config.getMaxRows());
+				Log.setContext(table, tableLoaderName);
 				if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 				reader.initialize();
 			}
 			else {
 				Integer threads = config.getThreads();
-				DatePartitionedTableReader preader = 
+				DatePartitionedTableReader multiReader = 
 						new DatePartitionedTableReader(factory, partitionInterval, threads);
-				reader = preader;
-				factory.setParent(preader);
-				preader.initialize();
-				logger.info(Log.INIT, "partition=" + preader.getPartition());
+				reader = multiReader;
+				factory.setParent(multiReader);
+				multiReader.initialize();
+				Log.setContext(table, tableLoaderName);
+				logger.info(Log.INIT, "partition=" + multiReader.getPartition());
 			}
 		}
 		assert reader != null;
