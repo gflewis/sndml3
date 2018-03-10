@@ -10,11 +10,9 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 
 	protected DatabaseInsertStatement insertStmt;
 	protected DatabaseUpdateStatement updateStmt;
-
-//	final private Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseUpdateWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(name, db, table, sqlTableName);
+	public DatabaseUpdateWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
+		super(db, table, sqlTableName);
 	}
 
 	@Override

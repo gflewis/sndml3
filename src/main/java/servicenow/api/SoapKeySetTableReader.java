@@ -55,7 +55,7 @@ public class SoapKeySetTableReader extends TableReader {
 			params.add("__encoded_query", sliceQuery.toString());
 			if (viewName != null) params.add("__use_view", viewName);
 			RecordList recs = apiSOAP.getRecords(params, this.displayValue);
-			readerMetrics().increment(recs.size());						
+			getReaderMetrics().increment(recs.size());						
 			writer.processRecords(this, recs);
 			rowCount += recs.size();
 			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));

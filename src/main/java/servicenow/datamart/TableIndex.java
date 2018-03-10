@@ -5,6 +5,7 @@ import java.util.Set;
 
 import servicenow.api.*;
 
+@Deprecated
 public class TableIndex {
 
 	public class Entry {

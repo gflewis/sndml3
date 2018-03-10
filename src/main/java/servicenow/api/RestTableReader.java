@@ -2,8 +2,6 @@ package servicenow.api;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RestTableReader extends TableReader {
 
@@ -11,8 +9,6 @@ public class RestTableReader extends TableReader {
 	private boolean statsEnabled = false;
 	protected TableStats stats = null;
 	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
 	private final int DEFAULT_PAGE_SIZE = 200;
 	
 	public RestTableReader(Table table) {
@@ -64,7 +60,7 @@ public class RestTableReader extends TableReader {
 			if (fieldNames != null) params.add("sysparm_fields", fieldNames.toString());
 			if (viewName != null) params.add("sysparm_view", viewName);
 			RecordList recs = apiREST.getRecords(params);
-			readerMetrics().increment(recs.size());
+			getReaderMetrics().increment(recs.size());
 			writer.processRecords(this, recs);			
 			rowCount += recs.size();
 			offset += recs.size();

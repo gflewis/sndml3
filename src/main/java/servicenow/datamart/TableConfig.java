@@ -13,7 +13,6 @@ public class TableConfig extends Config {
 	private LoaderAction action;
 	private Boolean truncate;
 	private DateTimeRange created;
-//	private DateTimeRange updated;
 	private DateTime since;
 	private EncodedQuery filter;
 	private String orderBy;
@@ -53,6 +52,7 @@ public class TableConfig extends Config {
 			    		case "update": this.action = LoaderAction.UPDATE; break;
 			    		case "insert": this.action = LoaderAction.INSERT; break;
 			    		case "prune":  this.action = LoaderAction.PRUNE; break;
+			    		case "sync":   this.action = LoaderAction.SYNC; break;
 			    		default:
 						throw new ConfigParseException("Not recognized: " + val.toString());			    			
 			    		}
@@ -111,13 +111,21 @@ public class TableConfig extends Config {
 	}
 	
 	void validate() throws ConfigParseException {
+		String actionName = getAction().toString();
 		if (name == null && source == null && target == null) 
 			configError("Must specify at least one of Name, Source, Target");
 		if (getAction().equals(LoaderAction.PRUNE)) {
-			if (created != null) configError("Created not valid with Action: Prune");
-			if (filter != null)  configError("Filter not valid with Action: Prune");
-			if (orderBy != null) configError("OrderBy not valid with Action: Prune");
-			if (threads != null) configError("Threads not valid with Action: Prune");			
+			if (created != null) configError("Created not valid with Action: " + actionName);
+			if (filter != null)  configError("Filter not valid with Action: " + actionName);
+			if (orderBy != null) configError("OrderBy not valid with Action: " + actionName);
+			if (threads != null) configError("Threads not valid with Action: " + actionName);
+			if (partition != null) configError("Partition not valid with Action: " + actionName);
+		}
+		if (getAction().equals(LoaderAction.SYNC)) {
+			if (since != null) configError("Since not valid with Action: " + actionName);
+			if (filter != null) configError("Filter not valid with Action: " + actionName);
+			if (created != null) configError("Created not valid with Action: " + actionName);
+			if (partition != null) configError("Partition not valid with Action: " + actionName);
 		}
 		if (orderBy != null && !Pattern.matches("(\\+|\\-)?\\w+", orderBy))
 			configError("Invalid OrderBy");				

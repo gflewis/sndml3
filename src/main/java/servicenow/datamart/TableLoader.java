@@ -8,7 +8,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +19,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	private final String sqlTableName;
 	private final String tableLoaderName;
 	private final TableConfig config;
-	
-	TableReader reader;
-	DatabaseTableWriter writer;
+	private WriterMetrics metrics;
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -63,7 +60,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	}
 	
 	WriterMetrics getMetrics() {
-		return writer.getMetrics();
+		return metrics;
 	}
 		
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
@@ -86,27 +83,39 @@ public class TableLoader implements Callable<WriterMetrics> {
 		DateTime since = config.getSince();
 		
 		if (LoaderAction.PRUNE.equals(action)) {
-			writer = new DatabaseDeleteWriter(tableLoaderName, db, table, sqlTableName);
-			writer.open();
+			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+			deleteWriter.open();
 			Table audit = session.table("sys_audit_delete");
 			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
-			reader = audit.getDefaultReader();
-			reader.setBaseQuery(auditQuery);			
-			reader.setCreatedRange(new DateTimeRange(since, null));
-			reader.setMaxRows(config.getMaxRows());
-			reader.setWriter(writer);
-			reader.initialize();
+			RestTableReader auditReader = new RestTableReader(audit);
+			auditReader.enableStats(true);
+			auditReader.setBaseQuery(auditQuery);			
+			auditReader.setCreatedRange(new DateTimeRange(since, null));
+			auditReader.setMaxRows(config.getMaxRows());
+			auditReader.setWriter(deleteWriter);
+			auditReader.initialize();
+			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+					tableLoaderName, auditReader.getReaderMetrics().getExpected()));
+			auditReader.call();
+			deleteWriter.close();
+			metrics = deleteWriter.getMetrics();;
 			
 		}
-		else if (LoaderAction.COMPARE.equals(action)) {
-			throw new NotImplementedException("LoadeAction.COMPARE");
-			
+		else if (LoaderAction.SYNC.equals(action)) {
+			DateTimeRange createdRange = config.getCreated();
+			TableSyncReader syncReader = new TableSyncReader(table, db, sqlTableName);
+			syncReader.initialize(createdRange);
+			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+					tableLoaderName, syncReader.getReaderMetrics().getExpected()));
+			syncReader.call();
+			metrics = syncReader.getWriterMetrics();						
 		}
 		else {
+			DatabaseTableWriter writer;
 			if (LoaderAction.UPDATE.equals(action))
-				writer = new DatabaseUpdateWriter(tableLoaderName, db, table, sqlTableName);
+				writer = new DatabaseUpdateWriter(db, table, sqlTableName);
 			else if (LoaderAction.INSERT.equals(action))
-				writer = new DatabaseInsertWriter(tableLoaderName, db, table, sqlTableName);
+				writer = new DatabaseInsertWriter(db, table, sqlTableName);
 			else
 				throw new AssertionError();
 			writer.open();
@@ -126,6 +135,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 			factory.setCreated(config.getCreated());
 			factory.setOrderBy(config.getOrderBy());
 			factory.setPageSize(pageSize);
+			TableReader reader;
 			if (partitionInterval == null) {
 				reader = factory.createReader();
 				reader.setMaxRows(config.getMaxRows());
@@ -143,15 +153,15 @@ public class TableLoader implements Callable<WriterMetrics> {
 				Log.setContext(table, tableLoaderName);
 				logger.info(Log.INIT, "partition=" + multiReader.getPartition());
 			}
+			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+					tableLoaderName, reader.getReaderMetrics().getExpected()));
+			reader.call();
+			writer.close();
+			metrics = writer.getMetrics();
+			
 		}
-		assert reader != null;
-		assert writer != null;
-		assert reader.readerMetrics() != null;
-		logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
-				tableLoaderName, reader.readerMetrics().getExpected()));
-		reader.call();
-		writer.close();
-		int processed = writer.getMetrics().getProcessed();
+		
+		int processed = metrics.getProcessed();
 		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, processed));
 		Integer minRows = config.getMinRows();
 		if (minRows != null && processed < minRows)
@@ -160,7 +170,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 		if (config.getSqlAfter() != null) {
 			db.executeStatement(config.getSqlAfter());
 		}
-		return writer.getMetrics();
+		return metrics;
 	}
 
 }

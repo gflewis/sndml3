@@ -6,16 +6,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.regex.Pattern;
-//import org.slf4j.Logger;
 
 public class DatabaseInsertWriter extends DatabaseTableWriter {
 
 	protected DatabaseInsertStatement insertStmt;
-
-//	final private Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseInsertWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(name, db, table, sqlTableName);
+	public DatabaseInsertWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
+		super(db, table, sqlTableName);
 	}
 
 	@Override

@@ -57,7 +57,7 @@ public class DateTimeFactory {
 		if (lastMetrics == null) {
 			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
 			logger.error(Log.INIT, message);
-			throw new IllegalArgumentException(message);
+			throw new ConfigParseException(message);
 		}
 		String propValue = lastMetrics.getProperty(propName);
 		if (propValue == null) 

@@ -8,11 +8,9 @@ import java.sql.SQLException;
 public class DatabaseDeleteWriter extends DatabaseTableWriter {
 
 	protected DatabaseDeleteStatement deleteStmt;
-	
-//	final private Logger logger = Log.logger(this.getClass());
-	
-	public DatabaseDeleteWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(name, db, table, sqlTableName);
+		
+	public DatabaseDeleteWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
+		super(db, table, sqlTableName);
 	}
 
 	@Override

@@ -2,16 +2,12 @@ package servicenow.api;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KeySetTableReader extends TableReader {
 
 	protected final JsonTableAPI api;
 	protected KeySet allKeys;
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-		
 	public KeySetTableReader(Table table) {
 		super(table);
 		api = table.json();
@@ -78,7 +74,7 @@ public class KeySetTableReader extends TableReader {
 			if (this.displayValue) params.add("displayvalue", "all");
 			params.add("sysparm_query", sliceQuery.toString());
 			RecordList recs = api.getRecords(params);
-			readerMetrics().increment(recs.size());			
+			getReaderMetrics().increment(recs.size());			
 			writer.processRecords(this, recs);
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));

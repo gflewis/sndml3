@@ -17,8 +17,7 @@ public class TimestampTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-//		return new String[] {"awsmysql","awspg", "awsora"};
-		return new String[] {"awspg"};
+		return new String[] {"awsmysql","awspg", "awsora"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -85,7 +84,7 @@ public class TimestampTest {
 		String tablename = "incident";
 		database.createMissingTable(session.table(tablename), tablename);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
-		TimestampLookup timestamps = reader.getTimestamps(tablename);
+		TimestampHash timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));
 		assertTrue(timestamps.size() > 0);
 		KeySet keys = timestamps.getKeys();

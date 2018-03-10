@@ -5,11 +5,9 @@ import java.sql.SQLException;
 
 public abstract class Writer {
 
-	protected WriterMetrics writerMetrics;
+	protected WriterMetrics writerMetrics = new WriterMetrics();
 
-	
 	public Writer() {
-		this.writerMetrics = new WriterMetrics(null);
 	}
 
 	public abstract void processRecords(TableReader source, RecordList recs) throws IOException, SQLException;	

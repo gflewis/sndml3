@@ -54,12 +54,12 @@ public class DatabaseTimestampReader {
 		return result;
 	}
 	
-	TimestampLookup getTimestamps(String tableName) throws SQLException {
+	TimestampHash getTimestamps(String tableName) throws SQLException {
 		String stmtText = database.getGenerator().getTemplate("all_timestamps", tableName, null);
 		return getQueryResult(stmtText);
 	}
 	
-	TimestampLookup getTimestamps(String tableName, DateTimeRange created) throws SQLException {
+	TimestampHash getTimestamps(String tableName, DateTimeRange created) throws SQLException {
 		Parameters vars = new Parameters();
 		vars.put("start", created.getStart().toString());
 		vars.put("end",  created.getEnd().toString());
@@ -67,8 +67,8 @@ public class DatabaseTimestampReader {
 		return getQueryResult(stmtText);
 	}
 	
-	private TimestampLookup getQueryResult(String stmtText) throws SQLException {
-		TimestampLookup result = new TimestampLookup();
+	private TimestampHash getQueryResult(String stmtText) throws SQLException {
+		TimestampHash result = new TimestampHash();
 		PreparedStatement stmt = dbc.prepareStatement(stmtText);
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next() ) {
@@ -79,7 +79,6 @@ public class DatabaseTimestampReader {
 			result.put(key, value);
 		}
 		rs.close();
-		return result;		
-		
+		return result;	
 	}
 }

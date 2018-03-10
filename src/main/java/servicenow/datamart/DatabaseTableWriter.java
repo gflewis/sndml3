@@ -17,7 +17,7 @@ public abstract class DatabaseTableWriter extends Writer {
 	
 	final Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseTableWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
+	public DatabaseTableWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
 		super();
 		this.db = db;
 		this.table = table;
@@ -46,7 +46,7 @@ public abstract class DatabaseTableWriter extends Writer {
 	private synchronized void logProgress(TableReader reader, String status) {
 		assert reader != null;
 		reader.setLogContext();
-		ReaderMetrics readerMetrics = reader.readerMetrics();
+		ReaderMetrics readerMetrics = reader.getReaderMetrics();
 		assert readerMetrics != null;
 		if (readerMetrics.getParent() == null) 
 			logger.info(Log.PROCESS, String.format("%s %s", status, readerMetrics.getProgress()));

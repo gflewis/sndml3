@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class TableReader implements Callable<TableReader> {
  
 	public final Table table;
@@ -23,18 +26,18 @@ public abstract class TableReader implements Callable<TableReader> {
 	protected ReaderMetrics readerMetrics;
 	protected Integer maxRows;
 	protected boolean initialized = false;
-
+	protected final Logger logger;
+	
 	public TableReader(Table table) {
 		this.table = table;
+		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.pageSize = getDefaultPageSize();
 		this.readerMetrics = new ReaderMetrics();
 	}
 			
-	public abstract int getDefaultPageSize();
-	
 	public void initialize() throws IOException {
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
-		if (writer == null) throw new IllegalStateException("Reader has no writer");
+//		if (writer == null) throw new IllegalStateException("Reader has no writer");
 		setLogContext();
 		initialized = true;
 	}
@@ -62,7 +65,7 @@ public abstract class TableReader implements Callable<TableReader> {
 		return this.parent;
 	}
 	
-	public ReaderMetrics readerMetrics() {
+	public ReaderMetrics getReaderMetrics() {
 		return this.readerMetrics;
 	}
 	
@@ -79,6 +82,8 @@ public abstract class TableReader implements Callable<TableReader> {
 		return readerMetrics.getExpected();
 	}
 		
+	public abstract int getDefaultPageSize();
+	
 	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
 			
 	public TableReader setPageSize(int size) {
@@ -88,7 +93,10 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 	
 	public int getPageSize() {
-		return pageSize > 0 ? pageSize : getDefaultPageSize();
+		if (this.pageSize > 0) return this.pageSize;
+		int result = getDefaultPageSize();
+		assert result > 0;
+		return result;
 	}
 	
 	public TableReader setBaseQuery(EncodedQuery value) {
@@ -201,7 +209,11 @@ public abstract class TableReader implements Callable<TableReader> {
 	public Writer getWriter() {
 		assert this.writer != null;
 		return this.writer;
-	}			
+	}
+	
+	public WriterMetrics getWriterMetrics() {
+		return this.writer.getMetrics();
+	}
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		if (initialized) throw new IllegalStateException();

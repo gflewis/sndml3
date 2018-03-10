@@ -85,5 +85,9 @@ public class LoaderConfig extends Config {
 	DateTime getStart() {
 		return start;
 	}
-			
+
+	void validate() throws ConfigParseException {
+		for (TableConfig job : tables) 
+			job.validate();
+	}
 }

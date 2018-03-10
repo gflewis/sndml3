@@ -26,7 +26,7 @@ public class LoaderConfigTest {
 
 	@Test
 	public void testGoodConfig1() throws Exception {
-		File config1 = new File("src/test/yaml/goodconfig1.yaml");
+		File config1 = yamlFile("goodconfig1");
 		LoaderConfig config = new LoaderConfig(config1);
 		DateTime start = config.getStart();
 		DateTime today = DateTime.today();
@@ -38,9 +38,9 @@ public class LoaderConfigTest {
 		assertEquals(today, config.getJobByName("cmdb_ci_service").getSince());
 	}
 	
-	@Test(expected = ConfigParseException.class)
+	@Test(expected=ConfigParseException.class)
 	public void testBadDate() throws Exception {
-		File badConfig = new File("src/test/yaml/baddate.yaml");
+		File badConfig = yamlFile("baddate");
 		LoaderConfig config = new LoaderConfig(badConfig);
 		TableConfig job = config.getJobByName("incident");
 		assertNotNull(job);
@@ -48,12 +48,31 @@ public class LoaderConfigTest {
 		fail();
 	}
 
-	@Test(expected = ConfigParseException.class)
+	@Test(expected=ConfigParseException.class)
 	public void testBadInteger() throws Exception {
-		File badConfig = new File("src/test/yaml/badinteger.yaml");
-		@SuppressWarnings("unused")
+		File badConfig = yamlFile("badinteger");
 		LoaderConfig config = new LoaderConfig(badConfig);
+		config.validate();
 		fail();
 	}
 
+	@Test
+	public void testGoodSync1() throws Exception {
+		File goodConfig = yamlFile("goodsync1");
+		LoaderConfig config = new LoaderConfig(goodConfig);
+		config.validate();
+	}
+	
+	@Test(expected=ConfigParseException.class) 
+	public void testBadSync1() throws Exception {
+		File badConfig = yamlFile("badsync1");
+		LoaderConfig config = new LoaderConfig(badConfig);
+		config.validate();
+		fail();		
+	}
+	
+	private File yamlFile(String name) {
+		assert name != null;
+		return new File("src/test/resources/yaml/" + name + ".yaml");
+	}
 }

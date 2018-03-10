@@ -6,64 +6,62 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Hashtable;
 
-import org.slf4j.Logger;
+@Deprecated
+public class DatabaseMultiWriter extends DatabaseTableWriter {
 
-
-public class DatabaseSyncWriter extends DatabaseTableWriter {
-
-	TableIndex dbEntries;
-	
+	final DateTimeRange createdRange;
+	TimestampHash dbTimestamps;
 	Hashtable<Key,Boolean> processedKeys;
 	
 	protected DatabaseInsertStatement insertStmt;
 	protected DatabaseUpdateStatement updateStmt;
 	protected DatabaseDeleteStatement deleteStmt;
 
-	final private Logger logger = Log.logger(this.getClass());
-
-	public DatabaseSyncWriter(String name, Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(name, db, table, sqlTableName);
+	public DatabaseMultiWriter(Database db, Table table, String sqlTableName, DateTimeRange createdRange) 
+			throws IOException, SQLException {
+		super(db, table, sqlTableName);
+		this.createdRange = createdRange;
 	}
 	
-	@Override
-	public void open() {
-		throw new UnsupportedOperationException();
-	}
-	
-	public void open(TableIndex dbEntries) throws SQLException, IOException {
+	@Override	
+	public void open() throws SQLException, IOException {
 		super.open();
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
 		updateStmt = new DatabaseUpdateStatement(this.db, this.sqlTableName, columns);
 		deleteStmt = new DatabaseDeleteStatement(this.db, this.sqlTableName);		
-		this.dbEntries = dbEntries;
-		this.processedKeys = new Hashtable<Key,Boolean>(dbEntries.size());
+		this.processedKeys = new Hashtable<Key,Boolean>(dbTimestamps.size());
+		DatabaseTimestampReader tsr = new DatabaseTimestampReader(db);
+		if (createdRange == null) 
+			this.dbTimestamps = tsr.getTimestamps(sqlTableName);
+		else
+			this.dbTimestamps = tsr.getTimestamps(sqlTableName, createdRange);		
 	}
 	
 	@Override
 	void writeRecord(Record rec) throws SQLException {
 		Key key = rec.getKey();
-		DateTime created = rec.getCreatedTimestamp();
 		DateTime updated = rec.getUpdatedTimestamp();
-		TableIndex.Entry entry = dbEntries.get(key);
-		if (entry == null) {
+		DateTime dbUpdated = dbTimestamps.get(key);
+		
+		if (dbUpdated == null) {
 			// Insert
 			logger.trace(Log.PROCESS, "Insert " + key);
 			insertStmt.insert(rec);
 			writerMetrics.incrementInserted();
-			entry = dbEntries.add(key, created, updated);
-			entry.processed = true;			
+			processedKeys.put(key, true);
 		}
 		else {
-			if (updated.equals(entry.updated)) {
+			if (updated.equals(dbUpdated)) {				
 				// Skip
-				entry.processed = true;
+				writerMetrics.incrementSkipped();
+				processedKeys.put(key,  true);
 			}
 			else {
 				// Update
 				logger.trace(Log.PROCESS, "Update " + key);
 				if (updateStmt.update(rec)) {
 					writerMetrics.incrementUpdated();
-					entry.processed = true;
+					processedKeys.put(key, true);
 				}
 				else {
 					throw new AssertionError("updaate failed");
@@ -75,7 +73,7 @@ public class DatabaseSyncWriter extends DatabaseTableWriter {
 	
 	@Override
 	public void close() throws SQLException {
-		for (Key key : dbEntries.getKeySet()) {
+		for (Key key : processedKeys.keySet()) {
 			if (!processedKeys.contains(key))
 				logger.trace(Log.PROCESS, "Delete " + key);
 				deleteStmt.deleteRecord(key);			

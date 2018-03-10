@@ -21,7 +21,7 @@ public class Loader {
 	int threads;
 	File metricsFile = null;
 	PrintWriter statsWriter;
-	WriterMetrics loaderMetrics = new WriterMetrics("_loader_");	
+	WriterMetrics loaderMetrics = new WriterMetrics();	
 	ArrayList<TableLoader> jobs = new ArrayList<TableLoader>();
 	
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
