@@ -100,9 +100,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>postgresql</groupId>
+      <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>9.1-901.jdbc4</version>
+      <version>42.2.1.jre7</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -222,7 +222,7 @@
               </filters>
               <artifactSet>
                 <includes>
-                  <include>postgresql:*</include>
+                  <include>org.postgresql:*</include>
                   <include>org.apache.*:*</include>
                   <include>commons-*:*</include>
                   <include>org.jdom:*</include>

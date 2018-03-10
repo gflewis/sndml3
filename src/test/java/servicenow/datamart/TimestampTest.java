@@ -18,7 +18,7 @@ public class TimestampTest {
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
 //		return new String[] {"awsmysql","awspg", "awsora"};
-		return new String[] {"awsmysql", "awspg"};
+		return new String[] {"awspg"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
