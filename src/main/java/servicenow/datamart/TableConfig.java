@@ -124,7 +124,6 @@ public class TableConfig extends Config {
 		if (getAction().equals(LoaderAction.SYNC)) {
 			if (since != null) configError("Since not valid with Action: " + actionName);
 			if (filter != null) configError("Filter not valid with Action: " + actionName);
-			if (created != null) configError("Created not valid with Action: " + actionName);
 			if (partition != null) configError("Partition not valid with Action: " + actionName);
 		}
 		if (orderBy != null && !Pattern.matches("(\\+|\\-)?\\w+", orderBy))
