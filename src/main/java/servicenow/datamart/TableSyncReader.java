@@ -24,13 +24,18 @@ public class TableSyncReader extends TableReader {
 	}
 
 	@Override
+	public WriterMetrics getWriterMetrics() {
+		return this.writerMetrics;
+	}
+	
+	@Override
 	public int getDefaultPageSize() {
-		return 1000;
+		return 200;
 	}
 
 	@Override
-	public WriterMetrics getWriterMetrics() {
-		return this.writerMetrics;
+	public void initialize() throws IOException, SQLException, InterruptedException {
+		this.initialize(this.getCreatedRange());
 	}
 	
 	public void initialize(DateTimeRange createdRange) 
@@ -99,6 +104,7 @@ public class TableSyncReader extends TableReader {
 		DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);
 		KeySetTableReader insertReader = new KeySetTableReader(table);
 		insertReader.setParent(this);
+		insertReader.setPageSize(this.getPageSize());
 		insertReader.setWriter(insertWriter.open());
 		insertReader.initialize(insertSet);
 		insertReader.call();
@@ -114,6 +120,7 @@ public class TableSyncReader extends TableReader {
 		DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
 		KeySetTableReader updateReader = new KeySetTableReader(table);
 		updateReader.setParent(this);
+		updateReader.setPageSize(this.getPageSize());
 		updateReader.setWriter(updateWriter.open());
 		updateReader.initialize(updateSet);
 		updateReader.call();

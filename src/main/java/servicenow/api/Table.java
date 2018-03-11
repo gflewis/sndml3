@@ -116,6 +116,7 @@ public class Table {
 		return api;
 	}
 	
+	@Deprecated
 	public TableReader getDefaultReader() throws IOException {
 		if (api == apiJSON) return apiJSON.getDefaultReader();
 		if (api == apiREST) return apiREST.getDefaultReader();
@@ -126,10 +127,6 @@ public class Table {
 	public Record getRecord(Key key) throws IOException {
 		return api.getRecord(key);
 	}
-	
-//	public Record getRecord(String fieldname, String fieldvalue, boolean displayValue)  throws IOException {
-//		return api.getRecord(fieldname, fieldvalue, displayValue);
-//	}
 		
 	/**
 	 * Retrieves a single record based on a unique field such as "name" or "number".  

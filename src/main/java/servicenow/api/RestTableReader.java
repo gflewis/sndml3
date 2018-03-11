@@ -25,8 +25,13 @@ public class RestTableReader extends TableReader {
 		return this;
 	}
 
-	public void initialize() throws IOException {		
-		super.initialize();
+	public void initialize() throws IOException, InterruptedException  {		
+		try {
+			super.initialize();
+		} catch (SQLException e) {
+			// impossible
+			throw new AssertionError(e);
+		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format(
 			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));

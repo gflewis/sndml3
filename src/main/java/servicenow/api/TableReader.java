@@ -35,7 +35,7 @@ public abstract class TableReader implements Callable<TableReader> {
 		this.readerMetrics = new ReaderMetrics();
 	}
 			
-	public void initialize() throws IOException {
+	public void initialize() throws IOException, SQLException, InterruptedException {
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
 //		if (writer == null) throw new IllegalStateException("Reader has no writer");
 		setLogContext();

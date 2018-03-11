@@ -49,7 +49,8 @@ public class FileWriter extends Writer {
 		Session session = new Session(props);
 		Table table = session.table(tablename);
 		FileWriter writer = new FileWriter(outfile);
-		TableReader reader = table.getDefaultReader().setWriter(writer);
+		TableReader reader = new RestTableReader(table);
+		reader.setWriter(writer);
 		reader.setBaseQuery(querystring == null ? EncodedQuery.all() : new EncodedQuery(querystring));
 		writer.open();
 		reader.call();

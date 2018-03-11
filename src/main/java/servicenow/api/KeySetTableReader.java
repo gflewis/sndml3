@@ -17,8 +17,13 @@ public class KeySetTableReader extends TableReader {
 		return 200;
 	}
 
-	public void initialize() throws IOException {
-		super.initialize();
+	public void initialize() throws IOException, InterruptedException {
+		try {
+			super.initialize();
+		} catch (SQLException e) {
+			// impossible
+			throw new AssertionError(e);
+		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		allKeys = table.json().getKeys(query);
@@ -42,7 +47,12 @@ public class KeySetTableReader extends TableReader {
 	}
 
 	public void initialize(KeySet keys) throws IOException {
-		super.initialize();
+		try {
+			super.initialize();
+		} catch (SQLException | InterruptedException e) {
+			// impossible
+			throw new AssertionError(e);
+		}
 		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;
 		setExpected(allKeys.size());

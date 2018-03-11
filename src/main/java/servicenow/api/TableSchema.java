@@ -54,7 +54,7 @@ public class TableSchema /* extends Writer */ {
 			addEquals("name",  tablename).
 			addEquals("active", "true");
 		
-		TableReader reader = dictionary.getDefaultReader();
+		RestTableReader reader = new RestTableReader(dictionary);
 		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
 		reader.setBaseQuery(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);

@@ -24,7 +24,7 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 
 	@Override
-	public void initialize() throws IOException {
+	public void initialize() throws IOException, InterruptedException, SQLException {
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, "initialize query=" + query);
 		super.initialize();
@@ -38,7 +38,7 @@ public class SoapKeySetTableReader extends TableReader {
 		return allKeys.size();
 	}
 	
-	public SoapKeySetTableReader call() throws IOException, SQLException {
+	public SoapKeySetTableReader call() throws IOException, InterruptedException, SQLException {
 		Writer writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null;

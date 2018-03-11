@@ -76,8 +76,13 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 	
 	@Override
-	public void initialize() throws IOException {
-		super.initialize();
+	public void initialize() throws IOException, InterruptedException {
+		try {
+			super.initialize();
+		} catch (SQLException e) {
+			// impossible
+			throw new AssertionError(e);
+		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, true);
