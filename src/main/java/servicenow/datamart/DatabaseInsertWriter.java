@@ -16,9 +16,10 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 	}
 
 	@Override
-	public void open() throws SQLException, IOException {
+	public DatabaseInsertWriter open() throws SQLException, IOException {
 		super.open();
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
+		return this;
 	}
 	
 	Pattern primaryKeyViolation = 

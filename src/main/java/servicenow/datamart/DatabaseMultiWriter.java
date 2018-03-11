@@ -24,7 +24,7 @@ public class DatabaseMultiWriter extends DatabaseTableWriter {
 	}
 	
 	@Override	
-	public void open() throws SQLException, IOException {
+	public DatabaseMultiWriter open() throws SQLException, IOException {
 		super.open();
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
 		updateStmt = new DatabaseUpdateStatement(this.db, this.sqlTableName, columns);
@@ -34,7 +34,8 @@ public class DatabaseMultiWriter extends DatabaseTableWriter {
 		if (createdRange == null) 
 			this.dbTimestamps = tsr.getTimestamps(sqlTableName);
 		else
-			this.dbTimestamps = tsr.getTimestamps(sqlTableName, createdRange);		
+			this.dbTimestamps = tsr.getTimestamps(sqlTableName, createdRange);
+		return this;
 	}
 	
 	@Override

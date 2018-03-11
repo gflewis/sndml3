@@ -223,6 +223,7 @@ public class Generator {
 			String tableName,
 			Map<String,String> vars) {
 		String sql = dialectTree.getChild("templates").getChildText(templateName);
+		assert sql != null : "Template not found: " + templateName;
 		Map<String,String> myvars = new HashMap<String,String>();
 		myvars.put("schema", this.schemaName);
 		myvars.put("table", sqlCase(tableName));
@@ -283,11 +284,13 @@ public class Generator {
 	}
 
 	private String replaceVars(String sql, Map<String, String> vars) {
+		assert sql != null;
 		Iterator<Map.Entry<String, String>> iterator = vars.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Map.Entry<String, String> entry = iterator.next();
 			String name = entry.getKey();
 			String value = entry.getValue();
+			assert name != null;
 			if (value == null || value.length() == 0) {
 				// if the variable (e.g. $schema) is null or zero length
 				// then also consume a period following the variable

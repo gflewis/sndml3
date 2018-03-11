@@ -59,6 +59,7 @@ public class TableSchema /* extends Writer */ {
 		reader.setBaseQuery(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(1000);
+		reader.initialize();
 		RecordList recs = reader.getAllRecords();
 		processRecords(recs);
 				

@@ -24,11 +24,11 @@ public class WriterMetrics {
 	}
 	
 	public DateTime getStarted() {
-		return new DateTime(this.started);
+		return started == null ? null : new DateTime(started);
 	}
 	
 	public DateTime getFinished() {
-		return new DateTime(this.finished);
+		return finished == null ? null : new DateTime(finished);
 	}
 	
 	public int getElapsedSec() {
@@ -88,6 +88,9 @@ public class WriterMetrics {
 	}
 	
 	public synchronized void add(WriterMetrics stats) {
+		assert stats != null;
+		assert stats.started != null;
+		assert stats.finished != null;
 		if (started == null || started.getTime() > stats.started.getTime()) started = stats.started;
 		if (finished == null || finished.getTime() < stats.finished.getTime()) finished = stats.finished;
 		inserted += stats.inserted;

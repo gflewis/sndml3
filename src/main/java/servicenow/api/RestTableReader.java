@@ -28,7 +28,8 @@ public class RestTableReader extends TableReader {
 	public void initialize() throws IOException {		
 		super.initialize();
 		EncodedQuery query = getQuery();
-		logger.debug(Log.INIT, String.format("initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));
+		logger.debug(Log.INIT, String.format(
+			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));
 		if (statsEnabled) {
 			stats = apiREST.getStats(query, false);
 			setExpected(stats.getCount());

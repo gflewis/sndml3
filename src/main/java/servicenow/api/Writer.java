@@ -12,8 +12,9 @@ public abstract class Writer {
 
 	public abstract void processRecords(TableReader source, RecordList recs) throws IOException, SQLException;	
 
-	public void open() throws IOException, SQLException {
+	public Writer open() throws IOException, SQLException {
 		writerMetrics.start();
+		return this;
 	}
 	
 	public void close() throws SQLException {
@@ -21,7 +22,7 @@ public abstract class Writer {
 	}
 
 	public WriterMetrics getMetrics() {
-		if (this.writerMetrics.getFinished() == null) this.writerMetrics.finish();
+		if (writerMetrics.getFinished() == null) writerMetrics.finish();
 		return writerMetrics;
 	}
 	

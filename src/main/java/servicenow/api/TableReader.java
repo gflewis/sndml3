@@ -216,10 +216,9 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
-		if (initialized) throw new IllegalStateException();
+		if (!initialized) throw new IllegalStateException("Not initialized");
 		RecordListAccumulator accumulator = new RecordListAccumulator(this.table);
-		setWriter(accumulator);
-		if (!initialized) initialize();
+		this.writer = accumulator;
 		try {
 			this.call();
 		} catch (SQLException e) {

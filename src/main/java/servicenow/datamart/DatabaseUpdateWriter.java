@@ -4,7 +4,6 @@ import servicenow.api.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-//import org.slf4j.Logger;
 
 public class DatabaseUpdateWriter extends DatabaseTableWriter {
 
@@ -16,10 +15,11 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 	}
 
 	@Override
-	public void open() throws SQLException, IOException {
+	public DatabaseUpdateWriter open() throws SQLException, IOException {
 		super.open();
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
-		updateStmt = new DatabaseUpdateStatement(this.db, this.sqlTableName, columns);		
+		updateStmt = new DatabaseUpdateStatement(this.db, this.sqlTableName, columns);
+		return this;
 	}
 		
 	@Override

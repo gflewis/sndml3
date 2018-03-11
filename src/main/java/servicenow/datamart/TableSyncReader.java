@@ -10,7 +10,6 @@ public class TableSyncReader extends TableReader {
 	final Database db;
 	final String sqlTableName;
 	final WriterMetrics writerMetrics = new WriterMetrics();
-	DateTimeRange createdRange;	
 	TimestampHash dbTimestamps;
 	RecordList snTimestamps;
 	KeySet insertSet;
@@ -37,15 +36,17 @@ public class TableSyncReader extends TableReader {
 	public void initialize(DateTimeRange createdRange) 
 			throws IOException, SQLException, InterruptedException {
 		super.initialize();
-		this.createdRange = createdRange;
+		logger.debug(Log.INIT, 
+				"initialize table=" + table.getName() + " created=" + createdRange);
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
 		if (createdRange == null) 
-			this.dbTimestamps = dbtsr.getTimestamps(sqlTableName);
+			dbTimestamps = dbtsr.getTimestamps(sqlTableName);
 		else
-			this.dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);
+			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);
+		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
 		RestTableReader sntsr = new RestTableReader(this.table);
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
-		sntsr.setCreatedRange(this.getCreatedRange());
+		sntsr.setCreatedRange(createdRange);
 		sntsr.initialize();
 		snTimestamps = sntsr.getAllRecords();
 		TimestampHash examined = new TimestampHash();
@@ -65,11 +66,14 @@ public class TableSyncReader extends TableReader {
 				updateSet.add(key);
 			examined.put(key, snts);
 		}
+		logger.debug(Log.INIT, String.format("inserts=%d updated=%d skips=%d", 
+				insertSet.size(), updateSet.size(), skipSet.size()));
 		assert examined.size() == (insertSet.size() + updateSet.size() + skipSet.size()); 
 		for (Key key : dbTimestamps.keySet()) {
 			if (examined.get(key) == null) 
 				deleteSet.add(key);
 		}
+		logger.debug(Log.INIT, String.format("deletes=%d", deleteSet.size()));
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size();
 		assert examined.size() == (expected + skipSet.size());
 		this.setExpected(expected);
@@ -91,9 +95,10 @@ public class TableSyncReader extends TableReader {
 		DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);
 		KeySetTableReader insertReader = new KeySetTableReader(table);
 		insertReader.setParent(this);
-		insertReader.setWriter(insertWriter);
+		insertReader.setWriter(insertWriter.open());
 		insertReader.initialize(insertSet);
 		insertReader.call();
+		insertWriter.close();
 		writerMetrics.add(insertWriter.getMetrics());
 		if (insertWriter.getMetrics().getInserted() != insertSet.size())
 			logger.error(Log.PROCESS, String.format("inserted %d, expected to insert %d", 
@@ -105,9 +110,10 @@ public class TableSyncReader extends TableReader {
 		DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
 		KeySetTableReader updateReader = new KeySetTableReader(table);
 		updateReader.setParent(this);
-		updateReader.setWriter(updateWriter);
-		updateReader.initialize(insertSet);
+		updateReader.setWriter(updateWriter.open());
+		updateReader.initialize(updateSet);
 		updateReader.call();
+		updateWriter.close();
 		writerMetrics.add(updateWriter.getMetrics());
 		if (updateWriter.getMetrics().getUpdated() != updateSet.size())
 			logger.error(Log.PROCESS, String.format("updated %d, expected to update %d", 
@@ -117,9 +123,11 @@ public class TableSyncReader extends TableReader {
 		setLogContext();
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+		deleteWriter.open();
 		for (Key key : deleteSet) {
 			deleteWriter.deleteRecord(key);
 		}
+		deleteWriter.close();
 		writerMetrics.add(deleteWriter.getMetrics());
 		if (deleteWriter.getMetrics().getDeleted() != deleteSet.size())
 			logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 

@@ -161,6 +161,10 @@ public class DateTime implements Comparable<DateTime> {
 		return this.toString().equals(other.toString());
 	}
 
+	public int hashCode() {
+		return this.dt.hashCode();
+	}
+		
 	public boolean before(DateTime other) {
 		// no datetime is before the beginning of time
 		if (other == null) return false; 

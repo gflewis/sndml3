@@ -14,10 +14,10 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	}
 
 	@Override
-	public void open() throws SQLException, IOException {
+	public DatabaseDeleteWriter open() throws SQLException, IOException {
 		super.open();
 		deleteStmt = new DatabaseDeleteStatement(this.db, this.sqlTableName);
-		
+		return this;
 	}
 	
 	@Override

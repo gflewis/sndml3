@@ -67,7 +67,7 @@ public class FileWriter extends Writer {
 	}
 	
 	@Override
-	public void open() throws IOException {
+	public FileWriter open() throws IOException {
 		writerMetrics.start();
 		if (file == null)
 			writer = new PrintWriter(System.out);
@@ -77,6 +77,7 @@ public class FileWriter extends Writer {
 			writer.println("[");
 			writer.flush();
 		}
+		return this;
 	}
 
 	@Override

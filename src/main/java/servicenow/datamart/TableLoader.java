@@ -60,6 +60,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	}
 	
 	WriterMetrics getMetrics() {
+		assert metrics != null;
 		return metrics;
 	}
 		
@@ -94,18 +95,17 @@ public class TableLoader implements Callable<WriterMetrics> {
 			auditReader.setMaxRows(config.getMaxRows());
 			auditReader.setWriter(deleteWriter);
 			auditReader.initialize();
-			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+			logger.info(Log.INIT, String.format("begin delete %s (%d rows)", 
 					tableLoaderName, auditReader.getReaderMetrics().getExpected()));
 			auditReader.call();
 			deleteWriter.close();
-			metrics = deleteWriter.getMetrics();;
-			
+			metrics = deleteWriter.getMetrics();;		
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
 			DateTimeRange createdRange = config.getCreated();
 			TableSyncReader syncReader = new TableSyncReader(table, db, sqlTableName);
 			syncReader.initialize(createdRange);
-			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+			logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
 					tableLoaderName, syncReader.getReaderMetrics().getExpected()));
 			syncReader.call();
 			metrics = syncReader.getWriterMetrics();						

@@ -55,7 +55,7 @@ where "sys_id" = $keyvalue</timestamp>
       <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
       <all_timestamps>select sys_id, sys_updated_on from $schema.$table</all_timestamps>
       <partition_timestamps>select sys_id, sys_updated_on from $schema.$table
-where sys_created_on &gt;= $start and sys_created_on &lt; $end</partition_timestamps>
+where sys_created_on &gt;= '$start' and sys_created_on &lt; '$end'</partition_timestamps>
       <insert>insert into $schema.$table (
 $fieldnames) 
 values ($fieldvalues)</insert>
@@ -209,7 +209,7 @@ CONSTRAINT ${table}_PK PRIMARY KEY (SYS_ID))</create>
       <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
       <all_timestamps>SELECT SYS_ID, SYS_UPDATED_ON FROM $schema.$table</all_timestamps>
       <partition_timestamps>SELECT SYS_ID, SYS_UPDATED_ON FROM $schema.$table
-WHERE SYS_CREATED_ON &gt;= $start AND SYS_CREATED_ON &lt; $end</partition_timestamps>
+WHERE SYS_CREATED_ON &gt;= '$start' AND SYS_CREATED_ON &lt; '$end'</partition_timestamps>
       <insert>INSERT INTO $schema.$table (
 $fieldnames) 
 VALUES ($fieldvalues)</insert>
@@ -405,7 +405,7 @@ PRIMARY KEY (sys_id))</create>
       <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
       <all_timestamps>SELECT sys_id, sys_updated_on FROM $schema.$table</all_timestamps>
       <partition_timestamps>SELECT sys_id, sys_updated_on FROM $schema.$table
-WHERE sys_created_on &gt;= $start AND sys_created_on &lt; $end</partition_timestamps>
+WHERE sys_created_on &gt;= '$start' AND sys_created_on &lt; '$end'</partition_timestamps>
       <insert>INSERT INTO $schema.$table (
 $fieldnames) 
 VALUES ($fieldvalues)</insert>
@@ -477,7 +477,7 @@ constraint ${table}_pk primary key ([sys_id]))</create>
       <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
       <all_timestamps>select sys_id, sys_updated_on from $schema.$table</all_timestamps>
       <partition_timestamps>select sys_id, sys_updated_on from $schema.$table
-where sys_created_on &gt;= $start and sys_created_on &lt; $end</partition_timestamps>
+where sys_created_on &gt;= '$start' and sys_created_on &lt; '$end'</partition_timestamps>
       <insert>insert into $schema.$table (
 $fieldnames) 
 values ($fieldvalues)</insert>
@@ -550,7 +550,7 @@ primary key ("sys_id"))</create>
       <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
       <all_timestamps>select sys_id, sys_updated_on from $schema.$table</all_timestamps>
       <partition_timestamps>select sys_id, sys_updated_on from $schema.$table
-where sys_created_on &gt;= $start and sys_created_on &lt; $end</partition_timestamps>
+where sys_created_on &gt;= '$start' and sys_created_on &lt; '$end'</partition_timestamps>
       <insert>insert into $schema.$table (
 $fieldnames) 
 values ($fieldvalues)</insert>

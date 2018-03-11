@@ -26,9 +26,10 @@ public abstract class DatabaseTableWriter extends Writer {
 	}
 	
 	@Override
-	public void open() throws SQLException, IOException {
+	public DatabaseTableWriter open() throws SQLException, IOException {
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
 		writerMetrics.start();
+		return this;
 	}
 
 	@Override

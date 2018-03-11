@@ -28,7 +28,11 @@ public final class Key {
 	public boolean equals(Object other) {
 		return this.value.equals(other.toString());
 	}
-		
+	
+	public int hashCode() {
+		return this.value.hashCode();
+	}
+	
 	public boolean isGUID() {
 		return isGUID(value);
 	}

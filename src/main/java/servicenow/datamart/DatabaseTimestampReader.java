@@ -61,14 +61,19 @@ public class DatabaseTimestampReader {
 	
 	TimestampHash getTimestamps(String tableName, DateTimeRange created) throws SQLException {
 		Parameters vars = new Parameters();
-		vars.put("start", created.getStart().toString());
-		vars.put("end",  created.getEnd().toString());
-		String stmtText = database.getGenerator().getTemplate("patition_timestamps", tableName, vars);
+		DateTime rangeStart = created.getStart();
+		if (rangeStart == null) rangeStart = new DateTime("1980-01-01");
+		DateTime rangeEnd = created.getEnd();
+		if (rangeEnd == null) rangeEnd = new DateTime("2099-12-31");
+		vars.put("start", rangeStart.toString());
+		vars.put("end",  rangeEnd.toString());
+		String stmtText = database.getGenerator().getTemplate("partition_timestamps", tableName, vars);
 		return getQueryResult(stmtText);
 	}
 	
 	private TimestampHash getQueryResult(String stmtText) throws SQLException {
 		TimestampHash result = new TimestampHash();
+		logger.debug(Log.INIT, stmtText);
 		PreparedStatement stmt = dbc.prepareStatement(stmtText);
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next() ) {
