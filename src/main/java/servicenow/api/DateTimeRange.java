@@ -57,5 +57,5 @@ public class DateTimeRange {
 				hasStart() ? start.toString() : "null", 
 				hasEnd() ? end.toString() : "null");
 	}
-	
+		
 }

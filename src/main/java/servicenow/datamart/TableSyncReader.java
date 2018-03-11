@@ -100,50 +100,58 @@ public class TableSyncReader extends TableReader {
 		assert snTimestamps != null;
 		// Process the Inserts
 		setLogContext();
+		writerMetrics.start();
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
-		DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);
-		KeySetTableReader insertReader = new KeySetTableReader(table);
-		insertReader.setParent(this);
-		insertReader.setPageSize(this.getPageSize());
-		insertReader.setWriter(insertWriter.open());
-		insertReader.initialize(insertSet);
-		insertReader.call();
-		insertWriter.close();
-		writerMetrics.add(insertWriter.getMetrics());
-		if (insertWriter.getMetrics().getInserted() != insertSet.size())
-			logger.error(Log.PROCESS, String.format("inserted %d, expected to insert %d", 
-				insertWriter.getMetrics().getInserted(), insertSet.size()));
+		if (insertSet.size() > 0) {
+			DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);
+			KeySetTableReader insertReader = new KeySetTableReader(table);
+			insertReader.setParent(this);
+			insertReader.setPageSize(this.getPageSize());
+			insertReader.setWriter(insertWriter.open());
+			insertReader.initialize(insertSet);
+			insertReader.call();
+			insertWriter.close();
+			writerMetrics.add(insertWriter.getMetrics());
+			if (insertWriter.getMetrics().getInserted() != insertSet.size())
+				logger.error(Log.PROCESS, String.format("inserted %d, expected to insert %d", 
+					insertWriter.getMetrics().getInserted(), insertSet.size()));
+		}
 		
 		// Process the Updates
 		setLogContext();
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
-		DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
-		KeySetTableReader updateReader = new KeySetTableReader(table);
-		updateReader.setParent(this);
-		updateReader.setPageSize(this.getPageSize());
-		updateReader.setWriter(updateWriter.open());
-		updateReader.initialize(updateSet);
-		updateReader.call();
-		updateWriter.close();
-		writerMetrics.add(updateWriter.getMetrics());
-		if (updateWriter.getMetrics().getUpdated() != updateSet.size())
-			logger.error(Log.PROCESS, String.format("updated %d, expected to update %d", 
-				updateWriter.getMetrics().getUpdated(), updateSet.size()));
+		if (updateSet.size() > 0) {
+			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
+			KeySetTableReader updateReader = new KeySetTableReader(table);
+			updateReader.setParent(this);
+			updateReader.setPageSize(this.getPageSize());
+			updateReader.setWriter(updateWriter.open());
+			updateReader.initialize(updateSet);
+			updateReader.call();
+			updateWriter.close();
+			writerMetrics.add(updateWriter.getMetrics());
+			if (updateWriter.getMetrics().getUpdated() != updateSet.size())
+				logger.error(Log.PROCESS, String.format("updated %d, expected to update %d", 
+					updateWriter.getMetrics().getUpdated(), updateSet.size()));
+		}
 					
 		// Process the Deletes
 		setLogContext();
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
-		DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
-		deleteWriter.open();
-		for (Key key : deleteSet) {
-			deleteWriter.deleteRecord(key);
+		if (deleteSet.size() > 0) {
+			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+			deleteWriter.open();
+			for (Key key : deleteSet) {
+				deleteWriter.deleteRecord(key);
+			}
+			deleteWriter.close();
+			writerMetrics.add(deleteWriter.getMetrics());
+			if (deleteWriter.getMetrics().getDeleted() != deleteSet.size())
+				logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
+					deleteWriter.getMetrics().getDeleted(), deleteSet.size()));
+			writerMetrics.addSkipped(skipSet.size());
 		}
-		deleteWriter.close();
-		writerMetrics.add(deleteWriter.getMetrics());
-		if (deleteWriter.getMetrics().getDeleted() != deleteSet.size())
-			logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
-				deleteWriter.getMetrics().getDeleted(), deleteSet.size()));
-		writerMetrics.addSkipped(skipSet.size());
+		writerMetrics.finish();
 		return this;
 	}
 
