@@ -30,7 +30,7 @@ public class TableWSDL {
 		this(session, tablename, false);
 	}
 
-	public TableWSDL(Session session, String tablename, boolean displayvalues) throws IOException {
+	TableWSDL(Session session, String tablename, boolean displayvalues) throws IOException {
 		this.tablename = tablename;
 		String path = tablename + ".do?WSDL";
 		if (displayvalues) path += "&displayvalue=all";
@@ -54,7 +54,7 @@ public class TableWSDL {
 		Log.clearContext();
 	}
 
-	public Document getDocument() {
+	Document getDocument() {
 		return this.doc;
 	}
 

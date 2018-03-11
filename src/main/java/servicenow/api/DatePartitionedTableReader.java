@@ -17,9 +17,10 @@ public class DatePartitionedTableReader extends TableReader {
 	final TableReaderFactory factory;
 	final int threads;
 	final DateTime.Interval interval;
+	final WriterMetrics writerMetrics = new WriterMetrics();
+	
 	DateTimeRange range;
 	DatePartition partition;
-	WriterMetrics processStats;
 	List<TableReader> partReaders;
 	List<Future<TableReader>> futures;
 
@@ -43,7 +44,6 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 	
 	public DatePartition getPartition() {
-//		if (this.partition == null) throw new IllegalStateException();
 		return this.partition;
 	}
 	
@@ -57,6 +57,11 @@ public class DatePartitionedTableReader extends TableReader {
 
 	public int numPartsTotal() {
 		return futures.size();
+	}
+	
+	@Override
+	public WriterMetrics getWriterMetrics() {
+		return this.writer.getMetrics();
 	}
 	
 	public int numPartsComplete() {

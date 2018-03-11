@@ -51,7 +51,7 @@ public class PruneTest {
 		config.setAction(LoaderAction.PRUNE);
 		config.setSince(t0);
 		logger.info(Log.TEST, "PRUNE " + config.getName());
-		TableLoader loader = new TableLoader(config);
+		TableLoader loader = new TableLoader(config, null);
 		loader.call();
 	}
 

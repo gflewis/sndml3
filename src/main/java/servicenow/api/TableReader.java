@@ -37,11 +37,14 @@ public abstract class TableReader implements Callable<TableReader> {
 			
 	public void initialize() throws IOException, SQLException, InterruptedException {
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
-//		if (writer == null) throw new IllegalStateException("Reader has no writer");
 		setLogContext();
 		initialized = true;
 	}
 	
+	public abstract int getDefaultPageSize();
+	
+	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
+			
 	public void setReaderName(String name) {
 		if (initialized) throw new IllegalStateException();
 		this.readerName = name;
@@ -82,10 +85,6 @@ public abstract class TableReader implements Callable<TableReader> {
 		return readerMetrics.getExpected();
 	}
 		
-	public abstract int getDefaultPageSize();
-	
-	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
-			
 	public TableReader setPageSize(int size) {
 		if (initialized) throw new IllegalStateException();
 		this.pageSize = size;
@@ -201,7 +200,6 @@ public abstract class TableReader implements Callable<TableReader> {
 
 	public TableReader setWriter(Writer value) {
 		if (initialized) throw new IllegalStateException();
-		assert value != null;
 		this.writer = value;
 		return this;
 	}

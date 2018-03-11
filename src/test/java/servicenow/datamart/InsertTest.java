@@ -40,7 +40,7 @@ public class InsertTest {
 		TableConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(LoaderAction.INSERT, job.getAction());
-		TableLoader loader = new TableLoader(job);
+		TableLoader loader = new TableLoader(job, null);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();
 		int processed = metrics.getProcessed();

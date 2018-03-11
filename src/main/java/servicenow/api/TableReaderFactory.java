@@ -3,8 +3,8 @@ package servicenow.api;
 public abstract class TableReaderFactory {
 
 	protected final Table table;
-	protected final Writer writer;
 
+	protected Writer writer;
 	protected TableReader parent;
 	protected EncodedQuery baseQuery;
 	protected DateTimeRange createdRange;
@@ -16,6 +16,10 @@ public abstract class TableReaderFactory {
 	public TableReaderFactory(Table table, Writer writer) {
 		this.table = table;
 		this.writer = writer;
+	}
+	
+	public TableReaderFactory(Table table) {
+		this.table = table;
 	}
 	
 	public abstract TableReader createReader();

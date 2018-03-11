@@ -71,7 +71,7 @@ public class TimestampTest {
 		TableConfig config = new TableConfig(inc);
 		config.setFilter(new EncodedQuery("sys_id=" + sys_id));
 		config.setCreated(emptyRange);
-		TableLoader loader = new TableLoader(config);
+		TableLoader loader = new TableLoader(config, null);
 		loader.call();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		DateTime dbcreated = reader.getTimestampCreated(inc.getName(), new Key(sys_id));

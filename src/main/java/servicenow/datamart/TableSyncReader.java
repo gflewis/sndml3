@@ -17,10 +17,11 @@ public class TableSyncReader extends TableReader {
 	KeySet deleteSet;
 	KeySet skipSet;
 	
-	public TableSyncReader(Table table, Database db, String sqlTableName) {
+	public TableSyncReader(Table table, Database db, String sqlTableName, WriterMetrics parentMetrics) {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;
+		writerMetrics.setParent(parentMetrics);
 	}
 
 	@Override
@@ -104,6 +105,7 @@ public class TableSyncReader extends TableReader {
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		if (insertSet.size() > 0) {
 			DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);
+			insertWriter.setParentMetrics(this.writerMetrics);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
 			insertReader.setPageSize(this.getPageSize());
@@ -111,10 +113,10 @@ public class TableSyncReader extends TableReader {
 			insertReader.initialize(insertSet);
 			insertReader.call();
 			insertWriter.close();
-			writerMetrics.add(insertWriter.getMetrics());
-			if (insertWriter.getMetrics().getInserted() != insertSet.size())
+			int rowsInserted = insertWriter.getMetrics().getInserted();
+			if (rowsInserted != insertSet.size())
 				logger.error(Log.PROCESS, String.format("inserted %d, expected to insert %d", 
-					insertWriter.getMetrics().getInserted(), insertSet.size()));
+					rowsInserted, insertSet.size()));
 		}
 		
 		// Process the Updates
@@ -122,6 +124,7 @@ public class TableSyncReader extends TableReader {
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
 			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
+			updateWriter.setParentMetrics(this.writerMetrics);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
 			updateReader.setPageSize(this.getPageSize());
@@ -129,10 +132,10 @@ public class TableSyncReader extends TableReader {
 			updateReader.initialize(updateSet);
 			updateReader.call();
 			updateWriter.close();
-			writerMetrics.add(updateWriter.getMetrics());
-			if (updateWriter.getMetrics().getUpdated() != updateSet.size())
+			int rowsUpdated = updateWriter.getMetrics().getUpdated();
+			if (rowsUpdated != updateSet.size())
 				logger.error(Log.PROCESS, String.format("updated %d, expected to update %d", 
-					updateWriter.getMetrics().getUpdated(), updateSet.size()));
+					rowsUpdated, updateSet.size()));
 		}
 					
 		// Process the Deletes
@@ -140,15 +143,16 @@ public class TableSyncReader extends TableReader {
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+			deleteWriter.setParentMetrics(this.writerMetrics);
 			deleteWriter.open();
 			for (Key key : deleteSet) {
 				deleteWriter.deleteRecord(key);
 			}
 			deleteWriter.close();
-			writerMetrics.add(deleteWriter.getMetrics());
-			if (deleteWriter.getMetrics().getDeleted() != deleteSet.size())
+			int rowsDeleted = deleteWriter.getMetrics().getDeleted();
+			if (rowsDeleted != deleteSet.size())
 				logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
-					deleteWriter.getMetrics().getDeleted(), deleteSet.size()));
+					rowsDeleted, deleteSet.size()));
 			writerMetrics.addSkipped(skipSet.size());
 		}
 		writerMetrics.finish();

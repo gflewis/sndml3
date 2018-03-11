@@ -65,26 +65,26 @@ public class Instance {
 		return result;
 	}
 	
-	@Deprecated
-	public URI getURI(String path, URIProtocol protocol, Parameters params) {
-		assert path != null;
-		assert path.length() > 0;
-		URI result;
-		try {
-			String base = url.toString();
-			if (protocol == null)  
-				base += path;
-			else 
-				base += path + "?" + protocol.toString();
-			URIBuilder builder = new URIBuilder(base);
-			if (params != null) builder.addParameters(params.nvpList());
-			result = builder.build();			
-		}
-		catch (URISyntaxException e) {
-			throw new ServiceNowError(e);
-		}
-		return result;
-	}		
+//	@Deprecated
+//	public URI getURI(String path, URIProtocol protocol, Parameters params) {
+//		assert path != null;
+//		assert path.length() > 0;
+//		URI result;
+//		try {
+//			String base = url.toString();
+//			if (protocol == null)  
+//				base += path;
+//			else 
+//				base += path + "?" + protocol.toString();
+//			URIBuilder builder = new URIBuilder(base);
+//			if (params != null) builder.addParameters(params.nvpList());
+//			result = builder.build();			
+//		}
+//		catch (URISyntaxException e) {
+//			throw new ServiceNowError(e);
+//		}
+//		return result;
+//	}		
 	
 	public URL getURL() {
 		return this.url;

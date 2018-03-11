@@ -71,7 +71,7 @@ public class Loader {
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = Globals.getMetricsFile();
 		for (TableConfig jobConfig : config.getJobs()) {
-			jobs.add(new TableLoader(jobConfig));
+			jobs.add(new TableLoader(jobConfig, loaderMetrics));
 		}
 	}
 	
@@ -97,7 +97,6 @@ public class Loader {
 		}
 		Log.setGlobalContext();
 		loaderMetrics.finish();
-		for (TableLoader job : jobs) loaderMetrics.add(job.getMetrics());
 		if (metricsFile != null) writeAllMetrics();
 	}
 	

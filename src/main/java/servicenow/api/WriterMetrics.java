@@ -12,14 +12,25 @@ public class WriterMetrics {
 	private int skipped = 0;
 	private Date started = null;
 	private Date finished = null;
+	private WriterMetrics parent = null;
 
-	public WriterMetrics start() {
+	public void setParent(WriterMetrics parent) {
+		this.parent = parent;
+	}
+	
+	public WriterMetrics getParent() {
+		return this.parent;
+	}
+	
+	public synchronized WriterMetrics start() {
+		if (parent != null) parent.start();
 		if (started == null) started = new Date();
 		return this;
 	}
 	
-	public WriterMetrics finish() {
+	public synchronized WriterMetrics finish() {
 		finished = new Date();
+		if (parent != null) parent.finish();
 		return this;
 	}
 	
@@ -73,20 +84,25 @@ public class WriterMetrics {
 
 	public synchronized void addInserted(int count) {
 		inserted += count;
+		if (parent != null) parent.addInserted(count);
 	}
 	
 	public synchronized void addUpdated(int count) {
 		updated += count;
+		if (parent != null) parent.addUpdated(count);
 	}
 	
 	public synchronized void addDeleted(int count) {
 		deleted += count;
+		if (parent != null) parent.addUpdated(count);
 	}
 	
 	public synchronized void addSkipped(int count) {
 		skipped += count;
+		if (parent != null) parent.addSkipped(count);
 	}
 	
+	@Deprecated
 	public synchronized void add(WriterMetrics stats) {
 		assert stats != null;
 		assert stats.started != null;

@@ -21,6 +21,10 @@ public abstract class Writer {
 		writerMetrics.finish();
 	}
 
+	public void setParentMetrics(WriterMetrics parentMetrics) {
+		writerMetrics.setParent(parentMetrics);
+	}
+	
 	public WriterMetrics getMetrics() {
 		if (writerMetrics.getFinished() == null) writerMetrics.finish();
 		return writerMetrics;
