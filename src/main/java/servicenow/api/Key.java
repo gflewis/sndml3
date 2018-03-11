@@ -3,11 +3,9 @@ package servicenow.api;
 import java.util.regex.Pattern;
 
 /**
- * 
  * Thin wrapper for a <b>sys_id</b> (GUID).  
  * This class is used to ensure proper parameter type resolution 
- * for various methods in the {@link CoreTable} class.
- *
+ * for various methods.
  */
 public final class Key {
 

@@ -47,6 +47,8 @@ public class TableSyncReader extends TableReader {
 		RestTableReader sntsr = new RestTableReader(this.table);
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
 		sntsr.setCreatedRange(createdRange);
+		sntsr.setPageSize(10000);
+		sntsr.enableStats(false);
 		sntsr.initialize();
 		snTimestamps = sntsr.getAllRecords();
 		TimestampHash examined = new TimestampHash();
@@ -73,7 +75,9 @@ public class TableSyncReader extends TableReader {
 			if (examined.get(key) == null) 
 				deleteSet.add(key);
 		}
-		logger.debug(Log.INIT, String.format("deletes=%d", deleteSet.size()));
+		logger.info(Log.INIT, String.format(
+			"compare identified %d inserts, %d updates, %d deletes, %d skips", 
+			insertSet.size(), updateSet.size(), deleteSet.size(), skipSet.size()));
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size();
 		assert examined.size() == (expected + skipSet.size());
 		this.setExpected(expected);
@@ -132,6 +136,7 @@ public class TableSyncReader extends TableReader {
 		if (deleteWriter.getMetrics().getDeleted() != deleteSet.size())
 			logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
 				deleteWriter.getMetrics().getDeleted(), deleteSet.size()));
+		writerMetrics.addSkipped(skipSet.size());
 		return this;
 	}
 
