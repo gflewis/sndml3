@@ -2,6 +2,8 @@ package servicenow.api;
 
 import java.util.ArrayList;
 
+import servicenow.api.DateTime.Interval;
+
 public class DatePartition extends ArrayList<DateTimeRange> {
 
 	private static final long serialVersionUID = 1L;
@@ -39,5 +41,14 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 		return String.format("%s[interval=%s size=%d min=%s max=%s]", 
 				this.getClass().getSimpleName(), interval.toString(), size(), first.getStart(), last.getEnd());
 	}
-	
+
+	static public String partName(DateTime.Interval interval, DateTimeRange partRange) {
+		String prefix = interval.toString().substring(0,1);
+		String suffix = partRange.getStart().toString();
+		if (interval == Interval.HOUR) {
+			if (suffix.length() == DateTime.DATE_ONLY) suffix += " 00:00:00";
+			suffix.replaceAll(" ", "T");
+		}
+		return prefix + suffix;
+	}
 }

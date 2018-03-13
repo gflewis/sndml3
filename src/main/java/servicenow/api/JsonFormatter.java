@@ -10,13 +10,18 @@ import com.google.gson.JsonSyntaxException;
 
 public class JsonFormatter {
 
-	public static String format(String jsonText) throws JsonSyntaxException {
+	public static String format(String jsonText) {
 		if (Boolean.FALSE.equals(Globals.getBoolean("loader.debug_format_json"))) 
 			return jsonText;
-		JsonParser parser = new JsonParser();
-		JsonObject obj = parser.parse(jsonText).getAsJsonObject();
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();	
-		return gson.toJson(obj);			
+		try {
+			JsonParser parser = new JsonParser();
+			JsonObject obj = parser.parse(jsonText).getAsJsonObject();
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();	
+			return gson.toJson(obj);						
+		}
+		catch (JsonSyntaxException e) {
+			return jsonText;
+		}
 	}
 	
 }
