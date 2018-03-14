@@ -85,7 +85,6 @@ public class TableSyncReader extends TableReader {
 			"compare identified %d inserts, %d updates, %d deletes, %d skips", 
 			insertSet.size(), updateSet.size(), deleteSet.size(), skipSet.size()));
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size();
-		assert examined.size() == (expected + skipSet.size());
 		this.setExpected(expected);
 	}
 
