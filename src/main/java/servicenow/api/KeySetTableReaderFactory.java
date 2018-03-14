@@ -8,7 +8,7 @@ public class KeySetTableReaderFactory extends TableReaderFactory {
 	
 	public KeySetTableReader createReader() {
 		KeySetTableReader reader = new KeySetTableReader(this.table);
-		reader.setBaseQuery(baseQuery);
+		reader.setFilter(filter);
 		reader.setUpdatedRange(updatedRange);
 		reader.setCreatedRange(createdRange);
 		reader.setOrderBy(orderBy);

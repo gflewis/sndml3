@@ -3,9 +3,6 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A {@link TableReader} which attempts to read a set of records
  * using a single Web Service call.
@@ -38,13 +35,11 @@ import org.slf4j.LoggerFactory;
  */
 public class SoapPetitTableReader extends TableReader {
 
-	protected final SoapTableAPI apiSOAP;
-	
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+	protected final SoapTableAPI soapAPI;
+		
 	public SoapPetitTableReader(Table table) {
 		super(table);
-		apiSOAP = table.soap();
+		soapAPI = table.soap();
 	}
 	
 	@Override
@@ -77,7 +72,7 @@ public class SoapPetitTableReader extends TableReader {
 			params.add("__first_row", Integer.toString(firstRow));
 			params.add("__last_row", Integer.toString(lastRow));
 			if (this.viewName != null) params.add("__use_view", viewName);
-			RecordList recs = apiSOAP.getRecords(params, this.displayValue);
+			RecordList recs = soapAPI.getRecords(params, this.displayValue);
 			getReaderMetrics().increment(recs.size());			
 			writer.processRecords(this, recs);
 			rowCount += recs.size();

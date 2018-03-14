@@ -196,7 +196,7 @@ public class TableConfig extends Config {
 		return this.filter; 
 	}
 	
-	String  getOrderBy()     { return this.orderBy; }	
+	String  getOrderBy()     { return this.orderBy; }
 	String  getSqlBefore()   { return this.sqlBefore; }
 	String  getSqlAfter()    { return this.sqlAfter; }
 	Integer getPageSize()    { return this.pageSize;	}

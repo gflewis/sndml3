@@ -5,12 +5,12 @@ import java.sql.SQLException;
 
 public class KeySetTableReader extends TableReader {
 
-	protected final JsonTableAPI api;
+	protected final JsonTableAPI jsonAPI;
 	protected KeySet allKeys;
 
 	public KeySetTableReader(Table table) {
 		super(table);
-		api = table.json();
+		jsonAPI = table.json();
 	}
 
 	public int getDefaultPageSize() {
@@ -26,7 +26,7 @@ public class KeySetTableReader extends TableReader {
 		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
-		allKeys = table.json().getKeys(query);
+		allKeys = jsonAPI.getKeys(query);
 		// JSONv2 API limits the number of keys to 10000
 		// If we got more than 999 then check the result
 		if (allKeys.size() > 999) {
@@ -34,11 +34,13 @@ public class KeySetTableReader extends TableReader {
 			int expected = stats.getCount();
 			if (allKeys.size() != expected) {
 				logger.warn(Log.PROCESS, 
-						String.format("Expected %d keys but JSON only returned %d; reverting to SOAP", expected, allKeys.size()));
+					String.format("Expected %d keys but JSON only returned %d; reverting to SOAP", 
+						expected, allKeys.size()));
 				allKeys = table.soap().getKeys(getQuery());
 				if (allKeys.size() != expected) {
 					throw new ServiceNowException(
-						String.format("Expected %d keys but SOAP only returned %d", expected, allKeys.size()));
+						String.format("Expected %d keys but SOAP only returned %d", 
+							expected, allKeys.size()));
 				}
 			}
 		}
@@ -83,7 +85,7 @@ public class KeySetTableReader extends TableReader {
 			if (this.viewName != null) params.add("sysparm_view", this.viewName);
 			if (this.displayValue) params.add("displayvalue", "all");
 			params.add("sysparm_query", sliceQuery.toString());
-			RecordList recs = api.getRecords(params);
+			RecordList recs = jsonAPI.getRecords(params);
 			getReaderMetrics().increment(recs.size());			
 			writer.processRecords(this, recs);
 			rowCount += recs.size();

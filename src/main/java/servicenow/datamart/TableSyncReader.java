@@ -90,7 +90,7 @@ public class TableSyncReader extends TableReader {
 	}
 
 	@Override
-	public TableReader setBaseQuery(EncodedQuery value) {
+	public TableReader setFilter(EncodedQuery value) {
 		throw new UnsupportedOperationException();
 	}
 	

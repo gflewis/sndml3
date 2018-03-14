@@ -6,7 +6,7 @@ public abstract class TableReaderFactory {
 
 	protected Writer writer;
 	protected TableReader parent;
-	protected EncodedQuery baseQuery;
+	protected EncodedQuery filter;
 	protected DateTimeRange createdRange;
 	protected DateTimeRange updatedRange;
 	protected String orderBy;
@@ -32,8 +32,8 @@ public abstract class TableReaderFactory {
 		this.parent = parent;
 	}
 
-	public void setBaseQuery(EncodedQuery query) {
-		this.baseQuery = query;
+	public void setFilter(EncodedQuery query) {
+		this.filter = query;
 	}
 
 	public void setUpdated(DateTime since) {

@@ -38,17 +38,24 @@ public class LoaderConfig extends Config {
 		for (String key : root.keySet()) {
 		    Object val = root.get(key);
 			switch (key.toLowerCase()) {
-			case "threads" : threads = asInteger(val); break;
-			case "metrics" : metricsFile = new File(val.toString()); break;
-			case "tables" : 
+			case "threads" : 
+				threads = asInteger(val); 
+				break;
+			case "metrics" : 
+				metricsFile = new File(val.toString()); 
+				break;
+			case "tables" :
+			case "jobs" :
 				for (Object job : toList(val)) {
 					this.tables.add(new TableConfig(this, job));
 				}
 				break;
-		    	default:
-		    		throw new ConfigParseException("Not recognized: " + key);
+	    	default:
+	    		throw new ConfigParseException("Not recognized: " + key);
 			}
 		}
+		if (tables.size() == 0)
+			throw new ConfigParseException("No tables specified");
 	}
 	
 	String getString(String key) {

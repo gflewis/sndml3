@@ -17,7 +17,7 @@ public class KeyedTableReaderTest {
 		table = session.table("incident");
 		FileWriter writer = new FileWriter(new File(filename));
 		SoapKeySetTableReader reader = new SoapKeySetTableReader(table);
-		reader.setBaseQuery(EncodedQuery.all());
+		reader.setFilter(EncodedQuery.all());
 		reader.setWriter(writer);
 		reader.setPageSize(20).initialize();
 		reader.call();

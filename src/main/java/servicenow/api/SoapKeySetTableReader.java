@@ -2,21 +2,17 @@ package servicenow.api;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SoapKeySetTableReader extends TableReader {
 
-	protected final SoapTableAPI apiSOAP;
+	protected final SoapTableAPI soapAPI;
 	private KeySet allKeys;
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	static final int DEFAULT_PAGE_SIZE = 200;
 		
 	public SoapKeySetTableReader(Table table) {
 		super(table);
-		apiSOAP = table.soap();
+		soapAPI = table.soap();
 	}
 	
 	public int getDefaultPageSize() {
@@ -28,7 +24,7 @@ public class SoapKeySetTableReader extends TableReader {
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, "initialize query=" + query);
 		super.initialize();
-		allKeys = apiSOAP.getKeys(query);
+		allKeys = soapAPI.getKeys(query);
 		setExpected(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 	}
@@ -54,7 +50,7 @@ public class SoapKeySetTableReader extends TableReader {
 			Parameters params = new Parameters();
 			params.add("__encoded_query", sliceQuery.toString());
 			if (viewName != null) params.add("__use_view", viewName);
-			RecordList recs = apiSOAP.getRecords(params, this.displayValue);
+			RecordList recs = soapAPI.getRecords(params, this.displayValue);
 			getReaderMetrics().increment(recs.size());						
 			writer.processRecords(this, recs);
 			rowCount += recs.size();

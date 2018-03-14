@@ -5,15 +5,16 @@ import java.sql.SQLException;
 
 public class RestTableReader extends TableReader {
 
-	final protected RestTableAPI apiREST;
-	private boolean statsEnabled = false;
+	final protected RestTableAPI restAPI;
+	protected boolean statsEnabled;
 	protected TableStats stats = null;
 	
 	private final int DEFAULT_PAGE_SIZE = 200;
 	
 	public RestTableReader(Table table) {
 		super(table);
-		this.apiREST = table.rest();
+		this.restAPI = table.rest();
+		this.statsEnabled = true;
 	}
 			
 	public int getDefaultPageSize() {
@@ -36,7 +37,7 @@ public class RestTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format(
 			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));
 		if (statsEnabled) {
-			stats = apiREST.getStats(query, false);
+			stats = restAPI.getStats(query, false);
 			setExpected(stats.getCount());
 			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 		}
@@ -65,12 +66,12 @@ public class RestTableReader extends TableReader {
 			if (!EncodedQuery.isEmpty(getQuery())) params.add("sysparm_query", getQuery().toString());
 			if (fieldNames != null) params.add("sysparm_fields", fieldNames.toString());
 			if (viewName != null) params.add("sysparm_view", viewName);
-			RecordList recs = apiREST.getRecords(params);
+			RecordList recs = restAPI.getRecords(params);
 			getReaderMetrics().increment(recs.size());
 			writer.processRecords(this, recs);			
 			rowCount += recs.size();
 			offset += recs.size();
-			finished = (recs.size() < pageSize);
+			if (isFinished(recs.size(), rowCount)) finished = true;
 			logger.debug(Log.PROCESS, String.format("processed %d rows", rowCount));
 			if (maxRows != null && rowCount > maxRows)
 				throw new RowCountExceededException(table, 
@@ -83,6 +84,12 @@ public class RestTableReader extends TableReader {
 			}
 		}
 		return this;
+	}
+	
+	protected boolean isFinished(int pageRows, int totalRows) {
+		if (pageRows == 0) return true;
+		if (statsEnabled && totalRows >= getExpected()) return true;
+		return false;
 	}
 		
 }

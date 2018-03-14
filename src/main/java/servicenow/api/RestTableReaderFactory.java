@@ -9,7 +9,7 @@ public class RestTableReaderFactory extends TableReaderFactory {
 	public RestTableReader createReader() {
 		RestTableReader reader = new RestTableReader(table);
 		reader.enableStats(true);
-		reader.setBaseQuery(baseQuery);
+		reader.setFilter(filter);
 		reader.setUpdatedRange(updatedRange);
 		reader.setCreatedRange(createdRange);
 		reader.setOrderBy(orderBy);

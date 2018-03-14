@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * @author Giles Lewis
  *
  */
-public class TableSchema /* extends Writer */ {
+public class TableSchema {
 
 	private final Table table;
 	private final Session session;
@@ -54,11 +54,11 @@ public class TableSchema /* extends Writer */ {
 			addEquals("name",  tablename).
 			addEquals("active", "true");
 		
-		RestTableReader reader = new RestTableReader(dictionary);
+		RestTableReader reader = new RestPetitTableReader(dictionary);
 		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
-		reader.setBaseQuery(query);
+		reader.setFilter(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
-		reader.setPageSize(1000);
+		reader.setPageSize(5000);
 		reader.initialize();
 		RecordList recs = reader.getAllRecords();
 		processRecords(recs);

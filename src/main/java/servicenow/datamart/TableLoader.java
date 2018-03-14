@@ -73,6 +73,15 @@ public class TableLoader implements Callable<WriterMetrics> {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		LoaderAction action = config.getAction();
+		DateTimeRange createdRange = config.getCreated();
+		
+		// Order By sys_created_on if not otherwise specified
+		String orderBy = config.getOrderBy();
+		if (orderBy == null)
+			orderBy = "sys_created_on";
+		else if ("void".equalsIgnoreCase(orderBy))
+			orderBy = null;
+		
 		assert action != null;
 		Log.clearContext();
 		this.setLogContext();
@@ -94,9 +103,10 @@ public class TableLoader implements Callable<WriterMetrics> {
 			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
 			RestTableReader auditReader = new RestTableReader(audit);
 			auditReader.enableStats(true);
-			auditReader.setBaseQuery(auditQuery);			
+			auditReader.setFilter(auditQuery);			
 			DateTime since = config.getSince();
 			auditReader.setCreatedRange(new DateTimeRange(since, null));
+			auditReader.setOrderBy(orderBy);
 			auditReader.setMaxRows(config.getMaxRows());
 			auditReader.setWriter(deleteWriter);
 			auditReader.initialize();
@@ -107,9 +117,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 			deleteWriter.close();
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
-			DateTimeRange createdRange = config.getCreated();
 			TableSyncReaderFactory factory = 
 				new TableSyncReaderFactory(table, db, sqlTableName, this.metrics, createdRange);
+			factory.setOrderBy(orderBy);
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
 			if (partitionInterval == null) {
@@ -153,9 +163,9 @@ public class TableLoader implements Callable<WriterMetrics> {
 				factory = new RestTableReaderFactory(table, writer);
 			}
 			factory.setReaderName(tableLoaderName);
-			factory.setBaseQuery(config.getFilter());
-			factory.setCreated(config.getCreated());
-			factory.setOrderBy(config.getOrderBy());
+			factory.setFilter(config.getFilter());
+			factory.setCreated(createdRange);
+			factory.setOrderBy(orderBy);
 			factory.setPageSize(pageSize);
 			TableReader reader;
 			if (partitionInterval == null) {
@@ -178,8 +188,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
 					tableLoaderName, reader.getReaderMetrics().getExpected()));
 			reader.call();
-			writer.close();
-			
+			writer.close();			
 		}
 		
 		int processed = metrics.getProcessed();

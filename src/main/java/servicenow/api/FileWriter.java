@@ -51,7 +51,7 @@ public class FileWriter extends Writer {
 		FileWriter writer = new FileWriter(outfile);
 		TableReader reader = new RestTableReader(table);
 		reader.setWriter(writer);
-		reader.setBaseQuery(querystring == null ? EncodedQuery.all() : new EncodedQuery(querystring));
+		reader.setFilter(querystring == null ? EncodedQuery.all() : new EncodedQuery(querystring));
 		writer.open();
 		reader.call();
 		writer.close();

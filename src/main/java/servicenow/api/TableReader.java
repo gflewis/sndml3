@@ -13,7 +13,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	private String readerName;
 	private TableReader parent;
-	private EncodedQuery baseQuery;
+	private EncodedQuery filter;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
 	private EncodedQuery orderByQuery;
@@ -98,15 +98,15 @@ public abstract class TableReader implements Callable<TableReader> {
 		return result;
 	}
 	
-	public TableReader setBaseQuery(EncodedQuery value) {
+	public TableReader setFilter(EncodedQuery value) {
 		if (initialized) throw new IllegalStateException();
 		// argument may be null to clear
-		this.baseQuery = value;
+		this.filter = value;
 		return this;
 	}
 
-	public EncodedQuery getBaseQuery() {
-		return baseQuery == null ? EncodedQuery.all() : baseQuery;
+	public EncodedQuery getFilter() {
+		return filter == null ? EncodedQuery.all() : filter;
 	}
 	
 	public TableReader setCreatedRange(DateTimeRange range) {
@@ -160,7 +160,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	 * Return a composite query built from base query, created range and updated range.
 	 */
 	public EncodedQuery getQuery() {
-		EncodedQuery query = new EncodedQuery(baseQuery);
+		EncodedQuery query = new EncodedQuery(filter);
 		if (createdRange != null) query.addCreated(createdRange);
 		if (updatedRange != null) query.addUpdated(updatedRange);
 		if (orderByQuery != null) query.addQuery(orderByQuery);
