@@ -44,11 +44,11 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 
 	static public String partName(DateTime.Interval interval, DateTimeRange partRange) {
 		String prefix = interval.toString().substring(0,1);
-		String suffix = partRange.getStart().toString();
+		String datepart = partRange.getStart().toString();
 		if (interval == Interval.HOUR) {
-			if (suffix.length() == DateTime.DATE_ONLY) suffix += " 00:00:00";
-			suffix.replaceAll(" ", "T");
+			if (datepart.length() == DateTime.DATE_ONLY) datepart += " 00:00:00";
+			datepart = datepart.replaceAll(" ", "T");
 		}
-		return prefix + suffix;
+		return prefix + datepart;
 	}
 }
