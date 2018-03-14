@@ -4,7 +4,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.0.1-b.9</version>
+  <version>3.0.1</version>
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
