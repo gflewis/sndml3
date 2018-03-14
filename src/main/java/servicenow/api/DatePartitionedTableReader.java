@@ -104,7 +104,7 @@ public class DatePartitionedTableReader extends TableReader {
 		partReaders = new ArrayList<TableReader>();
 		logger.debug(Log.INIT, "partition=" + partition.toString());		
 		for (DateTimeRange partRange : partition) {
-			String partName = interval.toString().substring(0, 1) + partRange.getStart().toString();
+			String partName = DatePartition.partName(interval, partRange);
 			TableReader partReader = factory.createReader();
 			partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
 			partReader.setReaderName(partReader.getReaderName() + "." + partName);
