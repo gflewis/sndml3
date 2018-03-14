@@ -5,7 +5,6 @@ import servicenow.api.*;
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import java.io.File;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -52,7 +51,7 @@ public class TimestampTest {
 	}
 	
 	void loadTable() throws Exception {
-		LoaderConfig config = new LoaderConfig(new File("src/test/resources/yaml/load_incident_truncate.yaml"));
+		LoaderConfig config = new LoaderConfig(LoaderConfigTest.yamlFile("load_incident_truncate"));
 		Loader loader = new Loader(config);
 		TableLoader tableLoader = loader.jobs.get(0);
 		loader.loadTables();

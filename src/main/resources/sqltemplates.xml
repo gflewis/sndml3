@@ -8,7 +8,7 @@
 <!ELEMENT namecase (#PCDATA)>
 <!ELEMENT namequotes (#PCDATA)>
 <!ELEMENT initialize (statement*)>
-<!ELEMENT templates (create,grant,timestamp,rec_timestamps,all_timestamps,partition_timestamps,insert,update,delete,truncate)>
+<!ELEMENT templates (create,grant,select_created,select_updated,insert,update,delete,truncate)>
 <!ELEMENT create (#PCDATA)>
 <!ELEMENT grant (#PCDATA)>
 <!ELEMENT timestamp (#PCDATA)>
@@ -50,12 +50,8 @@
 $fielddefinitions,
 primary key ("sys_id"))</create>
       <grant>grant select on $schema.$table to public</grant>
-      <timestamp>select "sys_updated_on" from $schema.$table 
-where "sys_id" = $keyvalue</timestamp>
-      <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
-      <all_timestamps>select sys_id, sys_updated_on from $schema.$table</all_timestamps>
-      <partition_timestamps>select sys_id, sys_updated_on from $schema.$table
-where sys_created_on &gt;= '$start' and sys_created_on &lt; '$end'</partition_timestamps>
+      <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>insert into $schema.$table (
 $fieldnames) 
 values ($fieldvalues)</insert>
@@ -125,11 +121,8 @@ where "sys_id" = $keyvalue</update>
 $fielddefinitions,
 CONSTRAINT ${table}_PK PRIMARY KEY (SYS_ID))</create>
       <grant>GRANT SELECT,REFERENCES ON $schema.$table TO PUBLIC</grant>
-      <timestamp>SELECT SYS_UPDATED_ON FROM $schema.$table WHERE SYS_ID=$keyvalue</timestamp>
-      <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
-      <all_timestamps>SELECT SYS_ID, SYS_UPDATED_ON FROM $schema.$table</all_timestamps>
-      <partition_timestamps>SELECT SYS_ID, SYS_UPDATED_ON FROM $schema.$table
-WHERE SYS_CREATED_ON &gt;= $start AND SYS_CREATED_ON &lt; $end</partition_timestamps>
+      <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>INSERT INTO $schema.$table (
 $fieldnames) 
 VALUES ($fieldvalues)</insert>
@@ -205,11 +198,8 @@ WHERE SYS_ID=$keyvalue</update>
 $fielddefinitions,
 CONSTRAINT ${table}_PK PRIMARY KEY (SYS_ID))</create>
       <grant>GRANT SELECT,REFERENCES ON $schema.$table TO PUBLIC</grant>
-      <timestamp>SELECT SYS_UPDATED_ON FROM $schema.$table WHERE SYS_ID=$keyvalue</timestamp>
-      <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
-      <all_timestamps>SELECT SYS_ID, SYS_UPDATED_ON FROM $schema.$table</all_timestamps>
-      <partition_timestamps>SELECT SYS_ID, SYS_UPDATED_ON FROM $schema.$table
-WHERE SYS_CREATED_ON &gt;= '$start' AND SYS_CREATED_ON &lt; '$end'</partition_timestamps>
+      <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>INSERT INTO $schema.$table (
 $fieldnames) 
 VALUES ($fieldvalues)</insert>
@@ -401,11 +391,8 @@ WHERE SYS_ID=$keyvalue</update>
 $fielddefinitions,
 PRIMARY KEY (sys_id))</create>
       <grant></grant>
-      <timestamp>SELECT sys_updated_on FROM $schema.$table WHERE sys_id=$keyvalue</timestamp>
-      <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
-      <all_timestamps>SELECT sys_id, sys_updated_on FROM $schema.$table</all_timestamps>
-      <partition_timestamps>SELECT sys_id, sys_updated_on FROM $schema.$table
-WHERE sys_created_on &gt;= '$start' AND sys_created_on &lt; '$end'</partition_timestamps>
+      <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>INSERT INTO $schema.$table (
 $fieldnames) 
 VALUES ($fieldvalues)</insert>
@@ -473,11 +460,8 @@ WHERE sys_id = $keyvalue</update>
 $fielddefinitions,
 constraint ${table}_pk primary key ([sys_id]))</create>
       <grant></grant>
-      <timestamp>select sys_updated_on from $schema.$table where [sys_id]=$keyvalue</timestamp>
-      <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
-      <all_timestamps>select sys_id, sys_updated_on from $schema.$table</all_timestamps>
-      <partition_timestamps>select sys_id, sys_updated_on from $schema.$table
-where sys_created_on &gt;= '$start' and sys_created_on &lt; '$end'</partition_timestamps>
+      <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>insert into $schema.$table (
 $fieldnames) 
 values ($fieldvalues)</insert>
@@ -546,11 +530,8 @@ where [sys_id] = $keyvalue</update>
 $fielddefinitions,
 primary key ("sys_id"))</create>
       <grant>grant select on $schema.$table to public</grant>
-      <timestamp>select sys_updated_on from $schema.$table where sys_id = $keyvalue</timestamp>
-      <rec_timestamps>SELECT sys_updated_on, sys_created_on FROM $schema.$table WHERE sys_id=$keyvalue</rec_timestamps>
-      <all_timestamps>select sys_id, sys_updated_on from $schema.$table</all_timestamps>
-      <partition_timestamps>select sys_id, sys_updated_on from $schema.$table
-where sys_created_on &gt;= '$start' and sys_created_on &lt; '$end'</partition_timestamps>
+      <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>insert into $schema.$table (
 $fieldnames) 
 values ($fieldvalues)</insert>

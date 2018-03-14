@@ -23,13 +23,17 @@ public class DatabaseTimestampReader {
 	}
 	
 	DateTime getTimestampUpdated(String tableName, Key key) throws SQLException {
-		String sql = database.getGenerator().getTemplate("rec_timestamps", tableName, null);
+		assert tableName != null;
+		assert key != null;
 		DateTime result = null;
-		PreparedStatement stmt = dbc.prepareStatement(sql);
-		stmt.setString(1,  key.toString());
+		Generator generator = database.getGenerator();
+		String stmtText = generator.getTemplate("select_updated", tableName);
+		stmtText += " WHERE " + generator.sqlName("sys_id") + " = ?";
+		PreparedStatement stmt = dbc.prepareStatement(stmtText);
+		stmt.setString(1, key.toString());
 		ResultSet rs = stmt.executeQuery();
-		if (rs.next() ) {
-			Timestamp sys_updated_on = rs.getTimestamp(1);
+		if (rs.next()) {
+			Timestamp sys_updated_on = rs.getTimestamp(2);
 			result = new DateTime(sys_updated_on);
 			logger.debug(Log.TEST, String.format(
 					"%s updated=%s (%s)", key.toString(), sys_updated_on.toString(), result));
@@ -39,12 +43,16 @@ public class DatabaseTimestampReader {
 	}
 
 	DateTime getTimestampCreated(String tableName, Key key) throws SQLException {
-		String sql = database.getGenerator().getTemplate("rec_timestamps", tableName, null);
+		assert tableName != null;
+		assert key != null;
 		DateTime result = null;
-		PreparedStatement stmt = dbc.prepareStatement(sql);
-		stmt.setString(1,  key.toString());
+		Generator generator = database.getGenerator();
+		String stmtText = generator.getTemplate("select_created", tableName);
+		stmtText += " WHERE " + generator.sqlName("sys_id") + " = ?";
+		PreparedStatement stmt = dbc.prepareStatement(stmtText);
+		stmt.setString(1, key.toString());
 		ResultSet rs = stmt.executeQuery();
-		if (rs.next() ) {
+		if (rs.next()) {
 			Timestamp sys_created_on = rs.getTimestamp(2);			
 			result = new DateTime(sys_created_on);
 			logger.debug(Log.TEST, String.format(
@@ -55,26 +63,36 @@ public class DatabaseTimestampReader {
 	}
 	
 	TimestampHash getTimestamps(String tableName) throws SQLException {
-		String stmtText = database.getGenerator().getTemplate("all_timestamps", tableName, null);
-		return getQueryResult(stmtText);
+		assert tableName != null;
+		Generator generator = database.getGenerator();
+		String stmtText = generator.getTemplate("select_updated", tableName);
+		PreparedStatement stmt = dbc.prepareStatement(stmtText);
+		return getQueryResult(stmt);
 	}
 	
 	TimestampHash getTimestamps(String tableName, DateTimeRange created) throws SQLException {
-		Parameters vars = new Parameters();
-		DateTime rangeStart = created.getStart();
-		if (rangeStart == null) rangeStart = new DateTime("1980-01-01");
-		DateTime rangeEnd = created.getEnd();
-		if (rangeEnd == null) rangeEnd = new DateTime("2099-12-31");
-		vars.put("start", rangeStart.toString());
-		vars.put("end",  rangeEnd.toString());
-		String stmtText = database.getGenerator().getTemplate("partition_timestamps", tableName, vars);
-		return getQueryResult(stmtText);
-	}
-	
-	private TimestampHash getQueryResult(String stmtText) throws SQLException {
-		TimestampHash result = new TimestampHash();
+		assert tableName != null;
+		Generator generator = database.getGenerator();
+		String stmtText = generator.getTemplate("select_updated", tableName);
+		boolean hasStart = created != null && created.hasStart();
+		boolean hasEnd   = created != null && created.hasEnd();
+		if (hasStart || hasEnd) {
+			stmtText += " WHERE ";
+			String sys_created_name = generator.sqlName("sys_created_on");
+			if (hasStart) stmtText += sys_created_name + " >= ?";
+			if (hasStart && hasEnd) stmtText += " AND ";
+			if (hasEnd) stmtText += sys_created_name + " < ?";
+		}
 		logger.debug(Log.INIT, stmtText);
 		PreparedStatement stmt = dbc.prepareStatement(stmtText);
+		int bind = 0;
+		if (hasStart) stmt.setTimestamp(++bind, created.getStart().toTimestamp());
+		if (hasEnd)   stmt.setTimestamp(++bind, created.getEnd().toTimestamp());
+		return getQueryResult(stmt);
+	}
+	
+	private TimestampHash getQueryResult(PreparedStatement stmt) throws SQLException {
+		TimestampHash result = new TimestampHash();
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next() ) {
 			String sys_id = rs.getString(1);

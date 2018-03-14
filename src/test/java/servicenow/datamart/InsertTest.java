@@ -5,7 +5,6 @@ import servicenow.api.*;
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import java.io.File;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -36,7 +35,7 @@ public class InsertTest {
 	
 	@Test
 	public void testInsert() throws Exception {
-		LoaderConfig config = new LoaderConfig(new File("src/test/yaml/load_incident_truncate.yaml"));
+		LoaderConfig config = new LoaderConfig(AllTests.yamlFile("load_incident_truncate"));
 		TableConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(LoaderAction.INSERT, job.getAction());
@@ -53,7 +52,7 @@ public class InsertTest {
 
 	@Test
 	public void testInsertTwice() throws Exception {
-		LoaderConfig config = new LoaderConfig(new File("src/test/yaml/load_incident_twice.yaml"));
+		LoaderConfig config = new LoaderConfig(AllTests.yamlFile("load_incident_twice"));
 		Loader loader = new Loader(config);
 		TableLoader job1 = loader.jobs.get(0);
 		TableLoader job2 = loader.jobs.get(1);

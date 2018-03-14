@@ -264,7 +264,7 @@ public class Generator {
 		String result = getTemplate("create", sqlTableName, map);
 		return result;
 	}
-
+	
 	private String sqlFieldDefinition(FieldDefinition fd) {
 		String fieldname = fd.getName();
 		String fieldtype = fd.getType();

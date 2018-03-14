@@ -147,6 +147,10 @@ public class DateTime implements Comparable<DateTime> {
 	public long getSeconds() {
 		return dt.getTime() / 1000;
 	}
+
+	public java.sql.Timestamp toTimestamp() {
+		return new java.sql.Timestamp(getMillisec());
+	}
 	
 	public boolean equals(Object other) {
 		if (other == null) return false;

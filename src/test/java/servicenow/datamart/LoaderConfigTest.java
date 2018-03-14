@@ -71,7 +71,7 @@ public class LoaderConfigTest {
 		fail();		
 	}
 	
-	private File yamlFile(String name) {
+	static public File yamlFile(String name) {
 		assert name != null;
 		return new File("src/test/resources/yaml/" + name + ".yaml");
 	}

@@ -17,7 +17,7 @@ public class CreateTableTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"mydev"};
+		return new String[] {"awsmysql", "awspg"};
 	}
 
 	Session session;
