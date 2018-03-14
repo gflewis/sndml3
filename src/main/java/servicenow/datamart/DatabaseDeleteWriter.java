@@ -28,8 +28,15 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 		deleteRecord(key);
 	}
 	
-	void deleteRecord(Key key) throws SQLException {
-		logger.trace(Log.PROCESS, "Delete " + key);		
+	void deleteRecords(KeySet keys) throws SQLException {
+		for (Key key : keys) {
+			deleteRecord(key);
+		}
+		db.commit();
+	}
+	
+	private void deleteRecord(Key key) throws SQLException {
+		logger.info(Log.PROCESS, "Delete " + key);		
 		if (deleteStmt.deleteRecord(key))
 			writerMetrics.incrementDeleted();
 		else {

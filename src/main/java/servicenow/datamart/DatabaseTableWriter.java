@@ -31,6 +31,12 @@ public abstract class DatabaseTableWriter extends Writer {
 		writerMetrics.start();
 		return this;
 	}
+	
+	@Override
+	public void close() throws SQLException {
+		db.commit();
+		writerMetrics.finish();
+	}
 
 	@Override
 	public synchronized void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {

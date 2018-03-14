@@ -17,7 +17,7 @@ public abstract class Writer {
 		return this;
 	}
 	
-	public void close() throws SQLException {
+	public void close() throws IOException, SQLException {
 		writerMetrics.finish();
 	}
 

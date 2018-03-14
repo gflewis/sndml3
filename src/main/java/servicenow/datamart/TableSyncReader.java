@@ -108,7 +108,8 @@ public class TableSyncReader extends TableReader {
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
 			insertReader.setPageSize(this.getPageSize());
-			insertReader.setWriter(insertWriter.open());
+			insertReader.setWriter(insertWriter);
+			insertWriter.open();
 			insertReader.initialize(insertSet);
 			insertReader.call();
 			insertWriter.close();
@@ -127,7 +128,8 @@ public class TableSyncReader extends TableReader {
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
 			updateReader.setPageSize(this.getPageSize());
-			updateReader.setWriter(updateWriter.open());
+			updateReader.setWriter(updateWriter);
+			updateWriter.open();
 			updateReader.initialize(updateSet);
 			updateReader.call();
 			updateWriter.close();
@@ -144,10 +146,11 @@ public class TableSyncReader extends TableReader {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(this.writerMetrics);
 			deleteWriter.open();
-			for (Key key : deleteSet) {
-				logger.info(Log.PROCESS, "Delete " + key.toString());
-				deleteWriter.deleteRecord(key);
-			}
+			deleteWriter.deleteRecords(deleteSet);
+//			for (Key key : deleteSet) {
+//				logger.info(Log.PROCESS, "Delete " + key.toString());
+//				deleteWriter.deleteRecord(key);
+//			}
 			deleteWriter.close();
 			int rowsDeleted = deleteWriter.getMetrics().getDeleted();
 			if (rowsDeleted != deleteSet.size())
