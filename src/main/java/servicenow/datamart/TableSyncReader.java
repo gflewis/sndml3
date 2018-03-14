@@ -145,6 +145,7 @@ public class TableSyncReader extends TableReader {
 			deleteWriter.setParentMetrics(this.writerMetrics);
 			deleteWriter.open();
 			for (Key key : deleteSet) {
+				logger.info(Log.PROCESS, "Delete " + key.toString());
 				deleteWriter.deleteRecord(key);
 			}
 			deleteWriter.close();
