@@ -110,6 +110,7 @@ public class TableSyncReader extends TableReader {
 			insertReader.setPageSize(this.getPageSize());
 			insertReader.setWriter(insertWriter);
 			insertWriter.open();
+			setLogContext();
 			insertReader.initialize(insertSet);
 			insertReader.call();
 			insertWriter.close();
@@ -130,6 +131,7 @@ public class TableSyncReader extends TableReader {
 			updateReader.setPageSize(this.getPageSize());
 			updateReader.setWriter(updateWriter);
 			updateWriter.open();
+			setLogContext();
 			updateReader.initialize(updateSet);
 			updateReader.call();
 			updateWriter.close();
@@ -146,11 +148,8 @@ public class TableSyncReader extends TableReader {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(this.writerMetrics);
 			deleteWriter.open();
+			setLogContext();
 			deleteWriter.deleteRecords(deleteSet);
-//			for (Key key : deleteSet) {
-//				logger.info(Log.PROCESS, "Delete " + key.toString());
-//				deleteWriter.deleteRecord(key);
-//			}
 			deleteWriter.close();
 			int rowsDeleted = deleteWriter.getMetrics().getDeleted();
 			if (rowsDeleted != deleteSet.size())
