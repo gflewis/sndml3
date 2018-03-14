@@ -32,8 +32,10 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 		logger.trace(Log.PROCESS, "Delete " + key);		
 		if (deleteStmt.deleteRecord(key))
 			writerMetrics.incrementDeleted();
-		else
-			writerMetrics.incrementSkipped();		
+		else {
+			logger.warn(Log.PROCESS, "Delete: Not found: " + key);
+			writerMetrics.incrementSkipped();
+		}
 	}
 
 }

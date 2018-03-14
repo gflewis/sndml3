@@ -19,7 +19,7 @@ public class DatabaseDeleteStatement extends DatabaseStatement {
 	}
 
 	public boolean deleteRecord(Key key) throws SQLException {
-		this.bindField(1,  key.toString());
+		this.bindField(1, key.toString());
 		int count = stmt.executeUpdate();
 		return (count > 0);
 	}
