@@ -44,7 +44,7 @@ public class SoapTableAPI extends TableAPI {
 	 * This method is called by {@link KeyReader}.
 	 */
 	public KeySet getKeys(Parameters params) throws IOException {
-		Log.setMethodContext(table, "getKeys");
+		Log.pushMethodContext(table,  "getKeys");
 		Element responseElement = client.executeRequest("getKeys", params, null, "getKeysResponse");
 		Namespace ns = responseElement.getNamespace();
 		int size = Integer.parseInt(responseElement.getChildText("count", ns));
@@ -63,15 +63,17 @@ public class SoapTableAPI extends TableAPI {
 				result.add(new Key(list[i]));
 			}
 		}
+		Log.popContext();
 		return result;		
 	}
 	
 	public Record getRecord(Key key) throws IOException {
-		Log.setMethodContext(table, "get");
+		Log.pushMethodContext(table,  "get");
 		Parameters params = new Parameters("sys_id", key.toString());
 		Element responseElement = client.executeRequest("get", params, null, "getResponse");
 		if (responseElement.getContentSize() == 0) return null;
 		Record rec = new XmlRecord(getTable(), responseElement);
+		Log.popContext();
 		return rec;		
 	}
 	
