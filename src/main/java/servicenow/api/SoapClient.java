@@ -56,10 +56,7 @@ public class SoapClient {
 			String responseElementName) throws IOException {
 		
 		URI uri = session.getURI(this.uriPath, uriParams);
-//		Log.setSessionContext(session);
-//		Log.setTableContext(tablename);
-//		Log.setMethodContext(methodName);
-//		Log.setURIContext(uri);
+		Log.pushContext(null, tablename, session, uri, methodName);
 		Element method = createXmlElement(methodName, docParams);
 		Document requestDoc = createSoapDocument(method);	
 		if (logger.isDebugEnabled()) {
@@ -89,6 +86,7 @@ public class SoapClient {
 		if (responseElementName != null && !responseElementName.equals(responseElement.getName()))
 			throw new ServiceNowError(
 					"responseElementName expected=" + responseElementName + "; found=" + responseElement.getName());
+		Log.popContext();
 		return responseElement;		
 	}
 	

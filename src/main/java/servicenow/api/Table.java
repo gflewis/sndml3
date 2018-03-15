@@ -12,10 +12,7 @@ public class Table {
 	protected final Instance instance;
 	protected final Session session;
 	protected final String tablename;
-	
-	// enum APIType {SOAP, REST};
-	// private EnumMap<APIType, TableAPI> apiset;
-	
+		
 	private SoapTableAPI apiSOAP;
 	private RestTableAPI apiREST;
 	private JsonTableAPI apiJSON;

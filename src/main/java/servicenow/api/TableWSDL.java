@@ -35,7 +35,7 @@ public class TableWSDL {
 		String path = tablename + ".do?WSDL";
 		if (displayvalues) path += "&displayvalue=all";
 		uri = session.getURI(path);
-		Log.setURIContext(uri);
+		Log.pushURIContext(uri);
 		logger.debug(Log.SCHEMA, uri.toString());
 
 		XmlRequest request = new XmlRequest(session.getClient(), uri, null);

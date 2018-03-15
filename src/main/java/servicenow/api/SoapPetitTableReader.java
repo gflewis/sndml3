@@ -45,7 +45,6 @@ public class SoapPetitTableReader extends TableReader {
 	@Override
 	public void initialize() {
 		assert writer != null : "Writer not initialized";
-		Log.setContext(table, getReaderName());
 	}
 
 	@Override
@@ -59,6 +58,7 @@ public class SoapPetitTableReader extends TableReader {
 	}
 
 	public SoapPetitTableReader call() throws IOException, SQLException {
+		Log.pushContext(table, getReaderName());
 		Writer writer = this.getWriter();
 		assert writer != null;
 		assert pageSize > 1;
@@ -80,6 +80,7 @@ public class SoapPetitTableReader extends TableReader {
 			firstRow = lastRow;
 			logger.info(String.format("processed %d rows", rowCount));			
 		}
+		Log.popContext();
 		return this;
 	}
 
