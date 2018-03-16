@@ -27,13 +27,12 @@ public class Log {
 		return org.slf4j.LoggerFactory.getLogger(name);
 	}
 	
-
-	static public synchronized void setGlobalContext() {
+	static public void setGlobalContext() {
 		MDC.clear();
 		MDC.put("job", "GLOBAL");
 	}
 	
-	static public synchronized void setContext(Table table, String jobname) {
+	static public void setContext(Table table, String jobname) {
 		MDC.clear();
 		MDC.put("table", table.getName());
 		MDC.put("user", table.getSession().getUsername());
@@ -48,12 +47,12 @@ public class Log {
 		return MDC.get("job");
 	}
 	
-	static public synchronized void setMethodContext(Table table, String method) {
+	static public void setMethodContext(Table table, String method) {
 		setTableContext(table);
 		MDC.put("method", method);
 	}
 	
-	static public synchronized void setTableContext(Table table) {
+	static public void setTableContext(Table table) {
 		MDC.put("table", table.getName());
 		MDC.put("user", table.getSession().getUsername());
 	}
