@@ -2,11 +2,6 @@ package servicenow.api;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
 public class Table {
 
 	protected final Instance instance;
@@ -17,11 +12,7 @@ public class Table {
 	private RestTableAPI apiREST;
 	private JsonTableAPI apiJSON;
 	private TableAPI api;
-		
-	final private Logger log = LoggerFactory.getLogger(this.getClass());
-	final Marker mrkRequest = MarkerFactory.getMarker("REQUEST");
-	final Marker mrkResponse = MarkerFactory.getMarker("RESPONSE");
-	
+			
 	Table(Session session, String tablename) {
 		this.session = session;
 		this.tablename = tablename;
@@ -124,8 +115,11 @@ public class Table {
 	 * @param fieldname Field name, e.g. "number" or "name"
 	 * @param fieldvalue Field value
 	 */
+	@Deprecated
 	public Record getRecord(String fieldname, String fieldvalue)
 			throws IOException, RowCountExceededException {
+		return api.getRecord(fieldname, fieldvalue);
+		/*
 		RecordList result = api.getRecords(fieldname, fieldvalue, true);
 		int size = result.size();
 		String msg = 
@@ -134,6 +128,7 @@ public class Table {
 		if (size == 0) return null;
 		if (size > 1) throw new RowCountExceededException(this, msg);
 		return result.get(0);
+		*/
 	}
 	
 	public TableWSDL getWSDL() throws IOException {		

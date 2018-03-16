@@ -4,21 +4,21 @@
     <File name="File" fileName="${sys:logFileName}" append="false">
       <Filters>
         <ThresholdFilter level="trace" />
-        <MarkerFilter marker="SCHEMA" onMatch="DENY" onMismatch="NEUTRAL" />
+        <MarkerFilter marker="SCHEMA" onMatch="ALLOW" onMismatch="NEUTRAL" />
         <MarkerFilter marker="BIND" onMatch="ALLOW" onMismatch="NEUTRAL" />
       </Filters>
       <PatternLayout>
-        <Pattern>%d{MM-dd HH:mm:ss} %level %marker [%thread] %logger{1} %X{context}:%X{table}: %msg%n</Pattern>  
+        <Pattern>%d{MM-dd HH:mm:ss} %level %marker [%thread] %logger{1} %X{job}[%X{table}] %msg%n</Pattern>  
       </PatternLayout>
     </File>    
     <Console name="Console">
       <Filters>
         <ThresholdFilter level="debug" />
-        <MarkerFilter marker="SCHEMA" onMatch="DENY" onMismatch="NEUTRAL" />
+        <MarkerFilter marker="SCHEMA" onMatch="ALLOW" onMismatch="NEUTRAL" />
         <MarkerFilter marker="BIND" onMatch="DENY" onMismatch="NEUTRAL" />
       </Filters>
       <PatternLayout>
-        <Pattern>%d{HH:mm:ss} %level %marker %logger{1} %X{context}: %msg%n</Pattern>  
+        <Pattern>%d{HH:mm:ss} %level %marker %logger{1} %X{job} %msg%n</Pattern>  
       </PatternLayout>
     </Console>
   </Appenders>

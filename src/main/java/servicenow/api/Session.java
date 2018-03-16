@@ -124,7 +124,7 @@ public class Session {
 	public Session verify() throws IOException, InterruptedException {
 		Table user = verify("sys_user");
 		assert this.username != null;
-		Record profile = user.getRecord("user_name", this.username);
+		Record profile = user.api().getRecord("user_name", this.username);
 		String timezone = profile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;

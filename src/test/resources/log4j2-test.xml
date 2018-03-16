@@ -11,7 +11,7 @@
         </ContextMapFilter>
       </Filters>
       <PatternLayout>
-        <Pattern>%d{HH:mm:ss} %level %marker %logger{1} %X{context}[%X{table}]: %msg%n</Pattern>  
+        <Pattern>%d{HH:mm:ss} %level %marker %logger{1} %X{job}[%X{table}]: %msg%n</Pattern>  
       </PatternLayout>
     </Console>
   </Appenders>

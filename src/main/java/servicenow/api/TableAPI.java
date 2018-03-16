@@ -93,12 +93,16 @@ public abstract class TableAPI {
 	 * @param fieldname Field name, e.g. "number" or "name"
 	 * @param fieldvalue Field value
 	 */
+	public Record getRecord(String fieldname, String fieldvalue) throws IOException {
+		return getRecord(fieldname, fieldvalue, false);
+	}
+	
 	public Record getRecord(String fieldname, String fieldvalue, boolean displayValues)
 			throws IOException, SoapResponseException {
 		RecordList result = getRecords(fieldname, fieldvalue, displayValues);
 		int size = result.size();
 		String msg = String.format("get %s=%s returned %d records", fieldname, fieldvalue, size);
-		logger.info(Log.RESPONSE, msg);
+		logger.debug(Log.RESPONSE, msg);
 		if (size == 0) return null;
 		if (size > 1) throw new RowCountExceededException(getTable(), msg);
 		return result.get(0);

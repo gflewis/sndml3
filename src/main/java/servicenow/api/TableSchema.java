@@ -34,11 +34,12 @@ public class TableSchema {
 		dictionary = session.table("sys_dictionary");
 		hierarchy = session.table("sys_db_object");
 		String saveJob = Log.getJobContext();
-		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
-		logger.debug(Log.INIT, "get definition for table " + tablename);
+		String myname = dictionary.getName() + "." + this.tablename;
+		Log.setContext(dictionary,  myname);
+		logger.debug(Log.SCHEMA, "get definition for table " + tablename);
 		fields = new TreeMap<String,FieldDefinition>();
 		parentname = determineParentName();
-		logger.debug(Log.INIT, tablename + " parent is " + parentname);
+		logger.debug(Log.SCHEMA, tablename + " parent is " + parentname);
 		if (parentname != null) {
 			// recursive call for parent definition
 			Table parentTable = session.table(parentname);
@@ -57,6 +58,7 @@ public class TableSchema {
 			addEquals("active", "true");
 		
 		RestTableReader reader = new RestPetitTableReader(dictionary);
+		reader.setReaderName(myname);
 		reader.setFilter(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(5000);
@@ -65,7 +67,7 @@ public class TableSchema {
 		processRecords(recs);
 				
 		if (this.empty) {
-			logger.error(Log.INIT, "Unable to read schema for: " + tablename +
+			logger.error(Log.SCHEMA, "Unable to read schema for: " + tablename +
 				" (check access controls for sys_dictionary and sys_db_object)");
 			if (tablename.equals("sys_db_object") || tablename.equals("sys_dictionary"))
 				throw new InsufficientRightsException("Unable to generate schema for " + tablename);
@@ -81,7 +83,7 @@ public class TableSchema {
 			if (fieldname != null) {
 				FieldDefinition fieldDef = new FieldDefinition(table, rec);
 				fields.put(fieldname, fieldDef);
-				logger.debug(Log.INIT, String.format("%s.%s %s(%d)", 
+				logger.debug(Log.BIND, String.format("%s.%s %s(%d)", 
 						tablename, fieldname, fieldDef.getType(), fieldDef.getLength()));
 				this.empty = false;
 			}
@@ -91,9 +93,9 @@ public class TableSchema {
 	private String determineParentName() throws IOException {
 		if (tablename.startsWith("sys_")) return null;
 		Log.setContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
-		Record myRec = hierarchy.getRecord("name", this.tablename);
+		Record myRec = hierarchy.api().getRecord("name", this.tablename);
 		if (myRec == null) {
-			logger.error(Log.INIT, "Unable to read schema for: " + tablename +
+			logger.error(Log.SCHEMA, "Unable to read schema for: " + tablename +
 					" (check access controls for sys_dictionary and sys_db_object)");
 			throw new InvalidTableNameException(tablename);			
 		}
@@ -101,7 +103,7 @@ public class TableSchema {
 		if (parentKey == null) return null;
 		Record parentRec = hierarchy.getRecord(parentKey);
 		String parentName = parentRec.getValue("name");
-		logger.debug("parent of " + tablename + " is " + parentKey + "/" + parentName);
+		logger.debug(Log.SCHEMA, "parent of " + tablename + " is " + parentKey + "/" + parentName);
 		return parentName;
 	}
 	
