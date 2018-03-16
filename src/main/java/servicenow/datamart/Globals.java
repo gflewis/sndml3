@@ -96,6 +96,7 @@ public class Globals {
 	static File getMetricsFile() {
 		String filename = getProperty("metrics");
 		if (filename != null) return new File(filename);
+		if (config == null) return null;
 		return config.metricsFile;
 	}
 

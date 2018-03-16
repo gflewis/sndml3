@@ -22,12 +22,12 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 	public ColumnDefinitions(Database db, Table table, String sqlTableName) 
 			throws SQLException, IOException {
 		super();		
-		String schema = db.getSchema();
-		logger.debug(Log.SCHEMA, String.format("schema=%s table=%s", schema, sqlTableName));
+		String dbschema = db.getSchema();
+		String saveJob = Log.getJobContext();
+		Log.setJobContext(sqlTableName + ".schema");
+		logger.debug(Log.SCHEMA, String.format("schema=%s table=%s", dbschema, sqlTableName));
 		Generator generator = db.getGenerator();
 		TableWSDL wsdl = table.getWSDL();
-
-		Log.setSchemaContext(table);		
 		ResultSet columns = db.getColumnDefinitions(sqlTableName);
 		while (columns.next()) {
 			String name = columns.getString(4);
@@ -53,6 +53,6 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 				" in first column of table \"" + sqlTableName + "\"");
 		logger.debug(Log.SCHEMA, this.size() + " columns");
 		columns.close();
-	
+		Log.setJobContext(saveJob);	
 	}
 }

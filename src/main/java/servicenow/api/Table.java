@@ -13,9 +13,6 @@ public class Table {
 	protected final Session session;
 	protected final String tablename;
 	
-	// enum APIType {SOAP, REST};
-	// private EnumMap<APIType, TableAPI> apiset;
-	
 	private SoapTableAPI apiSOAP;
 	private RestTableAPI apiREST;
 	private JsonTableAPI apiJSON;
@@ -50,21 +47,6 @@ public class Table {
 	public String getName() {
 		return this.tablename;
 	}
-
-	/*
-	public TableAPI getAPI(APIType t) {
-		if (!apiset.containsKey(t)) {
-			switch(t) {
-			case SOAP: apiset.put(t,  new SoapTableAPI(this)); break;
-			case REST: apiset.put(t,  new RestTableAPI(this)); break;
-			default: throw new AssertionError();
-			}
-		}
-		TableAPI api = apiset.get(t);
-		assert api != null;
-		return api;
-	}
-	*/
 	
 	/**
 	 * Return the SOAP API.
@@ -154,12 +136,20 @@ public class Table {
 		return result.get(0);
 	}
 	
-	public TableWSDL getWSDL() throws IOException {
-		return soap().getWSDL();
+	public TableWSDL getWSDL() throws IOException {		
+		String saveJob = Log.getJobContext();
+		Log.setJobContext(getName() + ".WSDL");
+		TableWSDL result = soap().getWSDL();
+		Log.setJobContext(saveJob);
+		return result;
 	}
 	
 	public TableSchema getSchema() throws IOException, InterruptedException {
-		return new TableSchema(this);
+		String saveJob = Log.getJobContext();
+		Log.setJobContext(getName() + ".schema");
+		TableSchema result = new TableSchema(this);
+		Log.setJobContext(saveJob);
+		return result;
 	}
 		
 }

@@ -38,7 +38,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 	}
 	
 	TableLoader(Table table) throws ConfigParseException {
-		this(new TableConfig(null, table.getName()), null);
+		this(new TableConfig(table), null);
 	}
 	
 	TableLoader(TableConfig config, WriterMetrics parentMetrics) throws ConfigParseException {
@@ -83,7 +83,6 @@ public class TableLoader implements Callable<WriterMetrics> {
 			orderBy = null;
 		
 		assert action != null;
-		Log.clearContext();
 		this.setLogContext();
 		logger.debug(Log.INIT, 
 			String.format("call table=%s action=%s", table.getName(), action.toString()));

@@ -26,15 +26,17 @@ public class TableSchema {
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	protected TableSchema(Table table) 
-			throws IOException, 	InvalidTableNameException, InterruptedException {
+			throws IOException, InvalidTableNameException, InterruptedException {
 		super();
 		this.table = table;
 		this.session = table.session;
 		this.tablename = table.getName();
-		logger.debug(Log.INIT, "get definition for table " + tablename);
-		fields = new TreeMap<String,FieldDefinition>();
 		dictionary = session.table("sys_dictionary");
 		hierarchy = session.table("sys_db_object");
+		String saveJob = Log.getJobContext();
+		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
+		logger.debug(Log.INIT, "get definition for table " + tablename);
+		fields = new TreeMap<String,FieldDefinition>();
 		parentname = determineParentName();
 		logger.debug(Log.INIT, tablename + " parent is " + parentname);
 		if (parentname != null) {
@@ -55,7 +57,6 @@ public class TableSchema {
 			addEquals("active", "true");
 		
 		RestTableReader reader = new RestPetitTableReader(dictionary);
-		Log.setContext(dictionary,  dictionary.getName() + "." + this.tablename);
 		reader.setFilter(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(5000);
@@ -71,6 +72,7 @@ public class TableSchema {
 			else
 				throw new InvalidTableNameException(tablename);
 		}
+		Log.setJobContext(saveJob);
 	}
 
 	public void processRecords(RecordList recs) throws IOException {

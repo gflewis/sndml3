@@ -233,7 +233,6 @@ public class Generator {
 	}
 	
 	String getCreateTable(Table table, String sqlTableName) throws IOException, InterruptedException {
-		Log.setSchemaContext(table);
 		// TODO: Dead code?
 		// We may be pulling the schema from a different ServiceNow instance
 		TableSchema tableSchema = table.getSchema();

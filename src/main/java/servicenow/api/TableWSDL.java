@@ -36,7 +36,7 @@ public class TableWSDL {
 		if (displayvalues) path += "&displayvalue=all";
 		uri = session.getURI(path);
 		Log.setURIContext(uri);
-		logger.debug(Log.SCHEMA, uri.toString());
+		logger.debug(Log.WSDL, uri.toString());
 
 		XmlRequest request = new XmlRequest(session.getClient(), uri, null);
 		try {
@@ -45,13 +45,13 @@ public class TableWSDL {
 			throw new InvalidTableNameException(tablename);
 		}
 		if (logger.isTraceEnabled()) 
-			logger.trace(Log.SCHEMA, "\n" + XmlFormatter.format(doc));
+			logger.trace(Log.WSDL, "\n" + XmlFormatter.format(doc));
 
 		readColumnNames = getColumnNames("getResponse");
 		readColumnTypes = getColumnTypes("getResponse");
 		writeColumnNames = getColumnNames("update");
 		writeColumnTypes = getColumnTypes("update");
-		Log.clearContext();
+		Log.clearURIContext();
 	}
 
 	Document getDocument() {

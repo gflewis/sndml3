@@ -2,12 +2,14 @@ package servicenow.api;
 
 import java.net.URI;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 public class Log {
 
 	static public final Marker INIT     = MarkerFactory.getMarker("INIT");
+	static public final Marker WSDL     = MarkerFactory.getMarker("WSDL");
 	static public final Marker SCHEMA   = MarkerFactory.getMarker("SCHEMA");
 	static public final Marker REQUEST  = MarkerFactory.getMarker("REQUEST");
 	static public final Marker RESPONSE = MarkerFactory.getMarker("RESPONSE");
@@ -25,51 +27,49 @@ public class Log {
 		return org.slf4j.LoggerFactory.getLogger(name);
 	}
 	
-	static public synchronized void clearContext() {
-		org.slf4j.MDC.clear();
-	}
-	
-	static public synchronized void setGlobalContext() {
-		clearContext();
-		setContextValue("context", "GLOBAL");
-	}
 
-	static public void setSchemaContext(Table table) {
-		setContext(table, table.getName() + ".schema");
+	static public synchronized void setGlobalContext() {
+		MDC.clear();
+		MDC.put("job", "GLOBAL");
 	}
 	
-	static public synchronized void setContext(Table table, String context) {
-		clearContext();
-		setContextValue("table", table.getName());
-		setContextValue("context", context);
+	static public synchronized void setContext(Table table, String jobname) {
+		MDC.clear();
+		MDC.put("table", table.getName());
+		MDC.put("user", table.getSession().getUsername());
+		MDC.put("job", jobname);
+	}
+	
+	static public void setJobContext(String jobname) {
+		MDC.put("job", jobname);
+	}
+	
+	static public String getJobContext() {
+		return MDC.get("job");
 	}
 	
 	static public synchronized void setMethodContext(Table table, String method) {
 		setTableContext(table);
-		setContextValue("method", method);
+		MDC.put("method", method);
 	}
 	
 	static public synchronized void setTableContext(Table table) {
-		setTableContext(table.getName());
-		setSessionContext(table.getSession());
+		MDC.put("table", table.getName());
+		MDC.put("user", table.getSession().getUsername());
 	}
 	
-	static public synchronized void setSessionContext(Session session) {
-		setContextValue("user", session.getUsername());
-	}
-
-	static public synchronized void setTableContext(String tablename) {
-		setContextValue("table", tablename);
+	static public void setTableContext(String tablename) {
+		MDC.put("table", tablename);
 	}
 			
-	static public synchronized void setURIContext(URI uri) {
-		setContextValue("uri", uri.toString());
+	static public void setURIContext(URI uri) {
+		MDC.put("uri", uri.toString());
 	}
 	
-	static private synchronized void setContextValue(String name, String value) {
-		org.slf4j.MDC.put(name, value);		
+	static public void clearURIContext() {
+		MDC.put("uri",  "");
 	}
-
+	
 	public static String join(URI uri, String requestText) {
 		StringBuilder result = new StringBuilder(uri.toString());
 		if (requestText != null) {

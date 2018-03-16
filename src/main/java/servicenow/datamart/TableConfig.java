@@ -23,10 +23,11 @@ public class TableConfig extends Config {
 	private String sqlBefore;
 	private String sqlAfter;
 	private Integer threads;
-	private DateTimeFactory dateFactory;
+	private final DateTimeFactory dateFactory;
 
 	TableConfig(Table table) {
 		this.name = table.getName();
+		this.dateFactory = new DateTimeFactory();
 	}
 	
 	TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
