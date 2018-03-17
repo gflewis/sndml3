@@ -66,6 +66,8 @@ public class Synchronizer extends TableReader {
 		skipSet = new KeySet();
 		for (Record rec : snTimestamps) {
 			Key key = rec.getKey();
+			assert !examined.containsKey(key) :
+				String.format("duplicate key: %s", key.toString());				
 			DateTime snts = rec.getUpdatedTimestamp();
 			DateTime dbts = dbTimestamps.get(key);
 			if (dbts == null)
@@ -78,7 +80,9 @@ public class Synchronizer extends TableReader {
 		}
 		logger.debug(Log.INIT, String.format("inserts=%d updated=%d skips=%d", 
 				insertSet.size(), updateSet.size(), skipSet.size()));
-		assert examined.size() == (insertSet.size() + updateSet.size() + skipSet.size()); 
+		assert examined.size() == (insertSet.size() + updateSet.size() + skipSet.size()) :
+			String.format("examined=%d inserts=%d updated=%d skips=%d", 
+					examined.size(), insertSet.size(), updateSet.size(), skipSet.size());
 		for (Key key : dbTimestamps.keySet()) {
 			if (examined.get(key) == null) 
 				deleteSet.add(key);
