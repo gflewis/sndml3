@@ -5,7 +5,7 @@ import servicenow.api.*;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class TableSyncReader extends TableReader {
+public class Synchronizer extends TableReader {
 
 	final Database db;
 	final String sqlTableName;
@@ -17,7 +17,7 @@ public class TableSyncReader extends TableReader {
 	KeySet deleteSet;
 	KeySet skipSet;
 	
-	public TableSyncReader(Table table, Database db, String sqlTableName, WriterMetrics parentMetrics) {
+	public Synchronizer(Table table, Database db, String sqlTableName, WriterMetrics parentMetrics) {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;

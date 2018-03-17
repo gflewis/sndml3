@@ -16,15 +16,16 @@ public class LoaderConfig extends Config {
 	
 	Map root;
 	Integer threads = 0;
+	Integer pageSize;
 	File metricsFile = null;
 	
-	private final java.util.List<TableConfig> tables = 
-			new java.util.ArrayList<TableConfig>();
+	private final java.util.List<JobConfig> tables = 
+			new java.util.ArrayList<JobConfig>();
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	LoaderConfig(Table table) throws IOException, ConfigParseException {
-		tables.add(new TableConfig(table));		
+		tables.add(new JobConfig(table));		
 	}
 	
 	LoaderConfig(File configFile) throws IOException, ConfigParseException {
@@ -44,10 +45,13 @@ public class LoaderConfig extends Config {
 			case "metrics" : 
 				metricsFile = new File(val.toString()); 
 				break;
+			case "pagesize" : 
+				pageSize = asInteger(val);
+				break;
 			case "tables" :
 			case "jobs" :
 				for (Object job : toList(val)) {
-					this.tables.add(new TableConfig(this, job));
+					this.tables.add(new JobConfig(this, job));
 				}
 				break;
 	    	default:
@@ -63,16 +67,16 @@ public class LoaderConfig extends Config {
 		return root.getString(key);
 	}
 		
-	java.util.List<TableConfig> getJobs() {
+	java.util.List<JobConfig> getJobs() {
 		return this.tables;
 	}
 	
 	/*
 	 * Used for JUnit tests
 	 */
-	TableConfig getJobByName(String name) {
+	JobConfig getJobByName(String name) {
 		assert name != null;
-		for (TableConfig job : tables) {
+		for (JobConfig job : tables) {
 			if (name.equals(job.getName())) return job;
 		}
 		return null;
@@ -86,6 +90,10 @@ public class LoaderConfig extends Config {
 		return metricsFile;
 	}
 	
+	Integer getPageSize() {
+		return pageSize;
+	}
+	
 	/**
 	 * Return the DateTime that this object was initialized.
 	 */
@@ -94,7 +102,7 @@ public class LoaderConfig extends Config {
 	}
 
 	void validate() throws ConfigParseException {
-		for (TableConfig job : tables) 
+		for (JobConfig job : tables) 
 			job.validate();
 	}
 }

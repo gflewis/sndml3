@@ -45,7 +45,7 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 			}				
 		}
 		if (this.size() < 1)
-			throw new TableInitException(
+			throw new RuntimeException(
 				"SQL table not found: " + db.qualifiedName(sqlTableName));
 		if (!this.get(0).getName().toUpperCase().equals("SYS_ID"))
 			throw new RuntimeException(

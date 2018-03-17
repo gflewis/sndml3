@@ -5,43 +5,26 @@ import servicenow.api.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
-
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableLoader implements Callable<WriterMetrics> {
+public class Job implements Callable<WriterMetrics> {
 
 	private final Session session;
 	private final Database db;
 	private final Table table;
 	private final String sqlTableName;
 	private final String tableLoaderName;
-	private final TableConfig config;
+	private final JobConfig config;
 	private final WriterMetrics metrics;
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	public static void main(String[] args) throws Exception {
-		Log.setGlobalContext();
-		Options options = new Options();
-		options.addOption(Option.builder("p").longOpt("prop").required(true).hasArg(true).
-				desc("Property file (required)").build());
-		options.addOption(Option.builder("t").longOpt("table").required(true).hasArg(true).
-				desc("Table name").build());		
-		Globals.initialize(options, args);
-		ResourceManager.initialize(Globals.getProperties());
-		String tablename = Globals.getOptionValue("t");
-		TableLoader loader = new TableLoader(ResourceManager.getSession().table(tablename));
-		loader.call();
+		
+	Job(Table table) throws ConfigParseException {
+		this(new JobConfig(table), null);
 	}
 	
-	TableLoader(Table table) throws ConfigParseException {
-		this(new TableConfig(table), null);
-	}
-	
-	TableLoader(TableConfig config, WriterMetrics parentMetrics) throws ConfigParseException {
+	Job(JobConfig config, WriterMetrics parentMetrics) throws ConfigParseException {
 		config.validate();
 		this.session = ResourceManager.getSession();
 		this.db = ResourceManager.getDatabase();
@@ -61,7 +44,7 @@ public class TableLoader implements Callable<WriterMetrics> {
 		return this.table.getName();
 	}
 	
-	TableConfig getConfig() {
+	JobConfig getConfig() {
 		return this.config;
 	}
 
@@ -116,13 +99,13 @@ public class TableLoader implements Callable<WriterMetrics> {
 			deleteWriter.close();
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
-			TableSyncReaderFactory factory = 
-				new TableSyncReaderFactory(table, db, sqlTableName, this.metrics, createdRange);
+			SynchronizerFactory factory = 
+				new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange);
 			factory.setOrderBy(orderBy);
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
 			if (partitionInterval == null) {
-				TableSyncReader syncReader = new TableSyncReader(table, db, sqlTableName, metrics);
+				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
 				syncReader.initialize(createdRange);
 				reader = syncReader;
 			}

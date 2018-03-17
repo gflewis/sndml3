@@ -22,7 +22,7 @@ public class Loader {
 	File metricsFile = null;
 	PrintWriter statsWriter;
 	WriterMetrics loaderMetrics = new WriterMetrics();	
-	ArrayList<TableLoader> jobs = new ArrayList<TableLoader>();
+	ArrayList<Job> jobs = new ArrayList<Job>();
 	
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -62,7 +62,7 @@ public class Loader {
 	}
 	
 	Loader(Table table) {
-		jobs.add(new TableLoader(table));
+		jobs.add(new Job(table));
 	}
 	
 	Loader(LoaderConfig config) {
@@ -70,8 +70,8 @@ public class Loader {
 		this.threads = config.getThreads();
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = Globals.getMetricsFile();
-		for (TableConfig jobConfig : config.getJobs()) {
-			jobs.add(new TableLoader(jobConfig, loaderMetrics));
+		for (JobConfig jobConfig : config.getJobs()) {
+			jobs.add(new Job(jobConfig, loaderMetrics));
 		}
 	}
 	
@@ -81,7 +81,7 @@ public class Loader {
 		if (threads > 1) {
 			logger.info(Log.INIT, String.format("starting %d threads", threads));
 			ExecutorService executor = Executors.newFixedThreadPool(threads);
-			for (TableLoader job : jobs) {
+			for (Job job : jobs) {
 				logger.info(Log.INIT, "submitting " + job.getName());
 				executor.submit(job);
 			}
@@ -91,7 +91,7 @@ public class Loader {
 	        }	 			
 		}
 		else {
-			for (TableLoader job : jobs) {
+			for (Job job : jobs) {
 				job.call();
 			}			
 		}
@@ -104,7 +104,7 @@ public class Loader {
 		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
 		statsWriter = new PrintWriter(metricsFile);
 		loaderMetrics.write(statsWriter);
-		for (TableLoader job : jobs) {			
+		for (Job job : jobs) {			
 			job.getMetrics().write(statsWriter, job.getName());
 		}
 		statsWriter.close();		

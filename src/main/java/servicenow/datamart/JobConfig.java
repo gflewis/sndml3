@@ -4,9 +4,10 @@ import servicenow.api.*;
 
 import java.util.regex.Pattern;
 
-public class TableConfig extends Config {
+public class JobConfig extends Config {
 
 	private Map items;
+	private LoaderConfig parent;
 	private String name;
 	private String source;
 	private String target;
@@ -25,15 +26,15 @@ public class TableConfig extends Config {
 	private Integer threads;
 	private final DateTimeFactory dateFactory;
 
-	TableConfig(Table table) {
+	JobConfig(Table table) {
 		this.name = table.getName();
 		this.dateFactory = new DateTimeFactory();
 	}
 	
-	TableConfig(LoaderConfig parent, Object config) throws ConfigParseException {
-		dateFactory = new DateTimeFactory();
+	JobConfig(LoaderConfig parent, Object config) throws ConfigParseException {
+		this.parent = parent;
+		this.dateFactory = new DateTimeFactory();
 		if (isMap(config)) {
-			assert parent != null;
 			items = new Config.Map(config);
 			for (String origkey : items.keySet()) {
 			    Object val = items.get(origkey);
@@ -200,7 +201,13 @@ public class TableConfig extends Config {
 	String  getOrderBy()     { return this.orderBy; }
 	String  getSqlBefore()   { return this.sqlBefore; }
 	String  getSqlAfter()    { return this.sqlAfter; }
-	Integer getPageSize()    { return this.pageSize;	}
+
+	Integer getPageSize() {
+		if (pageSize != null) return pageSize;
+		if (parent != null) return parent.getPageSize();
+		return null;
+	}
+	
 	Integer getMinRows()     { return this.minRows; }
 	Integer getMaxRows()     { return this.maxRows; }
 	Integer getThreads()     { return this.threads; }

@@ -42,7 +42,7 @@ public class LoaderConfigTest {
 	public void testBadDate() throws Exception {
 		File badConfig = yamlFile("baddate");
 		LoaderConfig config = new LoaderConfig(badConfig);
-		TableConfig job = config.getJobByName("incident");
+		JobConfig job = config.getJobByName("incident");
 		assertNotNull(job);
 		logger.debug(Log.TEST, String.format("name=%s created=%s", job.getName(), job.getCreated()));
 		fail();

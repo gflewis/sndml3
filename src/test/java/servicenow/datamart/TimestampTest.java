@@ -53,7 +53,7 @@ public class TimestampTest {
 	void loadTable() throws Exception {
 		LoaderConfig config = new LoaderConfig(LoaderConfigTest.yamlFile("load_incident_truncate"));
 		Loader loader = new Loader(config);
-		TableLoader tableLoader = loader.jobs.get(0);
+		Job tableLoader = loader.jobs.get(0);
 		loader.loadTables();
 		WriterMetrics metrics = tableLoader.getMetrics();
 		assertTrue(metrics.getProcessed() > 0);		
@@ -68,10 +68,10 @@ public class TimestampTest {
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
 		Record rec = inc.getRecord(new Key(sys_id));
 		assertEquals(created, rec.getCreatedTimestamp().toString());
-		TableConfig config = new TableConfig(inc);
+		JobConfig config = new JobConfig(inc);
 		config.setFilter(new EncodedQuery("sys_id=" + sys_id));
 		config.setCreated(emptyRange);
-		TableLoader loader = new TableLoader(config, null);
+		Job loader = new Job(config, null);
 		loader.call();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		DateTime dbcreated = reader.getTimestampCreated(inc.getName(), new Key(sys_id));

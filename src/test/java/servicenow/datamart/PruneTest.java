@@ -47,11 +47,11 @@ public class PruneTest {
 		assertNull(api.getRecord(key));
 	    TestingManager.sleep(2);
 	    TestingManager.banner(logger,  "Prune");
-		TableConfig config = new TableConfig(tbl);
+		JobConfig config = new JobConfig(tbl);
 		config.setAction(LoaderAction.PRUNE);
 		config.setSince(t0);
 		logger.info(Log.TEST, "PRUNE " + config.getName());
-		TableLoader loader = new TableLoader(config, null);
+		Job loader = new Job(config, null);
 		loader.call();
 	}
 
