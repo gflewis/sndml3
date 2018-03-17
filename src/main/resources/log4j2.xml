@@ -12,7 +12,6 @@
     <Root level="info">
       <AppenderRef ref="Console" />
     </Root>
-    <Logger name="org.apache.http" level="info" />
-    <Logger name="servicenow.common" level="info" />>
+    <Logger name="servicenow" level="info" />>
   </Loggers>
 </Configuration>
