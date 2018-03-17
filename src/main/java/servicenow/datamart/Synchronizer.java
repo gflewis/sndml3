@@ -51,12 +51,14 @@ public class Synchronizer extends TableReader {
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);
 		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
 		RestTableReader sntsr = new RestTableReader(this.table);
+		sntsr.setReaderName(this.getReaderName());
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
 		sntsr.setCreatedRange(createdRange);
 		sntsr.setPageSize(10000);
 		sntsr.enableStats(false);
 		sntsr.initialize();
 		snTimestamps = sntsr.getAllRecords();
+		setLogContext();
 		TimestampHash examined = new TimestampHash();
 		insertSet = new KeySet();
 		updateSet = new KeySet();
@@ -121,7 +123,6 @@ public class Synchronizer extends TableReader {
 		}
 		
 		// Process the Updates
-		setLogContext();
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
 			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
@@ -142,7 +143,6 @@ public class Synchronizer extends TableReader {
 		}
 					
 		// Process the Deletes
-		setLogContext();
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
