@@ -57,7 +57,7 @@ public class RestTableAPI extends TableAPI {
 		}
 		else {
 			logger.info(Log.PROCESS, String.format(
-				"getStats count=%d query=\"%s\" count=%s", stats.count, filter));			
+				"getStats count=%d query=\"%s\"", stats.count, filter));			
 		}
 		return stats;		
 	}
