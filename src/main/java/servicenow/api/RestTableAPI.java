@@ -53,11 +53,11 @@ public class RestTableAPI extends TableAPI {
 					"getStats query=\"%s\" minCreated=%s maxCreated=%s", filter, minCreated, maxCreated));
 			stats.created = new DateTimeRange(minCreated, maxCreated);
 			logger.info(Log.PROCESS, String.format(
-				"getStats query=\"%s\" count=%s createdRange=%s", filter, stats.count, stats.created));			
+				"getStats count=%d query=\"%s\" createdRange=%s", stats.count, filter, stats.created));			
 		}
 		else {
 			logger.info(Log.PROCESS, String.format(
-				"getStats query=\"%s\" count=%s", filter, stats.count));			
+				"getStats count=%d query=\"%s\" count=%s", stats.count, filter));			
 		}
 		return stats;		
 	}

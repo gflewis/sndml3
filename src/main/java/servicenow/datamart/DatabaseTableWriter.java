@@ -42,7 +42,8 @@ public abstract class DatabaseTableWriter extends Writer {
 	public synchronized void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
 		writerMetrics.start();
 		for (Record rec : recs) {
-			logger.debug(Log.PROCESS, String.format("processing %s", rec.getKey().toString()));
+			logger.debug(Log.PROCESS, String.format(
+				"processing %s %s", rec.getKey(), rec.getCreatedTimestamp()));
 			writeRecord(rec);
 		}
 		writerMetrics.finish();

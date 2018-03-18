@@ -133,25 +133,28 @@ public abstract class TableReader implements Callable<TableReader> {
 
 	/**
 	 * Specify an "OrderBy" or "OrderByDesc" clause for the reader.
-	 * @param fieldname - Name of field which may be prefixed with "+" or "-" 
+	 * @param fieldnames - Comma delimited list of field names.
+	 * each of which may be prefixed with "+" or "-" 
 	 * to indicate ascending or descending respectively. 
-	 * @return
 	 */
-	public TableReader setOrderBy(String fieldname) {
-		if (fieldname == null) {
+	public TableReader setOrderBy(String fieldnames) {
+		if (fieldnames == null) {
 			orderByQuery = null;
 		}
 		else {
-			boolean desc = false;
-			char c1 = fieldname.charAt(0);
-			if (c1 == '+' || c1 =='-') {
-				if (c1 == '-') desc = true;
-				fieldname = fieldname.substring(1);
+			orderByQuery = new EncodedQuery();
+			for (String field : fieldnames.split(",\\s*")) {
+				boolean desc = false;
+				char c1 = field.charAt(0);
+				if (c1 == '+' || c1 =='-') {
+					if (c1 == '-') desc = true;
+					field = field.substring(1);
+				}
+				if (desc) 
+					orderByQuery.addOrderByDesc(field);
+				else 
+					orderByQuery.addOrderBy(field);				
 			}
-			if (desc) 
-				orderByQuery = new EncodedQuery().addOrderByDesc(fieldname);
-			else 
-				orderByQuery = new EncodedQuery().addOrderBy(fieldname);
 		}
 		return this;
 	}

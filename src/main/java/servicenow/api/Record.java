@@ -69,18 +69,14 @@ public abstract class Record implements InsertResponse {
 	 * Get sys_updated_on from a Record object.
 	 */
 	public DateTime getUpdatedTimestamp() {
-		String fieldvalue = getValue("sys_updated_on");
-		assert fieldvalue != null;
-		return new DateTime(fieldvalue, DateTime.DATE_TIME);
+		return getDateTime("sys_updated_on");
 	}
 	
 	/**
 	 * Get sys_created_on from a Record object.
 	 */
 	public DateTime getCreatedTimestamp() {
-		String fieldvalue = getValue("sys_created_on");
-		assert fieldvalue != null;
-		return new DateTime(fieldvalue, DateTime.DATE_TIME);
+		return getDateTime("sys_created_on");
 	}
 	
 	/**
@@ -88,7 +84,7 @@ public abstract class Record implements InsertResponse {
 	 * For a Java date use getDateTime(fieldname).toDate().
 	 * @throws InvalidDateTimeException 
 	 */
-	public DateTime getDateTime(String fieldname) {
+	public DateTime getDateTime(String fieldname) throws InvalidDateTimeException {
 		String value = getValue(fieldname);
 		if (value == null) return null;
 		DateTime result = new DateTime(value, DateTime.DATE_TIME);

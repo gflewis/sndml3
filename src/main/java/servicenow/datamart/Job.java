@@ -56,16 +56,16 @@ public class Job implements Callable<WriterMetrics> {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		LoaderAction action = config.getAction();
+		assert action != null;
 		DateTimeRange createdRange = config.getCreated();
 		
 		// Order By sys_created_on if not otherwise specified
 		String orderBy = config.getOrderBy();
 		if (orderBy == null)
-			orderBy = "sys_created_on";
+			orderBy = "sys_created_on,sys_id";
 		else if ("void".equalsIgnoreCase(orderBy))
 			orderBy = null;
 		
-		assert action != null;
 		this.setLogContext();
 		logger.debug(Log.INIT, 
 			String.format("call table=%s action=%s", table.getName(), action.toString()));
