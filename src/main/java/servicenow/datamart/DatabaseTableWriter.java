@@ -43,7 +43,7 @@ public abstract class DatabaseTableWriter extends Writer {
 		writerMetrics.start();
 		for (Record rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
-				"processing %s %s", rec.getKey(), rec.getCreatedTimestamp()));
+				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));
 			writeRecord(rec);
 		}
 		writerMetrics.finish();
