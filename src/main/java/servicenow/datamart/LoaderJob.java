@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Job implements Callable<WriterMetrics> {
+public class LoaderJob implements Callable<WriterMetrics> {
 
 	private final Session session;
 	private final Database db;
@@ -20,11 +20,11 @@ public class Job implements Callable<WriterMetrics> {
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	Job(Table table) throws ConfigParseException {
+	LoaderJob(Table table) throws ConfigParseException {
 		this(new JobConfig(table), null);
 	}
 	
-	Job(JobConfig config, WriterMetrics parentMetrics) throws ConfigParseException {
+	LoaderJob(JobConfig config, WriterMetrics parentMetrics) throws ConfigParseException {
 		config.validate();
 		this.session = ResourceManager.getSession();
 		this.db = ResourceManager.getDatabase();

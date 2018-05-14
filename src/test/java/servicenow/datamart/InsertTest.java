@@ -39,7 +39,7 @@ public class InsertTest {
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(LoaderAction.INSERT, job.getAction());
-		Job loader = new Job(job, null);
+		LoaderJob loader = new LoaderJob(job, null);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();
 		int processed = metrics.getProcessed();
@@ -54,8 +54,8 @@ public class InsertTest {
 	public void testInsertTwice() throws Exception {
 		LoaderConfig config = new LoaderConfig(AllTests.yamlFile("load_incident_twice"));
 		Loader loader = new Loader(config);
-		Job job1 = loader.jobs.get(0);
-		Job job2 = loader.jobs.get(1);
+		LoaderJob job1 = loader.jobs.get(0);
+		LoaderJob job2 = loader.jobs.get(1);
 		loader.loadTables();
 		int rows = job1.getMetrics().getProcessed();
 		assertTrue(rows > 0);

@@ -24,7 +24,7 @@ public class Globals {
 
 	private static CommandLine cmdline;
 	private static Properties properties = new Properties();
-	private static DateTime start;
+	private static DateTime start = DateTime.now();
 	private static LoaderConfig config;
 	
 	public static Boolean warnOnTruncate = true;
