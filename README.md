@@ -5,7 +5,7 @@ Version 3 is essentially a complete rebuild of the application. The following ar
 * The version 2 "script" syntax has been abandoned replaced with a simpler YAML syntax.
 * Version 3 includes a `partition` option for improved reliability when backloading large task based tables.
 * Version 3 includes a `metrics` file option to enable incremental loads since the last run.
-* Version 3 includes a `sync` action which compares `sys_updated_on` to determine which records need to be update, inserted or deleted.
+* Version 3 includes a `sync` action which compares `sys_updated_on` to determine which records need to be updated, inserted or deleted.
 * The `dialect` option is still supported, but is no longer required. By default the code will select a dialect from the templates file based on the JDBC URL.
 
 This program is freely distributed software. You are welcome to redistribute and/or modify it. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY, explicit or implied. 
