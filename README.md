@@ -1,4 +1,4 @@
-The ServiceNow Data Mart Loader is a Java command-line application which uses the ServiceNow REST API to extract meta-data and data from ServiceNow. The Loader creates tables in an SQL database based on meta-data extracted from ServiceNow. It supports a variety of load and synchronization operation. 
+The ServiceNow Data Mart Loader is a Java command-line application which exports data from ServiceNow to an SQL database such as MySQL, PostgreSQL, Oracle or Microsoft SQL Server. SNDML uses the ServiceNow REST API to extract data from ServiceNow. It uses JDBC to load the target. It creates tables in the target database based on extracted meta-data. It supports a variety of load and synchronization operation. 
 
 Version 3 is essentially a complete rebuild of the application. The following are significant changes since version 2.
 * The SOAP API has been replaced with the REST API and the JSONv2 API for improved performance.
