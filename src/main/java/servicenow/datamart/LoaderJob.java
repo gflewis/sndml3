@@ -105,8 +105,8 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			TableReader reader;
 			if (partitionInterval == null) {
 				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
-				syncReader.initialize(createdRange);
 				syncReader.setPageSize(pageSize);
+				syncReader.initialize(createdRange);
 				reader = syncReader;
 			}
 			else {
