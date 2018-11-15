@@ -543,7 +543,8 @@ where sys_id = $keyvalue</update>
     </templates>
     <datatypes>
       <!-- Character types -->
-      <typemap glidetype="string"          >varchar(#) null</typemap>      
+      <typemap glidetype="string" maxsize="3999">varchar(#) null</typemap>
+      <typemap glidetype="string" minsize="4000">text null</typemap>
       <!-- Numeric types -->
       <typemap glidetype="boolean"         >boolean null</typemap>
       <typemap glidetype="integer"         >integer null</typemap>
