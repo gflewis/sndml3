@@ -567,7 +567,8 @@ where sys_id = $keyvalue</update>
       <typemap glidetype="glide_duration"  >integer null</typemap>
       <typemap glidetype="timer"           >integer null</typemap>
       <!-- Wildcard template must appear last -->
-      <typemap glidetype="*">varchar(#) null</typemap>      
+      <typemap glidetype="*" maxsize="3999">varchar(#) null</typemap>
+      <typemap glidetype="*" minsize="4000">text null</typemap>
     </datatypes>
     <fieldnames/>
   </sql>

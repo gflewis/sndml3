@@ -92,6 +92,11 @@ public class Database {
 		return "oracle".equalsIgnoreCase(protocol);
 	}
 	
+	boolean isPostgresql() {
+		String protocol = getProtocol(getURI());
+		return "postgresql".equalsIgnoreCase(protocol);		
+	}
+	
 	static String getProtocol(URI uri) {
 		String urlPart[] = uri.toString().split(":");
 		String protocol = urlPart[1];

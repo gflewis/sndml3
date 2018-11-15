@@ -140,7 +140,11 @@ public abstract class DatabaseStatement {
 				catch (UnsupportedEncodingException e) {
 					throw new RuntimeException(e);
 				}
-			}			
+			}
+			if (db.isPostgresql()) {
+				// PostgreSQL doesn't support storing NULL characters in text fields
+				value = value.replaceAll("\u0000", "");
+			}
 			if (value.length() != oldSize) {
 				String message = rec.getKey() + " truncated: " + glidename +
 					" from " + oldSize + " to " + value.length();
@@ -237,6 +241,10 @@ public abstract class DatabaseStatement {
 			stmt.setDouble(bindCol, Double.parseDouble(value));
 			break;
 		default :
+			if (db.isPostgresql()) {
+				// PostgreSQL doesn't support storing NULL characters in text fields
+				value = value.replaceAll("\u0000", "");
+			}
 			stmt.setString(bindCol, value);			
 		}
 	}
