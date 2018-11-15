@@ -43,7 +43,10 @@ public class WriterMetrics {
 	}
 	
 	public int getElapsedSec() {
-		return (int) ((finished.getTime() - started.getTime()) / 1000);
+		if (started == null || finished == null)
+			return 0;
+		else
+			return (int) ((finished.getTime() - started.getTime()) / 1000);
 	}
 		
 	public int getProcessed() {
