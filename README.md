@@ -4,7 +4,7 @@ For information about this product visit the wiki:
 * https://github.com/gflewis/sndml3/wiki
 
 For a quick tutorial, please see
-* https://github.com/gflewis/sndml3/wiki/Getting-Started.
+* https://github.com/gflewis/sndml3/wiki/Getting-Started
 
 This program is freely distributed software. You are welcome to redistribute and/or modify it. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY, explicit or implied. 
 
