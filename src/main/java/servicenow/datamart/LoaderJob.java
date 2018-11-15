@@ -99,7 +99,6 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			deleteWriter.close();
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
-			logger.info(Log.INIT, String.format("prepare sync %s", tableLoaderName));
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
 			int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 			TableReader reader;
@@ -116,7 +115,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 				factory.setPageSize(pageSize);
 				DatePartitionedTableReader multiReader =
 					new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
-				factory.setParent(multiReader);
+				factory.setParent(multiReader);				
 				multiReader.initialize();
 				reader = multiReader;
 				this.setLogContext();

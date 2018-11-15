@@ -42,8 +42,7 @@ public class Synchronizer extends TableReader {
 	public void initialize(DateTimeRange createdRange) 
 			throws IOException, SQLException, InterruptedException {
 		super.initialize();
-		logger.debug(Log.INIT, 
-				"initialize table=" + table.getName() + " created=" + createdRange);
+		logger.info(Log.INIT, "begin compare");
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
 		if (createdRange == null) 
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName);

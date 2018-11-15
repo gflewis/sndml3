@@ -34,6 +34,7 @@ public class DatePartitionedTableReader extends TableReader {
 		setFilter(factory.filter);
 		setCreatedRange(factory.createdRange);
 		setUpdatedRange(factory.updatedRange);
+		setPageSize(factory.pageSize);
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
 		setWriter(factory.getWriter());
