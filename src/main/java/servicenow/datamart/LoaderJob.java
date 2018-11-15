@@ -99,17 +99,21 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			deleteWriter.close();
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
-			SynchronizerFactory factory = 
-				new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange);
-			factory.setOrderBy(orderBy);
+			logger.info(Log.INIT, String.format("prepare sync %s", tableLoaderName));
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
+			int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 			TableReader reader;
 			if (partitionInterval == null) {
 				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
 				syncReader.initialize(createdRange);
+				syncReader.setPageSize(pageSize);
 				reader = syncReader;
 			}
 			else {
+				SynchronizerFactory factory = 
+					new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange);
+				factory.setOrderBy(orderBy);
+				factory.setPageSize(pageSize);
 				DatePartitionedTableReader multiReader =
 					new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
 				factory.setParent(multiReader);

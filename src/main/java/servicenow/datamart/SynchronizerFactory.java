@@ -20,6 +20,7 @@ public class SynchronizerFactory extends TableReaderFactory {
 	@Override
 	public Synchronizer createReader() {
 		Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, parentMetrics);
+		syncReader.setPageSize(this.pageSize);
 		return syncReader;
 	}
 
