@@ -65,6 +65,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			orderBy = "sys_created_on,sys_id";
 		else if ("void".equalsIgnoreCase(orderBy))
 			orderBy = null;
+		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 		
 		this.setLogContext();
 		logger.debug(Log.INIT, 
@@ -100,7 +101,6 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
-			int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 			TableReader reader;
 			if (partitionInterval == null) {
 				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
@@ -137,7 +137,6 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			writer.open();
 			
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
-			int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();								
 			TableReaderFactory factory;
 			DateTime since = config.getSince();			
 			if (since != null) {
