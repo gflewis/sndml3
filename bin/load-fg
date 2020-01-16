@@ -1,0 +1,8 @@
+#!/bin/bash
+source sndml-setup
+echo jar=$jar
+echo profile=$profile
+yaml=$base/yaml/$1.yaml
+echo yaml=$yaml
+cd $logdir
+java -ea -jar $jar -p $profile -y $yaml

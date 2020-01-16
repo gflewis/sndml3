@@ -1,0 +1,15 @@
+#!/bin/bash
+# profile=$1
+target=~/sndml3/target
+url=`awk -F= '/^datamart.url/{print $2}' <$1`
+# echo url=$url
+db=`echo $url | awk -F: '{print $2}'`
+# echo db=$db
+case $db in
+oracle) tag=ora ;;
+postgresql) tag=pg ;;
+mysql) tag=mysql ;;
+mssql) tag=mssql ;;
+esac
+# echo tag=$tag
+ls $target/sndml*-$tag.jar | tail -1

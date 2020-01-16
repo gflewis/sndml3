@@ -1,0 +1,10 @@
+#!/bin/bash
+source sndml-setup
+echo jar=$jar
+echo profile=$profile
+yaml=$base/$1.yaml
+timestamp=`date +%Y%m%d%H%M`
+logfile="$logdir/$1-$timestamp.log"
+cd $logdir
+echo java -ea -Dlog4j.configurationFile=$base/log4j.console.xml -jar $jar -p $profile -y $yaml "2>&1 >$logfile"
+nohup java -ea -Dlog4j.configurationFile=$base/log4j.console.xml -jar $jar -p $profile -y $yaml 2>&1 >$logfile &
