@@ -1,10 +1,12 @@
 #!/bin/bash
-base=~/sndml3/mit
-profile=$base/profiles/$1.profile
-yaml=$base/$2.yaml
-. setup $1
-timestamp=`date +%Y%m%d%H%M`
-logdir=log/$1
-cd $logdir
+source sndml-setup
 echo jar=$jar
+echo profile=$profile
+yaml=$base/yaml/$1.yaml
+timestamp=`date +%Y%m%d%H%M`
+logfile=$1-$timestamp.log
+echo logfile=$logdir/$logfile
+cd $logdir
 java -ea -Dlog4j.configurationFile=$debugxml -DlogFileName=$logfile -jar $jar -p $profile -y $yaml
+echo
+echo logfile=$logdir/$logfile
