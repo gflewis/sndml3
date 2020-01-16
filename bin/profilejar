@@ -1,6 +1,11 @@
 #!/bin/bash
 # profile=$1
-target=~/sndml3/target
+# target=$2
+if [ -n $2 ]
+then
+  cd $2
+fi
+dir=`pwd`
 url=`awk -F= '/^datamart.url/{print $2}' <$1`
 # echo url=$url
 db=`echo $url | awk -F: '{print $2}'`
@@ -12,4 +17,4 @@ mysql) tag=mysql ;;
 mssql) tag=mssql ;;
 esac
 # echo tag=$tag
-ls $target/sndml*-$tag.jar | tail -1
+ls $dir/sndml*-$tag.jar | tail -1

@@ -1,7 +1,12 @@
-export base=`pwd`
-export profile=$base/.sndml_profile
-export logdir=log
-export target=~/sndml3/target
-export src=~/sndml3/src
-jar=`profilejar $profile`
+# profile base directory
+pbase=`pwd`
+cd ../..
+# code base directory
+cbase=`pwd`
+cd $pbase
+export profile=$pbase/.sndml_profile
+export logdir=$pbase/log
+export target=$cbase/target
+export src=$cbase/src
+jar=`profilejar $profile $target`
 debugxml=$src/test/resources/log4j2-debug.xml
