@@ -17,6 +17,7 @@ public class LoaderConfig extends Config {
 	Map root;
 	Integer threads = 0;
 	Integer pageSize;
+	Boolean verify = false;
 	File metricsFile = null;
 	
 	private final java.util.List<JobConfig> tables = 
@@ -41,6 +42,9 @@ public class LoaderConfig extends Config {
 			switch (key.toLowerCase()) {
 			case "threads" : 
 				threads = asInteger(val); 
+				break;
+			case "verify" :
+				verify = asBoolean(val);
 				break;
 			case "metrics" : 
 				metricsFile = new File(val.toString()); 

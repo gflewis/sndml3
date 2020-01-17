@@ -116,6 +116,7 @@ public class Globals {
 		return value;
 	}
 	
+	// TODO Is this a bug? YAML show have precedence over property file
 	static String getValue(String name) {
 		assert name != null;
 		String value = getProperty(name);

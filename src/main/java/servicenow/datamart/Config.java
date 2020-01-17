@@ -107,5 +107,16 @@ public class Config {
 		}
 		return result;
 	}
+	
+	public static Boolean asBoolean(Object obj) throws ConfigParseException {
+		Boolean result;
+		try {
+			result = (Boolean) obj;
+		}
+		catch (ClassCastException e) {
+			throw new ConfigParseException("Invalid boolean: " + obj.toString(), e);
+		}
+		return result;
+	}
 			
 }

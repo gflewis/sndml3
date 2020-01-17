@@ -3,6 +3,8 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import servicenow.datamart.Globals;
+
 public class KeySetTableReader extends TableReader {
 
 	protected final JsonTableAPI jsonAPI;
@@ -38,9 +40,15 @@ public class KeySetTableReader extends TableReader {
 						expected, allKeys.size()));
 				allKeys = table.soap().getKeys(getQuery());
 				if (allKeys.size() != expected) {
-					throw new ServiceNowException(
-						String.format("Expected %d keys but SOAP only returned %d", 
-							expected, allKeys.size()));
+					// TODO I do not think this getBoolean is working correctly here
+					if (Boolean.TRUE.equals(Globals.getBoolean("verify")))
+						throw new ServiceNowException(
+							String.format("Expected %d keys but SOAP only returned %d", 
+								expected, allKeys.size()));
+					else
+						logger.warn(Log.PROCESS,
+							String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
+								expected, allKeys.size()));
 				}
 			}
 		}

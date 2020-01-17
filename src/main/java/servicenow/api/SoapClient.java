@@ -72,6 +72,7 @@ public class SoapClient {
 		if (logger.isDebugEnabled()) {
 			String responseText = XmlFormatter.format(responseDoc);
 			logger.debug(Log.RESPONSE, "\n" + Log.abbreviate(responseText));
+			// logger.trace(Log.RESPONSE, "\n" + responseText);
 		}
 		
 		Element responseBody = responseDoc.getRootElement().getChild("Body", nsSoapEnv);
