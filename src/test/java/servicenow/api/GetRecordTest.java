@@ -34,7 +34,7 @@ public class GetRecordTest {
 	public void testGetRecordByNumber() throws IOException {
 		Table inc = session.table("incident");
 		String number = TestingManager.getProperty("some_incident_number");
-		Record rec1 = inc.getRecord("number", number);
+		Record rec1 = inc.api().getRecord("number", number);
 		Key key = rec1.getKey();
 		assertEquals(32, key.toString().length());
 		Record rec2 = inc.getRecord(key);

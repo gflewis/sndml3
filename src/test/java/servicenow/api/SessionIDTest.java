@@ -10,13 +10,13 @@ public class SessionIDTest {
 		TestingManager.loadDefaultProfile();
 		Session session = TestingManager.getSession();
 		Table location = session.table("cmn_location");
-		location.getRecord("name", TestingManager.getProperty("location1"));;
+		location.api().getRecord("name", TestingManager.getProperty("location1"));;
 		String session1 = session.getSessionID();
 		System.out.println("JSESSIONID=" + session1);
-		location.getRecord("name", TestingManager.getProperty("location2"));
+		location.api().getRecord("name", TestingManager.getProperty("location2"));
 		String session2 = session.getSessionID();
 		System.out.println("JSESSIONID=" + session2);
-		location.getRecord("name", TestingManager.getProperty("location3"));
+		location.api().getRecord("name", TestingManager.getProperty("location3"));
 		String session3 = session.getSessionID();
 		System.out.println("JSESSIONID=" + session3);
 		assertEquals(session1, session2);

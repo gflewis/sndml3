@@ -69,6 +69,7 @@ public class Globals {
 	}
 
 	static void setLoaderConfig(LoaderConfig value) {
+		assert value != null;
 		config = value;
 		start = config.getStart();
 		logger.debug(Log.INIT, String.format("setLoaderConfig start=%s metrics=%s",  
@@ -76,6 +77,7 @@ public class Globals {
 	}
 	
 	static LoaderConfig getLoaderConfig() {
+		assert config != null;
 		return config;
 	}
 	
@@ -124,20 +126,24 @@ public class Globals {
 		return value;
 	}
 
+	@Deprecated
 	static File getFile(String varname) {
 		String path = getValue(varname);
 		return (path == null) ? null : new File(path); 
 	}
 	
+	@Deprecated
 	public static Boolean getBoolean(String varname) {
 		String value = getValue(varname);
 		return (value == null) ? null : new Boolean(value);
 	}
 	
+	@Deprecated
 	static Integer getInteger(String varname) {
 		return getInteger(varname, null);
 	}
 	
+	@Deprecated
 	static Integer getInteger(String varname, Integer defaultValue) {
 		String value = getValue(varname);
 		return (value == null) ? defaultValue : new Integer(value);		
