@@ -119,16 +119,6 @@ public class Table {
 	public Record getRecord(String fieldname, String fieldvalue)
 			throws IOException, RowCountExceededException {
 		return api.getRecord(fieldname, fieldvalue);
-		/*
-		RecordList result = api.getRecords(fieldname, fieldvalue, true);
-		int size = result.size();
-		String msg = 
-			"get " + fieldname + "=" + fieldvalue +	" returned " + size + " records";
-		log.info(mrkResponse, msg);
-		if (size == 0) return null;
-		if (size > 1) throw new RowCountExceededException(this, msg);
-		return result.get(0);
-		*/
 	}
 	
 	public TableWSDL getWSDL() throws IOException {		
