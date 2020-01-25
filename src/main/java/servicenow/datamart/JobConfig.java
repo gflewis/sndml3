@@ -2,8 +2,6 @@ package servicenow.datamart;
 
 import servicenow.api.*;
 
-import java.util.regex.Pattern;
-
 public class JobConfig extends Config {
 
 	private Map items;
@@ -16,7 +14,8 @@ public class JobConfig extends Config {
 	private DateTimeRange created;
 	private DateTime since;
 	private EncodedQuery filter;
-	private String orderBy;
+	// orderBy removed 2020-01-24
+	// private String orderBy;
 	private DateTime.Interval partition;
 	private Integer pageSize;
 	private Integer minRows;
@@ -74,9 +73,11 @@ public class JobConfig extends Config {
 			    case "partition":
 			    		this.partition = asInterval(val); 
 			    		break;
+			    /*
 			    case "orderby":
 			    		this.orderBy = val.toString(); 
 			    		break;
+			    */
 			    case "pagesize" :
 			    		this.pageSize = asInteger(val); 
 			    		break;
@@ -119,7 +120,7 @@ public class JobConfig extends Config {
 		if (getAction().equals(LoaderAction.PRUNE)) {
 			if (created != null) configError("Created not valid with Action: " + actionName);
 			if (filter != null)  configError("Filter not valid with Action: " + actionName);
-			if (orderBy != null) configError("OrderBy not valid with Action: " + actionName);
+			// if (orderBy != null) configError("OrderBy not valid with Action: " + actionName);
 			if (threads != null) configError("Threads not valid with Action: " + actionName);
 			if (partition != null) configError("Partition not valid with Action: " + actionName);
 		}
@@ -127,8 +128,10 @@ public class JobConfig extends Config {
 			if (since != null) configError("Since not valid with Action: " + actionName);
 			if (filter != null) configError("Filter not valid with Action: " + actionName);
 		}
+		/*
 		if (orderBy != null && !Pattern.matches("(\\+|\\-)?\\w+", orderBy))
-			configError("Invalid OrderBy");				
+			configError("Invalid OrderBy");
+		*/				
 	}
 			
 	String getName() throws ConfigParseException {
@@ -198,7 +201,7 @@ public class JobConfig extends Config {
 		return this.filter; 
 	}
 	
-	String  getOrderBy()     { return this.orderBy; }
+	// String  getOrderBy()     { return this.orderBy; }
 	String  getSqlBefore()   { return this.sqlBefore; }
 	String  getSqlAfter()    { return this.sqlAfter; }
 

@@ -9,7 +9,7 @@ public class SessionIDTest {
 	public void testSession() throws Exception {
 		TestingManager.loadDefaultProfile();
 		Session session = TestingManager.getSession();
-		Table location = session.table("cmn_location");
+		TableAPI location = session.table("cmn_location").api();
 		location.getRecord("name", TestingManager.getProperty("location1"));;
 		String session1 = session.getSessionID();
 		System.out.println("JSESSIONID=" + session1);

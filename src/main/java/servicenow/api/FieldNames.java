@@ -24,6 +24,13 @@ public class FieldNames extends ArrayList<String> {
 		super(names);
 	}
 	
+	public FieldNames addKey() {
+		if (!this.contains("sys_id")) {
+			this.add(0, "sys_id");
+		}
+		return this;
+	}
+	
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		String delim = "";

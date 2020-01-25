@@ -2,6 +2,7 @@ package servicenow.api;
 
 import java.io.StringWriter;
 import java.util.Iterator;
+
 import org.json.JSONWriter;
 
 public abstract class Record implements InsertResponse {
@@ -142,6 +143,17 @@ public abstract class Record implements InsertResponse {
 		long millis = dt.getMillisec();
 		return new Integer((int) (millis / 1000));
 	}
+	
+	/*
+	public JSONObject toJSONObject() {
+		JSONObject obj = new JSONObject();
+		for (String name : this.getFieldNames()) {
+			String value = this.getValue(name);
+			obj.put(name,  value);
+		}
+		return obj;		
+	}
+	*/
 	
 	public String toJSON() {
 		StringWriter writer = new StringWriter();

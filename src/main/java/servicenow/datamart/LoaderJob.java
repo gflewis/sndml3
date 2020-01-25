@@ -60,11 +60,14 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		DateTimeRange createdRange = config.getCreated();
 		
 		// Order By sys_created_on if not otherwise specified
+		/*
+		 * Order By removed 2020-01-24
 		String orderBy = config.getOrderBy();
 		if (orderBy == null)
 			orderBy = "sys_created_on,sys_id";
 		else if ("void".equalsIgnoreCase(orderBy))
 			orderBy = null;
+		*/
 		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 		
 		this.setLogContext();
@@ -86,10 +89,10 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
 			RestTableReader auditReader = new RestTableReader(audit);
 			auditReader.enableStats(true);
+			auditReader.orderByKeys(true);
 			auditReader.setFilter(auditQuery);			
 			DateTime since = config.getSince();
 			auditReader.setCreatedRange(new DateTimeRange(since, null));
-			auditReader.setOrderBy(orderBy);
 			auditReader.setMaxRows(config.getMaxRows());
 			auditReader.setWriter(deleteWriter);
 			auditReader.initialize();
@@ -111,7 +114,6 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			else {
 				SynchronizerFactory factory = 
 					new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange);
-				factory.setOrderBy(orderBy);
 				factory.setPageSize(pageSize);
 				DatePartitionedTableReader multiReader =
 					new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
@@ -149,7 +151,6 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			factory.setReaderName(tableLoaderName);
 			factory.setFilter(config.getFilter());
 			factory.setCreated(createdRange);
-			factory.setOrderBy(orderBy);
 			factory.setPageSize(pageSize);
 			TableReader reader;
 			if (partitionInterval == null) {

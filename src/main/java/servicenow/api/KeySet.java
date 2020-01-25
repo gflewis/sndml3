@@ -100,6 +100,7 @@ public class KeySet extends ArrayList<Key> {
 	/**
 	 * Return the number of unique values in this list of keys.
 	 */
+	@Deprecated
 	int uniqueCount() {
 		Hashtable<Key,Boolean> hash = new Hashtable<Key,Boolean>(this.size());
 		for (Key key : this) {
@@ -107,4 +108,5 @@ public class KeySet extends ArrayList<Key> {
 		}
 		return hash.size();
 	}
+	
 }

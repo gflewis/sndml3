@@ -16,8 +16,13 @@ public abstract class TableReader implements Callable<TableReader> {
 	private EncodedQuery filter;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
-	private EncodedQuery orderByQuery;
+	private Key keyExclusion = null;
 	
+	@Deprecated 
+	private EncodedQuery orderByQuery;
+
+	protected static enum OrderBy {NONE, FIELDS, KEYS}; 
+	protected OrderBy orderBy = OrderBy.NONE;
 	protected Writer writer;
 	protected int pageSize;
 	protected boolean displayValue = false;
@@ -130,18 +135,35 @@ public abstract class TableReader implements Callable<TableReader> {
 	public DateTimeRange getUpdatedRange() {
 		return this.updatedRange;
 	}
-
+	
+	public TableReader orderByKeys(boolean value) {
+		this.orderBy = value ? OrderBy.KEYS : OrderBy.NONE;
+		return this;
+	}
+		
+	/**
+	 * Exclude all keys less than or equal to the value
+	 */
+	public TableReader setKeyExclusion(Key value) {
+		assert this.orderBy == OrderBy.KEYS;
+		this.keyExclusion = value;
+		return this;
+	}
+	
 	/**
 	 * Specify an "OrderBy" or "OrderByDesc" clause for the reader.
 	 * @param fieldnames - Comma delimited list of field names.
 	 * each of which may be prefixed with "+" or "-" 
 	 * to indicate ascending or descending respectively. 
 	 */
+	@Deprecated
 	public TableReader setOrderBy(String fieldnames) {
 		if (fieldnames == null) {
 			orderByQuery = null;
+			this.orderBy = OrderBy.NONE;
 		}
 		else {
+			this.orderBy = OrderBy.FIELDS;
 			orderByQuery = new EncodedQuery();
 			for (String field : fieldnames.split(",\\s*")) {
 				boolean desc = false;
@@ -166,7 +188,17 @@ public abstract class TableReader implements Callable<TableReader> {
 		EncodedQuery query = new EncodedQuery(filter);
 		if (createdRange != null) query.addCreated(createdRange);
 		if (updatedRange != null) query.addUpdated(updatedRange);
-		if (orderByQuery != null) query.addQuery(orderByQuery);
+		switch (orderBy) {
+		case NONE: 
+			break;
+		case KEYS: 
+			query.addOrderByKeys();
+			if (keyExclusion != null) query.excludeKeys(keyExclusion);
+			break;
+		case FIELDS:
+			if (orderByQuery != null) query.addQuery(orderByQuery);			
+			break;
+		}
 		return query;
 	}
 	

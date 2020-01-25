@@ -1,12 +1,15 @@
 #!/bin/bash
 source sndml-setup
-echo jar=$jar
-echo profile=$profile
-yaml=$base/yaml/$1.yaml
+yamlfile=$sndml_yaml_dir/$1.yaml
+debugxml=$sndml_src_dir/test/resources/log4j2-debug.xml
+echo jar=$sndml_jar
+echo profile=$sndml_profile
+echo log4j=$debugxml
+echo yaml=$yamlfile
 timestamp=`date +%Y%m%d%H%M`
 logfile=$1-$timestamp.log
-echo logfile=$logdir/$logfile
-cd $logdir
-java -ea -Dlog4j.configurationFile=$debugxml -DlogFileName=$logfile -jar $jar -p $profile -y $yaml
+echo logfile=$sndml_log_dir/$logfile
+cd $sndml_log_dir
+java -ea -Dlog4j.configurationFile=$debugxml -DlogFileName=$logfile -jar $sndml_jar -p $sndml_profile -y $yamlfile
 echo
-echo logfile=$logdir/$logfile
+echo logfile=$sndml_log_dir/$logfile

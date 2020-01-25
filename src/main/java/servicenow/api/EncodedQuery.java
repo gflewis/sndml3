@@ -53,6 +53,9 @@ public class EncodedQuery implements Cloneable {
 	final public static String ORDER_BY_DESC          = "ORDERBYDESC";
 	
 	private StringBuffer buf = new StringBuffer();
+	
+	private static enum OrderBy {NONE, FIELDS, KEYS}; 
+	private OrderBy orderBy = OrderBy.NONE;
 
 	/**
 	 * Create an empty EncodedQuery.
@@ -218,14 +221,39 @@ public class EncodedQuery implements Cloneable {
 	public EncodedQuery addCreated(DateTimeRange created) {
 		return addCreated(created.getStart(), created.getEnd());
 	}
+	
+	public EncodedQuery addOrderByKeys() {
+		assert this.orderBy != OrderBy.FIELDS;
+		this.addQuery(ORDER_BY + "sys_id");
+		this.orderBy = OrderBy.KEYS;
+		return this;
+	}
+	
+	/**
+	 * Exclude all sys_ids less than or equal to the specified value.
+	 * Only applicable if orderByKeys was previously called.
+	 * 
+	 * @param value max sys_id from previous query
+	 * @return The modified original filter
+	 */
+	public EncodedQuery excludeKeys(Key value) {
+		assert value != null;
+		assert this.orderBy == OrderBy.KEYS;
+		this.addQuery("sys_id", GREATER_THAN, value.toString());
+		return this;
+	}	
 
 	public EncodedQuery addOrderBy(String fieldname) {
+		assert this.orderBy != OrderBy.KEYS;		
 		this.addQuery(ORDER_BY + fieldname);
+		this.orderBy = OrderBy.FIELDS;
 		return this;
 	}
 	
 	public EncodedQuery addOrderByDesc(String fieldname) {
+		assert this.orderBy != OrderBy.KEYS;
 		this.addQuery(ORDER_BY_DESC + fieldname);
+		this.orderBy = OrderBy.FIELDS;
 		return this;
 	}
 	

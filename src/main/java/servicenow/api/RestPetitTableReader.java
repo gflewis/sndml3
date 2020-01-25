@@ -5,6 +5,7 @@ public class RestPetitTableReader extends RestTableReader {
 	public RestPetitTableReader(Table table) {
 		super(table);
 		this.statsEnabled = false;
+		this.orderBy = OrderBy.NONE;
 	}
 
 	@Override

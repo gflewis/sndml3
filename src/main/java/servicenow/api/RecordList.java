@@ -41,6 +41,15 @@ public class RecordList extends ArrayList<Record> {
 		return new RecordIterator(this);
 	}
 
+	public Key maxKey() {
+		Key result = null;
+		for (Record rec : this) {			
+			Key key = rec.getKey();
+			if (key.greaterThan(result)) result = key;
+		}
+		return result;
+	}
+	
 	/**
 	 * Extract all the values of a reference field from a list of records.
 	 * Null keys are not included in the list.

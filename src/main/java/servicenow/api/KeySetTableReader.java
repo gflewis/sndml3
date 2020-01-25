@@ -3,8 +3,6 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import servicenow.datamart.Globals;
-
 public class KeySetTableReader extends TableReader {
 
 	protected final JsonTableAPI jsonAPI;
@@ -36,21 +34,17 @@ public class KeySetTableReader extends TableReader {
 			int expected = stats.getCount();
 			if (allKeys.size() != expected) {
 				logger.warn(Log.PROCESS, 
-					String.format("Expected %d keys but JSON only returned %d; reverting to SOAP", 
+					String.format("Expected %d keys but REST only returned %d; reverting to SOAP", 
 						expected, allKeys.size()));
 				allKeys = table.soap().getKeys(getQuery());
 				if (allKeys.size() != expected) {
-					// TODO I do not think this getBoolean is working correctly here
-					if (Boolean.TRUE.equals(Globals.getBoolean("verify")))
-						throw new ServiceNowException(
-							String.format("Expected %d keys but SOAP only returned %d", 
-								expected, allKeys.size()));
-					else
-						logger.warn(Log.PROCESS,
+					logger.warn(Log.PROCESS,
 							String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
 								expected, allKeys.size()));
 				}
 			}
+			// TODO Should this assertion be removed?
+			assert allKeys.size() == expected;
 		}
 		setExpected(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	

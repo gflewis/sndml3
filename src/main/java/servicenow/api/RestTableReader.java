@@ -15,6 +15,7 @@ public class RestTableReader extends TableReader {
 		super(table);
 		this.restAPI = table.rest();
 		this.statsEnabled = true;
+		this.orderBy = OrderBy.KEYS;
 	}
 			
 	public int getDefaultPageSize() {
@@ -49,6 +50,7 @@ public class RestTableReader extends TableReader {
 		assert writer != null;
 		setLogContext();
 		int rowCount = 0;
+		Key maxKey = null;
 		boolean finished = false;
 		if (statsEnabled && stats.count == 0) {
 			finished = true;
@@ -59,15 +61,22 @@ public class RestTableReader extends TableReader {
 		assert pageSize > 0;
 		while (!finished) {
 			Parameters params = new Parameters();
-			params.add("sysparm_offset", Integer.toString(offset));
+			if (orderBy == OrderBy.KEYS) {
+				setKeyExclusion(maxKey);
+			}
+			else {
+				params.add("sysparm_offset", Integer.toString(offset));				
+			}
 			params.add("sysparm_limit", Integer.toString(pageSize));
 			params.add("sysparm_exclude_reference_link", "true");			
 			params.add("sysparm_display_value", displayValue ? "all" : "false");
-			if (!EncodedQuery.isEmpty(getQuery())) params.add("sysparm_query", getQuery().toString());
-			if (fieldNames != null) params.add("sysparm_fields", fieldNames.toString());
+			if (fieldNames != null) params.add("sysparm_fields", fieldNames.addKey().toString());
 			if (viewName != null) params.add("sysparm_view", viewName);
+			EncodedQuery query = getQuery();
+			if (!query.isEmpty()) params.add("sysparm_query", query.toString());
 			RecordList recs = restAPI.getRecords(params);
 			getReaderMetrics().increment(recs.size());
+			maxKey = recs.maxKey();
 			writer.processRecords(this, recs);			
 			rowCount += recs.size();
 			offset += recs.size();

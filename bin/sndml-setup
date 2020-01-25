@@ -1,12 +1,20 @@
-# profile base directory
-pbase=`pwd`
-cd ../..
-# code base directory
-cbase=`pwd`
-cd $pbase
-export profile=$pbase/.sndml_profile
-export logdir=$pbase/log
-export target=$cbase/target
-export src=$cbase/src
-jar=`profilejar $profile $target`
-debugxml=$src/test/resources/log4j2-debug.xml
+# assumes directory structure as follows:
+#   pom.xml                       
+#   profiles/xxxxx/                <- CURRENT DIRECTORY
+#   profiles/xxxxx/.sndml_profile  <- profile
+#   profiles/xxxxx/yaml/           <- yaml files
+#   profiles/xxxxx/log/            <- log files
+#   src/                           <- source code
+#   target/                        <- jar files
+#
+base=`pwd`
+cd ../../src
+src=`pwd`
+cd ../target
+target=`pwd`
+cd $base
+export sndml_profile=$base/.sndml_profile
+export sndml_log_dir=$base/log
+export sndml_yaml_dir=$base/yaml
+export sndml_src_dir=$src
+export sndml_jar=`sndml-jar .sndml_profile $target`

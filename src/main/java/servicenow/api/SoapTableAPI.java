@@ -34,6 +34,7 @@ public class SoapTableAPI extends TableAPI {
 	public KeySet getKeys(EncodedQuery query) throws IOException {
 		Parameters params = new Parameters();
 		if (query != null) params.add("__encoded_query", query.toString());
+		params.add("__order_by", "sys_id");
 		return getKeys(params);
 	}
 	
