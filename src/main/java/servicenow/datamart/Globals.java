@@ -118,11 +118,17 @@ public class Globals {
 		return value;
 	}
 	
-	// TODO Is this a bug? YAML show have precedence over property file
+	static boolean getPropertyBoolean(String name, boolean defaultValue) {
+		String stringValue = getProperty(name);
+		if (stringValue == null) return defaultValue;
+		return new Boolean(stringValue);
+	}
+	
+	@Deprecated
 	static String getValue(String name) {
 		assert name != null;
-		String value = getProperty(name);
-		if (value != null) value = config.getString(name);
+		String value = config.getString(name);
+		if (value == null) value = getProperty(name);
 		return value;
 	}
 

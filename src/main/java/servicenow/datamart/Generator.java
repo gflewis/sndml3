@@ -74,7 +74,8 @@ public class Generator {
 		if (xmldocument == null) {
 			try {
 				InputStream sqlConfigStream;
-				String path = Globals.getValue("templates");
+				// TODO Update Wiki Docs
+				String path = Globals.getProperty("templates");
 				if (path == null) 
 					sqlConfigStream = ClassLoader.getSystemResourceAsStream("sqltemplates.xml");
 				else
@@ -91,7 +92,8 @@ public class Generator {
 	}
 	
 	static Element getTree(URI dbURI) {
-		String dialectName = Globals.getValue("dialect");
+		// TODO Update Wiki Docs
+		String dialectName = Globals.getProperty("dialect");
 		if (dialectName != null) return getTree(dialectName);
 		String protocol = Database.getProtocol(dbURI);
 		ListIterator<Element> children = getDocument().getRootElement().getChildren().listIterator();

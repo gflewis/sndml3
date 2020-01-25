@@ -98,9 +98,12 @@ public class DateTimeFactory {
 			name = name.substring(5);
 			return getLast(name);
 		}
+
+		// TODO: What is the purpose of this?
 		// System property or profile property will override metrics value
 		String propValue = Globals.getValue(name);
 		if (propValue != null) return new DateTime(propValue);
+		
 		DateTime lastValue = getLast(name);
 		if (lastValue == null)
 			throw new ConfigParseException("Invalid datetime: " + name);

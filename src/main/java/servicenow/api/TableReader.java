@@ -18,9 +18,6 @@ public abstract class TableReader implements Callable<TableReader> {
 	private DateTimeRange updatedRange;
 	private Key keyExclusion = null;
 	
-	@Deprecated 
-	private EncodedQuery orderByQuery;
-
 	protected static enum OrderBy {NONE, FIELDS, KEYS}; 
 	protected OrderBy orderBy = OrderBy.NONE;
 	protected Writer writer;
@@ -32,6 +29,9 @@ public abstract class TableReader implements Callable<TableReader> {
 	protected Integer maxRows;
 	protected boolean initialized = false;
 	protected final Logger logger;
+
+	@Deprecated
+	protected EncodedQuery orderByQuery;	
 	
 	public TableReader(Table table) {
 		this.table = table;

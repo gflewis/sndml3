@@ -42,18 +42,16 @@ public class Loader {
 		Database datamart = new Database(Globals.getProperties());
 		ResourceManager.setSession(session);
 		ResourceManager.setDatabase(datamart);
+		// TODO Document property session_verify
+		if (Globals.getPropertyBoolean("session_verify",  false)) session.verify();
 		if (Globals.hasOptionValue("t")) {
 			// Single table load
 			String tablename = Globals.getOptionValue("t");
-			session.verify();
 			Table table = session.table(tablename);
 			Loader loader = new Loader(table);
 			loader.loadTables();
 		}
 		if (Globals.hasOptionValue("y")) {
-			// YAML config file
-			if (Boolean.TRUE.equals(Globals.getBoolean("servicenow.verify_session")))
-				session.verify();
 			File configFile = new File(Globals.getOptionValue("y"));
 			LoaderConfig config = new LoaderConfig(configFile);
 			Loader loader = new Loader(config);
