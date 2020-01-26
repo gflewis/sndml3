@@ -182,10 +182,11 @@ public class Synchronizer extends TableReader {
 		}
 		writerMetrics.addSkipped(skipSet.size());
 		writerMetrics.finish();
-		// Free resources
+		// Release memory
 		insertSet = null;
 		updateSet = null;
 		deleteSet = null;
+		skipSet = null;
 		return this;
 	}
 
