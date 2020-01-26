@@ -89,7 +89,7 @@ public class RestTableReader extends TableReader {
 		}
 		if (statsEnabled) {
 			if (rowCount != getExpected()) {
-				logger.error(Log.PROCESS, 
+				logger.warn(Log.PROCESS, 
 					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
 			}
 		}
