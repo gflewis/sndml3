@@ -180,20 +180,31 @@ public abstract class TableReader implements Callable<TableReader> {
 		}
 		return this;
 	}
-		
+
 	/**
-	 * Return a composite query built from base query, created range and updated range.
+	 * Return a composite query built from base query, 
+	 * plus created range, updated range and key exclusion
 	 */
-	public EncodedQuery getQuery() {
+	public EncodedQuery getStatsQuery() {
 		EncodedQuery query = new EncodedQuery(filter);
 		if (createdRange != null) query.addCreated(createdRange);
 		if (updatedRange != null) query.addUpdated(updatedRange);
+		if (keyExclusion != null) query.excludeKeys(keyExclusion);
+		return query;
+	}
+	
+	/**
+	 * Return a composite query built from base query, 
+	 * plus created range, updated range and key exclusion
+	 * plus order by clause
+	 */
+	public EncodedQuery getQuery() {
+		EncodedQuery query = getStatsQuery();
 		switch (orderBy) {
 		case NONE: 
 			break;
 		case KEYS: 
 			query.addOrderByKeys();
-			if (keyExclusion != null) query.excludeKeys(keyExclusion);
 			break;
 		case FIELDS:
 			if (orderByQuery != null) query.addQuery(orderByQuery);			

@@ -237,9 +237,9 @@ public class EncodedQuery implements Cloneable {
 	 * @return The modified original filter
 	 */
 	public EncodedQuery excludeKeys(Key value) {
-		assert value != null;
-		assert this.orderBy == OrderBy.KEYS;
-		this.addQuery("sys_id", GREATER_THAN, value.toString());
+		if (value != null) {
+			this.addQuery("sys_id", GREATER_THAN, value.toString());			
+		}
 		return this;
 	}	
 

@@ -97,6 +97,22 @@ public class KeySet extends ArrayList<Key> {
 		return this.encodedQuery(0,  this.size());
 	}
 	
+	public Key maxValue() {
+		Key result = null;
+		for (Key key : this) {
+			if (result == null || key.greaterThan(result)) result = key;
+		}
+		return result;		
+	}
+	
+	public Key minValue() {
+		Key result = null;
+		for (Key key : this) {
+			if (result == null || key.lessThan(result)) result = key;
+		}
+		return result;
+	}
+	
 	/**
 	 * Return the number of unique values in this list of keys.
 	 */

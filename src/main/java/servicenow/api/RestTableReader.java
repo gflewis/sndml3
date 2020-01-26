@@ -34,11 +34,11 @@ public class RestTableReader extends TableReader {
 			// impossible
 			throw new AssertionError(e);
 		}
-		EncodedQuery query = getQuery();
+		EncodedQuery statsQuery = getStatsQuery();
 		logger.debug(Log.INIT, String.format(
-			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, query));
+			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, statsQuery));
 		if (statsEnabled) {
-			stats = restAPI.getStats(query, false);
+			stats = restAPI.getStats(statsQuery, false);
 			setExpected(stats.getCount());
 			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 		}
@@ -75,13 +75,14 @@ public class RestTableReader extends TableReader {
 			EncodedQuery query = getQuery();
 			if (!query.isEmpty()) params.add("sysparm_query", query.toString());
 			RecordList recs = restAPI.getRecords(params);
+			logger.debug(Log.RESPONSE, String.format("retrieved %d rows", recs.size()));
 			getReaderMetrics().increment(recs.size());
 			maxKey = recs.maxKey();
 			writer.processRecords(this, recs);			
 			rowCount += recs.size();
 			offset += recs.size();
 			if (isFinished(recs.size(), rowCount)) finished = true;
-			logger.debug(Log.PROCESS, String.format("processed %d rows", rowCount));
+			logger.debug(Log.PROCESS, String.format("processed %d rows so far", rowCount));
 			if (maxRows != null && rowCount > maxRows)
 				throw new RowCountExceededException(table, 
 					String.format("processed %d rows (MaxRows=%d)", rowCount, maxRows));

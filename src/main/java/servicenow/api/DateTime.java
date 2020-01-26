@@ -3,6 +3,7 @@ package servicenow.api;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -11,7 +12,7 @@ import java.util.TimeZone;
  * This class can convert the value to or from a Java Date.
  * All DateTime fields are represented in GMT.
  */
-public class DateTime implements Comparable<DateTime> {
+public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
 	public static final int DATE_ONLY = 10; // length of yyyy-MM-dd
 	public static final int DATE_TIME = 19; // length of yyyy-MM-dd HH:mm:ss
@@ -133,6 +134,16 @@ public class DateTime implements Comparable<DateTime> {
 		return dt;
 	}
 
+	@Override
+	public int compare(DateTime d1, DateTime d2) {
+		return d1.compareTo(d2);
+	}
+	
+	@Override
+	public int compareTo(DateTime other) {
+		return (int) (getSeconds() - other.getSeconds());
+	}
+	
 	/**
 	 * Return the number of milliseconds since 1970-01-01 00:00:00 GMT
 	 * @return
@@ -152,6 +163,7 @@ public class DateTime implements Comparable<DateTime> {
 		return new java.sql.Timestamp(getMillisec());
 	}
 	
+	@Override
 	public boolean equals(Object other) {
 		if (other == null) return false;
 		if (other instanceof DateTime) {
@@ -181,10 +193,6 @@ public class DateTime implements Comparable<DateTime> {
 		return getMillisec() > other.getMillisec();
 	}
 	
-	public int compareTo(DateTime other) {
-		return (int) (getSeconds() - other.getSeconds());
-	}
-
 	public DateTime truncate() {
 		return this.truncate(SEC_PER_DAY);
 	}

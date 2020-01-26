@@ -45,7 +45,16 @@ public class RecordList extends ArrayList<Record> {
 		Key result = null;
 		for (Record rec : this) {			
 			Key key = rec.getKey();
-			if (key.greaterThan(result)) result = key;
+			if (result == null || key.greaterThan(result)) result = key;
+		}
+		return result;
+	}
+	
+	public Key minKey() {
+		Key result = null;
+		for (Record rec : this) {			
+			Key key = rec.getKey();
+			if (result == null || key.lessThan(result)) result = key;
 		}
 		return result;
 	}

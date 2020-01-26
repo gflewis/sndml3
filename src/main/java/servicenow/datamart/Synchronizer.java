@@ -47,17 +47,32 @@ public class Synchronizer extends TableReader {
 		if (createdRange == null) 
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName);
 		else
-			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);
+			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);		
+		KeySet dbKeys = dbTimestamps.getKeys(); // for debug
+		Key dbMinKey = dbKeys.minValue(); // for debug
+		Key dbMaxKey = dbKeys.maxValue(); // for debug
 		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
+		if (logger.isDebugEnabled() && dbTimestamps.size() > 0) {
+			logger.debug(Log.INIT, String.format("DB keys min=%s max=%s", dbMinKey, dbMaxKey));
+			logger.debug(Log.INIT, String.format("%s updated %s", 
+					dbMinKey, dbTimestamps.get(dbMinKey)));
+			logger.debug(Log.INIT, String.format("%s updated %s", 
+					dbMaxKey, dbTimestamps.get(dbMaxKey)));
+		}
 		RestTableReader sntsr = new RestTableReader(this.table);
 		sntsr.setReaderName(this.getReaderName());
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
 		sntsr.setCreatedRange(createdRange);
 		sntsr.setPageSize(10000);
-		sntsr.enableStats(false);
+		sntsr.enableStats(true);
 		sntsr.initialize();
 		snTimestamps = sntsr.getAllRecords();
+		Key snMinKey = snTimestamps.minKey(); // for debug
+		Key snMaxKey = snTimestamps.maxKey(); // for debug
 		setLogContext();
+		if (logger.isDebugEnabled() && snTimestamps.size() > 0) {
+			logger.debug(Log.INIT, String.format("SN keys min=%s max=%s", snMinKey, snMaxKey));
+		}
 		TimestampHash examined = new TimestampHash();
 		insertSet = new KeySet();
 		updateSet = new KeySet();
@@ -65,10 +80,19 @@ public class Synchronizer extends TableReader {
 		skipSet = new KeySet();
 		for (Record rec : snTimestamps) {
 			Key key = rec.getKey();
+			assert key != null;
 			assert !examined.containsKey(key) :
 				String.format("duplicate key: %s", key.toString());				
 			DateTime snts = rec.getUpdatedTimestamp();
 			DateTime dbts = dbTimestamps.get(key);
+			if (key.equals(snMinKey)) {			
+				logger.debug(Log.INIT, String.format("%s SN=%s DB=%s", key, snts, dbts));
+				assert dbTimestamps.get(dbMinKey).equals(dbts);
+			}
+			if (key.equals(snMaxKey)) {			
+				logger.debug(Log.INIT, String.format("%s SN=%s DB=%s", key, snts, dbts));
+				assert dbTimestamps.get(dbMaxKey).equals(dbts);
+			}
 			if (dbts == null)
 				insertSet.add(key);
 			else if (dbts.equals(snts))
