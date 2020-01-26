@@ -37,8 +37,9 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	
 	private void deleteRecord(Key key) throws SQLException {
 		logger.info(Log.PROCESS, "Delete " + key);		
-		if (deleteStmt.deleteRecord(key))
-			writerMetrics.incrementDeleted();
+		if (deleteStmt.deleteRecord(key)) {
+			writerMetrics.incrementDeleted();			
+		}
 		else {
 			logger.warn(Log.PROCESS, "Delete: Not found: " + key);
 			writerMetrics.incrementSkipped();

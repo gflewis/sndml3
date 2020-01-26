@@ -97,7 +97,7 @@ public class WriterMetrics {
 	
 	public synchronized void addDeleted(int count) {
 		deleted += count;
-		if (parent != null) parent.addUpdated(count);
+		if (parent != null) parent.addDeleted(count);
 	}
 	
 	public synchronized void addSkipped(int count) {

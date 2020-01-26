@@ -53,10 +53,9 @@ public class Synchronizer extends TableReader {
 		Key dbMaxKey = dbKeys.maxValue(); // for debug
 		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
 		if (logger.isDebugEnabled() && dbTimestamps.size() > 0) {
-			logger.debug(Log.INIT, String.format("DB keys min=%s max=%s", dbMinKey, dbMaxKey));
-			logger.debug(Log.INIT, String.format("%s updated %s", 
+			logger.debug(Log.INIT, String.format("database min key=%s updated %s", 
 					dbMinKey, dbTimestamps.get(dbMinKey)));
-			logger.debug(Log.INIT, String.format("%s updated %s", 
+			logger.debug(Log.INIT, String.format("database max key=%s updated %s", 
 					dbMaxKey, dbTimestamps.get(dbMaxKey)));
 		}
 		RestTableReader sntsr = new RestTableReader(this.table);
@@ -86,12 +85,12 @@ public class Synchronizer extends TableReader {
 			DateTime snts = rec.getUpdatedTimestamp();
 			DateTime dbts = dbTimestamps.get(key);
 			if (key.equals(snMinKey)) {			
-				logger.debug(Log.INIT, String.format("%s SN=%s DB=%s", key, snts, dbts));
-				assert dbTimestamps.get(dbMinKey).equals(dbts);
+				logger.debug(Log.INIT, String.format(
+						"servicenow min key=%s snts=%s dbts=%s", key, snts, dbts));
 			}
 			if (key.equals(snMaxKey)) {			
-				logger.debug(Log.INIT, String.format("%s SN=%s DB=%s", key, snts, dbts));
-				assert dbTimestamps.get(dbMaxKey).equals(dbts);
+				logger.debug(Log.INIT, String.format(
+						"servicenow max key=%s snts=%s dbts=%s", key, snts, dbts));
 			}
 			if (dbts == null)
 				insertSet.add(key);
@@ -182,8 +181,8 @@ public class Synchronizer extends TableReader {
 			if (rowsDeleted != deleteSet.size())
 				logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
 					rowsDeleted, deleteSet.size()));
-			writerMetrics.addSkipped(skipSet.size());
 		}
+		writerMetrics.addSkipped(skipSet.size());
 		writerMetrics.finish();
 		return this;
 	}
