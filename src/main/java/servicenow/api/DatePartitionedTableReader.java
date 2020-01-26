@@ -132,7 +132,7 @@ public class DatePartitionedTableReader extends TableReader {
 				Future<TableReader> future = executor.submit(reader);
 				futures.add(future);
 			}
-			while (!	executor.awaitTermination(60, TimeUnit.SECONDS)) {
+			while (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
 				logger.debug(Log.FINISH, String.format("Waiting for %d / %d partitions to complete", 
 						numPartsIncomplete(), numPartsTotal()));
 			}
@@ -143,6 +143,10 @@ public class DatePartitionedTableReader extends TableReader {
 				reader.call();
 			}
 		}
+		// Free resources
+		partition = null;
+		partReaders = null;
+		futures = null;
 		return this;
 	}
 

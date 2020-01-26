@@ -10,8 +10,6 @@ public class Synchronizer extends TableReader {
 	final Database db;
 	final String sqlTableName;
 	final WriterMetrics writerMetrics = new WriterMetrics();
-	TimestampHash dbTimestamps;
-	RecordList snTimestamps;
 	KeySet insertSet;
 	KeySet updateSet;
 	KeySet deleteSet;
@@ -41,6 +39,8 @@ public class Synchronizer extends TableReader {
 	
 	public void initialize(DateTimeRange createdRange) 
 			throws IOException, SQLException, InterruptedException {
+		TimestampHash dbTimestamps;
+		RecordList snTimestamps;
 		super.initialize();
 		logger.info(Log.INIT, "begin compare");
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
@@ -124,8 +124,6 @@ public class Synchronizer extends TableReader {
 	@Override
 	public TableReader call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
-		assert dbTimestamps != null;
-		assert snTimestamps != null;
 		// Process the Inserts
 		setLogContext();
 		writerMetrics.start();
@@ -184,6 +182,10 @@ public class Synchronizer extends TableReader {
 		}
 		writerMetrics.addSkipped(skipSet.size());
 		writerMetrics.finish();
+		// Free resources
+		insertSet = null;
+		updateSet = null;
+		deleteSet = null;
 		return this;
 	}
 
