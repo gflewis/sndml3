@@ -43,8 +43,6 @@ public class KeySetTableReader extends TableReader {
 								expected, allKeys.size()));
 				}
 			}
-			// TODO Should this assertion be removed?
-			assert allKeys.size() == expected;
 		}
 		setExpected(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
