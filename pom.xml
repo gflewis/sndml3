@@ -296,25 +296,46 @@
           </execution>
         </executions>
       </plugin>
-       <!-- zip file for github release -->
-       <plugin>
-         <artifactId>maven-assembly-plugin</artifactId>
-         <configuration>
-           <descriptorRefs>
-             <descriptorRef>bin</descriptorRef>
-           </descriptorRefs>
-         </configuration>
-         <executions>
-           <execution>
-             <id>make-assembly</id>
-             <phase>package</phase>
-             <goals>
-               <goal>assembly</goal>
-             </goals>
-           </execution>
-         </executions>
-       </plugin>
     </plugins>
   </build>
+  
+  <profiles>
+    <profile>
+      <!--
+        To create zip file for github release:
+          mvn package -P github.release 
+       -->
+      <id>github.release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>github.release</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+           <plugin>
+             <artifactId>maven-assembly-plugin</artifactId>
+             <configuration>
+               <descriptorRefs>
+                 <descriptorRef>bin</descriptorRef>
+               </descriptorRefs>
+             </configuration>
+             <executions>
+               <execution>
+                 <id>make-assembly</id>
+                 <phase>package</phase>
+                 <goals>
+                   <goal>assembly</goal>
+                 </goals>
+               </execution>
+             </executions>
+           </plugin>
+        </plugins>
+      </build>
+    
+    </profile>
+  </profiles>
 
 </project>
