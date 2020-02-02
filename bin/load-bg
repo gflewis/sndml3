@@ -8,5 +8,6 @@ logfile="$sndml_log_dir/$1-$timestamp.log"
 echo jar=$sndml_jar
 echo profile=$sndml_profile
 echo yaml=$yamlfile
-echo java -ea -jar $jar -p $profile -y $yamlfile "2>&1 >$logfile"
-nohup java -ea -jar $jar -p $profile -y $yamlfile 2>&1 >$logfile &
+echo log=$logfile
+echo java -ea -jar $sndml_jar -p $sndml_profile -y $yamlfile "2>&1 >$logfile"
+nohup java -ea -jar $sndml_jar -p $sndml_profile -y $yamlfile 2>&1 >$logfile &
