@@ -4,5 +4,4 @@ yamlfile=$sndml_yaml_dir/$1.yaml
 echo jar=$sndml_jar
 echo profile=$sndml_profile
 echo yaml=$yamlfile
-cd $sndml_log_dir
 java -ea -jar $sndml_jar -p $sndml_profile -y $yamlfile
