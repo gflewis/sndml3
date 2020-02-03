@@ -1,16 +1,16 @@
 package servicenow.api;
 
-public class RecordInfoReader extends RestTableReader {
+public class TimestampTableReader extends RestTableReader {
 
 	final FieldNames fieldNames = new FieldNames("sys_id,sys_created_on,sys_updated_on");
 
-	public RecordInfoReader(Table table) {
+	public TimestampTableReader(Table table) {
 		super(table);
 		super.setFields(fieldNames);		
 		super.setPageSize(10000);
 	}
 	
-	public RecordInfoReader setFields(FieldNames names) {
+	public TimestampTableReader setFields(FieldNames names) {
 		throw new UnsupportedOperationException();
 	}
 	
