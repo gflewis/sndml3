@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 
 public class JsonRecord extends Record {
 
@@ -17,6 +18,9 @@ public class JsonRecord extends Record {
 	@Override
 	public String getValue(String fieldname) {
 		if (obj.has(fieldname)) {
+			if (obj.isNull(fieldname)) {
+				return null;
+			}
 			Object field = obj.get(fieldname);
 			if (field instanceof String) {
 				String value = (String) field;
@@ -28,7 +32,13 @@ public class JsonRecord extends Record {
 				if (value.length() == 0) return null;
 				return value;			
 			}
-			throw new JsonResponseError("table=" + table.getName() + "; value not string: " + fieldname);			
+			String msg = table.getName() + 
+					"." + this.getKey() + "." + fieldname + 
+					" type is " + field.getClass().getName();
+			Logger logger = Log.logger(this.getClass());
+			logger.error(Log.RESPONSE, obj.toString());
+			logger.error(Log.RESPONSE, msg);
+			throw new JsonResponseError(msg);
 		}
 		else return null;
 	}
