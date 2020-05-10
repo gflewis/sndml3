@@ -11,34 +11,17 @@ public class TableWSDLTest {
 
 	static Logger logger = TestingManager.getLogger(TableWSDLTest.class);
 
-	Session session;
-	String tablename;
-	Table table;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		TestingManager.loadDefaultProfile();
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
 	TableWSDL getWSDL(String tablename) throws IOException {
-		this.tablename = tablename;
-		this.table = session.table(tablename);
-		TableWSDL wsdl = this.table.getWSDL();
+		Session session = TestingManager.getDefaultSession();
+		Table table = session.table(tablename);
+		TableWSDL wsdl = table.getWSDL();
 		return wsdl;
 	}
 	
-	@Before
-	public void setUp() throws IOException {
-		session = TestingManager.getSession();
-	}
-
 	@Test
 	public void testGoodTable() throws Exception {
-		TableWSDL wsdl = getWSDL("incident");
+		String tablename = "incident";
+		TableWSDL wsdl = getWSDL(tablename);
 		List<String> columns = wsdl.getReadFieldNames();
 		int count = columns.size();
 		logger.info(tablename + " has " + count + " columns");
@@ -55,7 +38,8 @@ public class TableWSDLTest {
 
 	@Test
 	public void testDefaultWSDL() throws Exception {
-		TableWSDL wsdl = getWSDL("incident");
+		String tablename = "incident";
+		TableWSDL wsdl = getWSDL(tablename);
 		assertTrue(wsdl.canReadField("sys_updated_on"));
 		assertFalse(wsdl.canReadField("dv_assigned_to"));
 		assertFalse(wsdl.canReadField("createdxxxxx"));
@@ -65,6 +49,7 @@ public class TableWSDLTest {
 
 	@Test
 	public void testDisplayValues() throws Exception {
+		Session session = TestingManager.getDefaultSession();
 		String tablename = "incident";
 		TableWSDL wsdl = new TableWSDL(session, tablename, true);
 		assertTrue(wsdl.canReadField("sys_updated_on"));
@@ -76,12 +61,12 @@ public class TableWSDLTest {
 
 	@Test
 	public void testDisplayValues2() throws Exception {
+		Session session = TestingManager.getDefaultSession();
 		String tablename = "incident";
 		TableWSDL wsdl = new TableWSDL(session, tablename, true);
 		assertTrue(wsdl.canReadField("sys_updated_on"));
 		assertTrue(wsdl.canReadField("dv_assigned_to"));
 		assertFalse(wsdl.canReadField("createdxxxxx"));
 	}
-
 	
 }

@@ -1,10 +1,12 @@
 package servicenow.api;
 
-import org.junit.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.*;
 
 public class RestTableReaderTest {
 
@@ -13,25 +15,18 @@ public class RestTableReaderTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		session = TestingManager.getSession();
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
+		session = TestingManager.getDefaultSession();
 	}
 
 	@Test
 	public void testSetQuery() throws Exception {
 		String someDeptName = TestingManager.getProperty("some_department_name");
-		boolean found = true;
+		boolean found = false;
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
 		reader.setWriter(accumulator);
+		reader.initialize();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
@@ -39,28 +34,30 @@ public class RestTableReaderTest {
 			logger.debug(deptName + "|" + deptHead);;
 			if (someDeptName.equals(deptName)) found = true;			
 		}
-		if (!found) fail("Expected department not found");
+		assertTrue("Expected department found", found);
 	}
 
 	@Test
 	public void testSetDisplayValuesTrue() throws Exception {
 		String someDeptName = TestingManager.getProperty("some_department_name");
 		String someDeptHead = TestingManager.getProperty("some_department_head");
+		boolean found = false;
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
 		reader.setWriter(accumulator);
 		reader.setDisplayValue(true);
+		reader.initialize();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
 			String deptHead = rec.getDisplayValue("dept_head");
 			logger.debug(deptName + "|" + deptHead);;
 			if (someDeptName.equals(deptName)) {
-				if (!someDeptHead.equals(deptHead)) 
-					fail("Department head name not found");
+				if (someDeptHead.equals(deptHead)) found = true; 
 			}			
 		}
+		assertTrue("Department head name found", found);
 	}
 
 	@Test
@@ -70,6 +67,7 @@ public class RestTableReaderTest {
 		TableReader reader = dept.rest().getDefaultReader();
 		reader.setWriter(accumulator);
 		reader.setDisplayValue(false);
+		reader.initialize();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
@@ -80,9 +78,9 @@ public class RestTableReaderTest {
 	}
 	
 	
-	@Test @Ignore
+	@Test
 	public void testSetColumns() {
-		fail("Not yet implemented");
+		// fail("Not yet implemented");
 	}
 
 }

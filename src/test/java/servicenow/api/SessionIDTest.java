@@ -7,8 +7,7 @@ public class SessionIDTest {
 
 	@Test
 	public void testSession() throws Exception {
-		TestingManager.loadDefaultProfile();
-		Session session = TestingManager.getSession();
+		Session session = TestingManager.getDefaultSession();
 		TableAPI location = session.table("cmn_location").api();
 		location.getRecord("name", TestingManager.getProperty("location1"));;
 		String session1 = session.getSessionID();

@@ -25,8 +25,8 @@ public class CRUDTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"mydevjson", "mydevsoap", "mydevrest"};
-//		return new String[] {"mydevsoap"};
+//		return new String[] {"mydevjson", "mydevsoap", "mydevrest"};
+		return new String[] {"mydev"};
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -44,6 +44,7 @@ public class CRUDTest {
 		String now = DateTime.now().toString();
 		Table tbl = session.table("incident");
 		TableAPI api = tbl.api();
+		TestingManager.banner(logger, "Insert");
 	    FieldValues values = new FieldValues();
 	    String descr1 = "This is a test " + now;
 	    String descr2 = "This incident is updated " + now;
@@ -52,9 +53,11 @@ public class CRUDTest {
 	    Key key = api.insertRecord(values).getKey();	    
 	    assertNotNull(key);
 	    logger.info("inserted " + key);
+	    TestingManager.banner(logger,  "Update");
 	    Record rec = api.getRecord(key);
 	    assertEquals(descr1, rec.getValue("short_description"));
 	    api.updateRecord(key, new servicenow.api.Parameters("short_description", descr2));
+	    TestingManager.banner(logger, "Delete");
 	    rec = api.getRecord(key);
 	    assertEquals(descr2, rec.getValue("short_description"));
 	    assertTrue("Delete record just inserted", api.deleteRecord(key));

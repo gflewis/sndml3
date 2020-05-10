@@ -94,12 +94,12 @@ public class JsonRequest extends ServiceNowRequest {
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
 					statusLine, responseContentType, responseLen));
-		if (logger.isTraceEnabled())
-			logger.trace(Log.RESPONSE, JsonFormatter.format(responseText));
 		if (statusCode == 204) {
 			// Success - No Content
 			return null;
 		}
+		if (logger.isTraceEnabled())
+			logger.trace(Log.RESPONSE, JsonFormatter.format(responseText));			
 		if (statusCode == 401 || statusCode == 403) {
 //			logger.error(Log.REQUEST, Log.join(uri, requestText));
 //			logger.error(Log.RESPONSE, statusLine.toString());

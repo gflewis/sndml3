@@ -14,8 +14,7 @@ public class DatePartTest {
 
 	@Test
 	public void testDatePart() throws Exception {
-		TestingManager.loadProfile("mydev");
-		Session session = TestingManager.getSession();
+		Session session = TestingManager.getDefaultSession();
 		Table table = session.table("incident");
 		RecordListAccumulator accumulator = new RecordListAccumulator(table);
 		TableStats stats = table.rest().getStats(null, true);

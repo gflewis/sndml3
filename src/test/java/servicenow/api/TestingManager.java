@@ -1,11 +1,13 @@
 package servicenow.api;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,23 +18,24 @@ public class TestingManager {
 
 	static final Logger logger = LoggerFactory.getLogger(TestingManager.class);
 	
-	static final String TEST_PROFILES_DIR = "profiles/";
 	static final String DEFAULT_PROFILE = "mydev";
 	static final String TEST_PROPERTIES = "junit.properties";
 	
 	static Properties properties = getTestProperties();
+	static Session defaultSession;
 
 	/**
-	 * Load a unit test profile, which is a properties file with a ".profile" extension.
-	 * Test profiles are not stored in github because they may contain passwords.
+	 * Load a connection profile from profiles/name/.sndml_profile.
+	 * Profiles are not stored in github because they may contain passwords.
 	 * This function will throw an exception if the profiles directory
 	 * has not been initialized.
 	 */
 	public static void loadProfile(String name) throws TestingException {
 		logger.info(Log.INIT, "loadProfile " + name);
-		String filename = TEST_PROFILES_DIR + name + ".profile";
+		Path directory = Paths.get("profiles",  name);
+		File profile = directory.resolve(".sndml_profile").toFile();
 		try {
-			FileInputStream stream = new FileInputStream(filename);
+			FileInputStream stream = new FileInputStream(profile);
 			assert stream != null;
 			properties.load(stream);
 		}
@@ -59,6 +62,14 @@ public class TestingManager {
 			throw new TestingException("Profile not loaded");
 		Session session =  new Session(props);
 		return session;
+	}
+	
+	public static Session getDefaultSession() throws TestingException {
+		if (defaultSession == null) {
+			loadDefaultProfile();
+			defaultSession = getSession();
+		}
+		return defaultSession;
 	}
 	
 	private static Properties getTestProperties() {
@@ -91,17 +102,17 @@ public class TestingManager {
 		if (value == null) throw new IllegalArgumentException(propname);
 		return value;
 	}
-
+	
 	public static void banner(Logger logger, String msg) {
-		int len = msg.length();
-		String bar = "\n" + StringUtils.repeat("*", len + 4);
-		logger.info(Log.TEST, DateTime.now() + " " + msg + bar + "\n* " + msg + " *" + bar);
+		Log.banner(logger, Log.TEST, msg);
 	}
 
+	@Deprecated
 	public static void banner(Logger logger, String classname, String msg) {
-		banner(logger, classname + " - " + msg);
+		Log.banner(logger, Log.TEST, classname + " - " + msg);
 	}
 	
+	@Deprecated
 	public static void banner(Logger logger, @SuppressWarnings("rawtypes") Class klass, String msg) {
 		banner(logger, klass.getSimpleName(), msg);
 	}

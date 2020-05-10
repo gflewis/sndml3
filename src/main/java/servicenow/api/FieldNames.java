@@ -17,7 +17,7 @@ public class FieldNames extends ArrayList<String> {
 	
 	public FieldNames(String str) {
 		super();
-		addAll(Arrays.asList(str.split(",\\s*")));
+		addAll(Arrays.asList(str.split("[,\\s]+")));
 	}
 	
 	public FieldNames(Set<String> names) {

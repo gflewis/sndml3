@@ -2,6 +2,7 @@ package servicenow.api;
 
 import java.net.URI;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
@@ -87,5 +88,12 @@ public class Log {
 		final int default_limit = 2048;
 		return StringUtils.abbreviate(message, default_limit);
 	}
+	
+	public static void banner(Logger logger, Marker marker, String msg) {
+		int len = msg.length();
+		String bar = "\n" + StringUtils.repeat("*", len + 4);
+		logger.info(marker, DateTime.now() + " " + msg + bar + "\n* " + msg + " *" + bar);
+	}
+	
 
 }
