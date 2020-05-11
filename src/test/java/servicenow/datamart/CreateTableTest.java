@@ -17,16 +17,15 @@ public class CreateTableTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"awsmysql", "awspg"};
+		return TestingManager.allProfiles();
 	}
 
 	Session session;
 	Database database;
 	Logger logger = TestingManager.getLogger(this.getClass());
 	
-
 	public CreateTableTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile);
+		TestingManager.loadProfile(profile, true);
 		session = ResourceManager.getSession();
 		database = ResourceManager.getDatabase();
 	}
@@ -41,10 +40,10 @@ public class CreateTableTest {
 
 	@Test
 	public void testCreateTableFoo() throws Exception {
-		assertFalse(database.tableExists("blahblahblah"));
+		assertFalse(database.tableExists(TestingManager.randomName()));
 		String schema = database.getSchema();
 		logger.debug("schema=" + schema);
-		String shortname = "foo";
+		String shortname = TestingManager.randomName();
 		String createtable = "create table " + shortname + "(bar varchar(20))";
 		String droptable = "drop table " + shortname;
 		if (database.tableExists(shortname)) DBTest.sqlUpdate(droptable);

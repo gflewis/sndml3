@@ -21,23 +21,18 @@ public class DBTest {
 	
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"awspg"};
+		return TestingManager.allProfiles();
 	}
-
+	
 	static Logger logger = TestingManager.getLogger(DBTest.class);
 	
 	public DBTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile);
+		TestingManager.loadProfile(profile, true);
 //		session = ResourceManager.getSession();
 //		database = ResourceManager.getDatabase();
 	}
 		
 	
-//	@BeforeClass
-//	public static void setUpBeforeClass() throws Exception {
-//		initialize();
-//	}
-
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		ResourceManager.getDatabase().close();
@@ -83,12 +78,14 @@ public class DBTest {
 	}
 	
 	static void commit() throws SQLException {
-		ResourceManager.getDatabase().commit();
+		Database db = ResourceManager.getDatabase();
+		db.commit();
 	}
 	
 	@Test
 	public void testTableExistsTrue() throws Exception {
-		logger.info("testTableExistsTrue");
+		TestingManager.bannerStart(this.getClass(), "testTableExistsTrue");
+		// logger.info("testTableExistsTrue");
 		Database db = ResourceManager.getDatabase();
 		String tablename = "core_company";		
 		Table table = ResourceManager.getSession().table(tablename);
@@ -100,7 +97,8 @@ public class DBTest {
 	
 	@Test
 	public void testTableExistsFalse() throws Exception {
-		logger.info("testTableExistsFalse");
+		TestingManager.bannerStart(this.getClass(), "testTableExistsFalse");
+		// logger.info("testTableExistsFalse");
 		Database db = ResourceManager.getDatabase();
 		String tablename = "some_nonexistent_table";
 		assertNotNull(db);

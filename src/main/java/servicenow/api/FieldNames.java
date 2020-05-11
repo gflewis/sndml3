@@ -40,4 +40,11 @@ public class FieldNames extends ArrayList<String> {
 		}
 		return result.toString();
 	}
+	
+	@Override
+	public String[] toArray() {
+		String[] result = new String[this.size()];
+		result = this.toArray(result);
+		return result;
+	}
 }
