@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import servicenow.api.Table;
 import servicenow.api.TestingManager;
 
+/**
+ * Inactive because the tableExists method is tested in CreateTableTest
+ */
 @RunWith(Parameterized.class)
 public class TableExistsTest {
 

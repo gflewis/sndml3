@@ -42,6 +42,14 @@ public class DBUtil {
 	}
 
 	/**
+	 * Delete all records in a table
+	 */
+	static void truncateTable(String tablename) throws SQLException {
+		Database db = ResourceManager.getDatabase();
+		db.truncateTable(tablename);		
+	}
+	
+	/**
 	 * Drop a table if it exists
 	 */
 	static void dropTable(String tablename) throws SQLException {
