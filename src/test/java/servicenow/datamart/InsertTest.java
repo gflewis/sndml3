@@ -19,10 +19,9 @@ public class InsertTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static String[] profiles() {
-		return new String[] {"awsmysql","awsmssql", "awspg", "awsora"};
-//		return new String[] {"awsora"};
+		return TestingManager.allProfiles();
 	}
-
+		
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	final Session session;
 	final Database database;
@@ -35,7 +34,7 @@ public class InsertTest {
 	
 	@Test
 	public void testInsert() throws Exception {
-		LoaderConfig config = new LoaderConfig(AllTests.yamlFile("load_incident_truncate"));
+		LoaderConfig config = new LoaderConfig(TestingManager.yamlFile("load_incident_truncate"));
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(LoaderAction.INSERT, job.getAction());
@@ -52,7 +51,7 @@ public class InsertTest {
 
 	@Test
 	public void testInsertTwice() throws Exception {
-		LoaderConfig config = new LoaderConfig(AllTests.yamlFile("load_incident_twice"));
+		LoaderConfig config = new LoaderConfig(TestingManager.yamlFile("load_incident_twice"));
 		Loader loader = new Loader(config);
 		LoaderJob job1 = loader.jobs.get(0);
 		LoaderJob job2 = loader.jobs.get(1);

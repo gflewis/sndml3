@@ -32,27 +32,13 @@ public class CreateTableTest {
 		
 	@Test
 	public void testCreateTable() throws Exception {				
-		String tablename = "rm_story";
+		TestingManager.bannerStart(this.getClass(), "testCreateTable");
+		String tablename = "problem";
+		DBUtil.dropTable(tablename);
+		assertFalse(database.tableExists(tablename));
 		Table table = session.table(tablename);
 		database.createMissingTable(table, null);
-		assert database.tableExists(tablename);
-	}
-
-	@Test
-	public void testCreateTableFoo() throws Exception {
-		assertFalse(database.tableExists(TestingManager.randomName()));
-		String schema = database.getSchema();
-		logger.debug("schema=" + schema);
-		String shortname = TestingManager.randomName();
-		String createtable = "create table " + shortname + "(bar varchar(20))";
-		String droptable = "drop table " + shortname;
-		if (database.tableExists(shortname)) DBTest.sqlUpdate(droptable);
-		DBTest.sqlUpdate(createtable);
-		DBTest.commit();
-		assertTrue(DBTest.tableExists(shortname));
-		DBTest.sqlUpdate(droptable);
-		DBTest.commit();
-		assertFalse(DBTest.tableExists(shortname));
+		assertTrue(database.tableExists(tablename));
 	}
 	
 }

@@ -97,6 +97,10 @@ public class Database {
 		return "postgresql".equalsIgnoreCase(protocol);		
 	}
 	
+	boolean isAutoCommitEnabled() {
+		return this.autocommit;
+	}
+	
 	static String getProtocol(URI uri) {
 		String urlPart[] = uri.toString().split(":");
 		String protocol = urlPart[1];

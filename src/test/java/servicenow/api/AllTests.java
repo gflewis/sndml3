@@ -18,6 +18,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	CRUDTest.class,
 	DatePartTest.class,
 	})
+
 public class AllTests {
 
 }

@@ -4,69 +4,63 @@ import servicenow.api.*;
 
 import static org.junit.Assert.*;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@RunWith(Parameterized.class)
-public class DBTest {
-	
-	@Parameters(name = "{index}:{0}")
-	public static String[] profiles() {
-		return TestingManager.allProfiles();
-	}
-	
-	static Logger logger = TestingManager.getLogger(DBTest.class);
-	
-	public DBTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile, true);
-//		session = ResourceManager.getSession();
-//		database = ResourceManager.getDatabase();
-	}
+public class DBUtil {
 		
-	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		ResourceManager.getDatabase().close();
-	}
-
+	static Logger logger = TestingManager.getLogger(DBUtil.class);
+		
 	static void initialize() throws TestingException, SQLException {
 		Database db = ResourceManager.getDatabase();
 		assert db != null;
 		assert db.getConnection() != null;
 	}
 
-//	static Connection getConnection() throws SQLException {
-//		Database db = ResourceManager.getDatabase();
-//		return db.getConnection();
-//	}
-	
+	/**
+	 * Execute an SQL statement
+	 */
 	static int sqlUpdate(String sql) throws SQLException {
 		Database db = ResourceManager.getDatabase();
 		Connection dbc = db.getConnection();
 		assertNotNull(dbc);
-		logger.debug("sqlUpdate \"" + sql + "\"");
+		logger.debug(Log.TEST, "sqlUpdate \"" + sql + "\"");
 		Statement stmt = dbc.createStatement();
 		int count = 0;
 		try {
 			count = stmt.executeUpdate(sql);
-			dbc.commit();
+			db.commit();
 		} catch (SQLException e) {
-			logger.error(sql, e);
+			logger.error(Log.TEST, sql, e);
 			throw e;
 		}
-		logger.info(sql + " (" + count + ")");
+		logger.info(Log.TEST, sql + " (" + count + ")");
 		return count;
 	}
 
+	/**
+	 * Drop a table if it exists
+	 */
+	static void dropTable(String tablename) throws SQLException {
+		Database db = ResourceManager.getDatabase();
+		logger.debug(Log.TEST, "dropTable " + tablename);			
+		Connection dbc = db.getConnection();
+		assertNotNull(dbc);
+		Statement stmt = dbc.createStatement();
+		String sql = "drop table " + db.qualifiedName(tablename);
+		try {
+			stmt.executeUpdate(sql);
+			db.commit();
+			logger.debug(Log.TEST, tablename + " has been dropped");
+		}
+		catch (SQLException e) {
+			logger.warn(Log.TEST, tablename + " could not be dropped");
+		}
+	}
+	
 	static boolean tableExists(String tablename) throws SQLException {
 		Database db = ResourceManager.getDatabase();
 		return db.tableExists(tablename);
@@ -82,29 +76,6 @@ public class DBTest {
 		db.commit();
 	}
 	
-	@Test
-	public void testTableExistsTrue() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "testTableExistsTrue");
-		// logger.info("testTableExistsTrue");
-		Database db = ResourceManager.getDatabase();
-		String tablename = "core_company";		
-		Table table = ResourceManager.getSession().table(tablename);
-		assertNotNull(db);
-		db.createMissingTable(table, tablename);
-		assertTrue(db.tableExists(tablename));
-		assertFalse(db.tableExists(tablename.toUpperCase()));
-	}
-	
-	@Test
-	public void testTableExistsFalse() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "testTableExistsFalse");
-		// logger.info("testTableExistsFalse");
-		Database db = ResourceManager.getDatabase();
-		String tablename = "some_nonexistent_table";
-		assertNotNull(db);
-		assertFalse(db.tableExists(tablename));
-		assertFalse(db.tableExists(tablename.toUpperCase()));
-	}
 
 	static int sqlCount(String tablename, String where) throws SQLException {
 		String query = "select count(*) from " + tablename;
@@ -134,6 +105,7 @@ public class DBTest {
 		rs.next();
 		return rs;		
 	}
+
 	
 	/*
 	static String tableName(String name) throws IOException {
@@ -149,17 +121,6 @@ public class DBTest {
 		return sql.replaceAll("\\$", prefix);
 	}
 	
-
-	static void dropTable(String tablename) throws Exception {
-		tablename = tableName(tablename);
-		logger.debug("dropTable " + tablename);
-		try {
-			sqlUpdate("drop table " + tablename);
-			commit();
-			logger.debug("table " + tablename + " has been dropped");
-		}
-		catch (SQLException e) {}	
-	}
 		
 	static int numRows(String tablename) throws SQLException, IOException {
 		String sql = "select count(*) from " + tableName(tablename);

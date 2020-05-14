@@ -76,8 +76,7 @@ public class RestTableReaderTest {
 			if (deptHead != null) fail("Department head should be null");
 		}
 	}
-	
-	
+		
 	@Test
 	public void testSetColumns() {
 		// fail("Not yet implemented");
