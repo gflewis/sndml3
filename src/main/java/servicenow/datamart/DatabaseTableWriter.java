@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
-public abstract class DatabaseTableWriter extends Writer {
+public abstract class DatabaseTableWriter extends RecordWriter {
 
 	final protected Database db;
 	final protected Table table;

@@ -3,6 +3,9 @@ package servicenow.datamart;
 import servicenow.api.*;
 
 import static org.junit.Assert.*;
+
+import java.io.StringReader;
+
 import org.junit.*;
 
 import org.junit.runner.RunWith;
@@ -15,43 +18,37 @@ import org.slf4j.LoggerFactory;
 public class TimestampTest {
 
 	@Parameters(name = "{index}:{0}")
-	public static String[] profiles() {
-		return new String[] {"awsmysql","awspg", "awsora", "awsmssql"};
-//		return new String[] {"awsmssql"};
+	public static TestingProfile[] profiles() {
+		return TestingManager.getDatamartProfiles();
 	}
-
+	
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final String tablename = "incident";
 	final Session session;
 	final Database database;
+	final DBUtil util;	
 	
-	public TimestampTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile);
-		session = ResourceManager.getSession();
-		database = ResourceManager.getDatabase();
+	public TimestampTest(TestingProfile profile) throws Exception {
+		// TestingProfile profile = TestingManager.getDefaultProfile();
+		TestingManager.setProfile(this.getClass(), profile);
+		session = profile.getSession();
+		database = profile.getDatabase();
+		util = new DBUtil(database);
+		util.dropTable(tablename);
+		database.createMissingTable(session.table(tablename));
 	}
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {		
-	}
-
-	static boolean tableLoaded = false;
-	
-	@Before
-	public void setUp() throws Exception {
-		if (!tableLoaded) {
-			loadTable();
-			tableLoaded = true;
-		}
-	}
-	
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		Database db = ResourceManager.getDatabase();
-		if (db != null) db.close();
+	public static void clear() throws Exception {
+		TestingManager.clearAll();
 	}
-	
+		
 	void loadTable() throws Exception {
-		LoaderConfig config = new LoaderConfig(LoaderConfigTest.yamlFile("load_incident_truncate"));
+		String text = String.format("tables: [{name: %s, truncate: true}]", tablename);
+		logger.info(Log.TEST, text);;
+		StringReader reader = new StringReader(text);
+		LoaderConfig config = new LoaderConfig(reader);
+		// LoaderConfig config = new LoaderConfig(LoaderConfigTest.yamlFile("load_incident_truncate"));
 		Loader loader = new Loader(config);
 		LoaderJob tableLoader = loader.jobs.get(0);
 		loader.loadTables();
@@ -61,28 +58,29 @@ public class TimestampTest {
 	
 	@Test
 	public void testIncidentTimestamp() throws Exception {
-		Table inc = session.table("incident");
-		database.createMissingTable(inc, inc.getName());
+		TestingManager.bannerStart("testIncidentTimestamps");
+		Table tbl = session.table(tablename);
+		database.createMissingTable(tbl, tablename);
+		util.truncateTable(tablename);
 		String sys_id = TestingManager.getProperty("some_incident_sys_id");
-		String created = TestingManager.getProperty("some_incident_created");
-		DateTimeRange emptyRange = new DateTimeRange(null, null);
-		Record rec = inc.getRecord(new Key(sys_id));
-		assertEquals(created, rec.getCreatedTimestamp().toString());
-		JobConfig config = new JobConfig(inc);
+		Record rec = tbl.getRecord(new Key(sys_id));
+		String created = rec.getValue("sys_created_on");
+		JobConfig config = new JobConfig(tbl);
 		config.setFilter(new EncodedQuery("sys_id=" + sys_id));
+		DateTimeRange emptyRange = new DateTimeRange(null, null);
 		config.setCreated(emptyRange);
 		LoaderJob loader = new LoaderJob(config, null);
 		loader.call();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
-		DateTime dbcreated = reader.getTimestampCreated(inc.getName(), new Key(sys_id));
+		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new Key(sys_id));
 		assertNotNull(dbcreated);
 		assertEquals(created, dbcreated.toString());		
 	}
 	
-	@Test
+	@Test @Ignore
 	public void testGetTimestamps() throws Exception {
-		String tablename = "incident";
-		database.createMissingTable(session.table(tablename), tablename);
+		TestingManager.bannerStart("testGetTimestamps");
+		loadTable();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		TimestampHash timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));

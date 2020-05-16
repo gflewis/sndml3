@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,22 +24,28 @@ import servicenow.api.TableAPI;
 public class CRUDTest {
 
 	@Parameters(name = "{index}:{0}")
-	public static String[] profiles() {
+	public static TestingProfile[] profiles() {
 		return TestingManager.allProfiles();
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
-	final String profile;
+	final TestingProfile profile;
 	final Session session;
 	
-	public CRUDTest(String profile) throws IOException {
+	public CRUDTest(TestingProfile profile) throws IOException {
+		TestingManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
-		TestingManager.loadProfile(profile);
-		session = TestingManager.getSession();
+		this.session = profile.getSession();
 	}
-	
+
+	@AfterClass
+	public static void clear() throws Exception {
+		TestingManager.clearAll();
+	}
+			
 	@Test
 	public void testInsertUpdateDelete() throws Exception {
+		TestingManager.bannerStart("testInsertUpdateDelete");
 		String now = DateTime.now().toString();
 		Table tbl = session.table("incident");
 		TableAPI api = tbl.api();
@@ -65,8 +71,9 @@ public class CRUDTest {
 	    assertNull(rec);
 	}
 
-	@Test @Ignore
+	@Test(expected = NoSuchRecordException.class) 
 	public void testBadUpdate() throws Exception {
+		TestingManager.bannerStart("testBadUpdate");
 		Key badKey = new Key("0123456789abcdef0123456789abcdef");
 		Table tbl = session.table("incident");
 		TableAPI api = tbl.api();

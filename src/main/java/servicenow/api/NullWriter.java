@@ -3,7 +3,7 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class NullWriter extends Writer {
+public class NullWriter extends RecordWriter {
 
 	public NullWriter() {
 		super();

@@ -20,7 +20,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	protected static enum OrderBy {NONE, FIELDS, KEYS}; 
 	protected OrderBy orderBy = OrderBy.NONE;
-	protected Writer writer;
+	protected RecordWriter writer;
 	protected int pageSize;
 	protected boolean displayValue = false;
 	protected String viewName = null;
@@ -231,7 +231,17 @@ public abstract class TableReader implements Callable<TableReader> {
 		
 	public TableReader setFields(FieldNames names) {
 		if (initialized) throw new IllegalStateException();
-		this.fieldNames = names;
+		if (names == null) {
+			fieldNames = null;
+		}
+		else {
+			// sys_id, sys_created_on and sys_updated on are included
+			// whether you ask for them or not
+			fieldNames = new FieldNames("sys_id,sys_created_on,sys_updated_on");
+			for (String name : names) {
+				if (!fieldNames.contains(name)) fieldNames.add(name);
+			}			
+		}
 		return this;
 	}
 	
@@ -244,13 +254,13 @@ public abstract class TableReader implements Callable<TableReader> {
 		return this.maxRows;
 	}
 
-	public TableReader setWriter(Writer value) {
+	public TableReader setWriter(RecordWriter value) {
 		if (initialized) throw new IllegalStateException();
 		this.writer = value;
 		return this;
 	}
 	
-	public Writer getWriter() {
+	public RecordWriter getWriter() {
 		assert this.writer != null;
 		return this.writer;
 	}

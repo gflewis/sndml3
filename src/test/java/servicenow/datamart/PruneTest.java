@@ -4,6 +4,7 @@ import servicenow.api.*;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,22 +16,25 @@ import org.slf4j.LoggerFactory;
 public class PruneTest {
 
 	@Parameters(name = "{index}:{0}")
-	public static String[] profiles() {
-		return new String[] {"awsmysql","awsmssql"};
+	public static TestingProfile[] profiles() {
+		return TestingManager.getDatamartProfiles();
 	}
 
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
-	final Session session;
-	final Database database;
+	@AfterClass
+	public static void clear() throws Exception {
+		TestingManager.clearAll();
+	}
 	
-	public PruneTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile);
-		session = ResourceManager.getSession();
-		database = ResourceManager.getDatabase();
+	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	public PruneTest(TestingProfile profile) throws Exception {
+		TestingManager.setProfile(this.getClass(), profile);
 	}
 	
 	@Test
 	public void testPrune() throws Exception {
+		TestingManager.bannerStart("testPrune");
+		Session session = TestingManager.getProfile().getSession();
 		DateTime t0 = DateTime.now();
 		Table tbl = session.table("incident");
 		TableAPI api = tbl.api();

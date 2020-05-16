@@ -58,8 +58,13 @@ public class SoapPetitTableReader extends TableReader {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public TableReader setFields(FieldNames names) {
+		throw new UnsupportedOperationException();
+	}		
+	
 	public SoapPetitTableReader call() throws IOException, SQLException {
-		Writer writer = this.getWriter();
+		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert pageSize > 1;
 		int firstRow = 0;

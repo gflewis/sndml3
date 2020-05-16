@@ -52,19 +52,6 @@ public class DateTimeFactory {
 		return Globals.getStart();
 	}
 	
-	DateTime getLast(String propName) throws ConfigParseException {
-		assert propName != null;
-		if (lastMetrics == null) {
-			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
-			logger.error(Log.INIT, message);
-			throw new ConfigParseException(message);
-		}
-		String propValue = lastMetrics.getProperty(propName);
-		if (propValue == null) 
-			throw new ConfigParseException("Property not found: " + propName);
-		return new DateTime(propValue);
-	}
-	
 	DateTime getDate(Object obj) throws ConfigParseException {
 		assert obj != null;
 		DateTime result;
@@ -98,19 +85,22 @@ public class DateTimeFactory {
 			name = name.substring(5);
 			return getLast(name);
 		}
-
-		// TODO: What is the purpose of this?
-		// System property or profile property will override metrics value
-		String propValue = Globals.getValue(name);
-		if (propValue != null) return new DateTime(propValue);
-		
-		DateTime lastValue = getLast(name);
-		if (lastValue == null)
-			throw new ConfigParseException("Invalid datetime: " + name);
-		else
-			return lastValue;
+		return getLast(name);
 	}
 		
+	DateTime getLast(String propName) throws ConfigParseException {
+		assert propName != null;
+		if (lastMetrics == null) {
+			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
+			logger.error(Log.INIT, message);
+			throw new ConfigParseException(message);
+		}
+		String propValue = lastMetrics.getProperty(propName);
+		if (propValue == null) 
+			throw new ConfigParseException("Property not found: " + propName);
+		return new DateTime(propValue);
+	}
+	
 	private DateTime getExpr(String text) throws ConfigParseException {
 		Matcher m = exprPattern.matcher(text);
 		if (m.matches()) {

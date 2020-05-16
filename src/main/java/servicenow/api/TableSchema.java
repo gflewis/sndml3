@@ -120,6 +120,17 @@ public class TableSchema {
 	public FieldNames getFieldNames() {
 		return new FieldNames(fields.keySet());
 	}
+	
+	/**
+	 * Return all fields minus a set of names
+	 */
+	public FieldNames getFieldsMinus(FieldNames minus) {
+		FieldNames result = new FieldNames();
+		for (String name : getFieldNames()) {
+			if (!minus.contains(name)) result.add(name);
+		}
+		return result;
+	}
 
 	/**
 	 * Return the type definition for a field.

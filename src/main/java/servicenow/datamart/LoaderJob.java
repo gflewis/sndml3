@@ -59,15 +59,6 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		assert action != null;
 		DateTimeRange createdRange = config.getCreated();
 		
-		// Order By sys_created_on if not otherwise specified
-		/*
-		 * Order By removed 2020-01-24
-		String orderBy = config.getOrderBy();
-		if (orderBy == null)
-			orderBy = "sys_created_on,sys_id";
-		else if ("void".equalsIgnoreCase(orderBy))
-			orderBy = null;
-		*/
 		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 		
 		this.setLogContext();
@@ -79,8 +70,10 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		db.createMissingTable(table, sqlTableName);
 		
 		this.setLogContext();
-		if (config.getTruncate()) db.truncateTable(sqlTableName);
 
+		if (LoaderAction.CREATE.equals(action)) {
+			db.createMissingTable(table, sqlTableName);			
+		}
 		if (LoaderAction.PRUNE.equals(action)) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(metrics);
@@ -103,6 +96,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			deleteWriter.close();
 		}
 		else if (LoaderAction.SYNC.equals(action)) {
+			db.createMissingTable(table, sqlTableName);
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
 			if (partitionInterval == null) {
@@ -128,6 +122,8 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			reader.call();
 		}
 		else {
+			db.createMissingTable(table, sqlTableName);
+			if (config.getTruncate()) db.truncateTable(sqlTableName);
 			DatabaseTableWriter writer;
 			if (LoaderAction.UPDATE.equals(action))
 				writer = new DatabaseUpdateWriter(db, table, sqlTableName);

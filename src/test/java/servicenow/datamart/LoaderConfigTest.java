@@ -13,6 +13,11 @@ import org.slf4j.LoggerFactory;
 public class LoaderConfigTest {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@AfterClass
+	public static void clear() throws Exception {
+		TestingManager.clearAll();
+	}
 	
 	@Test
 	public void testSimple() throws Exception {

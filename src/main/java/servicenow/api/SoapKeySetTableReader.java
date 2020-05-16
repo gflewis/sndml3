@@ -3,6 +3,11 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * A {@link TableReader} which attempts to read a set of records
+ * by first getting a list of all the keys.
+ */
+
 public class SoapKeySetTableReader extends TableReader {
 
 	protected final SoapTableAPI soapAPI;
@@ -33,9 +38,9 @@ public class SoapKeySetTableReader extends TableReader {
 		assert allKeys != null : "TableReader not initialized";
 		return allKeys.size();
 	}
-	
+		
 	public SoapKeySetTableReader call() throws IOException, InterruptedException, SQLException {
-		Writer writer = this.getWriter();
+		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null;
 		assert pageSize > 0;

@@ -1,11 +1,8 @@
 package servicenow.api;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.Properties;
 
@@ -16,49 +13,112 @@ import servicenow.datamart.Globals;
 import servicenow.datamart.ResourceManager;
 
 public class TestingManager {
-
+	
 	static final Logger logger = LoggerFactory.getLogger(TestingManager.class);
 	
 	static final String TEST_PROPERTIES = "junit.properties";
 	
-	static Properties properties = getTestProperties();
 	static Session defaultSession;
-	static String currentProfile;
+	static Properties testProperties = getTestProperties();
+	static TestingProfile currentProfile;
+	@SuppressWarnings("rawtypes")
+	static Class classUnderTest;
 
 	/**
-	 * Load a connection profile from profiles/name/.sndml_profile.
+	 * Get a profile from profiles/name/.sndml_profile.
 	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
-	 * This function will throw an exception if the profiles directory has not been initialized.
 	 */
-	public static void loadProfile(String name, boolean showBanner) throws TestingException {
-		currentProfile = name;
-		if (showBanner) 
-			Log.banner(logger, Log.INIT, "loadProfile " + name);
-		else
-			logger.info(Log.INIT, "loadProfile " + name);
-		Path directory = Paths.get("profiles",  name);
-		File profile = directory.resolve(".sndml_profile").toFile();
+	public static TestingProfile getProfile(String name) {
 		try {
-			FileInputStream stream = new FileInputStream(profile);
-			assert stream != null;
-			properties.load(stream);
+			return new TestingProfile(name);
+		} catch (IOException e) {
+			throw new TestingException(e);
 		}
-		catch (IOException e) {
-			throw new TestingException("Unable to load testing profile: " + name, e);
+	}
+
+	public static TestingProfile getDefaultProfile() throws TestingException {
+		return getProfile(getProperty("api.default_profile"));
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
+		classUnderTest = myclass;
+		currentProfile = profile;
+		ResourceManager.setSession(profile.getSession());
+		ResourceManager.setDatabase(profile.getDatabase());
+		return profile;
+	}
+	
+	@Deprecated
+	public static TestingProfile setProfile(TestingProfile profile) {
+		currentProfile = profile;
+		return profile;		
+	}
+	
+	public static TestingProfile setDefaultProfile() {
+		return setProfile(getDefaultProfile());
+	}
+	
+	public static TestingProfile getProfile() {
+		return currentProfile;
+	}
+	
+	public static void clearAll() {
+		if (currentProfile != null) {
+			currentProfile.close();
 		}
-		ResourceManager.initialize(properties);
+		currentProfile = null;
+		classUnderTest = null;
+	}
+	
+	public static TestingProfile[] getProfiles(String names) {
+		FieldNames list = new FieldNames(names);
+		TestingProfile[] profiles = new TestingProfile[list.size()];
+		for (int i=0; i<list.size(); ++i) {
+			profiles[i] = getProfile(list.get(i));
+		}
+		return profiles;		
+	}
+	
+	public static TestingProfile[] getDatamartProfiles() {
+		return getProfiles(getProperty("datamart.profile_list"));
+	}
+	
+	/**
+	 * Returns an array of all available database profiles.
+	 * Parameterized tests will execute for each of these profiles.
+	 * @return
+	 */
+	public static TestingProfile[] allProfiles() {
+		return getProfiles(getProperty("datamart.profile_list"));
+	}
+
+	@Deprecated
+	public static Session getSession() throws TestingException {
+		return currentProfile.getSession();
+	}
+	
+	@Deprecated
+	public static Session getDefaultSession() throws TestingException {
+		return getDefaultProfile().getSession();
+	}
+	
+	@Deprecated
+	public static void loadProfile(TestingProfile profile, boolean showBanner) throws TestingException {
+		// currentProfile = profile;
+		if (showBanner) 
+			Log.banner(logger, Log.INIT, "loadProfile " + profile.getName());
+		else
+			logger.info(Log.INIT, "loadProfile " + profile.getName());
+		ResourceManager.initialize(profile.getProperties());
 		Globals.setStart(DateTime.now());
 	}
 	
-	public static void loadProfile(String name) throws TestingException {
-		loadProfile(name, false);
+	@Deprecated
+	public static void loadProfile(TestingProfile profile) throws TestingException {
+		loadProfile(profile, false);
 	}
 	
-	public static void loadDefaultProfile() throws TestingException {
-		String defaultProfile = getProperty("api.default_profile");
-		loadProfile(defaultProfile);
-	}
-
 	static Hashtable<String,Logger> myLoggers = new Hashtable<String,Logger>();
 	
 	@SuppressWarnings("rawtypes")
@@ -70,32 +130,6 @@ public class TestingManager {
 		return logger;
 	}
 
-	public static Session getSession() throws TestingException {
-		Properties props = getProperties();
-		String instanceName = props.getProperty("servicenow.instance");
-		if (instanceName == null) 
-			throw new TestingException("Profile not loaded");
-		Session session =  new Session(props);
-		return session;
-	}
-	
-	public static Session getDefaultSession() throws TestingException {
-		if (defaultSession == null) {
-			loadDefaultProfile();
-			defaultSession = getSession();
-		}
-		return defaultSession;
-	}
-
-	/**
-	 * Returns a string array of all available database profiles.
-	 * Parameterized tests will execute for each of these profiles.
-	 * @return
-	 */
-	public static String[] allProfiles() {
-		FieldNames allProfiles = new FieldNames(getProperty("datamart.profile_list"));
-		return allProfiles.toArray();
-	}
 	
 	/**
 	 * This function is called during TestingManager initialization.
@@ -114,25 +148,25 @@ public class TestingManager {
 		}
 		return props;
 	}
-	
-	public static Properties getDefaultProperties() throws TestingException {
-		loadDefaultProfile();
-		return properties;		
-	}
-	
-	public static Properties getProperties() throws TestingException {
-		return properties;
-	}
 
+	@Deprecated
+	public static Properties getProperties() throws TestingException {
+		return testProperties;
+	}
+		
 	/**
 	 * Return a value used for testing.
 	 * These properties are found in the file test/resources/junit.properties.
 	 * All properties have a prefix of junit.
+	 * 
+	 * @param name Name of property with "junit." prefix omitted
+	 * @return Property value
+	 * @throws TestingException
 	 */
 	public static String getProperty(String name) throws TestingException {
 		logger.info(Log.INIT, "getProperty " + name);
 		String propname = "junit." + name;
-		String value = getProperties().getProperty(propname);
+		String value = testProperties.getProperty(propname);
 		if (value == null) throw new IllegalArgumentException(propname);
 		return value;
 	}
@@ -151,11 +185,23 @@ public class TestingManager {
 	}
 
 	@SuppressWarnings("rawtypes")
+	public static void bannerStart(Class cls, TestingProfile profile, String testName) {
+		Logger logger = getLogger(cls);
+		String msg = "Begin: " + testName + " Profile: " + profile.getName();
+		banner(logger, msg);		
+	}
+
+	@SuppressWarnings("rawtypes")
 	public static void bannerStart(Class cls, String testName) {
 		Logger logger = getLogger(cls);
-		String profile = currentProfile;
-		String msg = "Begin: " + testName + " Profile: " + profile;
+		String msg = "Begin: " + testName + " Profile: " + currentProfile.getName();
 		banner(logger, msg);		
+	}
+	
+	public static void bannerStart(String testName) {
+		assert classUnderTest != null;
+		assert currentProfile != null;
+		bannerStart(classUnderTest, currentProfile, testName);
 	}
 	
 	@Deprecated

@@ -22,6 +22,7 @@ public class JobConfig extends Config {
 	private Integer maxRows;
 	private String sqlBefore;
 	private String sqlAfter;
+	private FieldNames columns;
 	private Integer threads;
 	private final DateTimeFactory dateFactory;
 
@@ -54,6 +55,7 @@ public class JobConfig extends Config {
 			    		case "insert": this.action = LoaderAction.INSERT; break;
 			    		case "prune":  this.action = LoaderAction.PRUNE; break;
 			    		case "sync":   this.action = LoaderAction.SYNC; break;
+			    		case "create": this.action = LoaderAction.CREATE; break;
 			    		default:
 						throw new ConfigParseException("Not recognized: " + val.toString());			    			
 			    		}
@@ -73,11 +75,9 @@ public class JobConfig extends Config {
 			    case "partition":
 			    		this.partition = asInterval(val); 
 			    		break;
-			    /*
-			    case "orderby":
-			    		this.orderBy = val.toString(); 
+			    case "columns":
+			    		this.columns = new FieldNames(val.toString());
 			    		break;
-			    */
 			    case "pagesize" :
 			    		this.pageSize = asInteger(val); 
 			    		break;
@@ -109,31 +109,45 @@ public class JobConfig extends Config {
 		}		
 	}
 	
+	void validate() throws ConfigParseException {
+		if (name == null && source == null && target == null) 
+			configError("Must specify at least one of Name, Source, Target");
+		switch (getAction()) {
+		case UPDATE:
+			break;
+		case INSERT:
+			break;
+		case PRUNE:
+			if (getTruncate()) notValid("Truncate");
+			if (created != null) notValid("Created");
+			if (filter != null) notValid("Filter");
+			if (threads != null) notValid("Threads");
+			if (partition != null) notValid("Partition");
+			break;
+		case SYNC:
+			if (getTruncate()) notValid("Truncate");
+			if (since != null) notValid("Since");
+			if (filter != null) notValid("Filter");
+			break;
+		case CREATE:
+			if (getTruncate()) notValid("Truncate");
+			if (created != null) notValid("Created");
+			if (filter != null) notValid("Filter");
+			if (threads != null) notValid("Threads");
+			if (partition != null) notValid("Partition");			
+			break;		
+		}
+	}
+	
+	void notValid(String option) {
+		String msg = option + " not valid with Action: " + getAction().toString();
+		configError(msg);
+	}
+
 	void configError(String msg) {
 		throw new ConfigParseException(msg);
 	}
 	
-	void validate() throws ConfigParseException {
-		String actionName = getAction().toString();
-		if (name == null && source == null && target == null) 
-			configError("Must specify at least one of Name, Source, Target");
-		if (getAction().equals(LoaderAction.PRUNE)) {
-			if (created != null) configError("Created not valid with Action: " + actionName);
-			if (filter != null)  configError("Filter not valid with Action: " + actionName);
-			// if (orderBy != null) configError("OrderBy not valid with Action: " + actionName);
-			if (threads != null) configError("Threads not valid with Action: " + actionName);
-			if (partition != null) configError("Partition not valid with Action: " + actionName);
-		}
-		if (getAction().equals(LoaderAction.SYNC)) {
-			if (since != null) configError("Since not valid with Action: " + actionName);
-			if (filter != null) configError("Filter not valid with Action: " + actionName);
-		}
-		/*
-		if (orderBy != null && !Pattern.matches("(\\+|\\-)?\\w+", orderBy))
-			configError("Invalid OrderBy");
-		*/				
-	}
-			
 	String getName() throws ConfigParseException {
 		if (this.name != null) return this.name;
 		if (this.target != null) return this.target;
@@ -197,11 +211,8 @@ public class JobConfig extends Config {
 		this.filter = value;
 	}
 	
-	EncodedQuery getFilter() { 
-		return this.filter; 
-	}
-	
-	// String  getOrderBy()     { return this.orderBy; }
+	EncodedQuery getFilter() { return this.filter; }
+	FieldNames getColumns()	 { return this.columns; }
 	String  getSqlBefore()   { return this.sqlBefore; }
 	String  getSqlAfter()    { return this.sqlAfter; }
 

@@ -4,15 +4,16 @@ public abstract class TableReaderFactory {
 
 	protected final Table table;
 
-	protected Writer writer;
-	protected TableReader parent;
-	protected EncodedQuery filter;
-	protected DateTimeRange createdRange;
-	protected DateTimeRange updatedRange;
-	protected int pageSize;
-	protected String readerName;
+	protected RecordWriter writer;
+	protected TableReader parent = null;
+	protected EncodedQuery filter = null;
+	protected DateTimeRange createdRange = null;
+	protected DateTimeRange updatedRange = null;
+	protected FieldNames fieldNames = null;
+	protected int pageSize = 0;
+	protected String readerName = null;
 	
-	public TableReaderFactory(Table table, Writer writer) {
+	public TableReaderFactory(Table table, RecordWriter writer) {
 		this.table = table;
 		this.writer = writer;
 	}
@@ -22,6 +23,17 @@ public abstract class TableReaderFactory {
 	}
 	
 	public abstract TableReader createReader();
+	
+	public void configure(TableReader reader) {
+		reader.orderByKeys(true);
+		reader.setFilter(filter);
+		reader.setUpdatedRange(updatedRange);
+		reader.setCreatedRange(createdRange);
+		reader.setFields(fieldNames);
+		reader.setPageSize(pageSize);
+		reader.setWriter(writer);
+		reader.setReaderName(readerName);		
+	}
 
 	public Table getTable() { 
 		return this.table; 
@@ -46,12 +58,16 @@ public abstract class TableReaderFactory {
 	public void setCreated(DateTimeRange created) {
 		this.createdRange = created;
 	}
-		
+	
+	public void setFields(FieldNames names) {
+		this.fieldNames = names;
+	}
+
 	public void setPageSize(int size) {
 		this.pageSize = size;
 	}
 
-	public Writer getWriter() {
+	public RecordWriter getWriter() {
 		return this.writer;
 	}
 	

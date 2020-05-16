@@ -1,7 +1,7 @@
 package servicenow.api;
 
 import java.net.URI;
-
+import org.slf4j.Logger;
 import org.apache.http.StatusLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -47,6 +47,10 @@ public abstract class ServiceNowRequest {
 			text.append(dumpResponseText());
 		}
 		return text.toString();
+	}
+	
+	public void logResponseError(Logger logger) {
+		logger.error(Log.RESPONSE, dump());
 	}
 	
 }

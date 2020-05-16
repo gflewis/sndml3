@@ -5,6 +5,8 @@ import servicenow.api.*;
 import static org.junit.Assert.*;
 
 import org.slf4j.Logger;
+
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,18 +15,28 @@ import java.sql.Statement;
 public class DBUtil {
 		
 	static Logger logger = TestingManager.getLogger(DBUtil.class);
-		
-	static void initialize() throws TestingException, SQLException {
-		Database db = ResourceManager.getDatabase();
-		assert db != null;
-		assert db.getConnection() != null;
-	}
+	Database db;
 
+	DBUtil(Database database) {
+		this.db = database;
+	}
+	
+	DBUtil(TestingProfile profile) throws SQLException, URISyntaxException {
+		this(profile.getDatabase());
+	}
+	
+	DBUtil() throws SQLException, URISyntaxException {
+		this(TestingManager.getProfile());
+	}
+	
+	Database getDatabase() {
+		return this.db;
+	}
+	
 	/**
 	 * Execute an SQL statement
 	 */
-	static int sqlUpdate(String sql) throws SQLException {
-		Database db = ResourceManager.getDatabase();
+	int sqlUpdate(String sql) throws SQLException {
 		Connection dbc = db.getConnection();
 		assertNotNull(dbc);
 		logger.debug(Log.TEST, "sqlUpdate \"" + sql + "\"");
@@ -44,16 +56,14 @@ public class DBUtil {
 	/**
 	 * Delete all records in a table
 	 */
-	static void truncateTable(String tablename) throws SQLException {
-		Database db = ResourceManager.getDatabase();
+	void truncateTable(String tablename) throws SQLException {
 		db.truncateTable(tablename);		
 	}
 	
 	/**
 	 * Drop a table if it exists
 	 */
-	static void dropTable(String tablename) throws SQLException {
-		Database db = ResourceManager.getDatabase();
+	void dropTable(String tablename) throws SQLException {
 		logger.debug(Log.TEST, "dropTable " + tablename);			
 		Connection dbc = db.getConnection();
 		assertNotNull(dbc);
@@ -69,30 +79,22 @@ public class DBUtil {
 		}
 	}
 	
-	static boolean tableExists(String tablename) throws SQLException {
-		Database db = ResourceManager.getDatabase();
+	boolean tableExists(String tablename) throws SQLException {
 		return db.tableExists(tablename);
 	}
-
-	@Deprecated
-	static void rollback() throws SQLException {
-		ResourceManager.getDatabase().getConnection().rollback();		
-	}
 	
-	static void commit() throws SQLException {
-		Database db = ResourceManager.getDatabase();
+	void commit() throws SQLException {
 		db.commit();
 	}
 	
 
-	static int sqlCount(String tablename, String where) throws SQLException {
+	int sqlCount(String tablename, String where) throws SQLException {
 		String query = "select count(*) from " + tablename;
 		if (where != null) query += " where " + where;
 		return sqlCount(query);
 	}
 	
-	static int sqlCount(String query) throws SQLException {		
-		Database db = ResourceManager.getDatabase();
+	int sqlCount(String query) throws SQLException {		
 		db.commit();
 		Statement stmt = db.getConnection().createStatement();
 		ResultSet rs = stmt.executeQuery(query);
@@ -105,8 +107,7 @@ public class DBUtil {
 	}
 
 	
-	static ResultSet getRow(String query) throws SQLException {
-		Database db = ResourceManager.getDatabase();
+	ResultSet getRow(String query) throws SQLException {
 		db.commit();
 		Statement stmt = db.getConnection().createStatement();
 		ResultSet rs = stmt.executeQuery(query);

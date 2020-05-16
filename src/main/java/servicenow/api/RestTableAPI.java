@@ -130,7 +130,8 @@ public class RestTableAPI extends TableAPI {
 		JSONObject requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.PUT, requestObj);
 		JSONObject responseObj = request.execute();
-		request.checkForInsufficientRights();		
+		request.checkForInsufficientRights();
+		request.checkForNoSuchRecord();
 		JSONObject resultObj = responseObj.getJSONObject("result");
 		@SuppressWarnings("unused") // discard the response
 		JsonRecord rec = new JsonRecord(this.table, resultObj);

@@ -3,19 +3,17 @@ package servicenow.api;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RestTableReaderTest {
 
-	Logger logger = LoggerFactory.getLogger(this.getClass());
-	static Session session;
+	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final Session session;
 	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		session = TestingManager.getDefaultSession();
+	public RestTableReaderTest() {
+		session = TestingManager.getDefaultProfile().getSession();
 	}
 
 	@Test
@@ -77,9 +75,5 @@ public class RestTableReaderTest {
 		}
 	}
 		
-	@Test
-	public void testSetColumns() {
-		// fail("Not yet implemented");
-	}
 
 }

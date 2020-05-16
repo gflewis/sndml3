@@ -18,20 +18,27 @@ import servicenow.api.TestingManager;
 public class InsertTest {
 
 	@Parameters(name = "{index}:{0}")
-	public static String[] profiles() {
+	public static TestingProfile[] profiles() {
 		return TestingManager.allProfiles();
 	}
 		
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final TestingProfile profile;
 	final Session session;
 	final Database database;
 	
-	public InsertTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile);
-		session = ResourceManager.getSession();
-		database = ResourceManager.getDatabase();
+	public InsertTest(TestingProfile profile) throws Exception {
+		TestingManager.setProfile(this.getClass(), profile);
+		this.profile = profile;
+		this.session = profile.getSession();
+		this.database = profile.getDatabase();
 	}
-	
+
+	@AfterClass
+	public static void clear() throws Exception {
+		TestingManager.clearAll();
+	}
+
 	@Test
 	public void testInsert() throws Exception {
 		LoaderConfig config = new LoaderConfig(TestingManager.yamlFile("load_incident_truncate"));

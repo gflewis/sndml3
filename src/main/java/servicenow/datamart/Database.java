@@ -20,14 +20,14 @@ import servicenow.api.*;
 
 public class Database {
 
-	private final Connection dbc;
+	private final Logger logger = Log.logger(this.getClass());
 	private final URI dbURI;
 	private final String dbuser;
 	private final boolean autocommit;
 	private final String dialect;
 	private final String schema;
 	private final Generator generator;
-	final private Logger logger = Log.logger(this.getClass());
+	private Connection dbc = null;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
@@ -39,6 +39,7 @@ public class Database {
 		schema = props.getProperty("datamart.schema");
 		dialect = props.getProperty("datamart.dialect");
 		
+		assert dbc == null;
 		assert dburl != null;
 		assert dbuser != null;
 		assert schema==null || schema.length() > 0;
@@ -52,7 +53,7 @@ public class Database {
 			this.generator = new Generator(dbURI, schema);
 		this.autocommit = this.generator.getAutoCommit();
 		this.initialize();
-		assert this.dbc != null;
+		assert dbc != null;
 	}
 
 	/**
@@ -71,7 +72,7 @@ public class Database {
 			stmt.execute(sql);
 		}
 		stmt.close();
-		commit();
+		commit();		
 		// TODO: batch inserts
 //		if (batchInserts) {
 //			if (!meta.supportsBatchUpdates()) {
@@ -84,21 +85,28 @@ public class Database {
 	
 	
 	void close() throws SQLException {
-		dbc.close();
+		logger.info(Log.FINISH, "Database connection closed");
+		this.dbc.close();
+		this.dbc = null;
+		assert this.isClosed();
 	}
 	
-	boolean isOracle() {
+	public boolean isOracle() {
 		String protocol = getProtocol(getURI());
 		return "oracle".equalsIgnoreCase(protocol);
 	}
 	
-	boolean isPostgresql() {
+	public boolean isPostgresql() {
 		String protocol = getProtocol(getURI());
 		return "postgresql".equalsIgnoreCase(protocol);		
 	}
 	
-	boolean isAutoCommitEnabled() {
+	public boolean isAutoCommitEnabled() {
 		return this.autocommit;
+	}
+	
+	public boolean isClosed() {
+		return (this.dbc == null);
 	}
 	
 	static String getProtocol(URI uri) {
@@ -191,8 +199,7 @@ public class Database {
 		ResultSet rs = meta.getColumns(null, schema, tablename, null);
 		return rs;		
 	}
-	
-	
+		
 	/**
 	 * Create a table in the target database if it does not already exist.
 	 * If the table already exists then do nothing.
@@ -201,8 +208,8 @@ public class Database {
 	void createMissingTable(Table table, String sqlTableName) 
 			throws SQLException, IOException, InterruptedException  {
 		assert table != null;
-		Log.setTableContext(table);
 		if (sqlTableName == null) sqlTableName = table.getName();
+		Log.setTableContext(table);
 		if (tableExists(sqlTableName)) return;
 		Statement stmt = dbc.createStatement();
 		String createSql = generator.getCreateTable(table, sqlTableName);
@@ -225,6 +232,11 @@ public class Database {
 		}
 		stmt.close();
 		commit();
+	}
+	
+	void createMissingTable(Table table) 
+			throws SQLException, IOException, InterruptedException {
+		createMissingTable(table, table.getName());
 	}
 	
 }

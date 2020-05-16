@@ -3,7 +3,7 @@ package servicenow.api;
 /**
  * Simple class to collect a bunch of records in a list.
  */
-public class RecordListAccumulator extends Writer {
+public class RecordListAccumulator extends RecordWriter {
 
 	RecordList allRecords;
 			

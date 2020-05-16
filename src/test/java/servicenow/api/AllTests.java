@@ -15,6 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	TableWSDLTest.class,
 	TableSchemaTest.class,
 	RestTableReaderTest.class,
+	SetFieldsTest.class,
 	CRUDTest.class,
 	DatePartTest.class,
 	})

@@ -31,11 +31,12 @@ public class ResourceManager {
 	}
 	
 	public static Database getDatabase() {
+		assert db != null : "database is null";
 		return db;
 	}
 	
 	public static Session getSession() {
-		assert session != null;
+		assert session != null : "session is null";
 		return session;
 	}
 

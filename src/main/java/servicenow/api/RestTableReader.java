@@ -26,7 +26,7 @@ public class RestTableReader extends TableReader {
 		this.statsEnabled = value;
 		return this;
 	}
-
+	
 	public void initialize() throws IOException, InterruptedException  {		
 		try {
 			super.initialize();
@@ -46,7 +46,7 @@ public class RestTableReader extends TableReader {
 	
 	public RestTableReader call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
-		Writer writer = getWriter();
+		RecordWriter writer = getWriter();
 		assert writer != null;
 		setLogContext();
 		int rowCount = 0;

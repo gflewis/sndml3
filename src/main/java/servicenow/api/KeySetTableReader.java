@@ -3,6 +3,9 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * A {@link TableReader} which attempts to read records using a {@link KeySet}.
+ */
 public class KeySetTableReader extends TableReader {
 
 	protected final JsonTableAPI jsonAPI;
@@ -69,7 +72,8 @@ public class KeySetTableReader extends TableReader {
 	public TableReader call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
 		setLogContext();
-		Writer writer = this.getWriter();
+		RecordWriter writer = this.getWriter();
+		int pageSize = this.getPageSize();
 		if (writer == null) throw new IllegalStateException("writer not defined");
 		if (allKeys == null) throw new IllegalStateException("not initialized");
 		if (pageSize <= 0) throw new IllegalStateException("invalid pageSize");

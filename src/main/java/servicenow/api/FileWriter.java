@@ -14,7 +14,7 @@ import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileWriter extends Writer {
+public class FileWriter extends RecordWriter {
 
 	public enum Format {Import, List};
 	

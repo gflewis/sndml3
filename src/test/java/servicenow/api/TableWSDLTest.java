@@ -9,10 +9,14 @@ import static org.junit.Assert.*;
 
 public class TableWSDLTest {
 
-	static Logger logger = TestingManager.getLogger(TableWSDLTest.class);
+	final Logger logger = TestingManager.getLogger(TableWSDLTest.class);
+	final Session session;
 
+	public TableWSDLTest() {
+		session = TestingManager.getDefaultProfile().getSession();
+	}
+	
 	TableWSDL getWSDL(String tablename) throws IOException {
-		Session session = TestingManager.getDefaultSession();
 		Table table = session.table(tablename);
 		TableWSDL wsdl = table.getWSDL();
 		return wsdl;
@@ -49,7 +53,6 @@ public class TableWSDLTest {
 
 	@Test
 	public void testDisplayValues() throws Exception {
-		Session session = TestingManager.getDefaultSession();
 		String tablename = "incident";
 		TableWSDL wsdl = new TableWSDL(session, tablename, true);
 		assertTrue(wsdl.canReadField("sys_updated_on"));
@@ -61,7 +64,6 @@ public class TableWSDLTest {
 
 	@Test
 	public void testDisplayValues2() throws Exception {
-		Session session = TestingManager.getDefaultSession();
 		String tablename = "incident";
 		TableWSDL wsdl = new TableWSDL(session, tablename, true);
 		assertTrue(wsdl.canReadField("sys_updated_on"));

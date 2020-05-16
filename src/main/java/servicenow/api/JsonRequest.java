@@ -140,8 +140,17 @@ public class JsonRequest extends ServiceNowRequest {
 		if (err == null) return;
 		if (err.contains("not authorized") ||
 				err.contains("insufficient rights") ||
-				err.contains("no permission"))
-			throw new InsufficientRightsException(this);
+				err.contains("no permission")) {
+			this.logResponseError(logger);
+			throw new InsufficientRightsException(this);			
+		}
+	}
+	
+	protected void checkForNoSuchRecord() throws IOException {
+		if (recordNotFound()) {
+			this.logResponseError(logger);
+			throw new NoSuchRecordException(this);					
+		}
 	}
 	
 	protected boolean recordNotFound() {

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 
 import servicenow.api.Table;
 import servicenow.api.TestingManager;
+import servicenow.api.TestingProfile;
 
 /**
  * Inactive because the tableExists method is tested in CreateTableTest
@@ -18,14 +19,14 @@ import servicenow.api.TestingManager;
 public class TableExistsTest {
 
 	@Parameters(name = "{index}:{0}")
-	public static String[] profiles() {
-		return TestingManager.allProfiles();
+	public static TestingProfile[] profiles() {
+		return TestingManager.getDatamartProfiles();
 	}
-	
+		
 	static Logger logger = TestingManager.getLogger(DBUtil.class);
 
-	public TableExistsTest(String profile) throws Exception {
-		TestingManager.loadProfile(profile, true);
+	public TableExistsTest(TestingProfile profile) throws Exception {
+		TestingManager.setProfile(this.getClass(), profile);
 	}
 	
 	@Test

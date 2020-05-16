@@ -4,8 +4,9 @@
 #
 version=3.1.0
 classdir=target/test-classes
-sndmljar=target/sndml-$version-mysql.jar
+sndmljars=target/sndml-$version-mysql.jar:target/sndml-$version-pg.jar
 junitjar=~/.m2/repository/junit/junit/4.12/junit-4.12.jar
 hamcrestjar=~/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
-classpath=.:target/test-classes:$sndmljar:$junitjar:$hamcrestjar
+classpath=.:target/test-classes:$sndmljars:$junitjar:$hamcrestjar
 java -cp $classpath org.junit.runner.JUnitCore servicenow.api.AllTests
+java -cp $classpath org.junit.runner.JUnitCore servicenow.datamart.AllTests

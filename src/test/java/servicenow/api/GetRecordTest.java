@@ -2,8 +2,6 @@ package servicenow.api;
 
 import static org.junit.Assert.*;
 import java.io.IOException;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -11,16 +9,10 @@ public class GetRecordTest {
 
 	Session session;
 	
-	@Before
-	public void setUp() throws Exception {
-		TestingManager.loadDefaultProfile();
-		session = TestingManager.getSession();
+	GetRecordTest() {
+		session = TestingManager.getDefaultProfile().getSession();
 	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
+	
 	@Ignore @Test
 	public void testRecordByKey() throws IOException {
 		String sys_id = TestingManager.getProperty("some_incident_sys_id");
