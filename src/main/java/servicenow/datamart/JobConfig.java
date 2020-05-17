@@ -86,7 +86,7 @@ public class JobConfig extends Config {
 				case "partition":
 					this.partition = asInterval(val);
 					break;
-				case "include":
+				case "columns":
 					this.includeColumns = new FieldNames(val.toString());
 					break;
 				case "exclude":
@@ -164,7 +164,7 @@ public class JobConfig extends Config {
 			break;
 		}
 		if (includeColumns != null && excludeColumns != null) 
-			configError("Cannot specify both Include and Exclude");
+			configError("Cannot specify both Columns and Exclude");
 	}
 
 	void notValid(String option) {
