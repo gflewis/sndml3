@@ -1,0 +1,2 @@
+tables:
+- {name: incident, truncate: true, exclude: "short_description"}

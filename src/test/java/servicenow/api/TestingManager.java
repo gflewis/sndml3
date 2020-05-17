@@ -1,6 +1,5 @@
 package servicenow.api;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -48,15 +47,10 @@ public class TestingManager {
 		ResourceManager.setDatabase(profile.getDatabase());
 		return profile;
 	}
-	
-	@Deprecated
-	public static TestingProfile setProfile(TestingProfile profile) {
-		currentProfile = profile;
-		return profile;		
-	}
-	
-	public static TestingProfile setDefaultProfile() {
-		return setProfile(getDefaultProfile());
+		
+	@SuppressWarnings("rawtypes")
+	public static TestingProfile setDefaultProfile(Class myclass) {
+		return setProfile(myclass, getDefaultProfile());
 	}
 	
 	public static TestingProfile getProfile() {
@@ -175,11 +169,7 @@ public class TestingManager {
 	 * Returns a File in the src/test/resources/yaml directory.
 	 * These files are used for YAML unit tests.
 	 */
-	static public File yamlFile(String name) {
-		assert name != null;
-		return new File("src/test/resources/yaml/" + name + ".yaml");
-	}
-	
+		
 	public static void banner(Logger logger, String msg) {
 		Log.banner(logger, Log.TEST, msg);
 	}

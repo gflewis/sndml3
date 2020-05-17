@@ -1,0 +1,2 @@
+tables:
+- {name: kb_knowledge, truncate: true}

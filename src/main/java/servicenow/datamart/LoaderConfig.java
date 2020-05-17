@@ -25,15 +25,15 @@ public class LoaderConfig extends Config {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	LoaderConfig(Table table) throws IOException, ConfigParseException {
+	public LoaderConfig(Table table) throws IOException, ConfigParseException {
 		tables.add(new JobConfig(table));		
 	}
 	
-	LoaderConfig(File configFile) throws IOException, ConfigParseException {
+	public LoaderConfig(File configFile) throws IOException, ConfigParseException {
 		this(new FileReader(configFile));
 	}
-	
-	LoaderConfig(Reader reader) throws IOException, ConfigParseException {
+		
+	public LoaderConfig(Reader reader) throws IOException, ConfigParseException {
 		Globals.setLoaderConfig(this);
 		root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());

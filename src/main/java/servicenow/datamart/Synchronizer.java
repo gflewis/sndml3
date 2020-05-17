@@ -133,6 +133,7 @@ public class Synchronizer extends TableReader {
 			insertWriter.setParentMetrics(this.writerMetrics);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
+			insertReader.setFields(this.fieldNames);
 			insertReader.setPageSize(this.getPageSize());
 			insertReader.setWriter(insertWriter);
 			insertWriter.open();
@@ -153,6 +154,7 @@ public class Synchronizer extends TableReader {
 			updateWriter.setParentMetrics(this.writerMetrics);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
+			updateReader.setFields(this.fieldNames);
 			updateReader.setPageSize(this.getPageSize());
 			updateReader.setWriter(updateWriter);
 			updateWriter.open();

@@ -29,14 +29,14 @@ public class GetRecordsTest {
 	final Session session;
 	
 	public GetRecordsTest(TestingProfile profile) throws IOException {
-		TestingManager.setProfile(profile);
+		TestingManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
 		this.session = profile.getSession();
 	}
 
 	@Test
 	public void testGetSingleRecord() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "testGetSingleRecord");
+		TestingManager.bannerStart("testGetSingleRecord");
 		// logger.info(Log.TEST, String.format("%s %s", profile, "testGetSingleRecord"));
 		Table tbl = session.table("cmn_department");
 		RecordList recs = tbl.api().getRecords("id", TestingManager.getProperty("some_department_id"));
@@ -49,7 +49,7 @@ public class GetRecordsTest {
 	
 	@Test
 	public void testGetEmptyRecordset() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "testGetSingleRecord");
+		TestingManager.bannerStart("testGetSingleRecord");
 		// logger.info(Log.TEST, String.format("%s %s", profile, "testGetEmptyRecordset"));
 		Table tbl = session.table("sys_user");
 		RecordList recs = tbl.api().getRecords("name", "Zebra Elephant");
@@ -58,7 +58,7 @@ public class GetRecordsTest {
 	
 	@Test
 	public void getGoodKey() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "getGoodKey");
+		TestingManager.bannerStart("getGoodKey");
 		String goodKey = TestingManager.getProperty("some_incident_sys_id");
 		Table tbl = session.table("incident");
 		Record rec = tbl.getRecord(new Key(goodKey));
@@ -68,7 +68,7 @@ public class GetRecordsTest {
 	
 	@Test 
 	public void testGetBadKey() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "testGetBadKey");
+		TestingManager.bannerStart("testGetBadKey");
 		String badKey = "00000000000000000000000000000000";
 		Table tbl = session.table("incident");
 		Record rec = tbl.getRecord(new Key(badKey));

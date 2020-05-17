@@ -51,7 +51,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	WriterMetrics getMetrics() {
 		return metrics;
 	}
-		
+
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
@@ -60,21 +60,24 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		DateTimeRange createdRange = config.getCreated();
 		
 		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
+		FieldNames fieldNames = null;
+		if (config.getIncludeColumns() != null)
+			fieldNames = config.getIncludeColumns();
+		else if (config.getExcludeColumns() != null)
+			fieldNames = table.getSchema().getFieldsMinus(config.getExcludeColumns());
 		
 		this.setLogContext();
 		logger.debug(Log.INIT, 
 			String.format("call table=%s action=%s", table.getName(), action.toString()));
 		if (config.getSqlBefore() != null) {
 			db.executeStatement(config.getSqlBefore());
-		}
-		db.createMissingTable(table, sqlTableName);
-		
+		}		
 		this.setLogContext();
 
 		if (LoaderAction.CREATE.equals(action)) {
 			db.createMissingTable(table, sqlTableName);			
 		}
-		if (LoaderAction.PRUNE.equals(action)) {
+		else if (LoaderAction.PRUNE.equals(action)) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(metrics);
 			deleteWriter.open();
@@ -101,6 +104,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			TableReader reader;
 			if (partitionInterval == null) {
 				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
+				syncReader.setFields(fieldNames);
 				syncReader.setPageSize(pageSize);
 				syncReader.initialize(createdRange);
 				reader = syncReader;
@@ -108,6 +112,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			else {
 				SynchronizerFactory factory = 
 					new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange);
+				factory.setFields(fieldNames);
 				factory.setPageSize(pageSize);
 				DatePartitionedTableReader multiReader =
 					new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
@@ -121,7 +126,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 					tableLoaderName, reader.getReaderMetrics().getExpected()));
 			reader.call();
 		}
-		else {
+		else /* Update or Insert */ {
 			db.createMissingTable(table, sqlTableName);
 			if (config.getTruncate()) db.truncateTable(sqlTableName);
 			DatabaseTableWriter writer;
@@ -147,6 +152,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			factory.setReaderName(tableLoaderName);
 			factory.setFilter(config.getFilter());
 			factory.setCreated(createdRange);
+			factory.setFields(fieldNames);
 			factory.setPageSize(pageSize);
 			TableReader reader;
 			if (partitionInterval == null) {

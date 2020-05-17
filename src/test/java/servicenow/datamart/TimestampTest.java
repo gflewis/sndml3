@@ -3,9 +3,6 @@ package servicenow.datamart;
 import servicenow.api.*;
 
 import static org.junit.Assert.*;
-
-import java.io.StringReader;
-
 import org.junit.*;
 
 import org.junit.runner.RunWith;
@@ -45,14 +42,8 @@ public class TimestampTest {
 		
 	void loadTable() throws Exception {
 		String text = String.format("tables: [{name: %s, truncate: true}]", tablename);
-		logger.info(Log.TEST, text);;
-		StringReader reader = new StringReader(text);
-		LoaderConfig config = new LoaderConfig(reader);
-		// LoaderConfig config = new LoaderConfig(LoaderConfigTest.yamlFile("load_incident_truncate"));
-		Loader loader = new Loader(config);
-		LoaderJob tableLoader = loader.jobs.get(0);
-		loader.loadTables();
-		WriterMetrics metrics = tableLoader.getMetrics();
+		TestLoader loader = new TestLoader(text);
+		WriterMetrics metrics = loader.load();
 		assertTrue(metrics.getProcessed() > 0);		
 	}
 	

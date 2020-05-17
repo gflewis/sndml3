@@ -5,13 +5,15 @@ import org.junit.Test;
 public class KeyedTableReaderTest {
 
 	Session session;
-	Table table;
-	SoapTableAPI impl;
+	
+	public KeyedTableReaderTest() {
+		TestingManager.setDefaultProfile(this.getClass());
+		session = TestingManager.getProfile().getSession();
+	}
 	
 	@Test
 	public void test() throws Exception {
-		session = TestingManager.setDefaultProfile().getSession();
-		table = session.table("incident");
+		Table table = session.table("incident");
 		SoapKeySetTableReader reader = new SoapKeySetTableReader(table);
 		reader.setFilter(EncodedQuery.all());
 		reader.setWriter(new NullWriter());
