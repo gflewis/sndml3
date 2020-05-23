@@ -1,7 +1,6 @@
 #!/bin/bash
 source sndml-setup
-yamlfile=$sndml_yaml_dir/$1.yaml
-echo jar=$sndml_jar
-echo profile=$sndml_profile
-echo yaml=$yamlfile
-java -ea -jar $sndml_jar -p $sndml_profile -y $yamlfile
+sndml_setup_profile $1
+export SNDML_YAML=$SNDML_BASE/yaml/$2.yaml
+env | grep SNDML | sort
+java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML

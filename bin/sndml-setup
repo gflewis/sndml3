@@ -1,20 +1,79 @@
-# assumes directory structure as follows:
-#   pom.xml                       
-#   profiles/xxxxx/                <- CURRENT DIRECTORY
-#   profiles/xxxxx/.sndml_profile  <- profile
-#   profiles/xxxxx/yaml/           <- yaml files
-#   profiles/xxxxx/log/            <- log files
-#   src/                           <- source code
-#   target/                        <- jar files
+#!/bin/bash
 #
-base=`pwd`
-cd ../../src
-src=`pwd`
-cd ../target
-target=`pwd`
-cd $base
-export sndml_profile=$base/.sndml_profile
-export sndml_log_dir=$base/log
-export sndml_yaml_dir=$base/yaml
-export sndml_src_dir=$src
-export sndml_jar=`sndml-jar .sndml_profile $target`
+# defines a function sndml_setup_profile
+# which sets the following environment variables
+#   SNDML_BASE
+#   SNDML_PROFILE
+#   SNDML_JAR
+#
+# assumes SNDML_HOME is predefined and structured as follows:
+#   pom.xml                       
+#   src/                           <- location of source code
+#   target/                        <- location of jar files
+#   profiles/                      <- profiles directory is excluded in .gitignore
+#   profiles/xxxxx/                <- SNDML_BASE
+#   profiles/xxxxx/.sndml_profile  <- SNDML_PROFILE
+#   profiles/xxxxx/yaml/           <- location of yaml files
+#   profiles/xxxxx/metrics/        <- location of metrics files
+#   profiles/xxxxx/log/            <- location of log files
+#
+sndml_setup_profile() {
+  # echo sndml_setup_profile $1
+  if [[ -z "$SNDML_HOME" ]]; then
+    echo SNDML_HOME not defined
+    return 1
+  fi  
+  if [[ "$1" == "." ]]
+  then
+    # assume we are in the base directory
+    export SNDML_BASE=`pwd`
+  else      
+    # assume argument is name of base directory
+    export SNDML_BASE=$SNDML_HOME/profiles/$1
+  fi
+  local filename=$SNDML_BASE/.sndml_profile
+  if [[ -r $filename ]]
+  then 
+    export SNDML_PROFILE=$filename
+  else
+    echo File not found: $filename
+    return 1
+  fi
+  sndml_setup_jar
+  # cd $SNDML_BASE
+  # if [[ ! -d $SNDML_BASE/yaml ]]; then
+  #   mkdir $SNDML_BASE/yaml
+  # fi
+  # if [[ ! -d $SNDML_BASE/metrics ]]; then
+  #   mkdir $SNDML_BASE/metrics
+  # fi
+  # if [[ ! -d $SNDML_BASE/log ]]; then
+  #   mkdir $SNDML_BASE/log
+  # fi
+}
+
+sndml_setup_jar() {
+  local url=`awk -F= '/^datamart.url/{print $2}' <$SNDML_PROFILE`
+  if [[ -z "$url" ]]
+  then
+    echo datamart.url not found in $SNDML_PROFILE
+    return 1
+  fi
+  local db=`echo $url | awk -F: '{print $2}'`
+  local tag
+  case $db in
+  oracle)     tag=ora ;;
+  postgresql) tag=pg ;;
+  mysql)      tag=mysql ;;
+  mssql)      tag=mssql ;;
+  esac
+  local jarfile=`ls $SNDML_HOME/target/sndml*-$tag.jar | tail -1`
+  if [[ -r $jarfile ]]
+  then
+    export SNDML_JAR=$jarfile
+  else
+    echo File not found: $jarfile
+    return 1
+  fi
+  return 0
+}

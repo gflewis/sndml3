@@ -1,15 +1,10 @@
 #!/bin/bash
+timestamp=`date +%Y%m%d%H%M%S`
 source sndml-setup
-yamlfile=$sndml_yaml_dir/$1.yaml
-debugxml=$sndml_src_dir/test/resources/log4j2-debug.xml
-echo jar=$sndml_jar
-echo profile=$sndml_profile
-echo log4j=$debugxml
-echo yaml=$yamlfile
-timestamp=`date +%Y%m%d%H%M`
-logfile=$1-$timestamp.log
-echo logfile=$sndml_log_dir/$logfile
-cd $sndml_log_dir
-java -ea -Dlog4j.configurationFile=$debugxml -DlogFileName=$logfile -jar $sndml_jar -p $sndml_profile -y $yamlfile
-echo
-echo logfile=$sndml_log_dir/$logfile
+sndml_setup_profile $1
+export SNDML_YAML=$SNDML_BASE/yaml/$2.yaml
+export SNDML_LOG4J=$SNDML_HOME/src/test/resources/log4j2-debug.xml
+export SNDML_LOG=$SNDML_BASE/log/$2-$timestamp.log
+env | grep SNDML | sort
+java -ea -Dlog4j.configurationFile=$SNDML_LOG4J -DlogFileName=$SNDML_LOG -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML
+echo log=$SNDML_LOG
