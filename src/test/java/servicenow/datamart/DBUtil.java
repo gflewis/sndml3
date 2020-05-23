@@ -64,6 +64,8 @@ public class DBUtil {
 	 * Drop a table if it exists
 	 */
 	void dropTable(String tablename) throws SQLException {
+		db.dropTable(tablename, true);
+		/*
 		logger.debug(Log.TEST, "dropTable " + tablename);			
 		Connection dbc = db.getConnection();
 		assertNotNull(dbc);
@@ -77,6 +79,7 @@ public class DBUtil {
 		catch (SQLException e) {
 			logger.warn(Log.TEST, tablename + " could not be dropped");
 		}
+		*/
 	}
 	
 	boolean tableExists(String tablename) throws SQLException {

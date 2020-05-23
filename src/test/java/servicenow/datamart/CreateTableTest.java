@@ -18,6 +18,7 @@ public class CreateTableTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
+		// return new TestingProfile[] {TestingManager.getDefaultProfile()};
 		return TestingManager.allProfiles();
 	}
 

@@ -208,14 +208,21 @@ public class Database {
 	void dropTable(String sqlTableName, boolean addSchema) 
 			throws SQLException {
 		if (tableExists(sqlTableName)) {
-			logger.warn(Log.INIT, String.format("dropTable: not found: %s", sqlTableName));
-		}
-		else {
 			String fullName = addSchema ? this.qualifiedName(sqlTableName) : sqlTableName;
+			logger.info(Log.INIT, String.format("dropTable: %s", fullName));
 			String sql = "DROP TABLE " + fullName;
 			Statement stmt = dbc.createStatement();
-			stmt.execute(sql);			
-		}		
+			try {
+				stmt.execute(sql);			
+			}
+			catch (SQLException e) {
+				logger.error(Log.INIT, sql, e);
+				throw e;
+			}
+		}
+		else {
+			logger.warn(Log.INIT, String.format("dropTable: not found: %s", sqlTableName));
+		}
 	}
 	
 	void createTable(Table table, String sqlTableName)
