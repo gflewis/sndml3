@@ -1,12 +1,10 @@
-#!/bin/bash
-#
-# defines a function sndml_setup_profile
+# Defines a bash function named sndml_setup_profile
 # which sets the following environment variables
 #   SNDML_BASE
 #   SNDML_PROFILE
 #   SNDML_JAR
 #
-# assumes SNDML_HOME is predefined and structured as follows:
+# Assumes SNDML_HOME is predefined and structured as follows:
 #   pom.xml                       
 #   src/                           <- location of source code
 #   target/                        <- location of jar files
@@ -40,16 +38,7 @@ sndml_setup_profile() {
     return 1
   fi
   sndml_setup_jar
-  # cd $SNDML_BASE
-  # if [[ ! -d $SNDML_BASE/yaml ]]; then
-  #   mkdir $SNDML_BASE/yaml
-  # fi
-  # if [[ ! -d $SNDML_BASE/metrics ]]; then
-  #   mkdir $SNDML_BASE/metrics
-  # fi
-  # if [[ ! -d $SNDML_BASE/log ]]; then
-  #   mkdir $SNDML_BASE/log
-  # fi
+  cd $SNDML_BASE
 }
 
 sndml_setup_jar() {
