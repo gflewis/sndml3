@@ -42,7 +42,7 @@ public class SoapTableAPI extends TableAPI {
 	 * Return a list of all the keys in the table
 	 * with extended query parameters. 
 	 * 
-	 * This method is called by {@link KeyReader}.
+	 * This method is called by {@link KeySetTableReader}.
 	 */
 	public KeySet getKeys(Parameters params) throws IOException {
 		Log.setMethodContext(table, "getKeys");

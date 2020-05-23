@@ -31,19 +31,13 @@ public abstract class TableAPI {
 		return table.getName();
 	}
 
-//	@Deprecated
-//	protected void setAPIContext(URI uri) {
-//		Log.setSessionContext(session);
-//		Log.setTableContext(table);
-//		Log.setURIContext(uri);		
-//	}
-	
+		
 	/**
 	 * Gets a record using the sys_id. 
 	 * If the record is not found then null is returned.
 	 * 
 	 * @param sys_id
-	 * @return Record if found otherwise null.
+	 * @return
 	 * @throws IOException
 	 */
  	public abstract Record getRecord(Key sys_id) throws IOException;

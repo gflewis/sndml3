@@ -8,9 +8,7 @@ import java.util.*;
 /**
  * Contains an XML document (in the form of a JDOM Element) which 
  * has been retrieved from ServiceNow.
- * The only way to obtain one of these is to use 
- * {@link Table#get(Key) Table.get()} or
- * {@link Table#getRecords(QueryFilter) Table.getRecords()}. 
+ * The only way to obtain one of these is from a {@link SoapTableAPI} method.  
  * 
  * @author Giles Lewis
  */

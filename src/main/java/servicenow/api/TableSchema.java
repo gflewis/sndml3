@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
  * This class holds the the schema or definition for a ServiceNow table.
  * The definition is read from <b>sys_dictionary</b> by the {@link Table} constructor.
  * 
- * @author Giles Lewis
- *
  */
 public class TableSchema {
 

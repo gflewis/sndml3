@@ -4,33 +4,32 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * A {@link TableReader} which attempts to read a set of records
- * using a single Web Service call.
- * <p/>
- * Use a {@link SoapPetitTableReader} only if...
+ * <p>A {@link TableReader} which attempts to read a set of records
+ * using a single Web Service call.</p>
+ * <p>This class should be used only if...</p>
  * <ul>
  * <li>the number of records to be read is small, and</li>
  * <li>there is no possibility of an access control
  * which could block the ability to read some of the records.</li>
  * </ul>
- * <p/>
- * A {@link SoapPetitTableReader} does NOT precede the first read with a getKeys call.
+ * 
+ * <p>This reader does NOT precede the first read with a getKeys call.
  * It simply starts reading the rows using first_row / last_row windowing.
  * If the number of records returned is equal to the limit,  
  * then it assumes there are more records and it keeps on reading.
  * If the number of records returned is less than the limit,
- * then it assumes it has reached the end. 
- * <p/>
- * For small result sets {@link SoapPetitTableReader} will perform better than 
+ * then it assumes it has reached the end.</p> 
+ * 
+ * <p>For small result sets this reader will perform better than 
  * {@link SoapKeySetTableReader} because it saves a Web Service call.
- * However, the performance of the {@link SoapPetitTableReader} will degrade exponentially
- * as the number of records grows.
- * <p/>
- * <b>Warning:</b> If access controls are in place, the <b>getRecords</b> method
+ * However, the performance of the this class will degrade exponentially
+ * as the number of records grows.</p>
+ * 
+ * <p><b>Warning:</b> If access controls are in place, the <b>getRecords</b> method
  * will sometimes return fewer records than the limit even though
- * there are more records to be read.  This will cause the {@link SoapPetitTableReader}
+ * there are more records to be read.  This will cause this reader
  * to terminate prematurely. Use a {@link SoapKeySetTableReader} 
- * if there is any possibility of access controls which could cause this behavior.
+ * if there is any possibility of access controls which could cause this behavior.</p>
  * 
  */
 public class SoapPetitTableReader extends TableReader {

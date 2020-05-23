@@ -199,18 +199,30 @@ public class Database {
 		ResultSet rs = meta.getColumns(null, schema, tablename, null);
 		return rs;		
 	}
-		
+
 	/**
-	 * Create a table in the target database if it does not already exist.
-	 * If the table already exists then do nothing.
-	 * @throws InterruptedException 
+	 * Drop a database table if exists.
+	 * @param sqlTableName Name of the table to be dropped.
+	 * @param addSchema If true then schema prefix will be added to the table name.
 	 */
-	void createMissingTable(Table table, String sqlTableName) 
-			throws SQLException, IOException, InterruptedException  {
+	void dropTable(String sqlTableName, boolean addSchema) 
+			throws SQLException {
+		if (tableExists(sqlTableName)) {
+			logger.warn(Log.INIT, String.format("dropTable: not found: %s", sqlTableName));
+		}
+		else {
+			String fullName = addSchema ? this.qualifiedName(sqlTableName) : sqlTableName;
+			String sql = "DROP TABLE " + fullName;
+			Statement stmt = dbc.createStatement();
+			stmt.execute(sql);			
+		}		
+	}
+	
+	void createTable(Table table, String sqlTableName)
+			throws SQLException, IOException, InterruptedException {
 		assert table != null;
-		if (sqlTableName == null) sqlTableName = table.getName();
+		assert sqlTableName != null;
 		Log.setTableContext(table);
-		if (tableExists(sqlTableName)) return;
 		Statement stmt = dbc.createStatement();
 		String createSql = generator.getCreateTable(table, sqlTableName);
 		logger.info(Log.INIT, createSql);
@@ -231,7 +243,23 @@ public class Database {
 			}
 		}
 		stmt.close();
-		commit();
+		commit();		
+	}
+	
+	/**
+	 * Create a table in the target database if it does not already exist.
+	 * If the table already exists then do nothing.
+	 */
+	void createMissingTable(Table table, String sqlTableName) 
+			throws SQLException, IOException, InterruptedException  {
+		assert table != null;
+		if (sqlTableName == null) sqlTableName = table.getName();
+		if (tableExists(sqlTableName)) {
+			return;
+		}
+		else {
+			createTable(table, sqlTableName);			
+		}
 	}
 	
 	void createMissingTable(Table table) 

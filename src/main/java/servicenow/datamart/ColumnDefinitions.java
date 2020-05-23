@@ -9,6 +9,10 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
+/**
+ * Contains SQL data type information for all columns in the table which are readable
+ * per the WSDL. 
+ */
 public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 
 	private static final long serialVersionUID = 1L;
@@ -16,9 +20,15 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 	final private Logger logger = Log.logger(this.getClass());
 
 	/**
-	 * Read the schema for a SQL table from the database.
+	 * Generate SQL data type information for all columns in the table
+	 * which are readable per the WSDL.
 	 * 
-	 */	
+	 * @param db SQL database from which metadata is collected.
+	 * @param table ServiceNow table whose WSDL will be used to establish which columns are readable.
+	 * @param sqlTableName Name of the SQL table for which metadata is collected.
+	 * @throws SQLException
+	 * @throws IOException
+	 */
 	public ColumnDefinitions(Database db, Table table, String sqlTableName) 
 			throws SQLException, IOException {
 		super();		

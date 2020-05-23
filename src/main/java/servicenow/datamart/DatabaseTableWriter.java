@@ -7,6 +7,16 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
+/**
+ * <p>A class which knows how to process records retrieved from ServiceNow.</p>
+ * <p>There are three subclasses: one for each of the three database operations.</p>
+ * <ul>
+ * <li>{@link DatabaseInsertWriter}</li>
+ * <li>{@link DatabaseUpdateWriter}</li>
+ * <li>{@link DatabaseDeleteWriter}</li>
+ * </ul>
+ *
+ */
 public abstract class DatabaseTableWriter extends RecordWriter {
 
 	final protected Database db;

@@ -2,37 +2,31 @@ package servicenow.api;
 
 
 /**
- * Encapsulates an Encoded Query.  
- * <p/>
- * {@link EncodedQuery} is used to restrict the number
+ * <p>Encapsulates an Encoded Query.</p> 
+ * 
+ * <p>{@link EncodedQuery} is used to restrict the number
  * of records return by a {@link TableReader}.  
- * The following two examples are equivalent.
- * <p/>
- * <b>Example 1:</b>
+ * The following two examples are equivalent.</p>
+ * <p><b>Example 1:</b></p>
  * <pre>
  * {@link EncodedQuery} filter = new {@link EncodedQuery}("category=network^active=true");
  * </pre>
- * <p/>
- * <b>Example 2:</b>
+ * 
+ * <p><b>Example 2:</b></p>
  * <pre>
  * {@link EncodedQuery} filter = new {@link EncodedQuery}()
  *    .{@link #addQuery}("category", "network")
  *    .{@link #addQuery}("active", "true");
  * </pre>
  * 
- * Most of the methods in the class will return the modified object
- * so that it is easy to chain calls together as in Example 2 above.
- * <p/>
- * For an explanation of encoded query syntax refer to
- * <a href="http://wiki.servicenow.com/index.php?title=Reference_Qualifiers"
- * >http://wiki.servicenow.com/index.php?title=Reference_Qualifiers</a>
- * <p/>
- * <b>Warning:</b>
+ * <p>Most of the methods in the class will return the modified object
+ * so that it is easy to chain calls together as in Example 2 above.</p>
+ * 
+ * <p><b>Warning:</b>
  * This class does NOT check the syntax of the encoded query string.
  * If you construct an encoded query with an invalid field name or
- * an invalid syntax, the behavior of ServiceNow will be to ignore it.
+ * an invalid syntax, the behavior of ServiceNow will be to ignore it.</p>
  * 
- * @author Giles Lewis
  */
 public class EncodedQuery implements Cloneable {
 

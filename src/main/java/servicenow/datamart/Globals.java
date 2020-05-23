@@ -82,9 +82,7 @@ public class Globals {
 	}
 	
 	/**
-	 * Used for testing.
-	 * @see servicenow.datamart.TestingManager
-	 * @see servicenow.datamart.DateTimeFactoryTest
+	 * Used in JUnit tests.
 	 */
 	public static void setStart(DateTime value) {
 		Globals.start = value;

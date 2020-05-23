@@ -4,16 +4,16 @@ import java.text.DateFormat;
 import java.util.Date;
 
 /**
- * The FieldValues object is used to insert or update ServiceNow tables.
- * <p/>
- * Example:
+ * <p>This object contains a collection of name/value pairs.
+ * It is used to insert or update ServiceNow tables.</p>
+ * 
+ * <p><b>Example:</b></p>
  * <pre>
  * FieldValues values = new FieldValues();
  * values.set("short_description", short_description);
  * values.set("assignment_group", assignment_group);
  * table.insert(values);
  * </pre>
- * @author Giles Lewis
  *
  */
 public class FieldValues extends Parameters {

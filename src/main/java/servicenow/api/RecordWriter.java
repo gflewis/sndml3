@@ -3,6 +3,13 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * A class which knows how to process records retrieved from ServiceNow.
+ * 
+ * Although this is normally instantiated as a {@link servicenow.datamart.DatabaseTableWriter}.
+ * there are several other subclasses.
+ *
+ */
 public abstract class RecordWriter {
 
 	protected WriterMetrics writerMetrics = new WriterMetrics();

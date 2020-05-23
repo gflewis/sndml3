@@ -5,6 +5,13 @@ import servicenow.api.*;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * A class which knows how to compare the keys and timestamps from a ServiceNow table
+ * with the keys and timestamps from a database table
+ * and figure out which records need to be inserted, which ones need to be updated,
+ * and which ones need to be deleted in the database table.
+ *
+ */
 public class Synchronizer extends TableReader {
 
 	final Database db;
@@ -36,6 +43,26 @@ public class Synchronizer extends TableReader {
 	public void initialize() throws IOException, SQLException, InterruptedException {
 		this.initialize(this.getCreatedRange());
 	}
+
+	/**
+	 * <p>This method will do the following.</p>
+	 * <ol>
+	 * <li>Read all the keys and sys_updated_on values from the SQL table 
+	 * (within the specified sys_created_on range).</li>
+	 * <li>Retrieve all keys and sys_updated_on from ServiceNow
+	 * (within the specified sys_created_on range).</li>
+	 * <li>Compare the two lists, and generate the following three new lists:
+	 * <ul>
+	 * <li>Records to be inserted</li>
+	 * <li>Records to be updated</li>
+	 * <li>Records to be deleted</li>
+	 * </ul>
+	 * </ol>
+	 * @param createdRange If not null then processing will be limited to records created in this range 
+	 * @throws IOException
+	 * @throws SQLException
+	 * @throws InterruptedException
+	 */
 	
 	public void initialize(DateTimeRange createdRange) 
 			throws IOException, SQLException, InterruptedException {

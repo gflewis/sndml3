@@ -63,7 +63,7 @@ public class Table {
 		return this.apiJSON;
 	}
 	
-	/**
+	/*
 	 * Set the default API to SOAP Web Services (XML).
 	 */
 	@Deprecated
@@ -72,7 +72,7 @@ public class Table {
 		return api;
 	}
 	
-	/**
+	/*
 	 * Set the default API to the REST Table API (JSON).
 	 */
 	@Deprecated
@@ -101,13 +101,13 @@ public class Table {
 		return api.getRecord(key);
 	}
 		
-	/**
+	/*
 	 * Retrieves a single record based on a unique field such as "name" or "number".  
 	 * This method should be used in cases where the field value is known to be unique.
 	 * If no qualifying records are found this function will return null.
 	 * If one qualifying record is found it will be returned.
 	 * If multiple qualifying records are found this method 
-	 * will throw an RowCountExceededException.
+	 * will throw an {@link RowCountExceededException}.
 	 * <pre>
 	 * {@link Record} grouprec = session.table("sys_user_group").get("name", "Network Support");
 	 * </pre>

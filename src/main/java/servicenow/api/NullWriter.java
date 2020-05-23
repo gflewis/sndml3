@@ -3,6 +3,10 @@ package servicenow.api;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * A {@link RecordWriter} which discards all input.
+ *
+ */
 public class NullWriter extends RecordWriter {
 
 	public NullWriter() {

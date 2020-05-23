@@ -156,20 +156,16 @@ public class Session {
 	}
 	
 	/**
-	 * Returns a {@link Table} object which can be used for 
-	 * get, insert, update and delete operations.
-	 * <p/>
-	 * The full schema will be retrieved from sys_dictionary 
-	 * only if you call {@link Table#getSchema()}.
+	 * <p>Returns a {@link Table} object which can be used for 
+	 * get, insert, update and delete operations.</p>
+	 * 
+	 * <p>The full schema will be retrieved from sys_dictionary 
+	 * only if you call {@link Table#getSchema()}.</p>
 	 * 	 
-	 * @param tablename 
-	 * The internal name of the table (not the label that
-	 * appears on the forms).  The table name is in all lower case letters
-	 * and may contain underscores.
-	 * @return 
-	 * {@link Table} object
-	 * @throws InvalidTableNameException 
-	 * No table with this name was found in sys_dictionary. 
+	 * @param name 
+	 * The internal name of the table (not the label that appears on the forms). 
+	 * The table name is in all lower case letters and may contain underscores.
+	 * @return {@link Table} object
 	 */
 	public Table table(String name) {
 		return new Table(this, name);

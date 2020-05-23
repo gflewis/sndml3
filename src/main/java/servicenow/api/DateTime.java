@@ -49,20 +49,23 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	private final Date dt;
 	
 	/**
-	 * Construct a DateTime from a string.
+	 * Construct a {@link DateTime} from a string.
 	 * InvalidDateTimeException will be thrown unless the value is 
 	 * "yyyy-MM-dd" or "yyyy-MM-dd HH:mm:ss".
-	 * @throws InvalidDateTimeException
+	 * @throws InvalidDateTimeException if length is not 10 or 19
+	 * or if argument cannot be converted to a Date.
 	 */
 	public DateTime(String value) throws InvalidDateTimeException {
 		this(value, value.length());
 	}
 
 	/**
-	 * Construct a DateTime from a string.
+	 * Construct a {@link DateTime} from a string.
 	 * @param value String value to be converted
-	 * @param fmtlen Specify 10 if value is "yyyy-MM-DD", 19 if value is "yyyy-MM-dd HH:mm:ss".
-	 * @throws InvalidDateTimeException
+	 * @param fmtlen Specify 10 if value is "yyyy-MM-DD".
+	 * Specify 19 if value is "yyyy-MM-dd HH:mm:ss".
+	 * @throws InvalidDateTimeException if length is not 10 or 19
+	 * or if argument cannot be converted to a Date.
 	 */
 	public DateTime(String value, int fmtlen) throws InvalidDateTimeException {
 		DateFormat df;
@@ -87,7 +90,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
 	/**
 	 * Static function to convert a string to DateTime.
-	 * @param s - String to be converted.
+	 * @param s String to be converted.
 	 * @return null if argument is null or zero length, otherwise a DateTime
 	 */
 	static public DateTime from(String s) {
@@ -116,8 +119,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	}
 	
 	/**
-	 * Construct a DateTime which is the number of seconds since 1970-01-01 00:00:00.<p/>
-	 * Warning: This constructor expects seconds, <b>not</b> milliseconds.
+	 * <p>Construct a {@link DateTime} which is the number of seconds since 1970-01-01 00:00:00.</p>
+	 * <p><b>Warning:</b> This constructor expects seconds, <b>not</b> milliseconds.</p>
 	 */
 	public DateTime(Long seconds) {
 		boolean date_only = (seconds % SEC_PER_DAY == 0);
@@ -237,22 +240,22 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	}
 		
 	/**
-	 * Returns a new DateTime which is the original object incremented
+	 * <p>Returns a new {@link DateTime} which is the original object incremented
 	 * by the specified amount of time (or decremented if the argument
-	 * is negative).<p/>
-	 * Warning: This method does <b>NOT</b> modify the original object.
-	 * DateTime objects are immutable.
+	 * is negative).</p>
+	 * <p><b>Warning:</b> This method does <b>NOT</b> modify the original object.
+	 * {@link DateTime} objects are immutable.</p>
 	 */
 	public DateTime addSeconds(int seconds) {
 		return new DateTime(this.getSeconds() + seconds);
 	}
 	
 	/**
-	 * Returns a new DateTime which is the original object decremented
+	 * <p>Returns a new {@link DateTime} which is the original object decremented
 	 * by the specified amount of time (or incremented if the argument
-	 * is negative).<p/>
-	 * Warning: This method does <b>NOT</b> modify the original object.
-	 * DateTime objects are immutable.
+	 * is negative).</p>
+	 * <p><b>Warning:</b> This method does <b>NOT</b> modify the original object.
+	 * {@link DateTime} objects are immutable.</p>
 	 */
 	public DateTime subtractSeconds(int seconds) {
 		return new DateTime(this.getSeconds() - seconds);
@@ -304,10 +307,10 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	}
 
 	/**
-	 * Returns the current local time adjusted by a slight lag.<p/>
-	 * This function is used to compensate for bugs that can occur if
+	 * <p>Returns the current local time adjusted by a slight lag.</p>
+	 * <p>This function is used to compensate for bugs that can occur if
 	 * the clock on the local machine is running faster than the clock
-	 * on the ServiceNow instance.
+	 * on the ServiceNow instance.</p>
 	 */
 	@Deprecated
 	public static DateTime now(int lagSeconds) {
