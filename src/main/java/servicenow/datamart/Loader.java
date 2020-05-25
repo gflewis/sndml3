@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 public class Loader {
 
+	final Session session;
+	final Database database;
 	LoaderConfig config;
 	int threads;
 	File metricsFile = null;
@@ -40,40 +42,64 @@ public class Loader {
 			throw new CommandOptionsException("Cannot specify both --table and --config");
 		Session session = new Session(Globals.getProperties());
 		Database datamart = new Database(Globals.getProperties());
-		ResourceManager.setSession(session);
-		ResourceManager.setDatabase(datamart);
+		// ResourceManager.setSession(session);
+		// ResourceManager.setDatabase(datamart);
 		// TODO Document property session_verify
 		if (Globals.getPropertyBoolean("session_verify",  false)) session.verify();
 		if (Globals.hasOptionValue("t")) {
 			// Single table load
 			String tablename = Globals.getOptionValue("t");
 			Table table = session.table(tablename);
-			Loader loader = new Loader(table);
+			Loader loader = new Loader(table, datamart);
 			loader.loadTables();
 		}
 		if (Globals.hasOptionValue("y")) {
 			File configFile = new File(Globals.getOptionValue("y"));
 			LoaderConfig config = new LoaderConfig(configFile);
-			Loader loader = new Loader(config);
+			Loader loader = new Loader(session, datamart, config);
 			loader.loadTables();			
 		}
 	}
 	
-	Loader(Table table) {
-		jobs.add(new LoaderJob(table));
+	Loader(Table table, Database database) {
+		this.session = table.getSession();
+		this.database = database;
+		jobs.add(new LoaderJob(table, database));
 	}
 	
-	Loader(LoaderConfig config) {
+	Loader(Session session, Database database, LoaderConfig config) {
+		this.session = session;
+		this.database = database;
 		this.config = config;
 		this.threads = config.getThreads();
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = Globals.getMetricsFile();
 		for (JobConfig jobConfig : config.getJobs()) {
-			jobs.add(new LoaderJob(jobConfig, loaderMetrics));
+			jobs.add(new LoaderJob(this, jobConfig));
 		}
 	}
 	
-	public void loadTables() throws SQLException, IOException, InterruptedException {
+	Loader(ConnectionProfile profile, LoaderConfig config) {
+		this(profile.getSession(), profile.getDatabase(), config);		
+	}
+	
+	Session getSession() {
+		return session;
+	}
+	
+	Database getDatabase() {
+		return database;
+	}
+	
+	WriterMetrics getMetrics() {
+		return loaderMetrics;
+	}
+	
+	LoaderJob lastJob() {
+		return jobs.get(jobs.size() - 1);
+	}
+	
+	public WriterMetrics loadTables() throws SQLException, IOException, InterruptedException {
 		Log.setGlobalContext();
 		loaderMetrics.start();
 		if (threads > 1) {
@@ -96,6 +122,7 @@ public class Loader {
 		Log.setGlobalContext();
 		loaderMetrics.finish();
 		if (metricsFile != null) writeAllMetrics();
+		return loaderMetrics;
 	}
 	
 	void writeAllMetrics() throws IOException {

@@ -1,20 +1,23 @@
 package servicenow.datamart;
 
-import servicenow.api.*;
-
 import static org.junit.Assert.*;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import servicenow.api.*;
 
 @RunWith(Parameterized.class)
 public class PruneTest {
 
+	final TestingProfile profile;
+	final Logger logger = TestingManager.getLogger(this.getClass());
+	
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
 		return TestingManager.getDatamartProfiles();
@@ -25,9 +28,13 @@ public class PruneTest {
 		TestingManager.clearAll();
 	}
 	
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+	@After
+	public void closeProfile() {
+		profile.close();
+	}
+		
 	public PruneTest(TestingProfile profile) throws Exception {
+		this.profile = profile;
 		TestingManager.setProfile(this.getClass(), profile);
 	}
 	
@@ -55,7 +62,7 @@ public class PruneTest {
 		config.setAction(LoaderAction.PRUNE);
 		config.setSince(t0);
 		logger.info(Log.TEST, "PRUNE " + config.getName());
-		LoaderJob loader = new LoaderJob(config, null);
+		LoaderJob loader = new LoaderJob(profile, config);
 		loader.call();
 	}
 

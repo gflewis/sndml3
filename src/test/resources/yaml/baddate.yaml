@@ -1,3 +1,0 @@
-tables:
-- {name: incident, target: incident_2017, created: [2017-01-01, yellow]}
-- {name: problem, since: 2017-10-15}

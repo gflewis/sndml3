@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -23,8 +25,13 @@ public class Session {
 	private String username;
 	private UsernamePasswordCredentials userPassCreds;
 	private CredentialsProvider credsProvider = null;
+	private ConcurrentHashMap<String,TableSchema> schemaCache = 
+			new ConcurrentHashMap<String,TableSchema>();
+	private ConcurrentHashMap<String,TableWSDL> wsdlCache = 
+			new ConcurrentHashMap<String,TableWSDL>();
 	final private BasicCookieStore cookieStore = new BasicCookieStore();
 	CloseableHttpClient client;
+	
 
 	final private Logger logger = Log.logger(this.getClass());
 		
@@ -121,6 +128,36 @@ public class Session {
 		return getInstance().getHost();
 	}
 
+	/**
+	 * Generate {@link TableSchema} or retrieve from cache.
+	 */
+	public TableSchema getSchema(String tablename) 
+			throws InvalidTableNameException, IOException, InterruptedException {
+		if (schemaCache.containsKey(tablename)) 
+			return schemaCache.get(tablename);
+		String saveJob = Log.getJobContext();
+		Log.setJobContext(tablename + ".schema");		
+		Table table = table(tablename);
+		TableSchema schema = new TableSchema(table);
+		schemaCache.put(tablename, schema);
+		Log.setJobContext(saveJob);
+		return schema;
+	}
+	
+	/**
+	 * Generate {@link TableWSDL} or retrieve from cache.
+	 */
+	public TableWSDL getWSDL(String tablename) throws IOException {
+		if (wsdlCache.containsKey(tablename)) 
+			return wsdlCache.get(tablename);
+		String saveJob = Log.getJobContext();
+		Log.setJobContext(tablename + ".wsdl");		
+		TableWSDL wsdl = new TableWSDL(this, tablename);
+		wsdlCache.put(tablename, wsdl);
+		Log.setJobContext(saveJob);						
+		return wsdl;
+	}
+	
 	public Session verify() throws IOException, InterruptedException {
 		Table user = verify("sys_user");
 		assert this.username != null;

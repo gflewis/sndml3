@@ -9,29 +9,22 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import servicenow.api.Session;
-import servicenow.api.TestingManager;
 
 @RunWith(Parameterized.class)
 public class InsertTest {
 
+	final TestingProfile profile;
+	final Logger logger = TestingManager.getLogger(this.getClass());
+	final TestFolder folder = new TestFolder("yaml");
+	
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
 		return TestingManager.allProfiles();
 	}
-		
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
-	final TestingProfile profile;
-	final Session session;
-	final Database database;
-	
+			
 	public InsertTest(TestingProfile profile) throws Exception {
 		TestingManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
-		this.session = profile.getSession();
-		this.database = profile.getDatabase();
 	}
 
 	@AfterClass
@@ -41,12 +34,12 @@ public class InsertTest {
 
 	@Test
 	public void testInsert() throws Exception {
-		YamlFile yaml = new YamlFile("load_incident_truncate");		
+		YamlFile yaml = folder.getYaml("load_incident_truncate");		
 		LoaderConfig config = new LoaderConfig(yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(LoaderAction.INSERT, job.getAction());
-		LoaderJob loader = new LoaderJob(job, null);
+		LoaderJob loader = new LoaderJob(profile, job);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();
 		int processed = metrics.getProcessed();
@@ -59,9 +52,9 @@ public class InsertTest {
 
 	@Test
 	public void testInsertTwice() throws Exception {
-		YamlFile yaml = new YamlFile("load_incident_twice");
+		YamlFile yaml = folder.getYaml("load_incident_twice");
 		LoaderConfig config = new LoaderConfig(yaml);
-		Loader loader = new Loader(config);
+		Loader loader = new Loader(profile, config);
 		LoaderJob job1 = loader.jobs.get(0);
 		LoaderJob job2 = loader.jobs.get(1);
 		loader.loadTables();

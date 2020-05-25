@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class TimestampTest {
@@ -19,17 +18,18 @@ public class TimestampTest {
 		return TestingManager.getDatamartProfiles();
 	}
 	
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final Logger logger = TestingManager.getLogger(this.getClass());
 	final String tablename = "incident";
+	final TestingProfile profile;
 	final Session session;
 	final Database database;
 	final DBUtil util;	
 	
 	public TimestampTest(TestingProfile profile) throws Exception {
-		// TestingProfile profile = TestingManager.getDefaultProfile();
+		this.profile = profile;
+		this.session = profile.getSession();
+		this.database = profile.getDatabase();
 		TestingManager.setProfile(this.getClass(), profile);
-		session = profile.getSession();
-		database = profile.getDatabase();
 		util = new DBUtil(database);
 		util.dropTable(tablename);
 		database.createMissingTable(session.table(tablename));
@@ -39,17 +39,26 @@ public class TimestampTest {
 	public static void clear() throws Exception {
 		TestingManager.clearAll();
 	}
-		
+
+	@After
+	public void closeProfile() {
+		profile.close();
+	}
+	
 	void loadTable() throws Exception {
-		String text = String.format("tables: [{name: %s, truncate: true}]", tablename);
-		TestLoader loader = new TestLoader(text);
-		WriterMetrics metrics = loader.load();
+		Table table = session.table(tablename);
+		database.truncateTable(table.getName());
+		Loader loader = new Loader(table, profile.getDatabase());
+		loader.loadTables();
+		WriterMetrics metrics = loader.lastJob().getMetrics();
 		assertTrue(metrics.getProcessed() > 0);		
 	}
 	
 	@Test
 	public void testIncidentTimestamp() throws Exception {
 		TestingManager.bannerStart("testIncidentTimestamps");
+		Session session = profile.getSession();
+		Database database = profile.getDatabase();
 		Table tbl = session.table(tablename);
 		database.createMissingTable(tbl, tablename);
 		util.truncateTable(tablename);
@@ -60,7 +69,7 @@ public class TimestampTest {
 		config.setFilter(new EncodedQuery("sys_id=" + sys_id));
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
 		config.setCreated(emptyRange);
-		LoaderJob loader = new LoaderJob(config, null);
+		LoaderJob loader = new LoaderJob(profile, config);
 		loader.call();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new Key(sys_id));
@@ -68,9 +77,11 @@ public class TimestampTest {
 		assertEquals(created, dbcreated.toString());		
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testGetTimestamps() throws Exception {
 		TestingManager.bannerStart("testGetTimestamps");
+		Session session = profile.getSession();
+		Database database = profile.getDatabase();
 		loadTable();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		TimestampHash timestamps = reader.getTimestamps(tablename);

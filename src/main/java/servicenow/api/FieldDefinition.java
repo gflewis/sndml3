@@ -32,8 +32,6 @@ public class FieldDefinition {
 		if (type == null) 
 			throw new AssertionError(String.format(
 				"Field \"%s.%s\" has no type. Check sys_dictionary read permissions.", table.getName(), name));  
-//		assert name != null : "Field has no name";
-//		assert type != null : "Field " + name + " has no type";
 	}
 
 	/**

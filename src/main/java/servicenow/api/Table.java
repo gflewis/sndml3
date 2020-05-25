@@ -117,24 +117,16 @@ public class Table {
 	 */
 	@Deprecated
 	public Record getRecord(String fieldname, String fieldvalue)
-			throws IOException, RowCountExceededException {
+			throws IOException, TooManyRowsException {
 		return api.getRecord(fieldname, fieldvalue);
 	}
 	
-	public TableWSDL getWSDL() throws IOException {		
-		String saveJob = Log.getJobContext();
-		Log.setJobContext(getName() + ".WSDL");
-		TableWSDL result = soap().getWSDL();
-		Log.setJobContext(saveJob);
-		return result;
+	public TableWSDL getWSDL() throws IOException {
+		return session.getWSDL(getName());
 	}
 	
 	public TableSchema getSchema() throws IOException, InterruptedException {
-		String saveJob = Log.getJobContext();
-		Log.setJobContext(getName() + ".schema");
-		TableSchema result = new TableSchema(this);
-		Log.setJobContext(saveJob);
-		return result;
+		return session.getSchema(getName());
 	}
 		
 }

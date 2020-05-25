@@ -1,40 +1,33 @@
 package servicenow.api;
 
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-import servicenow.api.KeySet;
-import servicenow.api.Session;
-import servicenow.api.Table;
+import org.slf4j.Logger;
 
 import static org.junit.Assert.*;
-import java.io.IOException;
 
-@RunWith(Parameterized.class)
+import org.junit.Test;
+
 public class GetKeysTest {
 
-	@Parameters(name = "{index}:{0}")
-	public static TestingProfile[] profiles() {
-		return TestingManager.getProfiles("mydevsoap mydevjson");
-	}
-	
-	TestingProfile profile;
-		     
-	public GetKeysTest(TestingProfile profile) {
-		this.profile = profile;
-	}
-	
-	@Test
-	public void testAllKeys() throws IOException {
-		Session session = profile.getSession();
-		Table inc = session.table("cmn_department");
-		KeySet keys = (profile.getName().contains("soap")) ? 
-			inc.soap().getKeys() :
-			inc.json().getKeys();
-		assertNotNull(keys);
-		assertTrue("keys.size() must be greater than 0", keys.size() > 0);
+	final TestingProfile profile;
+	final Logger logger = TestingManager.getLogger(this.getClass());
+				     
+	public GetKeysTest() {
+		this.profile = TestingManager.getDefaultProfile();
 	}
 
+	@Test
+	public void test() throws Exception {
+		Session session = profile.getSession();
+		Table table = session.table("cmdb_ci");
+		SoapTableAPI apiSoap = new SoapTableAPI(table);
+		JsonTableAPI apiJson = new JsonTableAPI(table);
+		RestTableAPI apiRest = new RestTableAPI(table);
+		TableStats stats = apiRest.getStats(null, false);
+		int numRecs = stats.getCount();
+		KeySet ksSoap = apiSoap.getKeys();
+		assertEquals(numRecs, ksSoap.size());
+		KeySet ksJson = apiJson.getKeys();
+		assertEquals(numRecs, ksJson.size());		
+	}
+	
 }

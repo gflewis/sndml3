@@ -12,7 +12,7 @@ public class TestingProfile extends ConnectionProfile {
 	private String name;
 	
 	public TestingProfile(String profileName) throws IOException {
-		super(getPath(profileName));
+		super(getProfilePath(profileName));
 		name = profileName;
 	}
 	
@@ -20,7 +20,7 @@ public class TestingProfile extends ConnectionProfile {
 	 * Get a file named ".sndml_profile" from the directory profiles/profileName/
 	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
 	 */
-	private static File getPath(String profileName) {
+	private static File getProfilePath(String profileName) {
 		Path directory = Paths.get("profiles", profileName);
 		File file = directory.resolve(".sndml_profile").toFile();
 		return file;

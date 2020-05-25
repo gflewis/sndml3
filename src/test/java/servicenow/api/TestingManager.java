@@ -8,8 +8,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.datamart.Globals;
-import servicenow.datamart.ResourceManager;
+import servicenow.datamart.YamlFile;
 
 public class TestingManager {
 	
@@ -43,8 +42,8 @@ public class TestingManager {
 	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
 		classUnderTest = myclass;
 		currentProfile = profile;
-		ResourceManager.setSession(profile.getSession());
-		ResourceManager.setDatabase(profile.getDatabase());
+		// ResourceManager.setSession(profile.getSession());
+		// ResourceManager.setDatabase(profile.getDatabase());
 		return profile;
 	}
 		
@@ -87,32 +86,6 @@ public class TestingManager {
 		return getProfiles(getProperty("datamart.profile_list"));
 	}
 
-	@Deprecated
-	public static Session getSession() throws TestingException {
-		return currentProfile.getSession();
-	}
-	
-	@Deprecated
-	public static Session getDefaultSession() throws TestingException {
-		return getDefaultProfile().getSession();
-	}
-	
-	@Deprecated
-	public static void loadProfile(TestingProfile profile, boolean showBanner) throws TestingException {
-		// currentProfile = profile;
-		if (showBanner) 
-			Log.banner(logger, Log.INIT, "loadProfile " + profile.getName());
-		else
-			logger.info(Log.INIT, "loadProfile " + profile.getName());
-		ResourceManager.initialize(profile.getProperties());
-		Globals.setStart(DateTime.now());
-	}
-	
-	@Deprecated
-	public static void loadProfile(TestingProfile profile) throws TestingException {
-		loadProfile(profile, false);
-	}
-	
 	static Hashtable<String,Logger> myLoggers = new Hashtable<String,Logger>();
 	
 	@SuppressWarnings("rawtypes")
@@ -124,7 +97,6 @@ public class TestingManager {
 		return logger;
 	}
 
-	
 	/**
 	 * This function is called during TestingManager initialization.
 	 * If it fails, then it is bad news. (Note the System.exit(-1).)
@@ -175,23 +147,29 @@ public class TestingManager {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static void bannerStart(Class cls, TestingProfile profile, String testName) {
+	public static void bannerStart(Class cls, String testName, 
+			TestingProfile profile, YamlFile config) {
 		Logger logger = getLogger(cls);
-		String msg = "Begin: " + testName + " Profile: " + profile.getName();
-		banner(logger, msg);		
+		StringBuilder msg = new StringBuilder("Begin:" + testName);
+		if (profile != null) msg.append(" Profile:" + profile.getName());
+		if (config != null) msg.append(" Config:" + config.getName());
+		banner(logger, msg.toString());		
 	}
 
 	@SuppressWarnings("rawtypes")
 	public static void bannerStart(Class cls, String testName) {
-		Logger logger = getLogger(cls);
-		String msg = "Begin: " + testName + " Profile: " + currentProfile.getName();
-		banner(logger, msg);		
+		bannerStart(cls, testName, null, null);
 	}
 	
 	public static void bannerStart(String testName) {
 		assert classUnderTest != null;
 		assert currentProfile != null;
-		bannerStart(classUnderTest, currentProfile, testName);
+		bannerStart(classUnderTest, testName, currentProfile, null);
+	}
+	
+	@SuppressWarnings("rawtypes")	
+	public static void bannerStart(Class cls, String testName, YamlFile config) {
+		bannerStart(cls, testName, null, config);
 	}
 	
 	@Deprecated
@@ -200,8 +178,8 @@ public class TestingManager {
 	}
 	
 	@Deprecated
-	public static void banner(Logger logger, @SuppressWarnings("rawtypes") Class klass, String msg) {
-		banner(logger, klass.getSimpleName(), msg);
+	public static void banner(Logger logger, @SuppressWarnings("rawtypes") Class cls, String msg) {
+		banner(logger, cls.getSimpleName(), msg);
 	}
 		
 	public static String randomName(int length) {

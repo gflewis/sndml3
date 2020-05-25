@@ -20,20 +20,37 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	LoaderJob(Table table) throws ConfigParseException {
-		this(new JobConfig(table), null);
+	LoaderJob(Table table, Database database) throws ConfigParseException {
+		this.config = new JobConfig(table);
+		this.session = table.getSession();
+		this.db = database;
+		this.table = table;
+		this.sqlTableName = config.getTargetName();
+		this.tableLoaderName = config.getName();
+		this.metrics = new WriterMetrics();
 	}
 	
-	LoaderJob(JobConfig config, WriterMetrics parentMetrics) throws ConfigParseException {
+	LoaderJob(Loader parent, JobConfig config) throws ConfigParseException {
 		config.validate();
-		this.session = ResourceManager.getSession();
-		this.db = ResourceManager.getDatabase();
+		this.session = parent.getSession();
+		this.db = parent.getDatabase();
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTargetName();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
-		this.metrics.setParent(parentMetrics);
+		this.metrics.setParent(parent.getMetrics());
 		this.config = config;
+	}
+	
+	LoaderJob(ConnectionProfile profile, JobConfig config) {
+		config.validate();
+		this.session = profile.getSession();
+		this.db = profile.getDatabase();
+		this.table = session.table(config.getSource());
+		this.sqlTableName = config.getTargetName();
+		this.tableLoaderName = config.getName();
+		this.metrics = new WriterMetrics();
+		this.config = config;		
 	}
 
 	private void setLogContext() {
@@ -74,8 +91,8 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		}		
 		this.setLogContext();
 
-		if (LoaderAction.CREATE.equals(action)) {
-			db.createMissingTable(table, sqlTableName);			
+		if (LoaderAction.DROPTABLE.equals(action)) {
+			db.dropTable(sqlTableName, true);
 		}
 		else if (LoaderAction.PRUNE.equals(action)) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
@@ -182,8 +199,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, processed));
 		Integer minRows = config.getMinRows();
 		if (minRows != null && processed < minRows)
-			throw new ServiceNowException(
-				String.format("%d rows were processed (MinRows=%d)",  processed, minRows));		
+			throw new TooFewRowsException(table, minRows, processed);
 		if (config.getSqlAfter() != null) {
 			db.executeStatement(config.getSqlAfter());
 		}

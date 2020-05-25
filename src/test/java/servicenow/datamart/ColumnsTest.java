@@ -2,8 +2,7 @@ package servicenow.datamart;
 
 import static org.junit.Assert.*;
 
-import java.sql.SQLException;
-
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -11,6 +10,7 @@ import servicenow.api.*;
 
 public class ColumnsTest {
 	
+	final static TestFolder folder = new TestFolder("yaml");
 	final TestingProfile profile;
 	final DBUtil util;
 	
@@ -24,23 +24,28 @@ public class ColumnsTest {
 	public static void clear() throws Exception {
 		TestingManager.clearAll();
 	}		
-	
+
+	@After
+	public void closeProfile() {
+		profile.close();
+	}
+			
 	@Test
-	public void test() throws SQLException {
-		TestLoader loader1 = new TestLoader(new YamlFile("incident_include_columns"));
-		WriterMetrics metrics1 = loader1.load();
+	public void test() throws Exception {
+		Loader loader1 = folder.getYaml("incident_include_columns").getLoader(profile);
+		WriterMetrics metrics1 = loader1.loadTables();
 		int processed = metrics1.getProcessed();
 		assertTrue(processed > 0);
 		assertEquals(processed, util.sqlCount("select count(*) from incident"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where short_description is null"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where state is not null"));
-		TestLoader loader2 = new TestLoader(new YamlFile("load_incident_truncate"));
-		loader2.load();
+		Loader loader2 = folder.getYaml("load_incident_truncate").getLoader(profile);
+		loader2.loadTables();
 		assertEquals(processed, util.sqlCount("select count(*) from incident"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where short_description is not null"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where state is not null"));
-		TestLoader loader3 = new TestLoader(new YamlFile("incident_exclude_columns"));
-		loader3.load();
+		Loader loader3 = folder.getYaml("incident_exclude_columns").getLoader(profile);
+		loader3.loadTables();
 		assertEquals(processed, util.sqlCount("select count(*) from incident"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where short_description is null"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where state is not null"));

@@ -18,13 +18,22 @@ import org.slf4j.Logger;
 
 import servicenow.api.*;
 
+/**
+ * <p>Wrapper class for a <tt>javasql.Connection</tt>.
+ * </p>
+ * <p>When this object is instantiated, it will execute any SQL statements
+ * from the <tt>&lt;initialize&gt;</tt> section of <tt>sqltemplates.xml</tt>.
+ * These statements should be used to ensure that the session time zone is GMT
+ * and the date format is <tt>YYYY-MM-DD HH24:MI:SS</tt>.
+ * </p>
+ * 
+ */
 public class Database {
 
 	private final Logger logger = Log.logger(this.getClass());
 	private final URI dbURI;
 	private final String dbuser;
 	private final boolean autocommit;
-	private final String dialect;
 	private final String schema;
 	private final Generator generator;
 	private Connection dbc = null;
@@ -37,7 +46,6 @@ public class Database {
 		this.dbuser = props.getProperty("datamart.username");
 		String dbpass = props.getProperty("datamart.password", "");
 		schema = props.getProperty("datamart.schema");
-		dialect = props.getProperty("datamart.dialect");
 		
 		assert dbc == null;
 		assert dburl != null;
@@ -47,10 +55,7 @@ public class Database {
 		if (schema != null) logmsg += " schema=" + schema;
 		logger.info(Log.INIT, logmsg);
 		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		if (dialect != null && dialect.length() > 0)
-			this.generator = new Generator(dialect, schema);
-		else
-			this.generator = new Generator(dbURI, schema);
+		this.generator = new Generator(this, props);
 		this.autocommit = this.generator.getAutoCommit();
 		this.initialize();
 		assert dbc != null;
@@ -73,17 +78,8 @@ public class Database {
 		}
 		stmt.close();
 		commit();		
-		// TODO: batch inserts
-//		if (batchInserts) {
-//			if (!meta.supportsBatchUpdates()) {
-//				logger.warn("batch inserts not supported");
-//				batchInserts = false;
-//			}
-//		}
-//		logger.debug("batch_inserts=" + batchInserts);
 	}
-	
-	
+		
 	void close() throws SQLException {
 		logger.info(Log.FINISH, "Database connection closed");
 		this.dbc.close();
@@ -201,7 +197,8 @@ public class Database {
 	}
 
 	/**
-	 * Drop a database table if exists.
+	 * <p>Drop a database table if exists.</p>
+	 * <p>This method is used for JUnit tests. It will always generate a warning in the log.</p>
 	 * @param sqlTableName Name of the table to be dropped.
 	 * @param addSchema If true then schema prefix will be added to the table name.
 	 */
@@ -209,7 +206,7 @@ public class Database {
 			throws SQLException {
 		if (tableExists(sqlTableName)) {
 			String fullName = addSchema ? this.qualifiedName(sqlTableName) : sqlTableName;
-			logger.info(Log.INIT, String.format("dropTable: %s", fullName));
+			logger.warn(Log.INIT, String.format("dropTable: %s", fullName));
 			String sql = "DROP TABLE " + fullName;
 			Statement stmt = dbc.createStatement();
 			try {

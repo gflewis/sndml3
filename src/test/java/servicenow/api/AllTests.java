@@ -14,6 +14,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	SessionVerificationTest.class,
 	TableWSDLTest.class,
 	TableSchemaTest.class,
+	GetKeysTest.class,
 	RestTableReaderTest.class,
 	SetFieldsTest.class,
 	CRUDTest.class,

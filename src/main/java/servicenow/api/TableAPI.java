@@ -98,7 +98,7 @@ public abstract class TableAPI {
 		String msg = String.format("get %s=%s returned %d records", fieldname, fieldvalue, size);
 		logger.debug(Log.RESPONSE, msg);
 		if (size == 0) return null;
-		if (size > 1) throw new RowCountExceededException(getTable(), msg);
+		if (size > 1) throw new TooManyRowsException(getTable(), 1, size); 
 		return result.get(0);
 	}
 	

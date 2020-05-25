@@ -84,8 +84,7 @@ public class RestTableReader extends TableReader {
 			if (isFinished(recs.size(), rowCount)) finished = true;
 			logger.debug(Log.PROCESS, String.format("processed %d rows so far", rowCount));
 			if (maxRows != null && rowCount > maxRows)
-				throw new RowCountExceededException(table, 
-					String.format("processed %d rows (MaxRows=%d)", rowCount, maxRows));
+				throw new TooManyRowsException(table, maxRows, rowCount);
 		}
 		if (statsEnabled) {
 			if (rowCount != getExpected()) {

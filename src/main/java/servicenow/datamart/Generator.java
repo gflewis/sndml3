@@ -1,50 +1,106 @@
 package servicenow.datamart;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
+import org.apache.commons.cli.*;
+import org.jdom2.*;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 
 import servicenow.api.*;
 
+/**
+ * A class which knows how to generate SQL statements (as strings)
+ * based on the ServiceNow schema and information in the <tt>templates.xml</tt> file.
+ *
+ */
 public class Generator {
 
 	enum NameCase {UPPER, LOWER, AUTO};
 	enum NameQuotes {DOUBLE, SQUARE, NONE};
 	
+	private final Document xmldocument;
 	private final Element dialectTree;
 	private final boolean autocommit;
 	private final NameCase namecase; 
 	private final NameQuotes namequotes;
 	private final String schemaName;
-	private final NameMap namemap;;
+	private final NameMap namemap;
 	
 	Logger logger = Log.logger(this.getClass());
-
-	static Document xmldocument = null;
 	
+	/**
+	 * Generate a Create Table statement.
+	 * 
+	 * @param args -p <i>profile</i> -t <i>tablename</i>
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
-		Globals.initialize(args);
-		Session session = Globals.getSession();
-		String tablename = Globals.getArg(0);
+		Options options = new Options();
+		options.addOption(Option.builder("p").longOpt("profile").required(true).hasArg().
+				desc("Profile file name (required)").build());
+		options.addOption(Option.builder("t").longOpt("table").required(true).hasArg().
+				desc("Table name (required)").build());
+		options.addOption(Option.builder("o").longOpt("output").required(false).hasArg().
+				desc("Table name (required)").build());		
+		DefaultParser parser = new DefaultParser();
+		CommandLine cmdline = parser.parse(options,  args);
+		String profilename = cmdline.getOptionValue("p");
+		String tablename = cmdline.getOptionValue("t");
+		PrintStream output = cmdline.hasOption("o") ? 
+			new PrintStream(new File(cmdline.getOptionValue("o"))) : System.out;
+		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
+		Session session = profile.getSession();
 		Table table = session.table(tablename);
-		Generator generator = new Generator("mysql", null);
-		System.out.println(generator.getCreateTable(table, tablename));
+		Generator generator = new Generator(profile);
+		String sql = generator.getCreateTable(table);
+		output.print(sql);		
 	}
 
+	public Generator(ConnectionProfile profile) {
+		this(profile.getDatabase(), profile.getProperties());
+	}
+	
+	public Generator(Database database, Properties profileProps) {
+		String schemaName = profileProps.getProperty("datamart.schema");
+		String dialectName = profileProps.getProperty("datamart.dialect");	
+		try {
+			InputStream sqlConfigStream;
+			// TODO Update Wiki Docs
+			String path = Globals.getProperty("templates");
+			if (path == null) 
+				sqlConfigStream = ClassLoader.getSystemResourceAsStream("sqltemplates.xml");
+			else
+				sqlConfigStream = new FileInputStream(new File(path));
+			SAXBuilder xmlbuilder = new SAXBuilder();
+			xmldocument = xmlbuilder.build(sqlConfigStream);
+		} 
+		catch (IOException | JDOMException e2) {
+			throw new ResourceException(e2);
+		}
+		
+		if (dialectName == null || dialectName.length() == 0) 
+			this.dialectTree = getProtocolTree(database.getURI());
+		else
+			this.dialectTree = getDialectTree(dialectName);
+		
+		this.schemaName = schemaName;
+		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
+		
+		Element dialogProps = dialectTree.getChild("properties");
+				
+		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
+		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
+		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
+
+		
+		logger.info(Log.INIT, String.format("dialect=%s schema=%s namecase=%s namequotes=%s", 
+				getDialectName(), getSchemaName(), namecase.toString(), namequotes.toString()));
+	}
+	
+	/*
 	public Generator(URI dbURI, String schemaName) {
 		this(getTree(dbURI), schemaName);
 	}
@@ -90,13 +146,11 @@ public class Generator {
 		assert xmldocument != null;
 		return xmldocument;	
 	}
+	*/
 	
-	static Element getTree(URI dbURI) {
-		// TODO Update Wiki Docs
-		String dialectName = Globals.getProperty("dialect");
-		if (dialectName != null) return getTree(dialectName);
+	Element getProtocolTree(URI dbURI) {
 		String protocol = Database.getProtocol(dbURI);
-		ListIterator<Element> children = getDocument().getRootElement().getChildren().listIterator();
+		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
 			Element tree = children.next();
 			if (tree.getName().equals("sql")) {
@@ -108,11 +162,11 @@ public class Generator {
 				}
 			}
 		}
-		return getTree("default");
+		return getDialectTree("default");
 	}
 	
-	static Element getTree(String dialectName) {
-		ListIterator<Element> children = getDocument().getRootElement().getChildren().listIterator();
+	Element getDialectTree(String dialectName) {
+		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
 			Element tree = children.next();
 			if (tree.getName().equals("sql")) {
@@ -234,7 +288,12 @@ public class Generator {
 		return replaceVars(sql, myvars);
 	}
 	
+	String getCreateTable(Table table) throws IOException, InterruptedException {
+		return getCreateTable(table, table.getName());
+	}
+	
 	String getCreateTable(Table table, String sqlTableName) throws IOException, InterruptedException {
+		assert sqlTableName != null;
 		// We may be pulling the schema from a different ServiceNow instance
 		TableSchema tableSchema = table.getSchema();
 		TableWSDL tableWSDL = table.getWSDL();

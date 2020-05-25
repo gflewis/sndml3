@@ -3,34 +3,54 @@ package servicenow.datamart;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import servicenow.api.Log;
 import servicenow.api.Session;
 
+/**
+ * <p>A {@link ConnectionProfile} holds connection credentials for a ServiceNow instance
+ * and a JDBC database as read from Properties file.</p>
+ * 
+ * <p>When this object is initialized,
+ * and value which is enclosed in backticks will be passed to <tt>Runtime.exec()</tt>
+ * for evaluation.</p>
+ *
+ */
 public class ConnectionProfile {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Properties properties = new Properties();
-	private final File file;
+	private String pathname; // file used to initialize this object
 	private Session session;
 	private Database database;
 	
-	public ConnectionProfile(File path) throws IOException {
-		file = path;
-		logger.info(Log.INIT, "Load profile " + file.getAbsolutePath());
-		FileInputStream stream = new FileInputStream(file);
+	public ConnectionProfile(File profile) throws IOException {
+		pathname = profile.getAbsolutePath();
+		logger.info(Log.INIT, "Load profile " + profile.getAbsolutePath());
+		loadProperties(new FileInputStream(profile));
+	}
+
+	/**
+	 * Load properties from an InputStream into this {@link ConnectionProfile}.
+	 * Any value which is inclosed in backticks will be passed to Runtime.exec()
+	 * for evaluation.
+	 * 
+	 */
+	void loadProperties(InputStream stream) throws IOException {
 		assert stream != null;
+		Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		Properties raw = new Properties();
 		raw.load(stream);
-		Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		for (String name : raw.stringPropertyNames()) {
 			String value = raw.getProperty(name);
 			// If property is in backticks then evaluate as a command 
@@ -38,7 +58,7 @@ public class ConnectionProfile {
 			if (cmdMatcher.matches()) {
 				logger.info(Log.INIT, "evaluate " + name);
 				String command = cmdMatcher.group(1);
-				value = Globals.evaluate(command);
+				value = evaluate(command);
 				if (value == null || value.length() == 0)
 					throw new AssertionError(String.format("Failed to evaluate \"%s\"", command));
 				logger.debug(Log.INIT, value);
@@ -47,21 +67,49 @@ public class ConnectionProfile {
 		}
 	}
 
-	public File getFile() {
-		return this.file;
+	/**
+	 * Pass a string to Runtime.exec() for evaluation
+	 * @param command - Command to be executed
+	 * @return Result of command with whitespace trimmed
+	 * @throws IOException
+	 */
+	public static String evaluate(String command) throws IOException {
+		Process p = Runtime.getRuntime().exec(command);
+		String output = IOUtils.toString(p.getInputStream(), "UTF-8").trim();
+		return output;
 	}
-	
+
+	/**
+	 * Return all properties stored in this object.
+	 */
 	public Properties getProperties() {
-		return this.properties;
+		return properties;
+	}
+
+	/**
+	 * Return a property value.
+	 */
+	public String getProperty(String name) {
+		return properties.getProperty(name);
 	}
 	
+	/** 
+	 * Opens and returns a connection to the ServiceNow instance.
+	 * If a connection has already been opened, then it will be returned.
+	 * @return
+	 */
 	public Session getSession()  {
 		if (session == null) {
 			session = new Session(properties);
 		}
 		return session;
 	}
-	
+
+	/**
+	 * Opens and returns a connection to the JDBC database.
+	 * If a connection has already been opened, then it will be returned.
+	 * If {@link #close()} has been called, then a new connection will be opened and returned.
+	 */
 	public Database getDatabase() throws ResourceException {
 		if (database == null) {
 			try {
@@ -73,8 +121,11 @@ public class ConnectionProfile {
 		return database;
 	}
 	
+	/**
+	 * Closes the connection to the {@link Database}. 
+	 */
 	public void close() {
-		logger.info(Log.FINISH, "Close profile " + file.getAbsolutePath());
+		logger.info(Log.FINISH, "Close profile " + pathname);
 		try {
 			if (database != null) database.close();
 			if (session != null) session.close();
@@ -86,8 +137,11 @@ public class ConnectionProfile {
 	}
 	
 	@Override
+	/**
+	 * Returns the absolute path of the properties file used to initialize this object.
+	 */
 	public String toString() {
-		return file.getAbsolutePath();
+		return pathname;
 	}
 		
 }

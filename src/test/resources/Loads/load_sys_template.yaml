@@ -1,0 +1,3 @@
+tables:
+- {name: sys_template_drop, source: sys_template, action: droptable}
+- {name: sys_template_load, source: sys_template, action: insert}

@@ -1,0 +1,3 @@
+tables:
+- {name: kb_knowledge_drop, source: kb_knowledge, action: droptable}
+- {name: kb_knowledge_load, source: kb_knowledge, action: insert}

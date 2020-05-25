@@ -8,11 +8,11 @@ import org.junit.*;
 import java.io.File;
 import java.io.StringReader;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoaderConfigTest {
 
-	Logger logger = LoggerFactory.getLogger(this.getClass());
+	final Logger logger = TestingManager.getLogger(this.getClass());
+	final TestFolder folder = new TestFolder("yaml");
 
 	@AfterClass
 	public static void clear() throws Exception {
@@ -31,7 +31,7 @@ public class LoaderConfigTest {
 
 	@Test
 	public void testGoodConfig1() throws Exception {
-		File config1 = yamlFile("goodconfig1");
+		File config1 = folder.getYaml("goodconfig1");
 		LoaderConfig config = new LoaderConfig(config1);
 		DateTime start = config.getStart();
 		DateTime today = DateTime.today();
@@ -43,41 +43,11 @@ public class LoaderConfigTest {
 		assertEquals(today, config.getJobByName("cmdb_ci_service").getSince());
 	}
 	
-	@Test(expected=ConfigParseException.class)
-	public void testBadDate() throws Exception {
-		File badConfig = yamlFile("baddate");
-		LoaderConfig config = new LoaderConfig(badConfig);
-		JobConfig job = config.getJobByName("incident");
-		assertNotNull(job);
-		logger.debug(Log.TEST, String.format("name=%s created=%s", job.getName(), job.getCreated()));
-		fail();
-	}
-
-	@Test(expected=ConfigParseException.class)
-	public void testBadInteger() throws Exception {
-		File badConfig = yamlFile("badinteger");
-		LoaderConfig config = new LoaderConfig(badConfig);
-		config.validate();
-		fail();
-	}
-
 	@Test
 	public void testGoodSync1() throws Exception {
-		File goodConfig = yamlFile("goodsync1");
+		File goodConfig = folder.getYaml("goodsync1");
 		LoaderConfig config = new LoaderConfig(goodConfig);
 		config.validate();
 	}
-	
-	@Test(expected=ConfigParseException.class) 
-	public void testBadSync1() throws Exception {
-		File badConfig = yamlFile("badsync1");
-		LoaderConfig config = new LoaderConfig(badConfig);
-		config.validate();
-		fail();		
-	}
-	
-	static public File yamlFile(String name) {
-		assert name != null;
-		return new File("src/test/resources/yaml/" + name + ".yaml");
-	}
+		
 }

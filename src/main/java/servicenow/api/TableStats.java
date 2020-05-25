@@ -4,7 +4,6 @@ public class TableStats {
 	
 	public int count;
 	public DateTimeRange created;
-//	public DateTimeRange updated;
 	
 	public int getCount() {
 		return count;
@@ -24,12 +23,4 @@ public class TableStats {
 		return this.created;
 	}
 
-//	public TableStats setUpdated(DateTimeRange range) {
-//		this.updated = range;
-//		return this;
-//	}
-//	
-//	public DateTimeRange getUpdated() {
-//		return this.updated;
-//	}
 }

@@ -3,9 +3,8 @@ package servicenow.api;
 import java.io.IOException;
 import java.net.URI;
 
+@SuppressWarnings("serial")
 public class ServiceNowException extends IOException {
-
-	private static final long serialVersionUID = 1L;
 
 	public ServiceNowException(URI uri) {
 		super(uri.toString());

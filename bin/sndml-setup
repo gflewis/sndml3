@@ -20,13 +20,15 @@ sndml_setup_profile() {
   if [[ -z "$SNDML_HOME" ]]; then
     echo SNDML_HOME not defined
     return 1
-  fi  
-  if [[ "$1" == "." ]]
+  fi 
+  if [[ -z "$1" ]]; then
+    echo Base directory not specified
+    return 1
+  fi 
+  if [[ -d "$1" ]]
   then
-    # assume we are in the base directory
-    export SNDML_BASE=`pwd`
+    export SNDML_BASE=$1
   else      
-    # assume argument is name of base directory
     export SNDML_BASE=$SNDML_HOME/profiles/$1
   fi
   local filename=$SNDML_BASE/.sndml_profile

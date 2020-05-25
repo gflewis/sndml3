@@ -3,7 +3,7 @@
   <Appenders>
     <Console name="Console">
       <Filters>
-        <ThresholdFilter level="debug" />
+        <ThresholdFilter level="info" />
         <MarkerFilter marker="SCHEMA" onMatch="NEUTRAL" onMismatch="NEUTRAL" />
         <ContextMapFilter onMatch="NEUTRAL" onMismatch="NEUTRAL">
           <KeyValuePair key="table" value="sys_db_object"/>

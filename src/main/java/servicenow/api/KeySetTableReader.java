@@ -95,8 +95,7 @@ public class KeySetTableReader extends TableReader {
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
 			if (maxRows != null && rowCount > maxRows)
-				throw new RowCountExceededException(table, 
-					String.format("processed %d rows (MaxRows=%d)", rowCount, maxRows));
+				throw new TooManyRowsException(table, maxRows, rowCount);
 			fromIndex += pageSize;
 		}
 		return this;

@@ -9,21 +9,22 @@ import java.util.ArrayList;
 import servicenow.api.TestingException;
 import servicenow.api.WriterMetrics;
 
-public class TestLoader {
+@Deprecated
+public class TestingTableLoader {
 
 	final LoaderConfig config;
 	ArrayList<LoaderJob> jobs = null;	
 
-	public TestLoader(String text) {
+	public TestingTableLoader(String text) {
 		StringReader reader = new StringReader(text);
 		try {
 			config = new LoaderConfig(reader);
-		} catch (ConfigParseException | IOException e) {
+		} catch (ConfigParseException e) {
 			throw new TestingException(e);
 		}
 	}
 	
-	public TestLoader(File file) {
+	public TestingTableLoader(File file) {
 		try {
 			config = new LoaderConfig(file);
 		} catch (ConfigParseException | IOException e) {
@@ -31,8 +32,8 @@ public class TestLoader {
 		}		
 	}
 	
-	public WriterMetrics load() {
-		Loader loader = new Loader(config);
+	public WriterMetrics load(ConnectionProfile profile) {
+		Loader loader = new Loader(profile, config);
 		jobs = loader.jobs;
 		LoaderJob lastJob = jobs.get(jobs.size() - 1);
 		try {
@@ -40,7 +41,7 @@ public class TestLoader {
 		} catch (SQLException | IOException | InterruptedException e) {
 			throw new TestingException(e);
 		}
-		return lastJob.getMetrics();		
+		return lastJob.getMetrics();
 	}
 	
 	public LoaderJob getJob(int index) {

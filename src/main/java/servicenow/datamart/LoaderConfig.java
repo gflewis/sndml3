@@ -33,7 +33,7 @@ public class LoaderConfig extends Config {
 		this(new FileReader(configFile));
 	}
 		
-	public LoaderConfig(Reader reader) throws IOException, ConfigParseException {
+	public LoaderConfig(Reader reader) throws ConfigParseException {
 		Globals.setLoaderConfig(this);
 		root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());

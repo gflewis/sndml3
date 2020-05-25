@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <Console name="Console">
+      <ThresholdFilter level="warn" />
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss} %level [%thread] %logger{1} %X{job} %marker: %msg%n</Pattern>  
+      </PatternLayout>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="Console" />
+    </Root>
+    <Logger name="servicenow" level="warn" />>
+  </Loggers>
+</Configuration>

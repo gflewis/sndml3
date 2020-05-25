@@ -40,9 +40,9 @@ public class TableSchema {
 		logger.debug(Log.SCHEMA, tablename + " parent is " + parentname);
 		if (parentname != null) {
 			// recursive call for parent definition
-			Table parentTable = session.table(parentname);
-			// TODO: optimize this code with a cache of schemas at the Session level
-			TableSchema parentDefinition = new TableSchema(parentTable);
+			TableSchema parentDefinition = session.getSchema(parentname);
+//			Table parentTable = session.table(parentname);
+//			TableSchema parentDefinition = new TableSchema(parentTable);
 			Iterator<FieldDefinition> parentIter = parentDefinition.iterator();
 			while (parentIter.hasNext()) {
 				FieldDefinition parentField = parentIter.next();
@@ -89,7 +89,7 @@ public class TableSchema {
 	}
 	
 	private String determineParentName() throws IOException {
-		if (tablename.startsWith("sys_")) return null;
+		// if (tablename.startsWith("sys_")) return null;
 		Log.setContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
 		Record myRec = hierarchy.api().getRecord("name", this.tablename);
 		if (myRec == null) {
@@ -106,7 +106,9 @@ public class TableSchema {
 	}
 	
 	/**
-	 * Return the name of the parent table or null if this table has no parent.
+	 * Return the name of the table from which this table was extended.
+	 * 
+	 * @return The name of the parent table or null if this table has no parent.
 	 */
 	public String getParentName() {
 		return parentname;

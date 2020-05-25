@@ -47,7 +47,8 @@ public class Globals {
 		loadPropertyFile(new File(propfilename));		
 	}
 	
-	public static void loadPropertyFile(File propfile) throws FileNotFoundException, IOException {
+	@Deprecated
+	private static void loadPropertyFile(File propfile) throws FileNotFoundException, IOException {
 		logger.info(Log.INIT, "loadProperties " + propfile.getAbsolutePath());
 		Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		Properties raw = new Properties();
@@ -76,6 +77,7 @@ public class Globals {
 				getStart(), getMetricsFile()));
 	}
 	
+	@Deprecated
 	static LoaderConfig getLoaderConfig() {
 		assert config != null;
 		return config;
@@ -84,10 +86,12 @@ public class Globals {
 	/**
 	 * Used in JUnit tests.
 	 */
+	@Deprecated
 	public static void setStart(DateTime value) {
 		Globals.start = value;
 	}
 	
+	@Deprecated
 	public static DateTime getStart() {
 		assert start != null;
 		return start;
@@ -122,6 +126,7 @@ public class Globals {
 		return new Boolean(stringValue);
 	}
 	
+	/*
 	@Deprecated
 	static String getValue(String name) {
 		assert name != null;
@@ -152,6 +157,7 @@ public class Globals {
 		String value = getValue(varname);
 		return (value == null) ? defaultValue : new Integer(value);		
 	}
+	*/
 	
 	static Properties getProperties() {
 		return properties;
@@ -180,21 +186,26 @@ public class Globals {
 	static String getArg(int index) {
 		return getArgList().get(index);
 	}
-		
+
+	/*
+	@Deprecated
 	static Session getSession() {
 		return new Session(getProperties());
 	}
+	*/
 	
-	/**
+	/*
 	 * Pass a string to Runtime.exec() for evaluation
 	 * @param command - Command to be executed
 	 * @return Result of command with whitespace trimmed
 	 * @throws IOException
 	 */
-	static public String evaluate(String command) throws IOException {
+	@Deprecated
+	static private String evaluate(String command) throws IOException {
 		Process p = Runtime.getRuntime().exec(command);
 		String output = IOUtils.toString(p.getInputStream(), "UTF-8").trim();
 		return output;
 	}
+
 
 }

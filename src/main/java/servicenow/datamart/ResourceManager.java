@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import servicenow.api.*;
 
+@Deprecated
 public class ResourceManager {
 
 	private static Database db;

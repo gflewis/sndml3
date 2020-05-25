@@ -71,4 +71,13 @@ public class TableWSDLTest {
 		assertFalse(wsdl.canReadField("createdxxxxx"));
 	}
 	
+	@Test
+	public void testSysTemplate() throws Exception {
+		String tablename = "sys_template";
+		TableWSDL wsdl = new TableWSDL(session, tablename, true);
+		assertTrue(wsdl.canReadField("sys_created_on"));
+		assertTrue(wsdl.canReadField("sys_updated_on"));
+		assertTrue(wsdl.canReadField("short_description"));
+	}
+	
 }

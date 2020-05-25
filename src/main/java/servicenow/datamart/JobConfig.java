@@ -34,7 +34,7 @@ public class JobConfig extends Config {
 
 	JobConfig(LoaderConfig parent, Object config) throws ConfigParseException {
 		this.parent = parent;
-		this.dateFactory = new DateTimeFactory();
+		this.dateFactory = new DateTimeFactory(parent.getStart(), parent.getMetricsFile());
 		if (isMap(config)) {
 			items = new Config.Map(config);
 			for (String origkey : items.keySet()) {
@@ -64,8 +64,8 @@ public class JobConfig extends Config {
 					case "sync":
 						this.action = LoaderAction.SYNC;
 						break;
-					case "create":
-						this.action = LoaderAction.CREATE;
+					case "droptable":
+						this.action = LoaderAction.DROPTABLE;
 						break;
 					default:
 						throw new ConfigParseException("Not recognized: " + val.toString());
@@ -122,7 +122,7 @@ public class JobConfig extends Config {
 		}
 	}
 
-	void validate() throws ConfigParseException {
+	public JobConfig validate() throws ConfigParseException {
 		if (name == null && source == null && target == null)
 			configError("Must specify at least one of Name, Source, Target");
 		switch (getAction()) {
@@ -131,40 +131,28 @@ public class JobConfig extends Config {
 		case INSERT:
 			break;
 		case PRUNE:
-			if (getTruncate())
-				notValid("Truncate");
-			if (created != null)
-				notValid("Created");
-			if (filter != null)
-				notValid("Filter");
-			if (threads != null)
-				notValid("Threads");
-			if (partition != null)
-				notValid("Partition");
+			if (getTruncate())     notValid("Truncate");
+			if (created != null)   notValid("Created");
+			if (filter != null)    notValid("Filter");
+			if (threads != null)   notValid("Threads");
+			if (partition != null) notValid("Partition");
 			break;
 		case SYNC:
-			if (getTruncate())
-				notValid("Truncate");
-			if (since != null)
-				notValid("Since");
-			if (filter != null)
-				notValid("Filter");
+			if (getTruncate())     notValid("Truncate");
+			if (since != null)     notValid("Since");
+			if (filter != null)	   notValid("Filter");
 			break;
-		case CREATE:
-			if (getTruncate())
-				notValid("Truncate");
-			if (created != null)
-				notValid("Created");
-			if (filter != null)
-				notValid("Filter");
-			if (threads != null)
-				notValid("Threads");
-			if (partition != null)
-				notValid("Partition");
+		case DROPTABLE:
+			if (getTruncate())     notValid("Truncate");
+			if (created != null)   notValid("Created");
+			if (filter != null)    notValid("Filter");
+			if (threads != null)   notValid("Threads");
+			if (partition != null) notValid("Partition");
 			break;
 		}
 		if (includeColumns != null && excludeColumns != null) 
 			configError("Cannot specify both Columns and Exclude");
+		return this;
 	}
 
 	void notValid(String option) {
@@ -177,32 +165,23 @@ public class JobConfig extends Config {
 	}
 
 	String getName() throws ConfigParseException {
-		if (this.name != null)
-			return this.name;
-		if (this.target != null)
-			return this.target;
-		if (this.source != null)
-			return this.source;
+		if (this.name != null)   return this.name;
+		if (this.target != null) return this.target;
+		if (this.source != null) return this.source;
 		throw new ConfigParseException("Name not specified");
 	}
 
 	String getSource() throws ConfigParseException {
-		if (this.source != null)
-			return this.source;
-		if (this.target != null)
-			return this.target;
-		if (this.name != null)
-			return this.name;
+		if (this.source != null) return this.source;
+		if (this.target != null) return this.target;
+		if (this.name != null)   return this.name;
 		throw new ConfigParseException("Source not specified");
 	}
 
 	String getTargetName() throws ConfigParseException {
-		if (this.target != null)
-			return this.target;
-		if (this.source != null)
-			return this.source;
-		if (this.name != null)
-			return this.name;
+		if (this.target != null) return this.target;
+		if (this.source != null) return this.source;
+		if (this.name != null)   return this.name;
 		throw new ConfigParseException("Target not specified");
 	}
 
@@ -220,11 +199,11 @@ public class JobConfig extends Config {
 	void setTruncate(boolean truncate) {
 		this.truncate = truncate;
 	}
-
+	
 	boolean getTruncate() {
 		return this.truncate == null ? false : this.truncate.booleanValue();
 	}
-
+	
 	void setCreated(DateTimeRange value) {
 		this.created = value;
 	}
