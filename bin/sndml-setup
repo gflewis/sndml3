@@ -24,13 +24,15 @@ sndml_setup_profile() {
   if [[ -z "$1" ]]; then
     echo Base directory not specified
     return 1
-  fi 
+  fi
   if [[ -d "$1" ]]
   then
-    export SNDML_BASE=$1
-  else      
+    cd $1
+  else
     export SNDML_BASE=$SNDML_HOME/profiles/$1
+    cd $SNDML_BASE
   fi
+  export SNDML_BASE=`pwd`
   local filename=$SNDML_BASE/.sndml_profile
   if [[ -r $filename ]]
   then 
@@ -40,7 +42,6 @@ sndml_setup_profile() {
     return 1
   fi
   sndml_setup_jar
-  cd $SNDML_BASE
 }
 
 sndml_setup_jar() {

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import servicenow.api.*;
 
+@Deprecated
 public class Globals {
 
 	private static CommandLine cmdline;
@@ -125,40 +126,7 @@ public class Globals {
 		if (stringValue == null) return defaultValue;
 		return new Boolean(stringValue);
 	}
-	
-	/*
-	@Deprecated
-	static String getValue(String name) {
-		assert name != null;
-		String value = config.getString(name);
-		if (value == null) value = getProperty(name);
-		return value;
-	}
-
-	@Deprecated
-	static File getFile(String varname) {
-		String path = getValue(varname);
-		return (path == null) ? null : new File(path); 
-	}
-	
-	@Deprecated
-	public static Boolean getBoolean(String varname) {
-		String value = getValue(varname);
-		return (value == null) ? null : new Boolean(value);
-	}
-	
-	@Deprecated
-	static Integer getInteger(String varname) {
-		return getInteger(varname, null);
-	}
-	
-	@Deprecated
-	static Integer getInteger(String varname, Integer defaultValue) {
-		String value = getValue(varname);
-		return (value == null) ? defaultValue : new Integer(value);		
-	}
-	*/
-	
+		
 	static Properties getProperties() {
 		return properties;
 	}

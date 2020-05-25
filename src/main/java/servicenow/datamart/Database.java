@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import servicenow.api.*;
 
 /**
- * <p>Wrapper class for a <tt>javasql.Connection</tt>.
+ * <p>Encapsulates a connection to a JDCB database (<tt>javasql.Connection</tt>).
  * </p>
  * <p>When this object is instantiated, it will execute any SQL statements
  * from the <tt>&lt;initialize&gt;</tt> section of <tt>sqltemplates.xml</tt>.
@@ -34,14 +34,17 @@ public class Database {
 	private final URI dbURI;
 	private final String dbuser;
 	private final boolean autocommit;
+	private final boolean warnOnTruncate;
 	private final String schema;
+	private final Properties properties;
 	private final Generator generator;
 	private Connection dbc = null;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
 	public Database(Properties props) throws SQLException, URISyntaxException {
-		String dburl  = props.getProperty("datamart.url");
+		this.properties = props;
+		String dburl = props.getProperty("datamart.url");
 		this.dbURI = new URI(dburl);
 		this.dbuser = props.getProperty("datamart.username");
 		String dbpass = props.getProperty("datamart.password", "");
@@ -57,6 +60,7 @@ public class Database {
 		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
 		this.generator = new Generator(this, props);
 		this.autocommit = this.generator.getAutoCommit();
+		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));
 		this.initialize();
 		assert dbc != null;
 	}
@@ -87,21 +91,29 @@ public class Database {
 		assert this.isClosed();
 	}
 	
-	public boolean isOracle() {
+	Properties getProperties() {
+		return this.properties;
+	}
+	
+	boolean isOracle() {
 		String protocol = getProtocol(getURI());
 		return "oracle".equalsIgnoreCase(protocol);
 	}
 	
-	public boolean isPostgresql() {
+	boolean isPostgresql() {
 		String protocol = getProtocol(getURI());
 		return "postgresql".equalsIgnoreCase(protocol);		
 	}
 	
-	public boolean isAutoCommitEnabled() {
+	boolean isAutoCommitEnabled() {
 		return this.autocommit;
 	}
 	
-	public boolean isClosed() {
+	boolean getWarnOnTruncate() {
+		return this.warnOnTruncate;
+	}
+	
+	boolean isClosed() {
 		return (this.dbc == null);
 	}
 	

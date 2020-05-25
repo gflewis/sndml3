@@ -35,8 +35,8 @@ public class ConnectionProfile {
 	private Database database;
 	
 	public ConnectionProfile(File profile) throws IOException {
-		pathname = profile.getAbsolutePath();
-		logger.info(Log.INIT, "Load profile " + profile.getAbsolutePath());
+		pathname = profile.getPath();
+		logger.info(Log.INIT, "ConnectionProfile: " + pathname);
 		loadProperties(new FileInputStream(profile));
 	}
 
@@ -91,6 +91,12 @@ public class ConnectionProfile {
 	 */
 	public String getProperty(String name) {
 		return properties.getProperty(name);
+	}
+	
+	boolean getPropertyBoolean(String name, boolean defaultValue) {
+		String stringValue = getProperty(name);
+		if (stringValue == null) return defaultValue;
+		return new Boolean(stringValue);
 	}
 	
 	/** 

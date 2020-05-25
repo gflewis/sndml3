@@ -148,7 +148,7 @@ public abstract class DatabaseStatement {
 			if (value.length() != oldSize) {
 				String message = rec.getKey() + " truncated: " + glidename +
 					" from " + oldSize + " to " + value.length();
-				if (Globals.warnOnTruncate)
+				if (db.getWarnOnTruncate())
 					logger.warn(Log.PROCESS, message);
 				else
 					logger.debug(Log.PROCESS, message);
@@ -221,7 +221,7 @@ public abstract class DatabaseStatement {
 			if (p > -1) {
 				String message = rec.getKey() + " decimal truncated: " +
 						glidename + "=" + value;
-				if (Globals.warnOnTruncate)
+				if (db.getWarnOnTruncate())
 					logger.warn(Log.PROCESS, message);
 				else
 					logger.debug(Log.PROCESS, message);

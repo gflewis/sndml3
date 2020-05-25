@@ -117,7 +117,7 @@
       <groupId>com.oracle.ojdbc</groupId>
       <artifactId>ojdbc8</artifactId>
       <version>19.3.0.0</version>      
-      <scope>test</scope>
+      <scope>compile</scope>
       <optional>true</optional>
     </dependency>
   </dependencies>
@@ -240,7 +240,7 @@
               </transformers>
               <artifactSet>
                 <includes>
-                  <include>com.oracle:*</include>
+                  <include>com.oracle.*:*</include>
                   <include>org.apache.*:*</include>
                   <include>commons-*:*</include>
                   <include>org.jdom:*</include>

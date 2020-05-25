@@ -73,12 +73,14 @@ public class Session {
 		return value;
 	}
 	
+	@Deprecated
 	private boolean getPropertyBoolean(String propname, boolean defaultValue) {
 		String propvalue = getProperty(propname);
 		if (propvalue == null) return defaultValue;
 		return Boolean.parseBoolean(propvalue);
 	}
 	
+	@Deprecated
 	private boolean getPropertyBoolean(String propname) {
 		return getPropertyBoolean(propname, false);
 	}

@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
@@ -36,29 +39,35 @@ public class Loader {
 		options.addOption(Option.builder("t").longOpt("table").required(false).hasArg(true).
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("config").required(false).hasArg(true).
-				desc("Config file (required)").build());
-		Globals.initialize(options, args);				
-		if (Globals.hasOptionValue("t") && Globals.hasOptionValue("y"))
+				desc("YAML config file (required)").build());
+		options.addOption(Option.builder("m").longOpt("metrics").required(false).hasArg(true).
+				desc("Metrics file (optional)").build());
+		
+		CommandLine line = new DefaultParser().parse(options,  args);
+		String profilename = line.getOptionValue("p");
+		String yamlfilename = line.getOptionValue("y");
+		String tablename = line.getOptionValue("t");
+		if (yamlfilename != null && tablename != null)
 			throw new CommandOptionsException("Cannot specify both --table and --config");
-		Session session = new Session(Globals.getProperties());
-		Database datamart = new Database(Globals.getProperties());
-		// ResourceManager.setSession(session);
-		// ResourceManager.setDatabase(datamart);
-		// TODO Document property session_verify
-		if (Globals.getPropertyBoolean("session_verify",  false)) session.verify();
-		if (Globals.hasOptionValue("t")) {
+		if (yamlfilename == null && tablename == null)
+			throw new CommandOptionsException("Must specify either --table or --config");
+			
+		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
+		Session session = profile.getSession();
+		if (profile.getPropertyBoolean("loader.verify_session", true)) {
+			session.verify();
+		}
+		LoaderConfig config = (tablename != null) ?
 			// Single table load
-			String tablename = Globals.getOptionValue("t");
-			Table table = session.table(tablename);
-			Loader loader = new Loader(table, datamart);
-			loader.loadTables();
+			new LoaderConfig(session.table(tablename)) :
+			// YAML config load
+			new LoaderConfig(new File(yamlfilename));
+		if (line.hasOption("m")) {
+			config.setMetricsFile(new File(line.getOptionValue("m")));
 		}
-		if (Globals.hasOptionValue("y")) {
-			File configFile = new File(Globals.getOptionValue("y"));
-			LoaderConfig config = new LoaderConfig(configFile);
-			Loader loader = new Loader(session, datamart, config);
-			loader.loadTables();			
-		}
+		config.validate();
+		Loader loader = new Loader(profile, config);			
+		loader.loadTables();			
 	}
 	
 	Loader(Table table, Database database) {
@@ -73,7 +82,7 @@ public class Loader {
 		this.config = config;
 		this.threads = config.getThreads();
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
-		this.metricsFile = Globals.getMetricsFile();
+		this.metricsFile = config.getMetricsFile();
 		for (JobConfig jobConfig : config.getJobs()) {
 			jobs.add(new LoaderJob(this, jobConfig));
 		}

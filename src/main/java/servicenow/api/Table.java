@@ -62,25 +62,7 @@ public class Table {
 		if (this.apiJSON == null) this.apiJSON = new JsonTableAPI(this);
 		return this.apiJSON;
 	}
-	
-	/*
-	 * Set the default API to SOAP Web Services (XML).
-	 */
-	@Deprecated
-	public TableAPI setSOAP() {
-		this.api = soap();
-		return api;
-	}
-	
-	/*
-	 * Set the default API to the REST Table API (JSON).
-	 */
-	@Deprecated
-	public TableAPI setREST() {
-		this.api = rest();
-		return api;
-	}
-	
+		
 	/**
 	 * Return the default API.
 	 */
@@ -100,27 +82,7 @@ public class Table {
 	public Record getRecord(Key key) throws IOException {
 		return api.getRecord(key);
 	}
-		
-	/*
-	 * Retrieves a single record based on a unique field such as "name" or "number".  
-	 * This method should be used in cases where the field value is known to be unique.
-	 * If no qualifying records are found this function will return null.
-	 * If one qualifying record is found it will be returned.
-	 * If multiple qualifying records are found this method 
-	 * will throw an {@link RowCountExceededException}.
-	 * <pre>
-	 * {@link Record} grouprec = session.table("sys_user_group").get("name", "Network Support");
-	 * </pre>
-	 * 
-	 * @param fieldname Field name, e.g. "number" or "name"
-	 * @param fieldvalue Field value
-	 */
-	@Deprecated
-	public Record getRecord(String fieldname, String fieldvalue)
-			throws IOException, TooManyRowsException {
-		return api.getRecord(fieldname, fieldvalue);
-	}
-	
+			
 	public TableWSDL getWSDL() throws IOException {
 		return session.getWSDL(getName());
 	}

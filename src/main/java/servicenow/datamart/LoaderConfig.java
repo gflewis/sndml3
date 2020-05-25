@@ -34,7 +34,7 @@ public class LoaderConfig extends Config {
 	}
 		
 	public LoaderConfig(Reader reader) throws ConfigParseException {
-		Globals.setLoaderConfig(this);
+		// Globals.setLoaderConfig(this);
 		root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());
 		for (String key : root.keySet()) {
@@ -92,6 +92,11 @@ public class LoaderConfig extends Config {
 	
 	File getMetricsFile() {
 		return metricsFile;
+	}
+	
+	LoaderConfig setMetricsFile(File file) {
+		metricsFile = file;
+		return this;
 	}
 	
 	Integer getPageSize() {

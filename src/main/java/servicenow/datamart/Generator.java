@@ -45,8 +45,7 @@ public class Generator {
 				desc("Table name (required)").build());
 		options.addOption(Option.builder("o").longOpt("output").required(false).hasArg().
 				desc("Table name (required)").build());		
-		DefaultParser parser = new DefaultParser();
-		CommandLine cmdline = parser.parse(options,  args);
+		CommandLine cmdline = new DefaultParser().parse(options,  args);
 		String profilename = cmdline.getOptionValue("p");
 		String tablename = cmdline.getOptionValue("t");
 		PrintStream output = cmdline.hasOption("o") ? 
@@ -65,15 +64,13 @@ public class Generator {
 	
 	public Generator(Database database, Properties profileProps) {
 		String schemaName = profileProps.getProperty("datamart.schema");
-		String dialectName = profileProps.getProperty("datamart.dialect");	
+		String dialectName = profileProps.getProperty("datamart.dialect");
+		String templatesPath = profileProps.getProperty("datamart.templates");
 		try {
-			InputStream sqlConfigStream;
-			// TODO Update Wiki Docs
-			String path = Globals.getProperty("templates");
-			if (path == null) 
-				sqlConfigStream = ClassLoader.getSystemResourceAsStream("sqltemplates.xml");
-			else
-				sqlConfigStream = new FileInputStream(new File(path));
+			InputStream sqlConfigStream =
+				(templatesPath == null || templatesPath.length() == 0) ?
+				ClassLoader.getSystemResourceAsStream("sqltemplates.xml") :
+				new FileInputStream(new File(templatesPath));	
 			SAXBuilder xmlbuilder = new SAXBuilder();
 			xmldocument = xmlbuilder.build(sqlConfigStream);
 		} 
