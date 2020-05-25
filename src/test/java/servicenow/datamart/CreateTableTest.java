@@ -64,6 +64,7 @@ public class CreateTableTest {
 		String sql = generator.getCreateTable(table);		
 		Log.setContext(table, "testCreateTable_incident");
 		logger.info(Log.TEST, sql);
+		sql = sql.toLowerCase();
 		assertTrue(sql.indexOf(tablename) > 5);
 		FieldNames testFields = new FieldNames(
 				"sys_created_on,sys_created_by,sys_updated_on,sys_updated_by," + 
@@ -83,6 +84,7 @@ public class CreateTableTest {
 		String sql = generator.getCreateTable(table);		
 		Log.setContext(table, "testCreateTable_sys_template");
 		logger.info(Log.TEST, sql);
+		sql = sql.toLowerCase();
 		assertTrue(sql.indexOf(tablename) > 5);
 		FieldNames testFields = new FieldNames(
 				"sys_created_on,sys_created_by,sys_updated_on,sys_updated_by");
