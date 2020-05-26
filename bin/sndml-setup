@@ -5,7 +5,7 @@
 #   SNDML_JAR
 #
 # Assumes SNDML_HOME is predefined and structured as follows:
-#   pom.xml                       
+#   pom.xml
 #   src/                           <- location of source code
 #   target/                        <- location of jar files
 #   profiles/                      <- profiles directory is excluded in .gitignore
@@ -20,7 +20,7 @@ sndml_setup_profile() {
   if [[ -z "$SNDML_HOME" ]]; then
     echo SNDML_HOME not defined
     return 1
-  fi 
+  fi
   if [[ -z "$1" ]]; then
     echo Base directory not specified
     return 1
@@ -35,7 +35,7 @@ sndml_setup_profile() {
   export SNDML_BASE=`pwd`
   local filename=$SNDML_BASE/.sndml_profile
   if [[ -r $filename ]]
-  then 
+  then
     export SNDML_PROFILE=$filename
   else
     echo File not found: $filename
@@ -57,7 +57,7 @@ sndml_setup_jar() {
   oracle)     tag=ora ;;
   postgresql) tag=pg ;;
   mysql)      tag=mysql ;;
-  mssql)      tag=mssql ;;
+  sqlserver)  tag=mssql ;;
   esac
   local jarfile=`ls $SNDML_HOME/target/sndml*-$tag.jar | tail -1`
   if [[ -r $jarfile ]]
