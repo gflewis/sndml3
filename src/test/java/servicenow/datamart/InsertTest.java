@@ -15,7 +15,7 @@ public class InsertTest {
 
 	final TestingProfile profile;
 	final Logger logger = TestingManager.getLogger(this.getClass());
-	final TestFolder folder = new TestFolder("yaml");
+	// final TestFolder folder = new TestFolder("yaml");
 	
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
@@ -32,9 +32,14 @@ public class InsertTest {
 		TestingManager.clearAll();
 	}
 
+	@After
+	public void closeProfile() {
+		profile.close();
+	}
+			
 	@Test
 	public void testInsert() throws Exception {
-		YamlFile yaml = folder.getYaml("load_incident_truncate");		
+		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_truncate");		
 		LoaderConfig config = new LoaderConfig(yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
@@ -52,7 +57,7 @@ public class InsertTest {
 
 	@Test
 	public void testInsertTwice() throws Exception {
-		YamlFile yaml = folder.getYaml("load_incident_twice");
+		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_twice");
 		LoaderConfig config = new LoaderConfig(yaml);
 		Loader loader = new Loader(profile, config);
 		LoaderJob job1 = loader.jobs.get(0);
