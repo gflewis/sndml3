@@ -40,13 +40,13 @@ public class Loader {
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("config").required(false).hasArg(true).
 				desc("YAML config file (required)").build());
-		options.addOption(Option.builder("m").longOpt("metrics").required(false).hasArg(true).
-				desc("Metrics file (optional)").build());
+//		options.addOption(Option.builder("m").longOpt("metrics").required(false).hasArg(true).
+//				desc("Metrics file (optional)").build());
 		
-		CommandLine line = new DefaultParser().parse(options,  args);
-		String profilename = line.getOptionValue("p");
-		String yamlfilename = line.getOptionValue("y");
-		String tablename = line.getOptionValue("t");
+		CommandLine cmd = new DefaultParser().parse(options,  args);
+		String profilename = cmd.getOptionValue("p");
+		String yamlfilename = cmd.getOptionValue("y");
+		String tablename = cmd.getOptionValue("t");
 		if (yamlfilename != null && tablename != null)
 			throw new CommandOptionsException("Cannot specify both --table and --config");
 		if (yamlfilename == null && tablename == null)
@@ -62,9 +62,9 @@ public class Loader {
 			new LoaderConfig(session.table(tablename)) :
 			// YAML config load
 			new LoaderConfig(new File(yamlfilename));
-		if (line.hasOption("m")) {
-			config.setMetricsFile(new File(line.getOptionValue("m")));
-		}
+//		if (line.hasOption("m")) {
+//			config.setMetricsFile(new File(line.getOptionValue("m")));
+//		}
 		config.validate();
 		Loader loader = new Loader(profile, config);			
 		loader.loadTables();			

@@ -59,18 +59,26 @@ public class Generator {
 	}
 
 	public Generator(ConnectionProfile profile) {
-		this(profile.getDatabase(), profile.getProperties());
+		this(profile.getDatabase(), profile.getProperties(), null);
 	}
 	
-	public Generator(Database database, Properties profileProps) {
-		String schemaName = profileProps.getProperty("datamart.schema");
-		String dialectName = profileProps.getProperty("datamart.dialect");
-		String templatesPath = profileProps.getProperty("datamart.templates");
+	public Generator(Database database, Properties properties, File templatesFile) {
+		assert database != null;
+		assert properties != null;
+		String schemaName = properties.getProperty("datamart.schema");
+		String dialectName = properties.getProperty("datamart.dialect");
+		// only check properties if file was not passed in as an argument
+		if (templatesFile == null) {
+			String templatesPath = properties.getProperty("datamart.templates", "");
+			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
+		}
 		try {
+			// if file not specified as argument or property
+			// then use the default XML from the JAR
 			InputStream sqlConfigStream =
-				(templatesPath == null || templatesPath.length() == 0) ?
+				(templatesFile == null) ?
 				ClassLoader.getSystemResourceAsStream("sqltemplates.xml") :
-				new FileInputStream(new File(templatesPath));	
+				new FileInputStream(templatesFile);	
 			SAXBuilder xmlbuilder = new SAXBuilder();
 			xmldocument = xmlbuilder.build(sqlConfigStream);
 		} 
@@ -96,54 +104,6 @@ public class Generator {
 		logger.info(Log.INIT, String.format("dialect=%s schema=%s namecase=%s namequotes=%s", 
 				getDialectName(), getSchemaName(), namecase.toString(), namequotes.toString()));
 	}
-	
-	/*
-	public Generator(URI dbURI, String schemaName) {
-		this(getTree(dbURI), schemaName);
-	}
-	
-	public Generator(String dialectName, String schemaName) {
-		this(getTree(dialectName), schemaName);
-	}
-	
-	public Generator(Element dialectTree, String schemaName) {
-		assert dialectTree != null;
-		this.dialectTree = dialectTree;
-		this.schemaName = schemaName;
-
-		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
-		Element dialogProps = dialectTree.getChild("properties");
-				
-		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
-		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
-		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
-		
-		logger.info(Log.INIT, String.format("dialect=%s schema=%s namecase=%s namequotes=%s", 
-				getDialectName(), getSchemaName(), namecase.toString(), namequotes.toString()));
-		
-	}
-
-	static private Document getDocument() {
-		if (xmldocument == null) {
-			try {
-				InputStream sqlConfigStream;
-				// TODO Update Wiki Docs
-				String path = Globals.getProperty("templates");
-				if (path == null) 
-					sqlConfigStream = ClassLoader.getSystemResourceAsStream("sqltemplates.xml");
-				else
-					sqlConfigStream = new FileInputStream(new File(path));
-				SAXBuilder xmlbuilder = new SAXBuilder();
-				xmldocument = xmlbuilder.build(sqlConfigStream);
-			} 
-			catch (IOException | JDOMException e2) {
-				throw new ResourceException(e2);
-			}
-		}
-		assert xmldocument != null;
-		return xmldocument;	
-	}
-	*/
 	
 	Element getProtocolTree(URI dbURI) {
 		String protocol = Database.getProtocol(dbURI);

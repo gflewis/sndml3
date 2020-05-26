@@ -1,5 +1,6 @@
 package servicenow.datamart;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,14 +37,15 @@ public class Database {
 	private final boolean autocommit;
 	private final boolean warnOnTruncate;
 	private final String schema;
-	private final Properties properties;
+	private final Properties properties = new Properties();
+	private final File templates;
 	private final Generator generator;
 	private Connection dbc = null;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
 	public Database(Properties props) throws SQLException, URISyntaxException {
-		this.properties = props;
+		this.properties.putAll(props);
 		String dburl = props.getProperty("datamart.url");
 		this.dbURI = new URI(dburl);
 		this.dbuser = props.getProperty("datamart.username");
@@ -58,9 +60,11 @@ public class Database {
 		if (schema != null) logmsg += " schema=" + schema;
 		logger.info(Log.INIT, logmsg);
 		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		this.generator = new Generator(this, props);
-		this.autocommit = this.generator.getAutoCommit();
 		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));
+		this.templates = (props.getProperty("datamart.templates", "").length() > 0) ?
+			new File(props.getProperty("datamart.templates")) : null;
+		this.generator = new Generator(this, this.properties, this.templates);
+		this.autocommit = this.generator.getAutoCommit();
 		this.initialize();
 		assert dbc != null;
 	}
@@ -93,6 +97,10 @@ public class Database {
 	
 	Properties getProperties() {
 		return this.properties;
+	}
+
+	Generator getGenerator() {
+		return this.generator;
 	}
 	
 	boolean isOracle() {
@@ -132,10 +140,6 @@ public class Database {
 		return this.dbc;
 	}
 	
-	Generator getGenerator() {
-		return this.generator;
-	}
-		
 	String getSchema() {
 		String result;
 		if (this.schema == null && this.isOracle()) 
