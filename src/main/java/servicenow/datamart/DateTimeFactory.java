@@ -103,12 +103,13 @@ public class DateTimeFactory {
 	 */
 	DateTime getLast(String propName) throws ConfigParseException {
 		assert propName != null;
-		if (lastValues == null) {
+		Properties values = getLastValues();
+		if (values == null) {
 			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
 			logger.error(Log.INIT, message);
 			throw new ConfigParseException(message);
 		}
-		String propValue = getLastValues().getProperty(propName);
+		String propValue = values.getProperty(propName);
 		if (propValue == null) 
 			throw new ConfigParseException("Property not found: " + propName);
 		return new DateTime(propValue);
