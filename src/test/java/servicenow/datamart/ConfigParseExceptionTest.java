@@ -14,7 +14,7 @@ import servicenow.api.TestingManager;
 @RunWith(Parameterized.class)
 public class ConfigParseExceptionTest {
 
-	public YamlFile yamlFile;	
+	public YamlFile yamlFile;
 	static final TestFolder folder = new TestFolder("ConfigParseError");
 	Logger logger = TestingManager.getLogger(this.getClass());
 	
@@ -34,7 +34,7 @@ public class ConfigParseExceptionTest {
 		LoaderConfig config = null;
 		Throwable err = null;
 		try {
-			config = yamlFile.getConfig();
+			config = yamlFile.getConfig(null);
 			config.validate();
 		}
 		catch (ConfigParseException e) {

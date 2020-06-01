@@ -70,6 +70,7 @@ public class Globals {
 		}
 	}
 
+	/*
 	static void setLoaderConfig(LoaderConfig value) {
 		assert value != null;
 		config = value;
@@ -77,6 +78,7 @@ public class Globals {
 		logger.debug(Log.INIT, String.format("setLoaderConfig start=%s metrics=%s",  
 				getStart(), getMetricsFile()));
 	}
+	*/
 	
 	@Deprecated
 	static LoaderConfig getLoaderConfig() {
@@ -98,12 +100,14 @@ public class Globals {
 		return start;
 	}
 
+	/*
 	static File getMetricsFile() {
 		String filename = getProperty("metrics");
 		if (filename != null) return new File(filename);
 		if (config == null) return null;
 		return config.metricsFile;
 	}
+	*/
 
 	static String getProperty(String name) {
 		assert name != null;

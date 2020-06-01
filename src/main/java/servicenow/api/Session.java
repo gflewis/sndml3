@@ -1,7 +1,6 @@
 package servicenow.api;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,8 +35,9 @@ public class Session {
 	final private Logger logger = Log.logger(this.getClass());
 		
 	public Session(String instancename, String username, String password, Properties props) 
-			throws MalformedURLException {
+			throws IOException {
 		this(new Instance(instancename), username, password);
+		if (this.getPropertyBoolean("verify_session", false)) this.verify();
 	}
 
 	public Session(Instance instance, String username, String password) {
@@ -54,12 +54,13 @@ public class Session {
 		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
 	}
 
-	public Session(Properties props) {
+	public Session(Properties props) throws IOException {
 		this.properties = props;
 		this.instance = new Instance(getProperty("instance"));
 		this.authScope = new AuthScope(instance.getHost());
 		this.setCredentials(getProperty("username"), getProperty("password"));
 		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);
+		if (this.getPropertyBoolean("verify_session", false)) this.verify();
 	}
 
 	/**
@@ -158,14 +159,19 @@ public class Session {
 		return wsdl;
 	}
 	
-	public Session verify() throws IOException, InterruptedException {
-		Table user = verify("sys_user");
+	public Session verify() throws IOException {
+		Table user;
+		try {
+			user = verify("sys_user");
+		} catch (InterruptedException e) {
+			throw new IOException(e);
+		}
 		assert this.username != null;
 		Record profile = user.api().getRecord("user_name", this.username);
 		String timezone = profile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;
-			if (getPropertyBoolean("verify_session")) {
+			if (getPropertyBoolean("verify_timezone")) {
 				logger.error(Log.INIT, message);				
 				throw new ServiceNowException(message);				
 			}

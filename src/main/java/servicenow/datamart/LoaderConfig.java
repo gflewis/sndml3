@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +15,10 @@ public class LoaderConfig extends Config {
 
 	final DateTime start = DateTime.now();
 	
-	Map root;
-	Integer threads = 0;
-	Integer pageSize;
-	Boolean verify = false;
-	File metricsFile = null;
+	private Map root;
+	private Integer threads = 0;
+	private Integer pageSize;
+	private File metricsFile = null;
 	
 	private final java.util.List<JobConfig> tables = 
 			new java.util.ArrayList<JobConfig>();
@@ -26,16 +26,21 @@ public class LoaderConfig extends Config {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public LoaderConfig(Table table) throws IOException, ConfigParseException {
-		tables.add(new JobConfig(table));		
+		this.tables.add(new JobConfig(table));
 	}
 	
-	public LoaderConfig(File configFile) throws IOException, ConfigParseException {
-		this(new FileReader(configFile));
+	public LoaderConfig(File configFile, Properties props) throws IOException, ConfigParseException {
+		this(new FileReader(configFile), props);
 	}
 		
-	public LoaderConfig(Reader reader) throws ConfigParseException {
-		// Globals.setLoaderConfig(this);
-		root = parseDocument(reader);		
+	public LoaderConfig(Reader reader, Properties props) throws ConfigParseException {
+		File metricsFolder = null;				
+		if (props != null) {
+			String metricsFolderName = props.getProperty("loader.metrics_folder");
+			if (metricsFolderName != null && metricsFolderName.length() > 0)
+				metricsFolder = new File(metricsFolderName);
+		}		
+		this.root = parseDocument(reader);		
 		logger.info(Log.INIT, "\n" + parser.dump(root).trim());
 		for (String key : root.keySet()) {
 		    Object val = root.get(key);
@@ -43,11 +48,10 @@ public class LoaderConfig extends Config {
 			case "threads" : 
 				threads = asInteger(val); 
 				break;
-			case "verify" :
-				verify = asBoolean(val);
-				break;
-			case "metrics" : 
-				metricsFile = new File(val.toString()); 
+			case "metrics" :
+				String metricsFileName = val.toString();
+				metricsFile = (metricsFolder == null) ?
+						new File (metricsFileName) : new File(metricsFolder, metricsFileName);
 				break;
 			case "pagesize" : 
 				pageSize = asInteger(val);
@@ -89,16 +93,11 @@ public class LoaderConfig extends Config {
 	int getThreads() {
 		return this.threads==null ? 0 : this.threads.intValue();
 	}
-	
+		
 	File getMetricsFile() {
-		return metricsFile;
+		return this.metricsFile;
 	}
-	
-	LoaderConfig setMetricsFile(File file) {
-		metricsFile = file;
-		return this;
-	}
-	
+		
 	Integer getPageSize() {
 		return pageSize;
 	}

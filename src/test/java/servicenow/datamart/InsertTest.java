@@ -40,7 +40,7 @@ public class InsertTest {
 	@Test
 	public void testInsert() throws Exception {
 		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_truncate");		
-		LoaderConfig config = new LoaderConfig(yaml);
+		LoaderConfig config = new LoaderConfig(yaml, null);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(LoaderAction.INSERT, job.getAction());
@@ -58,7 +58,7 @@ public class InsertTest {
 	@Test
 	public void testInsertTwice() throws Exception {
 		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_twice");
-		LoaderConfig config = new LoaderConfig(yaml);
+		LoaderConfig config = new LoaderConfig(yaml, null);
 		Loader loader = new Loader(profile, config);
 		LoaderJob job1 = loader.jobs.get(0);
 		LoaderJob job2 = loader.jobs.get(1);

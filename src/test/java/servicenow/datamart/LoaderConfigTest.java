@@ -22,7 +22,7 @@ public class LoaderConfigTest {
 	@Test
 	public void testSimple() throws Exception {
 		String yaml = "tables: [core_company, incident]";
-		LoaderConfig config = new LoaderConfig(new StringReader(yaml));
+		LoaderConfig config = new LoaderConfig(new StringReader(yaml), null);
 		assertEquals(2, config.getJobs().size());
 		assertEquals("core_company", config.getJobs().get(0).getName());
 		assertEquals("incident", config.getJobs().get(1).getName());
@@ -32,7 +32,7 @@ public class LoaderConfigTest {
 	@Test
 	public void testGoodConfig1() throws Exception {
 		File config1 = folder.getYaml("goodconfig1");
-		LoaderConfig config = new LoaderConfig(config1);
+		LoaderConfig config = new LoaderConfig(config1, null);
 		DateTime start = config.getStart();
 		DateTime today = DateTime.today();
 		assertEquals(8, config.getJobs().size());
@@ -46,7 +46,7 @@ public class LoaderConfigTest {
 	@Test
 	public void testGoodSync1() throws Exception {
 		File goodConfig = folder.getYaml("goodsync1");
-		LoaderConfig config = new LoaderConfig(goodConfig);
+		LoaderConfig config = new LoaderConfig(goodConfig, null);
 		config.validate();
 	}
 		

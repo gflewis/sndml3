@@ -9,6 +9,9 @@ import servicenow.api.TableSchema;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.util.Properties;
+
 public class SessionVerificationTest {
 
 	Logger logger = TestingManager.getLogger(this.getClass());
@@ -28,4 +31,22 @@ public class SessionVerificationTest {
 		assertEquals(wsdlCount, schemaCount);
 	}
 
+	@Test
+	public void testAutoVerify() throws Exception {
+		Properties props = new Properties();
+		props.setProperty("servicenow.instance", "dev00000");
+		props.setProperty("servicenow.username", "admin");
+		props.setProperty("servicenow.password", "secret");
+		Session session1 = new Session(props);
+		assertNotNull(session1);
+		props.setProperty("servicenow.verify_session", "true");
+		Session session2 = null;
+		try {
+			session2 = new Session(props);
+		}
+		catch (IOException e) {
+			logger.info(Log.TEST, e.getMessage());
+		}
+		assertNull(session2);
+	}
 }

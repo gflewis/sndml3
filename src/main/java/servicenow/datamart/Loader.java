@@ -40,8 +40,6 @@ public class Loader {
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("config").required(false).hasArg(true).
 				desc("YAML config file (required)").build());
-//		options.addOption(Option.builder("m").longOpt("metrics").required(false).hasArg(true).
-//				desc("Metrics file (optional)").build());
 		
 		CommandLine cmd = new DefaultParser().parse(options,  args);
 		String profilename = cmd.getOptionValue("p");
@@ -54,17 +52,11 @@ public class Loader {
 			
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
 		Session session = profile.getSession();
-		if (profile.getPropertyBoolean("loader.verify_session", true)) {
-			session.verify();
-		}
 		LoaderConfig config = (tablename != null) ?
 			// Single table load
 			new LoaderConfig(session.table(tablename)) :
 			// YAML config load
-			new LoaderConfig(new File(yamlfilename));
-//		if (line.hasOption("m")) {
-//			config.setMetricsFile(new File(line.getOptionValue("m")));
-//		}
+			new LoaderConfig(new File(yamlfilename), profile.getProperties());
 		config.validate();
 		Loader loader = new Loader(profile, config);			
 		loader.loadTables();			
@@ -75,10 +67,10 @@ public class Loader {
 		this.database = database;
 		jobs.add(new LoaderJob(table, database));
 	}
-	
-	Loader(Session session, Database database, LoaderConfig config) {
-		this.session = session;
-		this.database = database;
+		
+	Loader(ConnectionProfile profile, LoaderConfig config) {
+		this.session = profile.getSession();
+		this.database = profile.getDatabase();
 		this.config = config;
 		this.threads = config.getThreads();
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
@@ -86,10 +78,6 @@ public class Loader {
 		for (JobConfig jobConfig : config.getJobs()) {
 			jobs.add(new LoaderJob(this, jobConfig));
 		}
-	}
-	
-	Loader(ConnectionProfile profile, LoaderConfig config) {
-		this(profile.getSession(), profile.getDatabase(), config);		
 	}
 	
 	Session getSession() {

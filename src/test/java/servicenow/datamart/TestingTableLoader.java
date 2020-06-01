@@ -18,7 +18,7 @@ public class TestingTableLoader {
 	public TestingTableLoader(String text) {
 		StringReader reader = new StringReader(text);
 		try {
-			config = new LoaderConfig(reader);
+			config = new LoaderConfig(reader, null);
 		} catch (ConfigParseException e) {
 			throw new TestingException(e);
 		}
@@ -26,7 +26,7 @@ public class TestingTableLoader {
 	
 	public TestingTableLoader(File file) {
 		try {
-			config = new LoaderConfig(file);
+			config = new LoaderConfig(file, null);
 		} catch (ConfigParseException | IOException e) {
 			throw new TestingException(e);
 		}		

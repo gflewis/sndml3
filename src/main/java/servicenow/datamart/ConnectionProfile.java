@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,9 @@ public class ConnectionProfile {
 		raw.load(stream);
 		for (String name : raw.stringPropertyNames()) {
 			String value = raw.getProperty(name);
+			// Replace any environment variables
+			StringSubstitutor envMap = new StringSubstitutor(System.getenv());
+			value = envMap.replace(value);
 			// If property is in backticks then evaluate as a command 
 			Matcher cmdMatcher = cmdPattern.matcher(value); 
 			if (cmdMatcher.matches()) {
@@ -104,9 +108,13 @@ public class ConnectionProfile {
 	 * If a connection has already been opened, then it will be returned.
 	 * @return
 	 */
-	public Session getSession()  {
+	public Session getSession() throws ResourceException {
 		if (session == null) {
-			session = new Session(properties);
+			try {
+				session = new Session(properties);
+			} catch (IOException e) {
+				throw new ResourceException(e);
+			}
 		}
 		return session;
 	}

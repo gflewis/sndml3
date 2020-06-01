@@ -21,8 +21,8 @@ import servicenow.api.Log;
 public class DateTimeFactory {
 
 	final DateTime start;
-	final File lastMetrics;
-	Properties lastProperties = null;
+	File metricsFile = null;
+	Properties lastValues = null;
 	
 	final Pattern datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2}:\\d{2})?");
 	final Pattern namePattern = Pattern.compile("[a-z][a-z0-9_.]*", Pattern.CASE_INSENSITIVE);
@@ -30,57 +30,36 @@ public class DateTimeFactory {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	/*
-	DateTimeFactory() throws ConfigParseException {
-		this.start =  DateTime.now();
-		File metricsFile = Globals.getMetricsFile();
-		if (metricsFile == null || !metricsFile.exists()) {
-			this.lastMetrics = null;
-			return;
-		}
-		this.lastMetrics = new Properties();
-		try {
-			FileInputStream input = new FileInputStream(metricsFile);
-			lastMetrics.load(input);
-		}
-		catch (IOException e) {
-			throw new ConfigParseException(e);
-		}
-	}
-	*/
-
 	DateTimeFactory() {
 		this.start = DateTime.now();
-		this.lastMetrics = null;
 	}
 	
-	DateTimeFactory(DateTime start, File lastMetrics) {
+	DateTimeFactory(DateTime start, File metricsFile) {
 		this.start = (start==null ? DateTime.now() : start);
-		this.lastMetrics = lastMetrics;
+		this.metricsFile = metricsFile;
 	}
 	
-	DateTimeFactory(DateTime start, Properties properties) {
+	DateTimeFactory(DateTime start, Properties lastValues) {
 		this.start = (start==null ? DateTime.now() : start);
-		this.lastMetrics = null;
-		this.lastProperties = properties;		
+		this.lastValues = lastValues;
 	}
 
 	DateTime getStart() {
-		// return Globals.getStart();
 		return this.start;
 	}
 
-	private Properties getLastMetrics() throws ConfigParseException {
-		if (lastProperties == null) {
-			lastProperties = new Properties();
-			try {
-				lastProperties.load(new FileReader(lastMetrics));
-			} catch (IOException e) {
-				logger.error(Log.INIT, e.getMessage());
-				throw new ConfigParseException(e);
-			}			
+	private Properties getLastValues() throws ConfigParseException {
+		if (this.lastValues == null) {
+			this.lastValues = new Properties();
+			if (this.metricsFile != null) {
+				try {
+					lastValues.load(new FileReader(this.metricsFile));
+				} catch (IOException e) {
+					throw new ConfigParseException(e);
+				}							
+			}
 		}
-		return lastProperties;
+		return lastValues;
 	}
 	
 	DateTime getDate(Object obj) throws ConfigParseException {
@@ -124,12 +103,12 @@ public class DateTimeFactory {
 	 */
 	DateTime getLast(String propName) throws ConfigParseException {
 		assert propName != null;
-		if (lastMetrics == null && lastProperties == null) {
+		if (lastValues == null) {
 			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
 			logger.error(Log.INIT, message);
 			throw new ConfigParseException(message);
 		}
-		String propValue = getLastMetrics().getProperty(propName);
+		String propValue = getLastValues().getProperty(propName);
 		if (propValue == null) 
 			throw new ConfigParseException("Property not found: " + propName);
 		return new DateTime(propValue);

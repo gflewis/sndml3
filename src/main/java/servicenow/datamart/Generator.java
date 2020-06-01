@@ -31,6 +31,10 @@ public class Generator {
 	
 	Logger logger = Log.logger(this.getClass());
 	
+	@SuppressWarnings("serial")
+	class Variables extends HashMap<String,String> {		
+	}
+	
 	/**
 	 * Generate a Create Table statement.
 	 * 
@@ -147,7 +151,7 @@ public class Generator {
 	}
 	
 	List<String> getInitializations() {
-		Map<String,String> myvars = new HashMap<String,String>();
+		Variables myvars = new Variables();
 		myvars.put("schema", this.schemaName);
 		List<String> result = new ArrayList<String>();
 		Element initialize = dialectTree.getChild("initialize");
@@ -237,7 +241,7 @@ public class Generator {
 			Map<String,String> vars) {
 		String sql = dialectTree.getChild("templates").getChildText(templateName);
 		assert sql != null : "Template not found: " + templateName;
-		Map<String,String> myvars = new HashMap<String,String>();
+		Variables myvars = new Variables();
 		myvars.put("schema", this.schemaName);
 		myvars.put("table", sqlCase(tableName));
 		myvars.put("keyvalue", "?");
@@ -275,7 +279,7 @@ public class Generator {
 			fieldlist.append(fieldSeparator);
 			fieldlist.append(sqlFieldDefinition(fd));
 		}
-		HashMap<String, String> map = new HashMap<String, String>();
+		Variables map = new Variables();
 		map.put("fielddefinitions", fieldlist.toString());
 		String result = getTemplate("create", sqlTableName, map);
 		return result;
@@ -299,7 +303,27 @@ public class Generator {
 		return result;
 	}
 
-	private String replaceVars(String sql, Map<String, String> vars) {
+	@Deprecated
+	static String replaceVars(String sql, Properties vars) {
+		assert sql != null;
+		for (String name : vars.stringPropertyNames()) {
+			String value = vars.getProperty(name);
+			if (value == null || value.length() == 0) {
+				// if the variable (e.g. $schema) is null or zero length
+				// then also consume a period following the variable
+				// i.e. "insert into $schema.$table" becomes "insert into $table"
+				sql = sql.replaceAll("\\$\\{" + name + "\\}\\.?", "");
+				sql = sql.replaceAll("\\$" + name + "\\.", "");
+				sql = sql.replaceAll("\\$" + name + "\\b", "");
+			} else {
+				sql = sql.replaceAll("\\$\\{" + name + "\\}", value);
+				sql = sql.replaceAll("\\$" + name + "\\b", value);
+			}			
+		}
+		return sql;
+	}
+	
+	static String replaceVars(String sql, Map<String,String> vars) {
 		assert sql != null;
 		Iterator<Map.Entry<String, String>> iterator = vars.entrySet().iterator();
 		while (iterator.hasNext()) {

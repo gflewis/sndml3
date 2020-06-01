@@ -3,6 +3,7 @@ package servicenow.datamart;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.Properties;
 
 /**
  * A file with YAML Loader Config instructions. 
@@ -20,13 +21,13 @@ public class YamlFile extends File {
 		return new FileReader(this);
 	}
 	
-	public LoaderConfig getConfig() throws ConfigParseException, FileNotFoundException {
-		return new LoaderConfig(getReader());
+	public LoaderConfig getConfig(Properties profile) throws ConfigParseException, FileNotFoundException {
+		return new LoaderConfig(getReader(), profile);
 	}
 	
 	public Loader getLoader(ConnectionProfile profile) 
 			throws ConfigParseException, FileNotFoundException{
-		return new Loader(profile.getSession(), profile.getDatabase(), getConfig());
+		return new Loader(profile, getConfig(profile.getProperties()));
 	}
 	
 	/**
