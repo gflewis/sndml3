@@ -1,9 +1,9 @@
 #!/bin/bash
 # delete log files older than 10 days
-cd $SNDML_HOME/profiles
+cd $SNDML_HOME/configs
 for p in *
 do
-  dir=$SNDML_HOME/profiles/$p/log
+  dir=$SNDML_HOME/configs/$p/log
   if [[ -d $dir ]]
   then
     find $dir -mtime 10 -type f -print -delete

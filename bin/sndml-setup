@@ -1,19 +1,21 @@
 # Defines a bash function named sndml_setup_profile
 # which sets the following environment variables
-#   SNDML_BASE
+#   SNDML_CONFIGS
+#   SNDML_VERSION
+#   SNDML_CONFIG
 #   SNDML_PROFILE
 #   SNDML_JAR
 #
 # Assumes SNDML_HOME is predefined and structured as follows:
-#   pom.xml
-#   src/                           <- location of source code
-#   target/                        <- location of jar files
-#   profiles/                      <- profiles directory is excluded in .gitignore
-#   profiles/xxxxx/                <- SNDML_BASE
-#   profiles/xxxxx/.sndml_profile  <- SNDML_PROFILE
-#   profiles/xxxxx/yaml/           <- location of yaml files
-#   profiles/xxxxx/metrics/        <- location of metrics files
-#   profiles/xxxxx/log/            <- location of log files
+#   pom.xml                       <- Maven Project Object Model
+#   src/                          <- location of source code
+#   target/                       <- location of jar files
+#   configs/                      <- SNDML_CONFIGS excluded in .gitignore
+#   configs/xxxxx/                <- SNDML_CONFIG
+#   configs/xxxxx/.sndml_profile  <- SNDML_PROFILE
+#   configs/xxxxx/yaml/           <- location of yaml files
+#   configs/xxxxx/metrics/        <- location of metrics files
+#   configs/xxxxx/log/            <- location of log files
 #
 sndml_setup_profile() {
   # echo sndml_setup_profile $1
@@ -22,49 +24,54 @@ sndml_setup_profile() {
     return 1
   fi
   if [[ -z "$1" ]]; then
-    echo Base directory not specified
+    echo Config directory not specified
     return 1
+  fi
+  if [[ -z "$SNDML_CONFIGS" ]]; then
+    export SNDML_CONFIGS=$SNDML_HOME/CONFIGS
   fi
   if [[ -d "$1" ]]
   then
     cd $1
+    export SNDML_CONFIG=`pwd`
   else
-    export SNDML_BASE=$SNDML_HOME/profiles/$1
-    cd $SNDML_BASE
+    export SNDML_CONFIG=$SNDML_CONFIGS/$1
+    cd $SNDML_CONFIG
   fi
-  export SNDML_BASE=`pwd`
-  local filename=$SNDML_BASE/.sndml_profile
-  if [[ -r $filename ]]
-  then
-    export SNDML_PROFILE=$filename
-  else
-    echo File not found: $filename
+  export SNDML_PROFILE=$SNDML_CONFIG/.sndml_profile
+  if [[ ! -r "$SNDML_PROFILE" ]]; then
+    echo File not found: $SNDML_PROFILE
     return 1
   fi
-  sndml_setup_jar
+  sndml_determine_jar
 }
 
-sndml_setup_jar() {
+sndml_determine_version() {
+  # look in pom.xml to find the latest version
+  local vpath='/*[local-name()="project"]/*[local-name()="version"]/text()'
+  export SNDML_VERSION=`xmllint --xpath $vpath $SNDML_HOME/pom.xml`
+}
+
+sndml_determine_jar() {
+  if [[ -z "$SNDML_VERSION" ]]; then
+    sndml_determine_version
+  fi
   local url=`awk -F= '/^datamart.url/{print $2}' <$SNDML_PROFILE`
-  if [[ -z "$url" ]]
-  then
+  if [[ -z "$url" ]]; then
     echo datamart.url not found in $SNDML_PROFILE
     return 1
   fi
   local db=`echo $url | awk -F: '{print $2}'`
-  local tag
+  local suffix
   case $db in
-  oracle)     tag=ora ;;
-  postgresql) tag=pg ;;
-  mysql)      tag=mysql ;;
-  sqlserver)  tag=mssql ;;
+  oracle)     suffix=ora ;;
+  postgresql) suffix=pg ;;
+  mysql)      suffix=mysql ;;
+  sqlserver)  suffix=mssql ;;
   esac
-  local jarfile=`ls $SNDML_HOME/target/sndml*-$tag.jar | tail -1`
-  if [[ -r $jarfile ]]
-  then
-    export SNDML_JAR=$jarfile
-  else
-    echo File not found: $jarfile
+  export SNDML_JAR=$SNDML_HOME/target/sndml-$SNDML_VERSION-$suffix.jar
+  if [[ ! -r $SNDML_JAR ]]; then
+    echo File not found: $SNDML_JAR
     return 1
   fi
   return 0

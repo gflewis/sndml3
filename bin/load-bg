@@ -2,10 +2,10 @@
 timestamp=`date +%Y%m%d%H%M%S`
 source sndml-setup
 sndml_setup_profile $1
-export SNDML_YAML=$SNDML_BASE/yaml/$2.yaml
-export SNDML_LOG=$SNDML_BASE/log/$2-$timestamp.log
-# env | grep SNDML | sort
-cd $SNDML_BASE
+export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml
+export SNDML_LOG=$SNDML_CONFIG/log/$2-$timestamp.log
+env | grep SNDML | sort
+cd $SNDML_CONFIG
 # echo java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML "2>&1 >$SNDML_LOG"
 nohup java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML 2>&1 >$SNDML_LOG &
 echo $SNDML_LOG
