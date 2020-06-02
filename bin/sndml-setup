@@ -28,7 +28,7 @@ sndml_setup_profile() {
     return 1
   fi
   if [[ -z "$SNDML_CONFIGS" ]]; then
-    export SNDML_CONFIGS=$SNDML_HOME/CONFIGS
+    export SNDML_CONFIGS=$SNDML_HOME/configs
   fi
   if [[ -d "$1" ]]
   then
