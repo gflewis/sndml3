@@ -23,7 +23,7 @@ public class TestingManager {
 	static Class classUnderTest;
 
 	/**
-	 * Get a profile from profiles/name/.sndml_profile.
+	 * Get a profile from configs/name/.sndml_profile.
 	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
 	 */
 	public static TestingProfile getProfile(String name) {

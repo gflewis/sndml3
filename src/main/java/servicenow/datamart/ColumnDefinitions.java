@@ -57,10 +57,11 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 		if (this.size() < 1)
 			throw new RuntimeException(
 				"SQL table not found: " + db.qualifiedName(sqlTableName));
-		if (!this.get(0).getName().toUpperCase().equals("SYS_ID"))
+		if (!this.get(0).getName().toLowerCase().equals("sys_id"))
 			throw new RuntimeException(
-				"expected SYS_ID, found " + this.get(0).getName() + 
-				" in first column of table \"" + sqlTableName + "\"");
+				String.format(
+					"expected 'sys_id', found '%s' in first column of table '%s'",
+					this.get(0).getName(), sqlTableName));
 		logger.debug(Log.SCHEMA, this.size() + " columns");
 		columns.close();
 		Log.setJobContext(saveJob);	

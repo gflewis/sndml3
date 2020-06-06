@@ -21,7 +21,7 @@ public class TestingProfile extends ConnectionProfile {
 	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
 	 */
 	private static File getProfilePath(String profileName) {
-		Path directory = Paths.get("profiles", profileName);
+		Path directory = Paths.get("configs", profileName);
 		File file = directory.resolve(".sndml_profile").toFile();
 		return file;
 	}
