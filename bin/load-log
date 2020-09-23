@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Run a load job will all output directed to a log file.
-# This command is intended to be run from cron.
+# Run a load job with all output directed to a file in the log directory.
+# This command is intended to be used in cron jobs.
 #
 source sndml-setup
 sndml_setup_profile $1
