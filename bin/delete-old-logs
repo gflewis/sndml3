@@ -6,6 +6,6 @@ do
   dir=$SNDML_HOME/configs/$p/log
   if [[ -d $dir ]]
   then
-    find $dir -mtime 10 -type f -print -delete
+    find $dir -mtime +10 -type f -print -delete
   fi
 done
