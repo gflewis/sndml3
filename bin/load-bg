@@ -1,11 +1,15 @@
 #!/bin/bash
+#
+# Run a load job will all output directed to a log file.
+# This command is intended to be run from cron.
+#
 timestamp=`date +%Y%m%d%H%M%S`
 source sndml-setup
 sndml_setup_profile $1
 export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml
-export SNDML_LOG=$SNDML_CONFIG/log/$2-$timestamp.log
-env | grep SNDML | sort
+if [[ -z $SNDML_LOG ]]; then
+  export SNDML_LOG=$SNDML_CONFIG/log/$2-$timestamp.log
+fi
+env | grep SNDML | sort >$SNDML_LOG
 cd $SNDML_CONFIG
-# echo java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML "2>&1 >$SNDML_LOG"
-nohup java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML 2>&1 >$SNDML_LOG &
-echo $SNDML_LOG
+java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML 2>&1 >>$SNDML_LOG
