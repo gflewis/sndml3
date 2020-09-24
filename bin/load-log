@@ -11,4 +11,4 @@ if [[ -z $SNDML_LOG ]]; then
 fi
 env | grep SNDML | sort >$SNDML_LOG
 cd $SNDML_CONFIG
-java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML 2>&1 >>$SNDML_LOG
+java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML >>$SNDML_LOG 2>&1

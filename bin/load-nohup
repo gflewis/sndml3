@@ -7,4 +7,4 @@ source sndml-setup
 sndml_setup_profile $1
 export SNDML_LOG=`logfile-name $1 $2`
 echo logfile=$SNDML_LOG
-nohup load-log $* &
+nohup load-log $* >>$SNDML_LOG 2>&1 &
