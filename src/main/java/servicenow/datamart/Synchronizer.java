@@ -144,7 +144,7 @@ public class Synchronizer extends TableReader {
 	}
 
 	@Override
-	public TableReader setFilter(EncodedQuery value) {
+	public TableReader setQuery(EncodedQuery value) {
 		throw new UnsupportedOperationException();
 	}
 	

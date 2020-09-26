@@ -31,7 +31,7 @@ public class DatePartitionedTableReader extends TableReader {
 	public DatePartitionedTableReader(TableReaderFactory factory, DateTime.Interval interval, Integer threads) {
 		super(factory.getTable());
 		this.factory = factory;
-		setFilter(factory.filter);
+		setQuery(factory.filter);
 		setCreatedRange(factory.createdRange);
 		setUpdatedRange(factory.updatedRange);
 		setFields(factory.fieldNames);

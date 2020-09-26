@@ -13,9 +13,8 @@ public class JobConfig extends Config {
 	private Boolean truncate;
 	private DateTimeRange created;
 	private DateTime since;
-	private EncodedQuery filter;
-	// orderBy removed 2020-01-24
-	// private String orderBy;
+	// private EncodedQuery filter;
+	private String filter;
 	private DateTime.Interval partition;
 	private Integer pageSize;
 	private Integer minRows;
@@ -81,7 +80,8 @@ public class JobConfig extends Config {
 					this.since = asDate(val);
 					break;
 				case "filter":
-					this.filter = new EncodedQuery(val.toString());
+//					this.filter = new EncodedQuery(val.toString());
+					this.filter = val.toString();
 					break;
 				case "partition":
 					this.partition = asInterval(val);
@@ -223,11 +223,11 @@ public class JobConfig extends Config {
 		return this.since;
 	}
 
-	void setFilter(EncodedQuery value) {
+	void setFilter(String value) {
 		this.filter = value;
 	}
 
-	EncodedQuery getFilter() {
+	String getFilter() {
 		return this.filter;
 	}
 

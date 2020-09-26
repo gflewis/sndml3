@@ -4,23 +4,8 @@ package servicenow.api;
 /**
  * <p>Encapsulates an Encoded Query.</p> 
  * 
- * <p>{@link EncodedQuery} is used to restrict the number
- * of records return by a {@link TableReader}.  
- * The following two examples are equivalent.</p>
- * <p><b>Example 1:</b></p>
- * <pre>
- * {@link EncodedQuery} filter = new {@link EncodedQuery}("category=network^active=true");
- * </pre>
- * 
- * <p><b>Example 2:</b></p>
- * <pre>
- * {@link EncodedQuery} filter = new {@link EncodedQuery}()
- *    .{@link #addQuery}("category", "network")
- *    .{@link #addQuery}("active", "true");
- * </pre>
- * 
  * <p>Most of the methods in the class will return the modified object
- * so that it is easy to chain calls together as in Example 2 above.</p>
+ * to support chaining.</p>
  * 
  * <p><b>Warning:</b>
  * This class does NOT check the syntax of the encoded query string.
@@ -46,22 +31,41 @@ public class EncodedQuery implements Cloneable {
 	final public static String ORDER_BY               = "ORDERBY";
 	final public static String ORDER_BY_DESC          = "ORDERBYDESC";
 	
-	private StringBuffer buf = new StringBuffer();
+	private final Table table;
+	private final StringBuffer buf;
 	
 	private static enum OrderBy {NONE, FIELDS, KEYS}; 
 	private OrderBy orderBy = OrderBy.NONE;
-
-	/**
-	 * Create an empty EncodedQuery.
-	 */
-	public EncodedQuery() {
+		
+	public EncodedQuery(Table table) {
+		this.table = table;
+		this.buf = new StringBuffer();
+	}
+	
+	public EncodedQuery(Table table, String str) {
+		this.table = table;
+		this.buf = str == null ? new StringBuffer() : new StringBuffer(str);
 	}
 
+	public EncodedQuery(Table table, KeySet keys) {
+		this.table = table;
+		this.buf = new StringBuffer();
+		this.addQuery(keys);
+	}
+		
+	/**
+	 * Make a copy of an EncodedQuery.
+	 */
+	public EncodedQuery(EncodedQuery other) {
+		this.table = other.table;
+		this.buf = new StringBuffer(other.buf);
+	}
+	
 	/**
 	 * @return A query that will read the entire table, i.e. an empty query
 	 */
-	public static EncodedQuery all() {
-		return new EncodedQuery();
+	public static EncodedQuery all(Table table) {
+		return new EncodedQuery(table);
 	}
 	
 	public static boolean isEmpty(EncodedQuery query) {
@@ -74,51 +78,33 @@ public class EncodedQuery implements Cloneable {
 		return (buf.length() == 0);
 	}
 	
-	/**
-	 * Create an EncodedQuery from a string.
-	 * 
-	 * <pre>
-	 * {@link EncodedQuery} filter = new {@link EncodedQuery}("category=network^active=true");
-	 * </pre>
-	 */
-	public EncodedQuery(String str) {
-		if (str != null) buf.append(str);
-	}
-
-	/**
-	 * Make a copy of an EncodedQuery.
-	 */
-	public EncodedQuery(EncodedQuery other) {
-		if (other != null) addQuery(other.toString());
-	}
-
+	
 	/**
 	 * Make a copy of an EncodedQuery
-	 */	
+	 */		
 	public EncodedQuery clone() {
 		return new EncodedQuery(this);
 	}
 
 	public String toString() {
-		return buf.toString();
+		Domain domain = this.table.getDomain();
+		if (domain == null) {
+			return this.buf.toString();
+		}
+		else {
+			StringBuffer result = new StringBuffer("sys_domainIN" + domain.toString());
+			if (buf.length() > 0) {
+				result.append('^');
+				result.append(this.buf);
+			}
+			return result.toString();
+		}
 	}
 	
 	public boolean equals(Object other) {
 		return this.toString().equals(other.toString());
 	}
-	
-	public EncodedQuery(String field, String relop, String value) {
-		this.addQuery(field, relop, value);
-	}
-	
-	public EncodedQuery(String field, String value) {
-		this.addQuery(field, EQUALS, value);
-	}
-	
-	public EncodedQuery(KeySet keys) {
-		this.addQuery(keys);
-	}
-	
+			
 	/**
 	 * Append an encoded query string to a {@link EncodedQuery}
 	 * 

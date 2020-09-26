@@ -1,21 +1,33 @@
 package servicenow.api;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class Table {
 
 	protected final Instance instance;
 	protected final Session session;
 	protected final String tablename;
+	protected final Domain domain;
 	
 	private SoapTableAPI apiSOAP;
 	private RestTableAPI apiREST;
 	private JsonTableAPI apiJSON;
 	private TableAPI api;
-			
+	
+	private static final List<String> DOMAIN_EXCLUDED_TABLES = Arrays.asList(
+			"sys_dictionary", "sys_db_object", "sys_glide_object", 
+			"sys_security_acl", "sys_security_acl_role", "sys_security_restricted_list", 
+			"sys_properties", "sys_script_include", "sys_dictionary_override");
+	
 	Table(Session session, String tablename) {
 		this.session = session;
 		this.tablename = tablename;
+		Domain sessionDomain = session.getDomain();
+		this.domain = 
+			(sessionDomain == null || DOMAIN_EXCLUDED_TABLES.contains(tablename)) ? 
+				null : sessionDomain;			
 		this.instance = session.getInstance();
 		String apiName = session.getProperty("api");
 		if (apiName == null)
@@ -37,6 +49,17 @@ public class Table {
 	
 	public String getName() {
 		return this.tablename;
+	}
+	
+	public Domain getDomain() {
+		return this.domain;
+	}
+	
+	public EncodedQuery getQuery(String filter) {
+		if (filter == null) 
+			return new EncodedQuery(this);
+		else
+			return new EncodedQuery(this, filter);
 	}
 	
 	/**

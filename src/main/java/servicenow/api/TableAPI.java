@@ -69,7 +69,8 @@ public abstract class TableAPI {
  	}
  	
 	public RecordList getRecords(String fieldname, String fieldvalue, boolean displayValue) throws IOException {
-		EncodedQuery query = new EncodedQuery(fieldname, fieldvalue);
+		EncodedQuery query = new EncodedQuery(table);
+		query.addQuery(fieldname, EncodedQuery.EQUALS, fieldvalue);
 		return getRecords(query, displayValue);
 	}
 

@@ -51,7 +51,7 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public RecordList getRecords(KeySet keys, boolean displayValue) throws IOException {
-		EncodedQuery query = keys.encodedQuery();
+		EncodedQuery query = new EncodedQuery(table, keys);
 		return getRecords(query, displayValue);
 	}
 	

@@ -51,13 +51,13 @@ public class TableSchema {
 			}
 		}
 		
-		EncodedQuery query = new EncodedQuery().
+		EncodedQuery query = new EncodedQuery(dictionary).
 			addEquals("name",  tablename).
 			addEquals("active", "true");
 		
 		RestTableReader reader = new RestPetitTableReader(dictionary);
 		reader.setReaderName(myname);
-		reader.setFilter(query);
+		reader.setQuery(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(5000);
 		reader.initialize();

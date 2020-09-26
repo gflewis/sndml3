@@ -33,6 +33,7 @@ public class Database {
 
 	private final Logger logger = Log.logger(this.getClass());
 	private final URI dbURI;
+	private final String protocol;
 	private final String dbuser;
 	private final boolean autocommit;
 	private final boolean warnOnTruncate;
@@ -48,6 +49,7 @@ public class Database {
 		this.properties.putAll(props);
 		String dburl = props.getProperty("datamart.url");
 		this.dbURI = new URI(dburl);
+		this.protocol = getProtocol(this.dbURI);
 		this.dbuser = props.getProperty("datamart.username");
 		String dbpass = props.getProperty("datamart.password", "");
 		schema = props.getProperty("datamart.schema");
@@ -104,13 +106,15 @@ public class Database {
 	}
 	
 	boolean isOracle() {
-		String protocol = getProtocol(getURI());
 		return "oracle".equalsIgnoreCase(protocol);
 	}
 	
 	boolean isPostgresql() {
-		String protocol = getProtocol(getURI());
 		return "postgresql".equalsIgnoreCase(protocol);		
+	}
+	
+	boolean isMySQL() {
+		return "mysql".equalsIgnoreCase(protocol);
 	}
 	
 	boolean isAutoCommitEnabled() {
@@ -124,15 +128,18 @@ public class Database {
 	boolean isClosed() {
 		return (this.dbc == null);
 	}
-	
-	static String getProtocol(URI uri) {
-		String urlPart[] = uri.toString().split(":");
-		String protocol = urlPart[1];
-		return protocol;		
-	}
-	
+
 	URI getURI() {
 		return this.dbURI;
+	}
+	
+	String getProtocol() {
+		return this.protocol;
+	}
+	
+	static String getProtocol(URI dbURI) {
+		String urlPart[] = dbURI.toString().split(":");
+		return urlPart[1];		
 	}
 	
 	Connection getConnection() {
@@ -185,31 +192,62 @@ public class Database {
 	 */
 	boolean tableExists(String tablename) 
 			throws SQLException {
-		ResultSet rs = getTableDefinition(tablename);
-		boolean result = (rs.next() ? true : false);
-		rs.close();
-		logger.debug(Log.INIT, String.format("tableExists schema=%s table=%s result=%b", schema, tablename, result));
+		ResultSet rsTables = getTableDefinition(tablename);
+		boolean result = rsTables != null && rsTables.first();
+		rsTables.close();
+		logger.debug(Log.INIT, String.format(
+				"tableExists protocol=%s schema=%s table=%s result=%b", 
+				protocol, getSchema(), tablename, result));
 		return result;
 	}
 
-	ResultSet getTableDefinition(String tablename) throws SQLException {
+	private ResultSet getTableDefinition(String tablename) throws SQLException {
 		assert tablename != null;
 		assert tablename.length() > 0;
 		DatabaseMetaData meta = getConnection().getMetaData();
-		String schema = getSchema();
-		if (this.isOracle()) tablename = tablename.toUpperCase();
-		ResultSet rs = meta.getTables(null, schema, tablename, null);
-		return rs;		
+		String catalog, schema;
+		if (isMySQL()) {
+			catalog = getSchema();
+			schema = null;
+		}
+		else {
+			catalog = null;
+			schema = getSchema();
+		}
+		if (isOracle()) tablename = tablename.toUpperCase();
+		ResultSet rsTables = meta.getTables(catalog, schema, tablename, null);
+		int count = 0;
+		while (rsTables.next()) {
+			count += 1;
+			logger.trace(Log.INIT, String.format(
+				"getTableDefinition catalog=%s schema=%s tablename=%s type=%s",
+				rsTables.getString(1), rsTables.getString(2), 
+				rsTables.getString(3), rsTables.getString(4)));
+		}
+		if (count > 0) 
+			throw new ResourceException(String.format(
+				"DatabaseMetaData returned multiple rows for catalog=%s schema=%s tablename=%s", 
+				catalog, schema, tablename));
+		rsTables.beforeFirst();
+		return rsTables;
 	}
 
 	ResultSet getColumnDefinitions(String tablename) throws SQLException {
 		assert tablename != null;
 		assert tablename.length() > 0;
 		DatabaseMetaData meta = getConnection().getMetaData();
-		String schema = getSchema();
+		String catalog, schema;
+		if (isMySQL()) {
+			catalog = getSchema();
+			schema = null;
+		}
+		else {
+			catalog = null;
+			schema = getSchema();
+		}
 		if (this.isOracle()) tablename = tablename.toUpperCase();
-		ResultSet rs = meta.getColumns(null, schema, tablename, null);
-		return rs;		
+		ResultSet rsColumns = meta.getColumns(catalog, schema, tablename, null);
+		return rsColumns;
 	}
 
 	/**

@@ -99,11 +99,12 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			deleteWriter.setParentMetrics(metrics);
 			deleteWriter.open();
 			Table audit = session.table("sys_audit_delete");
-			EncodedQuery auditQuery = new EncodedQuery("tablename", EncodedQuery.EQUALS, table.getName());
+			EncodedQuery auditQuery = new EncodedQuery(audit);
+			auditQuery.addQuery("tablename", EncodedQuery.EQUALS, table.getName());
 			RestTableReader auditReader = new RestTableReader(audit);
 			auditReader.enableStats(true);
 			auditReader.orderByKeys(true);
-			auditReader.setFilter(auditQuery);			
+			auditReader.setQuery(auditQuery);			
 			DateTime since = config.getSince();
 			auditReader.setCreatedRange(new DateTimeRange(since, null));
 			auditReader.setMaxRows(config.getMaxRows());
@@ -167,7 +168,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 				factory = new RestTableReaderFactory(table, writer);
 			}
 			factory.setReaderName(tableLoaderName);
-			factory.setFilter(config.getFilter());
+			factory.setFilter(new EncodedQuery(table, config.getFilter()));
 			factory.setCreated(createdRange);
 			factory.setFields(fieldNames);
 			factory.setPageSize(pageSize);

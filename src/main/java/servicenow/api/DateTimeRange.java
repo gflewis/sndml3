@@ -44,14 +44,7 @@ public class DateTimeRange {
 			other.getEnd() : this.getEnd();
 		return new DateTimeRange(start, end);		
 	}
-	
-	EncodedQuery asQuery(String fieldname) {
-		EncodedQuery result = new EncodedQuery();
-		if (start != null) result.addQuery(fieldname, EncodedQuery.GREATER_THAN_OR_EQUALS, start.toString());
-		if (end != null) result.addQuery(fieldname, EncodedQuery.LESS_THAN, end.toString());
-		return result;
-	}
-	
+		
 	public String toString() {
 		return String.format("[%s,%s]", 
 				hasStart() ? start.toString() : "null", 

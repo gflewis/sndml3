@@ -76,22 +76,7 @@ public class KeySet extends ArrayList<Key> {
 		}
 		return result;
 	}
-	
-	/**
-	 * Returns a {@link EncodedQuery}
-	 * that selects all the records in a subset of this list.
-	 * @param fromIndex Zero based starting index (inclusive).
-	 * @param toIndex Zero based ending index (exclusive).
-	 */
-	public EncodedQuery encodedQuery(int fromIndex, int toIndex) {
-		String queryStr = "sys_idIN" + this.getSlice(fromIndex, toIndex).toString();
-		return new EncodedQuery(queryStr);
-	}
-	
-	public EncodedQuery encodedQuery() {
-		return this.encodedQuery(0,  this.size());
-	}
-	
+		
 	public Key maxValue() {
 		Key result = null;
 		for (Key key : this) {

@@ -66,7 +66,7 @@ public class TimestampTest {
 		Record rec = tbl.getRecord(new Key(sys_id));
 		String created = rec.getValue("sys_created_on");
 		JobConfig config = new JobConfig(tbl);
-		config.setFilter(new EncodedQuery("sys_id=" + sys_id));
+		config.setFilter("sys_id=" + sys_id);
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
 		config.setCreated(emptyRange);
 		LoaderJob loader = new LoaderJob(profile, config);

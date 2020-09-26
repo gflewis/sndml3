@@ -84,7 +84,7 @@ public class KeySetTableReader extends TableReader {
 			int toIndex = fromIndex + pageSize;
 			if (toIndex > totalRows) toIndex = totalRows;
 			KeySet slice = allKeys.getSlice(fromIndex, toIndex);
-			EncodedQuery sliceQuery = new EncodedQuery(slice);
+			EncodedQuery sliceQuery = new EncodedQuery(table, slice);
 			Parameters params = new Parameters();
 			if (this.viewName != null) params.add("sysparm_view", this.viewName);
 			if (this.displayValue) params.add("displayvalue", "all");

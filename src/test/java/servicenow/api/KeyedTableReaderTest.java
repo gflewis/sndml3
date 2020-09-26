@@ -15,7 +15,7 @@ public class KeyedTableReaderTest {
 	public void test() throws Exception {
 		Table table = session.table("incident");
 		SoapKeySetTableReader reader = new SoapKeySetTableReader(table);
-		reader.setFilter(EncodedQuery.all());
+		reader.setQuery(table.getQuery(null));
 		reader.setWriter(new NullWriter());
 		reader.setPageSize(20).initialize();
 		reader.call();

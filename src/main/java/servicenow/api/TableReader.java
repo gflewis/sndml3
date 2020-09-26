@@ -13,7 +13,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	private String readerName;
 	private TableReader parent;
-	private EncodedQuery filter;
+	private EncodedQuery query;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
 	private Key keyExclusion = null;
@@ -103,15 +103,20 @@ public abstract class TableReader implements Callable<TableReader> {
 		return result;
 	}
 	
-	public TableReader setFilter(EncodedQuery value) {
+	public TableReader setQuery(EncodedQuery value) {
 		if (initialized) throw new IllegalStateException();
 		// argument may be null to clear
-		this.filter = value;
+		this.query = value;
 		return this;
 	}
 
 	public EncodedQuery getFilter() {
-		return filter == null ? EncodedQuery.all() : filter;
+		if (query == null) {
+			return EncodedQuery.all(table);
+		}
+		else {
+			return query;
+		}
 	}
 	
 	public TableReader setCreatedRange(DateTimeRange range) {
@@ -164,7 +169,7 @@ public abstract class TableReader implements Callable<TableReader> {
 		}
 		else {
 			this.orderBy = OrderBy.FIELDS;
-			orderByQuery = new EncodedQuery();
+			orderByQuery = new EncodedQuery(this.table);
 			for (String field : fieldnames.split(",\\s*")) {
 				boolean desc = false;
 				char c1 = field.charAt(0);
@@ -186,11 +191,11 @@ public abstract class TableReader implements Callable<TableReader> {
 	 * plus created range, updated range and key exclusion
 	 */
 	public EncodedQuery getStatsQuery() {
-		EncodedQuery query = new EncodedQuery(filter);
-		if (createdRange != null) query.addCreated(createdRange);
-		if (updatedRange != null) query.addUpdated(updatedRange);
-		if (keyExclusion != null) query.excludeKeys(keyExclusion);
-		return query;
+		EncodedQuery result = query == null ? new EncodedQuery(table) : new EncodedQuery(query);
+		if (createdRange != null) result.addCreated(createdRange);
+		if (updatedRange != null) result.addUpdated(updatedRange);
+		if (keyExclusion != null) result.excludeKeys(keyExclusion);
+		return result;
 	}
 	
 	/**

@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * This class is used to ensure proper parameter type resolution 
  * for various methods.
  */
-public final class Key implements Comparable<Key>, Comparator<Key> {
+public class Key implements Comparable<Key>, Comparator<Key> {
 
 	static final Pattern pattern = Pattern.compile("[0-9a-f]{32}");
 	static final int LENGTH = 32;

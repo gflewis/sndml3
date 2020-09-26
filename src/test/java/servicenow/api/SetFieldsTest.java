@@ -28,7 +28,7 @@ public class SetFieldsTest {
 			assertNotNull(rec.getValue("sys_updated_on"));
 			assertNotNull(rec.getValue("number"));
 			assertNotNull(rec.getValue("state"));
-			assertNotNull(rec.getValue("short_description"));
+			// assertNotNull(rec.getValue("short_description"));
 			assertNull(rec.getValue("close_notes"));
 			assertNull(rec.getValue("assignment_group"));
 		}

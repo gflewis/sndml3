@@ -21,48 +21,47 @@ public class Session {
 	private final Instance instance;
 	private final Properties properties;
 	private final AuthScope authScope;
-	private String username;
-	private UsernamePasswordCredentials userPassCreds;
-	private CredentialsProvider credsProvider = null;
-	private ConcurrentHashMap<String,TableSchema> schemaCache = 
+	private final String username;
+	private final Domain domain;
+	private final UsernamePasswordCredentials userPassCreds;
+	private final CredentialsProvider credsProvider;
+	private final ConcurrentHashMap<String,TableSchema> schemaCache = 
 			new ConcurrentHashMap<String,TableSchema>();
-	private ConcurrentHashMap<String,TableWSDL> wsdlCache = 
+	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
 	final private BasicCookieStore cookieStore = new BasicCookieStore();
-	CloseableHttpClient client;
-	
+	CloseableHttpClient client;	
 
 	final private Logger logger = Log.logger(this.getClass());
-		
-	public Session(String instancename, String username, String password, Properties props) 
-			throws IOException {
-		this(new Instance(instancename), username, password);
-		if (this.getPropertyBoolean("verify_session", false)) this.verify();
-	}
-
-	public Session(Instance instance, String username, String password) {
-		this(instance);
-		this.setCredentials(username, password);
-		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
-	}
-
-	public Session(Instance instance) {
-		assert instance != null;
-		this.instance = instance;
-		this.properties = null;
-		this.authScope = new AuthScope(instance.getHost());		
-		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);		
-	}
 
 	public Session(Properties props) throws IOException {
 		this.properties = props;
-		this.instance = new Instance(getProperty("instance"));
+		String instancename = this.getProperty("instance");
+		String username = this.getProperty("username");
+		String password = this.getProperty("password");
+		String domainname = this.getProperty("domain");
+		assert instancename != null; 
+		assert instancename != "";
+		assert username != null;
+		assert username != "";
+		this.instance = new Instance(instancename);
+		this.username = username;
+		this.domain = (domainname == null || domainname.length() == 0) ? 
+			null : new Domain(domainname);		
+		this.logInitInfo();
 		this.authScope = new AuthScope(instance.getHost());
-		this.setCredentials(getProperty("username"), getProperty("password"));
-		logger.info(Log.INIT, "instance=" + this.instance.getURL() + " user=" + this.username);
+		this.credsProvider = new BasicCredentialsProvider();
+		this.userPassCreds = new UsernamePasswordCredentials(username, password);
+		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);		
 		if (this.getPropertyBoolean("verify_session", false)) this.verify();
 	}
 
+	private void logInitInfo() {
+		String msg = "instance=" + instance.getURL() + " user=" + username;
+		if (getDomain() != null) msg += " domain=" + getDomain();		
+		logger.info(msg);
+	}
+		
 	/**
 	 * Return the value of a property with the name "servicenow." + propname
 	 * if it is defined, otherwise return null.
@@ -70,7 +69,8 @@ public class Session {
 	public String getProperty(String propname) {
 		propname = "servicenow." + propname;
 		String value = System.getProperty(propname);
-		if (value == null && properties != null)	value = properties.getProperty(propname);
+		if (value == null && properties != null)	
+			value = properties.getProperty(propname);
 		return value;
 	}
 	
@@ -83,16 +83,7 @@ public class Session {
 	private boolean getPropertyBoolean(String propname) {
 		return getPropertyBoolean(propname, false);
 	}
-	
-	private Session setCredentials(String username, String password) {
-		assert username != null;
-		this.username = username;
-		this.credsProvider = new BasicCredentialsProvider();
-		this.userPassCreds = new UsernamePasswordCredentials(username, password);
-		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);
-		return this;
-	}
-	
+		
 	public void close() throws IOException {
 		client.close();
 	}
@@ -129,6 +120,10 @@ public class Session {
 		return getInstance().getHost();
 	}
 
+	public Domain getDomain() {
+		return this.domain;
+	}
+	
 	/**
 	 * Generate {@link TableSchema} or retrieve from cache.
 	 */

@@ -51,7 +51,7 @@ public class SoapKeySetTableReader extends TableReader {
 			int toIndex = fromIndex + pageSize;
 			if (toIndex > totalRows) toIndex = totalRows;
 			KeySet slice = allKeys.getSlice(fromIndex, toIndex);
-			EncodedQuery sliceQuery = new EncodedQuery(slice);
+			EncodedQuery sliceQuery = new EncodedQuery(table, slice);
 			Parameters params = new Parameters();
 			params.add("__encoded_query", sliceQuery.toString());
 			if (viewName != null) params.add("__use_view", viewName);

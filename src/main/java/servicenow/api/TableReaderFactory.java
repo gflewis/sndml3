@@ -26,7 +26,7 @@ public abstract class TableReaderFactory {
 	
 	public void configure(TableReader reader) {
 		reader.orderByKeys(true);
-		reader.setFilter(filter);
+		reader.setQuery(filter);
 		reader.setUpdatedRange(updatedRange);
 		reader.setCreatedRange(createdRange);
 		reader.setFields(fieldNames);
