@@ -1,6 +1,7 @@
 package servicenow.datamart;
 
 import java.io.IOException;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,11 +39,11 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 		logger.debug(Log.SCHEMA, String.format("schema=%s table=%s", dbschema, sqlTableName));
 		Generator generator = db.getGenerator();
 		TableWSDL wsdl = table.getWSDL();
-		ResultSet columns = db.getColumnDefinitions(sqlTableName);
-		while (columns.next()) {
-			String name = columns.getString(4);
-			int type = columns.getInt(5);
-			int size = columns.getInt(7);
+		ResultSet rsColumns = getColumnDefinitions(db, sqlTableName);
+		while (rsColumns.next()) {
+			String name = rsColumns.getString(4);
+			int type = rsColumns.getInt(5);
+			int size = rsColumns.getInt(7);
 			String glidename = generator.glideName(name);
 			if (wsdl.canReadField(glidename)) {
 				DatabaseFieldDefinition defn =
@@ -54,6 +55,7 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 				logger.warn(Log.SCHEMA, name + " type=" + type + " size=" + size + " (not mapped)");				
 			}				
 		}
+		rsColumns.close();
 		if (this.size() < 1)
 			throw new RuntimeException(
 				"SQL table not found: " + db.qualifiedName(sqlTableName));
@@ -63,7 +65,26 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 					"expected 'sys_id', found '%s' in first column of table '%s'",
 					this.get(0).getName(), sqlTableName));
 		logger.debug(Log.SCHEMA, this.size() + " columns");
-		columns.close();
 		Log.setJobContext(saveJob);	
 	}
+	
+	private ResultSet getColumnDefinitions(Database database, String tablename) 
+			throws SQLException {
+		assert tablename != null;
+		assert tablename.length() > 0;
+		DatabaseMetaData meta = database.getConnection().getMetaData();
+		String catalog, schema;
+		if (database.isMySQL()) {
+			catalog = database.getSchema();
+			schema = null;
+		}
+		else {
+			catalog = null;
+			schema = database.getSchema();
+		}
+		if (database.isOracle()) tablename = tablename.toUpperCase();
+		ResultSet rsColumns = meta.getColumns(catalog, schema, tablename, null);
+		return rsColumns;
+	}
+	
 }

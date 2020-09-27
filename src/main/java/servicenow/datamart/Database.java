@@ -192,26 +192,14 @@ public class Database {
 	 */
 	boolean tableExists(String tablename) 
 			throws SQLException {
-		ResultSet rsTables = getTableDefinition(tablename);
-		boolean result = (rsTables != null && rsTables.first());
-		rsTables.close();
-		logger.debug(Log.INIT, String.format(
-				"tableExists protocol=%s schema=%s table=%s result=%b", 
-				protocol, getSchema(), tablename, result));
-		return result;
-	}
-
-	private ResultSet getTableDefinition(String tablename) throws SQLException {
 		assert tablename != null;
 		assert tablename.length() > 0;
 		DatabaseMetaData meta = getConnection().getMetaData();
-		String catalog, schema;
+		String catalog = null, schema = null;
 		if (isMySQL()) {
 			catalog = getSchema();
-			schema = null;
 		}
 		else {
-			catalog = null;
 			schema = getSchema();
 		}
 		if (isOracle()) tablename = tablename.toUpperCase();
@@ -224,14 +212,19 @@ public class Database {
 				count, rsTables.getString(1), rsTables.getString(2), 
 				rsTables.getString(3), rsTables.getString(4)));
 		}
+		rsTables.close();
 		if (count > 1) 
 			throw new ResourceException(String.format(
-				"DatabaseMetaData returned multiple rows for catalog=%s schema=%s tablename=%s", 
-				catalog, schema, tablename));
-		rsTables.beforeFirst();
-		return rsTables;
+				"DatabaseMetaData returned %d rows for catalog=%s schema=%s tablename=%s", 
+				count, catalog, schema, tablename));
+		boolean result = count > 0 ? true : false;
+		logger.debug(Log.INIT, String.format(
+				"tableExists protocol=%s schema=%s table=%s result=%b", 
+				protocol, getSchema(), tablename, result));
+		return result;
 	}
 
+	@Deprecated
 	ResultSet getColumnDefinitions(String tablename) throws SQLException {
 		assert tablename != null;
 		assert tablename.length() > 0;
