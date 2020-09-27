@@ -17,6 +17,7 @@
 #   configs/xxxxx/metrics/        <- location of metrics files
 #   configs/xxxxx/log/            <- location of log files
 #
+
 sndml_setup_profile() {
   # echo sndml_setup_profile $1
   if [[ -z "$SNDML_HOME" ]]; then
@@ -81,3 +82,7 @@ sndml_determine_jar() {
   fi
   return 0
 }
+
+if [[ -n $1 ]]; then
+  sndml_setup_profile $1
+fi

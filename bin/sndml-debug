@@ -1,6 +1,5 @@
 #!/bin/bash
-source sndml-setup
-sndml_setup_profile $1
+source sndml-setup $1
 sndml_set_log $2
 export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml
 export SNDML_LOG4J=$SNDML_HOME/src/test/resources/log4j2-debug.xml
