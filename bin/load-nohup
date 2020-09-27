@@ -3,9 +3,9 @@
 # Run a load job in background using nohup (ignoring hangup signals).
 # This command is intended to be run from an interactive terminal session.
 #
-echo '*************************'
-echo '*** DEPRECATED SCRIPT ***'
-echo '*************************'
+echo '#########################'
+echo '### DEPRECATED SCRIPT ###'
+echo '#########################'
 source sndml-setup
 sndml_setup_profile $1
 export SNDML_LOG=`logfile-name $1 $2`

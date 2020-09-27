@@ -3,9 +3,9 @@
 # Run a load job with all output directed to a file in the log directory.
 # This command is intended to be used in cron jobs.
 #
-echo '*************************'
-echo '*** DEPRECATED SCRIPT ***'
-echo '*************************'
+echo '#########################'
+echo '### DEPRECATED SCRIPT ###'
+echo '#########################'
 source sndml-setup
 sndml_setup_profile $1
 export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml

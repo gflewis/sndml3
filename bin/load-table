@@ -1,7 +1,7 @@
 #!/bin/bash
-echo '*************************'
-echo '*** DEPRECATED SCRIPT ***'
-echo '*************************'
+echo '#########################'
+echo '### DEPRECATED SCRIPT ###'
+echo '#########################'
 source sndml-setup
 sndml_setup_profile $1
 env | grep SNDML | sort
