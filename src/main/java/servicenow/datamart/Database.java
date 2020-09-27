@@ -59,7 +59,7 @@ public class Database {
 		assert dbuser != null;
 		assert schema==null || schema.length() > 0;
 		String logmsg = "database=" + dburl + " user=" + dbuser;
-		if (schema != null) logmsg += " schema=" + schema;
+		if (schema != null) logmsg += " schema=" + getSchema();
 		logger.info(Log.INIT, logmsg);
 		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
 		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));
@@ -193,7 +193,7 @@ public class Database {
 	boolean tableExists(String tablename) 
 			throws SQLException {
 		ResultSet rsTables = getTableDefinition(tablename);
-		boolean result = rsTables != null && rsTables.first();
+		boolean result = (rsTables != null && rsTables.first());
 		rsTables.close();
 		logger.debug(Log.INIT, String.format(
 				"tableExists protocol=%s schema=%s table=%s result=%b", 
@@ -220,11 +220,11 @@ public class Database {
 		while (rsTables.next()) {
 			count += 1;
 			logger.trace(Log.INIT, String.format(
-				"getTableDefinition catalog=%s schema=%s tablename=%s type=%s",
-				rsTables.getString(1), rsTables.getString(2), 
+				"getTableDefinition (%d) catalog=%s schema=%s tablename=%s type=%s",
+				count, rsTables.getString(1), rsTables.getString(2), 
 				rsTables.getString(3), rsTables.getString(4)));
 		}
-		if (count > 0) 
+		if (count > 1) 
 			throw new ResourceException(String.format(
 				"DatabaseMetaData returned multiple rows for catalog=%s schema=%s tablename=%s", 
 				catalog, schema, tablename));
