@@ -3,9 +3,6 @@
 # Run a load job in foreground with output to the console.
 # This command is intended to be run from an interactive terminal session.
 #
-echo '*************************'
-echo '*** DEPRECATED SCRIPT ***'
-echo '*************************'
 source sndml-setup
 sndml_setup_profile $1
 export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml

@@ -46,6 +46,11 @@ sndml_setup_profile() {
   sndml_determine_jar
 }
 
+sndml_set_log() {
+  timestamp=`date +%Y%m%d%H%M%S`
+  export SNDML_LOG=$SNDML_CONFIG/log/$1-$timestamp.log
+}
+
 sndml_determine_version() {
   # look in pom.xml to find the latest version
   local vpath='/*[local-name()="project"]/*[local-name()="version"]/text()'

@@ -1,0 +1,5 @@
+#!/bin/bash
+# delete log files older than 10 days
+source sndml-setup
+sndml_setup_profile $1
+find $SNDML_config/log -mtime +10 -type f -delete

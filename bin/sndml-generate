@@ -1,7 +1,4 @@
 #!/bin/bash
-echo '*************************'
-echo '*** DEPRECATED SCRIPT ***'
-echo '*************************'
 #
 # Generate SQL Create Table statement
 #
