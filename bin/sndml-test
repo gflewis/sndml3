@@ -1,12 +1,7 @@
 #!/bin/bash
 # 
-# Be sure to rebuild JAR before running this script
+# Run JUnit Tests
 #
-sndml_determine_version
-classdir=target/test-classes
-sndmljars=target/sndml-$SNDML_VERS-mysql.jar:target/sndml-$SNDML_VERS-pg.jar
-junitjar=~/.m2/repository/junit/junit/4.12/junit-4.12.jar
-hamcrestjar=~/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
-classpath=.:target/test-classes:$sndmljars:$junitjar:$hamcrestjar
-java -cp $classpath org.junit.runner.JUnitCore servicenow.api.AllTests
-java -cp $classpath org.junit.runner.JUnitCore servicenow.datamart.AllTests
+cd $SNDML_HOME
+mvn surefire:test -P test.api
+mvn surefire:test -P test.datamart
