@@ -224,25 +224,6 @@ public class Database {
 		return result;
 	}
 
-	@Deprecated
-	ResultSet getColumnDefinitions(String tablename) throws SQLException {
-		assert tablename != null;
-		assert tablename.length() > 0;
-		DatabaseMetaData meta = getConnection().getMetaData();
-		String catalog, schema;
-		if (isMySQL()) {
-			catalog = getSchema();
-			schema = null;
-		}
-		else {
-			catalog = null;
-			schema = getSchema();
-		}
-		if (this.isOracle()) tablename = tablename.toUpperCase();
-		ResultSet rsColumns = meta.getColumns(catalog, schema, tablename, null);
-		return rsColumns;
-	}
-
 	/**
 	 * <p>Drop a database table if exists.</p>
 	 * <p>This method is used for JUnit tests. It will always generate a warning in the log.</p>
