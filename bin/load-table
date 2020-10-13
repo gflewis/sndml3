@@ -1,8 +1,0 @@
-#!/bin/bash
-echo '#########################'
-echo '### DEPRECATED SCRIPT ###'
-echo '#########################'
-source sndml-setup
-sndml_setup_profile $1
-env | grep SNDML | sort
-java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -t $2

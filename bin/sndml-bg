@@ -3,8 +3,7 @@
 # Run a load job with all output directed to a file in the log directory.
 # This command is intended to be used in cron jobs or other backgound contexts.
 #
-source sndml-setup $1
-export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml
+source sndml-setup $1 $2
 sndml_set_log $2
 env | grep SNDML | sort >$SNDML_LOG
 cd $SNDML_CONFIG

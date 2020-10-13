@@ -18,8 +18,8 @@
 #   configs/xxxxx/log/            <- location of log files
 #
 
-sndml_setup_profile() {
-  # echo sndml_setup_profile $1
+sndml_setup_args() {
+  # echo sndml_setup_args $1 $2
   if [[ -z "$SNDML_HOME" ]]; then
     echo SNDML_HOME not defined
     return 1
@@ -44,12 +44,23 @@ sndml_setup_profile() {
     echo File not found: $SNDML_PROFILE
     return 1
   fi
+  if [[ -n "$2" ]]
+  then
+      if [[ -f "$2" ]]
+      then
+        export SNDML_YAML=$2
+      else
+        export SNDML_YAML=$SNDML_CONFIG/yaml/$2.yaml
+      fi
+  fi
   sndml_determine_jar
 }
 
 sndml_set_log() {
   timestamp=`date +%Y%m%d%H%M%S`
-  export SNDML_LOG=$SNDML_CONFIG/log/$1-$timestamp.log
+  ybase=${1##*/}
+  yname=${ybase%.*}
+  export SNDML_LOG=$SNDML_CONFIG/log/$yname-$timestamp.log
 }
 
 sndml_determine_version() {
@@ -84,5 +95,5 @@ sndml_determine_jar() {
 }
 
 if [[ -n $1 ]]; then
-  sndml_setup_profile $1
+  sndml_setup_args $@
 fi

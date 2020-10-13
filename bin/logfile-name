@@ -1,9 +1,0 @@
-#!/bin/bash
-##############
-# DEPRECATED #
-##############
-timestamp=`date +%Y%m%d%H%M%S`
-source sndml-setup
-sndml_setup_profile $1
-logfile=$SNDML_CONFIG/log/$2-$timestamp.log
-echo $logfile
