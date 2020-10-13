@@ -1,4 +1,4 @@
-# Defines a bash function named sndml_setup_profile
+# Defines a bash function named sndml_setup_args
 # which sets the following environment variables
 #   SNDML_CONFIGS
 #   SNDML_VERSION
