@@ -2,6 +2,11 @@ package servicenow.api;
 
 import org.junit.Test;
 
+import sndml.servicenow.NullWriter;
+import sndml.servicenow.Session;
+import sndml.servicenow.SoapKeySetTableReader;
+import sndml.servicenow.Table;
+
 public class KeyedTableReaderTest {
 
 	Session session;

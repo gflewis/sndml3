@@ -1,6 +1,7 @@
 package servicenow.datamart;
 
-import servicenow.api.*;
+import sndml.datamart.TimestampHash;
+import sndml.servicenow.*;
 
 import static org.junit.Assert.*;
 

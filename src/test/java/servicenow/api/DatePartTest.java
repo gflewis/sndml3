@@ -8,6 +8,18 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.servicenow.DatePartition;
+import sndml.servicenow.DatePartitionedTableReader;
+import sndml.servicenow.DateTime;
+import sndml.servicenow.Log;
+import sndml.servicenow.RecordListAccumulator;
+import sndml.servicenow.RestTableReaderFactory;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableReader;
+import sndml.servicenow.TableReaderFactory;
+import sndml.servicenow.TableStats;
+
 public class DatePartTest {
 
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());

@@ -3,9 +3,11 @@ package servicenow.api;
 import org.junit.*;
 import org.slf4j.Logger;
 
-import servicenow.api.Session;
-import servicenow.api.Table;
-import servicenow.api.TableSchema;
+import sndml.servicenow.Log;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableSchema;
+import sndml.servicenow.TableWSDL;
 
 import static org.junit.Assert.*;
 

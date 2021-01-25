@@ -8,7 +8,10 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.datamart.YamlFile;
+import sndml.datamart.YamlFile;
+import sndml.servicenow.FieldNames;
+import sndml.servicenow.Log;
+import sndml.servicenow.Session;
 
 public class TestingManager {
 	

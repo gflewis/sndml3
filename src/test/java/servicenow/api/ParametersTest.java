@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import servicenow.api.Parameters;
+import sndml.servicenow.Parameters;
 
 public class ParametersTest {
 

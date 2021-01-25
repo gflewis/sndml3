@@ -6,6 +6,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.servicenow.InvalidTableNameException;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableSchema;
+
 public class TableSchemaTest {
 
 	static Logger logger = LoggerFactory.getLogger(TableSchemaTest.class);

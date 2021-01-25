@@ -6,7 +6,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import servicenow.api.*;
+import servicenow.api.TestingManager;
+import servicenow.api.TestingProfile;
+import sndml.datamart.Loader;
+import sndml.servicenow.*;
 
 public class ColumnsTest {
 	

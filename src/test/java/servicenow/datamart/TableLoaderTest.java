@@ -10,7 +10,9 @@ import org.junit.runners.Parameterized.Parameters;
 
 import servicenow.api.TestingManager;
 import servicenow.api.TestingProfile;
-import servicenow.api.WriterMetrics;
+import sndml.datamart.Loader;
+import sndml.datamart.YamlFile;
+import sndml.servicenow.WriterMetrics;
 
 @RunWith(Parameterized.class)
 public class TableLoaderTest {

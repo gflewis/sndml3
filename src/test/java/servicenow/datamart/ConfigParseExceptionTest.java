@@ -8,8 +8,11 @@ import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import servicenow.api.Log;
 import servicenow.api.TestingManager;
+import sndml.datamart.ConfigParseException;
+import sndml.datamart.LoaderConfig;
+import sndml.datamart.YamlFile;
+import sndml.servicenow.Log;
 
 @RunWith(Parameterized.class)
 public class ConfigParseExceptionTest {

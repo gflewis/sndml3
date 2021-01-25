@@ -3,6 +3,9 @@ package servicenow.api;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+import sndml.servicenow.Session;
+import sndml.servicenow.TableAPI;
+
 public class SessionIDTest {
 
 	@Test

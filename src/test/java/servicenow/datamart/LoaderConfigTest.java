@@ -1,6 +1,7 @@
 package servicenow.datamart;
 
-import servicenow.api.*;
+import sndml.datamart.LoaderConfig;
+import sndml.servicenow.*;
 
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -8,6 +9,8 @@ import org.junit.*;
 import java.io.File;
 import java.io.StringReader;
 import org.slf4j.Logger;
+
+import servicenow.api.TestingManager;
 
 public class LoaderConfigTest {
 

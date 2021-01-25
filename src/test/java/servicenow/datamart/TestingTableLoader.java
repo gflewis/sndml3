@@ -7,7 +7,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import servicenow.api.TestingException;
-import servicenow.api.WriterMetrics;
+import sndml.datamart.ConfigParseException;
+import sndml.datamart.ConnectionProfile;
+import sndml.datamart.Loader;
+import sndml.datamart.LoaderConfig;
+import sndml.datamart.LoaderJob;
+import sndml.servicenow.WriterMetrics;
 
 @Deprecated
 public class TestingTableLoader {

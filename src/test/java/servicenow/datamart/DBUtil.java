@@ -1,10 +1,14 @@
 package servicenow.datamart;
 
-import servicenow.api.*;
+import sndml.datamart.Database;
+import sndml.servicenow.*;
 
 import static org.junit.Assert.*;
 
 import org.slf4j.Logger;
+
+import servicenow.api.TestingManager;
+import servicenow.api.TestingProfile;
 
 import java.net.URISyntaxException;
 import java.sql.Connection;

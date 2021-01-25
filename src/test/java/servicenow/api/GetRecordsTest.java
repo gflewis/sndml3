@@ -10,11 +10,11 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.api.Key;
-import servicenow.api.Record;
-import servicenow.api.RecordList;
-import servicenow.api.Session;
-import servicenow.api.Table;
+import sndml.servicenow.Key;
+import sndml.servicenow.Record;
+import sndml.servicenow.RecordList;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
 
 @RunWith(Parameterized.class)
 public class GetRecordsTest {

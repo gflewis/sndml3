@@ -3,6 +3,8 @@ package servicenow.datamart;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import sndml.datamart.YamlFile;
+
 /**
  * A folder in src/test/resources which contains files for JUnit tests.
  *

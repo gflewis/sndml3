@@ -1,6 +1,12 @@
 package servicenow.datamart;
 
-import servicenow.api.*;
+import sndml.datamart.Database;
+import sndml.datamart.DatabaseTimestampReader;
+import sndml.datamart.JobConfig;
+import sndml.datamart.Loader;
+import sndml.datamart.LoaderJob;
+import sndml.datamart.TimestampHash;
+import sndml.servicenow.*;
 
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -9,6 +15,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
+
+import servicenow.api.TestingManager;
+import servicenow.api.TestingProfile;
 
 @RunWith(Parameterized.class)
 public class TimestampTest {

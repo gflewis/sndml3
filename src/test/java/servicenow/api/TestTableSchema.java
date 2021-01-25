@@ -9,6 +9,12 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
+import sndml.servicenow.FieldNames;
+import sndml.servicenow.Log;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableSchema;
+
 @RunWith(Parameterized.class)
 public class TestTableSchema {
 

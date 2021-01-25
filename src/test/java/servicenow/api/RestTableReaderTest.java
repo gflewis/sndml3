@@ -6,6 +6,12 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import sndml.servicenow.Record;
+import sndml.servicenow.RecordListAccumulator;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableReader;
+
 public class RestTableReaderTest {
 
 	final Logger logger = TestingManager.getLogger(this.getClass());

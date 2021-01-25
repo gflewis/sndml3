@@ -2,6 +2,14 @@ package servicenow.api;
 
 import org.slf4j.Logger;
 
+import sndml.servicenow.JsonTableAPI;
+import sndml.servicenow.KeySet;
+import sndml.servicenow.RestTableAPI;
+import sndml.servicenow.Session;
+import sndml.servicenow.SoapTableAPI;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableStats;
+
 import static org.junit.Assert.*;
 
 import org.junit.Test;

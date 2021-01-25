@@ -7,10 +7,10 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.api.DatePartition;
-import servicenow.api.DateTime;
-import servicenow.api.DateTimeRange;
-import servicenow.api.InvalidDateTimeException;
+import sndml.servicenow.DatePartition;
+import sndml.servicenow.DateTime;
+import sndml.servicenow.DateTimeRange;
+import sndml.servicenow.InvalidDateTimeException;
 
 public class DateTimeTest {
 

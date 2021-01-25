@@ -10,7 +10,12 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import servicenow.api.*;
+import servicenow.api.TestingManager;
+import servicenow.api.TestingProfile;
+import sndml.datamart.JobConfig;
+import sndml.datamart.LoaderAction;
+import sndml.datamart.LoaderJob;
+import sndml.servicenow.*;
 
 @RunWith(Parameterized.class)
 public class PruneTest {

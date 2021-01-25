@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import servicenow.datamart.ConnectionProfile;
+import sndml.datamart.ConnectionProfile;
 
 public class TestingProfile extends ConnectionProfile {
 

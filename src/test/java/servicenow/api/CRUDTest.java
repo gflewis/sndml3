@@ -12,13 +12,14 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import servicenow.api.DateTime;
-import servicenow.api.FieldValues;
-import servicenow.api.Key;
-import servicenow.api.Record;
-import servicenow.api.Session;
-import servicenow.api.Table;
-import servicenow.api.TableAPI;
+import sndml.servicenow.DateTime;
+import sndml.servicenow.FieldValues;
+import sndml.servicenow.Key;
+import sndml.servicenow.NoSuchRecordException;
+import sndml.servicenow.Record;
+import sndml.servicenow.Session;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableAPI;
 
 @RunWith(Parameterized.class)
 public class CRUDTest {
@@ -61,7 +62,7 @@ public class CRUDTest {
 	    TestingManager.banner(logger,  "Update");
 	    Record rec = api.getRecord(key);
 	    assertEquals(descr1, rec.getValue("short_description"));
-	    api.updateRecord(key, new servicenow.api.Parameters("short_description", descr2));
+	    api.updateRecord(key, new sndml.servicenow.Parameters("short_description", descr2));
 	    TestingManager.banner(logger, "Delete");
 	    rec = api.getRecord(key);
 	    assertEquals(descr2, rec.getValue("short_description"));
@@ -77,7 +78,7 @@ public class CRUDTest {
 		Key badKey = new Key("0123456789abcdef0123456789abcdef");
 		Table tbl = session.table("incident");
 		TableAPI api = tbl.api();
-		servicenow.api.Parameters parms = new servicenow.api.Parameters();
+		sndml.servicenow.Parameters parms = new sndml.servicenow.Parameters();
 		parms.add("short_description", "Updated incident");
 		api.updateRecord(badKey,  parms);;
 	}
