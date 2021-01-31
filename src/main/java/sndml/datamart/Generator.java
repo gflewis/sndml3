@@ -49,7 +49,7 @@ public class Generator {
 				desc("Table name (required)").build());
 		options.addOption(Option.builder("o").longOpt("output").required(false).hasArg().
 				desc("Table name (required)").build());		
-		CommandLine cmdline = new DefaultParser().parse(options,  args);
+		CommandLine cmdline = new DefaultParser().parse(options, args);
 		String profilename = cmdline.getOptionValue("p");
 		String tablename = cmdline.getOptionValue("t");
 		PrintStream output = cmdline.hasOption("o") ? 

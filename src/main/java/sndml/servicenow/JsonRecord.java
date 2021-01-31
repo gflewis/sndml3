@@ -2,82 +2,87 @@ package sndml.servicenow;
 
 import java.util.Iterator;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonRecord extends Record {
 
-	final JSONObject obj;
+	final ObjectNode root;
 	
-	public JsonRecord(Table table, JSONObject obj) {
+	public JsonRecord(Table table, ObjectNode obj) {
 		this.table = table;
-		this.obj = obj;		
+		this.root = obj;		
 	}
 	
 	@Override
 	public String getValue(String fieldname) {
-		if (obj.has(fieldname)) {
-			if (obj.isNull(fieldname)) {
-				return null;
-			}
-			Object field = obj.get(fieldname);
-			if (field instanceof String) {
-				String value = (String) field;
+		JsonNode node = root.get(fieldname);
+		if (node == null) return null;
+		JsonNodeType nodetype = node.getNodeType();
+		switch (nodetype) {
+		case MISSING:
+		case NULL:
+			return null;
+		case STRING:
+			String value = node.asText();
+			if (value.length() == 0) return null;
+			return value;
+		case OBJECT:
+			if (node.has("value")) {
+				value = node.get("value").asText();
 				if (value.length() == 0) return null;
 				return value;
 			}
-			if (field instanceof JSONObject) {
-				String value = ((JSONObject) field).getString("value");
-				if (value.length() == 0) return null;
-				return value;			
-			}
+			// fall through to error
+		default:
 			String msg = table.getName() + 
-					"." + this.getKey() + "." + fieldname + 
-					" type is " + field.getClass().getName();
-			Logger logger = Log.logger(this.getClass());
-			logger.error(Log.RESPONSE, obj.toString());
-			logger.error(Log.RESPONSE, msg);
-			throw new JsonResponseError(msg);
-		}
-		else return null;
+				"." + this.getKey() + "." + fieldname + 
+				" type is " + nodetype.toString();
+			throw new JsonResponseError(msg);				
+		}			
 	}
 
 	@Override
 	public String getDisplayValue(String fieldname) {
-		if (obj.has("dv_" + fieldname)) {
-			// JSONv2 API
-			String displayValue = obj.getString("dv_" + fieldname);
-			return displayValue;
+		JsonNode node = root.get(fieldname);
+		// REST Table API
+		if (node.isObject()) {
+			return node.get("display_value").asText();
 		}
-		if (obj.has(fieldname)) {
-			// REST Table API
-			try {
-				JSONObject field = obj.getJSONObject(fieldname);
-				String displayValue = field.getString("display_value");
-				if (displayValue.length() == 0) return null;
-				return displayValue;
-			}
-			catch (JSONException e) {
-				return null;
-			}			
+		// JSONv2 API
+		JsonNode dvNode = root.get("dv_" + fieldname);
+		if (dvNode != null) {
+			return dvNode.asText();
 		}
 		return null;
 	}
 
 	@Override
 	public Iterator<String> keys() {
-		return obj.keys();
+		return root.fieldNames();
 	}
 
 	@Override
 	public FieldNames getFieldNames() {
 		FieldNames names = new FieldNames();
-		Iterator<String> iter = obj.keys();
+		Iterator<String> iter = root.fieldNames();
 		while (iter.hasNext()) {
 			names.add(iter.next());
 		}
 		return names;
 	}
+
+	@Override
+	public String toString() {
+		return root.toString();
+	}
+	
+	/*
+	@Override
+	public String toJSON() {
+		return root.toString();
+	}
+	*/
 		
 }

@@ -1,13 +1,14 @@
 package sndml.servicenow;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 /**
  * This class holds a list of name/value pairs.
@@ -72,20 +73,24 @@ public class Parameters extends LinkedHashMap<String, String> {
 		return result;		
 	}
 	
-	public JSONObject toJSON() {
-		JSONObject obj = new JSONObject();
-		appendToObject(this, obj);
-		return obj;
+	public ObjectNode toJSON() {		
+		ObjectNode node = JsonNodeFactory.instance.objectNode();
+		for (Map.Entry<String,String> entry : this.entrySet()) {
+			node.put(entry.getKey(), entry.getValue());
+		}
+		return node;		
 	}
-	
+		
 	/**
 	 * Append a list of parameters to a JSON Object
 	 * @param params - The parameters which are to be appended
 	 * @param obj - The JSON Object to which the parameters are appended
 	 */
+	/*
 	public static void appendToObject(Parameters params, JSONObject obj) {
 		for (Map.Entry<String,String> entry : params.entrySet()) {
 			obj.put(entry.getKey(), entry.getValue());
 		}		
 	}
+	*/
 }

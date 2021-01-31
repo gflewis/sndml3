@@ -96,5 +96,4 @@ public class XmlRecord extends Record {
 		return result;
 	}
 
-
 }

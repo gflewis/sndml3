@@ -1,12 +1,13 @@
 package sndml.servicenow;
 
-import java.io.StringWriter;
 import java.util.Iterator;
 
-import org.json.JSONWriter;
+import org.slf4j.Logger;
 
 public abstract class Record implements InsertResponse {
 
+	static final Logger logger = Log.logger(Record.class);
+	
 	protected Table table;
 
 	/**
@@ -143,31 +144,7 @@ public abstract class Record implements InsertResponse {
 		long millis = dt.getMillisec();
 		return new Integer((int) (millis / 1000));
 	}
-	
-	/*
-	public JSONObject toJSONObject() {
-		JSONObject obj = new JSONObject();
-		for (String name : this.getFieldNames()) {
-			String value = this.getValue(name);
-			obj.put(name,  value);
-		}
-		return obj;		
-	}
-	*/
-	
-	public String toJSON() {
-		StringWriter writer = new StringWriter();
-		JSONWriter json = new JSONWriter(writer);
-		json.object();
-		for (String name : this.getFieldNames()) {
-			String value = this.getValue(name);
-			if (value != null && value.length() > 0) {
-				json.key(name);
-				json.value(value);				
-			}
-		}
-		json.endObject();
-		return writer.toString();
-	}
-	
+		
+	// public abstract String toJSON();
+		
 }

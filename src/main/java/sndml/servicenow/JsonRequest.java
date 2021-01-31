@@ -16,23 +16,26 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class JsonRequest extends ServiceNowRequest {
 
-	final JSONObject requestObj;
-	JSONObject responseObj;
+	static final ObjectMapper mapper = new ObjectMapper();
+	final ObjectNode requestObj;
+	ObjectNode responseObj;
 	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	JsonRequest(CloseableHttpClient client, URI uri, HttpMethod method, JSONObject requestObj) {
+	public JsonRequest(CloseableHttpClient client, URI uri, HttpMethod method, ObjectNode body) {
 		super(client, uri, method);
-		this.requestObj = requestObj;
+		this.requestObj = body;
 	}
 
-	public JSONObject execute() throws IOException {
+	public ObjectNode execute() throws IOException {
 		assert client != null;
 		assert uri != null;
 		HttpUriRequest request;
@@ -101,26 +104,18 @@ public class JsonRequest extends ServiceNowRequest {
 		if (logger.isTraceEnabled())
 			logger.trace(Log.RESPONSE, JsonFormatter.format(responseText));			
 		if (statusCode == 401 || statusCode == 403) {
-//			logger.error(Log.REQUEST, Log.join(uri, requestText));
-//			logger.error(Log.RESPONSE, statusLine.toString());
 			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);
 		}
 		if (responseText == null || responseContentType == null) {
 			// should have gotten an HTTP 204 for No Content
-//			logger.error(Log.REQUEST, Log.join(uri, requestText));
-//			logger.error(Log.RESPONSE, statusLine.toString());
 			logger.error(Log.RESPONSE, this.dump());
 			throw new NoContentException(this);
 		}		
 		if ("text/html".equals(responseContentType))
-			throw new InstanceUnavailableException(this);						
-		try {
-			responseObj = new JSONObject(responseText);
-		}
-		catch (org.json.JSONException e) {
-			throw new JsonResponseError(responseText);
-		}
+			throw new InstanceUnavailableException(this);
+		
+		responseObj = (ObjectNode) mapper.readTree(responseText);
 		if (responseObj.has("error")) {
 			logger.warn(Log.RESPONSE, responseText);
 		}
@@ -130,9 +125,9 @@ public class JsonRequest extends ServiceNowRequest {
 	protected String errorMessageLowerCase() {
 		assert responseObj != null;
 		if (!responseObj.has("error")) return null;
-		JSONObject error = responseObj.getJSONObject("error");
+		ObjectNode error = (ObjectNode) responseObj.get("error");
 		if (!error.has("message")) return null;
-		return error.getString("message").toLowerCase();
+		return error.get("message").asText().toLowerCase();
 	}
 		
 	protected void checkForInsufficientRights() throws IOException {

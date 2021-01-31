@@ -4,23 +4,36 @@ import java.io.Reader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+// import org.yaml.snakeyaml.Yaml;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * Utility class to help parse YAML configuration files
  */
-public class Config {
+@Deprecated
+public class YamlConfig {
 
-	static Yaml parser = new Yaml();
-	static Logger logger = LoggerFactory.getLogger(Config.class);
+	static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 	
+	// static Yaml yamlParser = new Yaml();
+	static Logger logger = LoggerFactory.getLogger(YamlConfig.class);
+	
+	/*
 	public class Map extends java.util.LinkedHashMap<String, Object> {
 		private static final long serialVersionUID = 1L;	
 
-		@SuppressWarnings("unchecked")
-		public Map(Object obj) throws ConfigParseException {
+		public Map(JSONObject obj) throws ConfigParseException {
+			java.util.Set<java.util.Map.Entry<String,Object>> entrySet = obj.entrySet();
+			
+		}
+
+		public Map(java.util.Map<String,Object> obj) throws ConfigParseException {
 			try {
-				for (java.util.Map.Entry<Object,Object> entry : ((java.util.Map<Object,Object>) obj).entrySet()) {
+				for (java.util.Map.Entry<String,Object> entry : obj.entrySet()) {
 					this.put(entry.getKey().toString(), entry.getValue());				
 				}
 			}
@@ -30,13 +43,10 @@ public class Config {
 			
 		}
 
-		public Config.List getList(String name) throws ConfigParseException {
+		public YamlConfig.List getList(String name) throws ConfigParseException {
 			return new List(get(name));
 		}
 
-		/**
-		 * @return String value if defined otherwise null;
-		 */
 		public String getString(String name) throws ConfigParseException {
 			return getString(name, null);
 		}
@@ -75,26 +85,29 @@ public class Config {
 		return obj instanceof java.util.List;
 	}
 	
-	public Config.List toList(Object obj) throws ConfigParseException {
-		return new Config.List(obj);
+	public YamlConfig.List toList(Object obj) throws ConfigParseException {
+		return new YamlConfig.List(obj);
 	}
+	*/
 	
-	public Map parseDocument(Reader reader) throws ConfigParseException {
+	public ObjectNode parseYAML(Reader reader) throws ConfigParseException {
 		try {
-			return new Map(parser.load(reader));
+			JsonNode root = yamlMapper.readTree(reader);
+			return (ObjectNode) root;
 		}
 		catch (Exception e) {
 			throw new ConfigParseException(e);
-		}
-		
+		}		
 	}
 	
+	/*
 	public static boolean isMap(Object obj) {
 		return obj instanceof java.util.Map;
 	}
-	
-	public Config.Map toMap(Object obj) throws ConfigParseException {
-		return new Config.Map(obj);
+
+	@SuppressWarnings("unchecked")
+	public YamlConfig.Map toMap(Object obj) throws ConfigParseException { 
+		return new YamlConfig.Map((java.util.Map<String,Object>) obj);
 	}
 		
 	public static Integer asInteger(Object obj) throws ConfigParseException {
@@ -118,5 +131,6 @@ public class Config {
 		}
 		return result;
 	}
+	*/
 			
 }

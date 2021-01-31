@@ -2,8 +2,10 @@ package sndml.servicenow;
 
 import java.io.IOException;
 import java.net.URI;
-import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonTableAPI extends TableAPI {
 
@@ -22,20 +24,23 @@ public class JsonTableAPI extends TableAPI {
 		return getKeys(null);
 	}
 		
-	public KeySet getKeys(EncodedQuery query) throws IOException {		
+	public KeySet getKeys(EncodedQuery query) throws IOException {
 		Log.setMethodContext(table, "getKeys");
-		JSONObject requestObj = new JSONObject();
-		requestObj.put("sysparm_action",  "getKeys");
-		if (!EncodedQuery.isEmpty(query))
-			requestObj.put("sysparm_query", query.toString());
-		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
-		JSONObject responseObj = request.execute();
-		assert responseObj.has("records");
-		KeySet keys = new KeySet(responseObj, "records");
+		Parameters params = new Parameters();
+		params.put("sysparm_action",  "getKeys");
+		if (!EncodedQuery.isEmpty(query)) params.put("sysparm_query", query.toString());
+		ObjectNode requestObj = params.toJSON();
+		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);		
+		ObjectNode responseObj = request.execute();
+		// TODO: Is this correct?
+		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
+		KeySet keys = new KeySet(recordsObj);
 		return keys;
 	}
 
 	public Record getRecord(Key sys_id) throws IOException {
+		throw new UnsupportedOperationException();
+		/*
 		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
@@ -48,6 +53,7 @@ public class JsonTableAPI extends TableAPI {
 		assert recs != null;
 		if (recs.size() == 0) return null;
 		return recs.get(0);
+		*/
 	}
 
 	public RecordList getRecords(KeySet keys, boolean displayValue) throws IOException {
@@ -64,6 +70,8 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public RecordList getRecords(Parameters params) throws IOException {
+		throw new UnsupportedOperationException();
+		/*
 		Log.setMethodContext(table, "getRecords");
 		JSONObject requestObj = params.toJSON();
 		requestObj.put("sysparm_action", "getRecords");
@@ -71,9 +79,12 @@ public class JsonTableAPI extends TableAPI {
 		JSONObject responseObj = request.execute();
 		assert responseObj.has("records");
 		return new RecordList(table, responseObj, "records");
+		*/
 	}
 		
 	public InsertResponse insertRecord(Parameters fields) throws IOException {
+		throw new UnsupportedOperationException();
+		/*
 		Log.setMethodContext(table, "insert");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action", "insert");
@@ -84,9 +95,12 @@ public class JsonTableAPI extends TableAPI {
 		assert list.size() > 0;
 		assert list.size() == 1;
 		return list.get(0);
+		*/
 	}
 	
 	public void updateRecord(Key key, Parameters fields) throws IOException {
+		throw new UnsupportedOperationException();
+		/*
 		Log.setMethodContext(table, "update");
 		JSONObject requestObj = new JSONObject();
 		requestObj.put("sysparm_action", "update");
@@ -96,9 +110,12 @@ public class JsonTableAPI extends TableAPI {
 		JSONObject responseObj = request.execute();
 		RecordList list = new RecordList(table, responseObj, "records");
 		if (list.size() != 1) throw new JsonResponseException(request);
+		*/
 	}
 
 	public boolean deleteRecord(Key key) throws IOException {
+		throw new UnsupportedOperationException();
+		/*
 		Log.setMethodContext(table, "deleteRecord");
 		JSONObject requestObj = new JSONObject(); 
 		requestObj.put("sysparm_action", "deleteRecord");
@@ -110,6 +127,7 @@ public class JsonTableAPI extends TableAPI {
 		if (list.size() > 1) throw new JsonResponseException(request);
 		if (list.get(0).getKey().equals(key)) return true;
 		throw new JsonResponseException(request);
+		*/
 	}
 
 	@Override

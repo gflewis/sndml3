@@ -10,7 +10,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +91,10 @@ public class FileWriter extends RecordWriter {
 		}
 	}
 
-	public void processRecord(Record rec) {		
+	public void processRecord(Record rec) {	
+		// TODO Fix Me
+		throw new UnsupportedOperationException();
+		/*
 		assert writer != null;
 		assert rec !=null;
 		JSONWriter json = new JSONWriter(writer);
@@ -111,6 +113,7 @@ public class FileWriter extends RecordWriter {
 			writer.println(",");
 		writer.flush();
 		writerMetrics.incrementInserted();
+		*/
 	}
 
 	@Override

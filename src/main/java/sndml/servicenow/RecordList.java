@@ -2,8 +2,8 @@ package sndml.servicenow;
 
 import java.util.*;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * An array of Records.
@@ -24,18 +24,20 @@ public class RecordList extends ArrayList<Record> {
 		this.table = table;
 	}
 
-	public RecordList(Table table, JSONArray array) {
-		this(table, array.length());
-		for (int i = 0; i < array.length(); ++i) {
-			JSONObject entry = (JSONObject) array.get(i);
+	public RecordList(Table table, ArrayNode array) {
+		this(table, array.size());
+		for (int i = 0; i < array.size(); ++i) {
+			ObjectNode entry = (ObjectNode) array.get(i);
 			JsonRecord rec = new JsonRecord(table, entry);
 			this.add(rec);
 		}
 	}
 	
+	/*
 	public RecordList(Table table, JSONObject obj, String fieldname) {
 		this(table, (JSONArray) obj.get(fieldname));
 	}
+	*/
 	
 	public RecordIterator iterator() {
 		return new RecordIterator(this);

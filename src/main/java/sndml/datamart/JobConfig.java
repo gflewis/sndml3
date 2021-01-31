@@ -1,11 +1,18 @@
 package sndml.datamart;
 
+import java.util.Iterator;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import sndml.servicenow.*;
 
-public class JobConfig extends Config {
+public class JobConfig {
 
-	private Map items;
 	private LoaderConfig parent;
+	private Key id;
+	private String number;
 	private String name;
 	private String source;
 	private String target;
@@ -13,7 +20,6 @@ public class JobConfig extends Config {
 	private Boolean truncate;
 	private DateTimeRange created;
 	private DateTime since;
-	// private EncodedQuery filter;
 	private String filter;
 	private DateTime.Interval partition;
 	private Integer pageSize;
@@ -26,102 +32,116 @@ public class JobConfig extends Config {
 	private Integer threads;
 	private final DateTimeFactory dateFactory;
 
+	public JobConfig(ObjectNode map) {
+		this.dateFactory = new DateTimeFactory();
+		this.name = map.get("number").asText();
+		this.setPropertiesFrom(map);;
+	}
+	
 	JobConfig(Table table) {
 		this.name = table.getName();
 		this.dateFactory = new DateTimeFactory();
 	}
 
-	JobConfig(LoaderConfig parent, Object config) throws ConfigParseException {
+	JobConfig(LoaderConfig parent, JsonNode config) throws ConfigParseException {
 		this.parent = parent;
 		this.dateFactory = new DateTimeFactory(parent.getStart(), parent.getMetricsFile());
-		if (isMap(config)) {
-			items = new Config.Map(config);
-			for (String origkey : items.keySet()) {
-				Object val = items.get(origkey);
-				String key = origkey.toLowerCase();
-				switch (key) {
-				case "name":
-					this.name = val.toString();
-					break;
-				case "source":
-					this.source = val.toString();
-					break;
-				case "target":
-					this.target = val.toString();
-					break;
-				case "action":
-					switch (val.toString().toLowerCase()) {
-					case "update":
-						this.action = LoaderAction.UPDATE;
-						break;
-					case "insert":
-						this.action = LoaderAction.INSERT;
-						break;
-					case "prune":
-						this.action = LoaderAction.PRUNE;
-						break;
-					case "sync":
-						this.action = LoaderAction.SYNC;
-						break;
-					case "droptable":
-						this.action = LoaderAction.DROPTABLE;
-						break;
-					default:
-						throw new ConfigParseException("Not recognized: " + val.toString());
-					}
-					break;
-				case "truncate":
-					this.truncate = (Boolean) val;
-					break;
-				case "created":
-					this.created = asDateRange(val);
-					break;
-				case "since":
-					this.since = asDate(val);
-					break;
-				case "filter":
-//					this.filter = new EncodedQuery(val.toString());
-					this.filter = val.toString();
-					break;
-				case "partition":
-					this.partition = asInterval(val);
-					break;
-				case "columns":
-					this.includeColumns = new FieldNames(val.toString());
-					break;
-				case "exclude":
-					this.excludeColumns = new FieldNames(val.toString());
-					break;
-				case "pagesize":
-					this.pageSize = asInteger(val);
-					break;
-				case "sqlbefore":
-					this.sqlBefore = val.toString();
-					break;
-				case "sqlafter":
-					this.sqlAfter = val.toString();
-					break;
-				case "minrows":
-					this.minRows = asInteger(val);
-					break;
-				case "maxrows":
-					this.maxRows = asInteger(val);
-					break;
-				case "threads":
-					this.threads = asInteger(val);
-					break;
-				default:
-					throw new ConfigParseException("Not recognized: " + origkey);
-				}
-			}
+		if (config.isObject()) {
+			setPropertiesFrom((ObjectNode) config);
 		} else {
-			if (config instanceof String)
-				name = (String) config;
-			else
-				throw new ConfigParseException("Not recognized: " + config.toString());
+			name = config.asText();
 		}
 	}
 
+	private void setPropertiesFrom(ObjectNode map) {
+		Iterator<String> fieldnames = map.fieldNames();
+		while (fieldnames.hasNext()) {
+			String key = fieldnames.next();
+			JsonNode val = map.get(key);
+			switch (key.toLowerCase()) {
+			case "name":
+				this.name = val.asText();
+				break;
+			case "source":
+				this.source = val.asText();
+				break;
+			case "target":
+				this.target = val.asText();
+				break;
+			case "id":
+				this.id = new Key(val.asText());
+				break;
+			case "number":
+				this.number = val.asText();
+				break;
+			case "action":
+				switch (val.asText().toLowerCase()) {
+				case "update":
+				case "refresh":
+					this.action = LoaderAction.UPDATE;
+					break;
+				case "insert":
+				case "load":
+					this.action = LoaderAction.INSERT;
+					break;
+				case "prune":
+					this.action = LoaderAction.PRUNE;
+					break;
+				case "sync":
+					this.action = LoaderAction.SYNC;
+					break;
+				case "droptable":
+					this.action = LoaderAction.DROPTABLE;
+					break;
+				default:
+					throw new ConfigParseException("Not recognized: " + val.asText());
+				}
+				break;
+			case "truncate":
+				this.truncate = val.asBoolean();
+				break;
+			case "created":
+				this.created = asDateRange(val);
+				break;
+			case "since":
+				this.since = asDate(val);
+				break;
+			case "filter":
+				this.filter = val.toString();
+				break;
+			case "partition":
+				this.partition = asInterval(val);
+				break;
+			case "columns":
+				this.includeColumns = new FieldNames(val.asText());
+				break;
+			case "exclude":
+				this.excludeColumns = new FieldNames(val.asText());
+				break;
+			case "pagesize":
+				this.pageSize = val.asInt();
+				break;
+			case "sqlbefore":
+				this.sqlBefore = val.asText();
+				break;
+			case "sqlafter":
+				this.sqlAfter = val.asText();
+				break;
+			case "minrows":
+				this.minRows = val.asInt();
+				break;
+			case "maxrows":
+				this.maxRows = val.asInt();
+				break;
+			case "threads":
+				this.threads = val.asInt();
+				break;
+			default:
+				throw new ConfigParseException("Not recognized: " + key);
+			}
+		}		
+	}
+	
 	public JobConfig validate() throws ConfigParseException {
 		if (name == null && source == null && target == null)
 			configError("Must specify at least one of Name, Source, Target");
@@ -185,6 +205,14 @@ public class JobConfig extends Config {
 		throw new ConfigParseException("Target not specified");
 	}
 
+	Key getId() {
+		return this.id;
+	}
+	
+	String getNumber() {
+		return this.number;
+	}
+	
 	void setAction(LoaderAction action) {
 		this.action = action;
 	}
@@ -281,15 +309,15 @@ public class JobConfig extends Config {
 		return result;
 	}
 
-	DateTime asDate(Object obj) {
+	DateTime asDate(JsonNode obj) {
 		return dateFactory.getDate(obj);
 	}
 
-	DateTimeRange asDateRange(Object obj) throws ConfigParseException {
+	DateTimeRange asDateRange(JsonNode obj) {
 		DateTime start, end;
 		end = dateFactory.getStart();
-		if (isList(obj)) {
-			List dates = new Config.List(obj);
+		if (obj.isArray()) {
+			ArrayNode dates = (ArrayNode) obj;
 			if (dates.size() < 1 || dates.size() > 2)
 				throw new ConfigParseException("Invalid date range: " + obj.toString());
 			start = dateFactory.getDate(dates.get(0));

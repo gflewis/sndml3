@@ -56,7 +56,9 @@ public class CRUDTest {
 	    String descr2 = "This incident is updated " + now;
 	    values.put("short_description", descr1);
 	    values.put("cmdb_ci",  TestingManager.getProperty("some_ci"));
-	    Key key = api.insertRecord(values).getKey();	    
+	    InsertResponse resp = api.insertRecord(values);
+	    logger.info(Log.TEST, "InsertResponse=" + resp.toString());
+	    Key key = resp.getKey();	    
 	    assertNotNull(key);
 	    logger.info("inserted " + key);
 	    TestingManager.banner(logger,  "Update");

@@ -29,26 +29,15 @@ public class KeySetTableReader extends TableReader {
 		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
-		allKeys = jsonAPI.getKeys(query);
-		// JSONv2 API limits the number of keys to 10000
-		// If we got more than 999 then check the result
-		if (allKeys.size() > 999) {
-			TableStats stats = table.rest().getStats(query, false);
-			int expected = stats.getCount();
-			if (allKeys.size() != expected) {
-				logger.warn(Log.PROCESS, 
-					String.format("Expected %d keys but REST only returned %d; reverting to SOAP", 
-						expected, allKeys.size()));
-				allKeys = table.soap().getKeys(getQuery());
-				if (allKeys.size() != expected) {
-					logger.warn(Log.PROCESS,
-							String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
-								expected, allKeys.size()));
-				}
-			}
-		}
+		TableStats stats = table.rest().getStats(query, false);
+		int expected = stats.getCount();
+		allKeys = table.soap().getKeys(getQuery());
+		if (allKeys.size() != expected)
+			logger.warn(Log.PROCESS,
+					String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
+						expected, allKeys.size()));				
 		setExpected(allKeys.size());
-		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
+		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
 	public void initialize(KeySet keys) throws IOException {

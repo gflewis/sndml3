@@ -32,8 +32,8 @@ public class ConnectionProfile {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final Properties properties = new Properties();
 	private String pathname; // file used to initialize this object
-	private Session session;
-	private Database database;
+	private Session session = null; // initialized on request
+	private Database database = null; // initialized on request
 	
 	public ConnectionProfile(File profile) throws IOException {
 		pathname = profile.getPath();
@@ -97,10 +97,21 @@ public class ConnectionProfile {
 		return properties.getProperty(name);
 	}
 	
-	boolean getPropertyBoolean(String name, boolean defaultValue) {
+	public String getProperty(String name, String defaultValue) {
+		String value = getProperty(name);
+		return value == null ? defaultValue : value;
+	}
+	
+	public boolean getPropertyBoolean(String name, boolean defaultValue) {
 		String stringValue = getProperty(name);
 		if (stringValue == null) return defaultValue;
 		return new Boolean(stringValue);
+	}
+	
+	public int getPropertyInt(String name, int defaultValue) {
+		String stringValue = getProperty(name);
+		if (stringValue == null) return defaultValue;
+		return new Integer(stringValue);
 	}
 	
 	/** 

@@ -2,8 +2,11 @@ package sndml.servicenow;
 
 import java.io.IOException;
 import java.net.URI;
-import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class RestTableAPI extends TableAPI {
 
@@ -27,7 +30,7 @@ public class RestTableAPI extends TableAPI {
 		
 	public TableStats getStats(EncodedQuery filter, boolean includeDates) throws IOException {
 		Log.setMethodContext(table, "STATS");
-		TableStats stats = new TableStats();
+		TableStats tableStats = new TableStats();
 		Parameters params = new Parameters();
 		if (filter != null) params.add("sysparm_query", filter.toString());
 		String aggregateFields = "sys_created_on";
@@ -38,43 +41,44 @@ public class RestTableAPI extends TableAPI {
 		}
 		URI uri = getURI("stats", null, params);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
-		JSONObject responseObj = request.execute();
+		ObjectNode root = request.execute();
 		if (logger.isDebugEnabled()) logger.debug(Log.PROCESS, request.dumpResponseText());
 		request.checkForInsufficientRights();
-		JSONObject result = responseObj.getJSONObject("result").getJSONObject("stats");
-		stats.count = Integer.parseInt(result.getString("count"));
+		// ObjectNode result = (ObjectNode) root.get("result");
+		// ObjectNode stats = (ObjectNode) result.get("stats");
+		tableStats.count = root.at("/result/stats/count").asInt();
 		if (includeDates) {
-			JSONObject minValues = result.getJSONObject("min");
-			JSONObject maxValues = result.getJSONObject("max");
-			DateTime minCreated = DateTime.from(minValues.getString("sys_created_on"));
-			DateTime maxCreated = DateTime.from(maxValues.getString("sys_created_on"));
+			JsonNode minValues = root.at("/result/stats/min");
+			JsonNode maxValues = root.at("/result/stats/max");
+			DateTime minCreated = DateTime.from(minValues.get("sys_created_on").asText());
+			DateTime maxCreated = DateTime.from(maxValues.get("sys_created_on").asText());
 			if (minCreated == null || maxCreated == null) 
 				logger.warn(Log.PROCESS, String.format(
 					"getStats query=\"%s\" minCreated=%s maxCreated=%s", filter, minCreated, maxCreated));
-			stats.created = new DateTimeRange(minCreated, maxCreated);
+			tableStats.created = new DateTimeRange(minCreated, maxCreated);
 			logger.info(Log.PROCESS, String.format(
-				"getStats count=%d query=\"%s\" createdRange=%s", stats.count, filter, stats.created));			
+				"getStats count=%d query=\"%s\" createdRange=%s", tableStats.count, filter, tableStats.created));			
 		}
 		else {
 			logger.info(Log.PROCESS, String.format(
-				"getStats count=%d query=\"%s\"", stats.count, filter));			
+				"getStats count=%d query=\"%s\"", tableStats.count, filter));			
 		}
-		return stats;		
+		return tableStats;		
 	}
 	
 	public Record getRecord(Key key) throws IOException {
 		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
-		JSONObject responseObj = request.execute();
+		ObjectNode responseObj = request.execute();
 		request.checkForInsufficientRights();		
 		if (responseObj.has("error")) {
-			JSONObject errorObj = responseObj.getJSONObject("error");
-			String message = errorObj.getString("message");
+			JsonNode errorObj = responseObj.get("error");
+			String message = errorObj.get("message").asText();
 			if (message.equalsIgnoreCase("No record found")) return null;
 			throw new JsonResponseError(responseObj.toString());
 		}
-		JSONObject resultObj =  responseObj.getJSONObject("result");
+		ObjectNode resultObj = (ObjectNode) responseObj.get("result");
 		if (resultObj == null) return null;
 		JsonRecord rec = new JsonRecord(this.table, resultObj);
 		return rec;
@@ -104,22 +108,22 @@ public class RestTableAPI extends TableAPI {
 		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", null, params);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.GET, null);
-		JSONObject responseObj = request.execute();
-		request.checkForInsufficientRights();		
-		assert responseObj.has("result");
-		RecordList list = new RecordList(table, responseObj, "result");
+		ObjectNode root = request.execute();
+		request.checkForInsufficientRights();
+		ArrayNode resultObj = (ArrayNode) root.get("result");
+		RecordList list = new RecordList(table, resultObj);
 		return list;
 	}
 
 	public InsertResponse insertRecord(Parameters fields) throws IOException {
 		Log.setMethodContext(table, "POST");
 		URI uri = getURI("table", null, null);
-		JSONObject requestObj = fields.toJSON();
+		ObjectNode requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
-		JSONObject responseObj = request.execute();
-		request.checkForInsufficientRights();		
-		assert responseObj.has("result");
-		JSONObject resultObj = responseObj.getJSONObject("result");
+		ObjectNode root = request.execute();
+		request.checkForInsufficientRights();
+		ObjectNode resultObj = (ObjectNode) root.get("result");
+		assert root.has("result");
 		JsonRecord rec = new JsonRecord(this.table, resultObj);
 		return rec;
 	}
@@ -127,13 +131,13 @@ public class RestTableAPI extends TableAPI {
 	public void updateRecord(Key key, Parameters fields) throws IOException {
 		Log.setMethodContext(table, "PUT");
 		URI uri = getURI("table", key, null);
-		JSONObject requestObj = fields.toJSON();
+		ObjectNode requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.PUT, requestObj);
-		JSONObject responseObj = request.execute();
+		ObjectNode root = request.execute();
 		request.checkForInsufficientRights();
 		request.checkForNoSuchRecord();
-		JSONObject resultObj = responseObj.getJSONObject("result");
-		@SuppressWarnings("unused") // discard the response
+		ObjectNode resultObj = (ObjectNode) root.get("result");
+		@SuppressWarnings("unused")
 		JsonRecord rec = new JsonRecord(this.table, resultObj);
 	}
 	
@@ -141,8 +145,8 @@ public class RestTableAPI extends TableAPI {
 		Log.setMethodContext(table, "DELETE");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(client, uri, HttpMethod.DELETE, null);
-		JSONObject responseObj = request.execute();
-		if (responseObj == null) return true;
+		ObjectNode root = request.execute();
+		if (root == null) return true;
 		if (request.recordNotFound()) return false;
 		throw new JsonResponseException(request);
 	}

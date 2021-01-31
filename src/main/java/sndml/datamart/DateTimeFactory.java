@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import sndml.servicenow.DateTime;
 import sndml.servicenow.Log;
 
@@ -62,25 +64,25 @@ public class DateTimeFactory {
 		return lastValues;
 	}
 	
-	DateTime getDate(Object obj) throws ConfigParseException {
+	DateTime getDate(JsonNode obj) throws ConfigParseException {
 		assert obj != null;
+		return getDate(obj.asText());
+	}
+	
+	DateTime getDate(String expr) throws ConfigParseException {
+		assert expr != null;
+		assert expr.length() > 0;
 		DateTime result;
-		logger.debug(Log.INIT, 
-			String.format("getDate %s=%s", obj.getClass().getName(), obj.toString()));
-		if (obj instanceof java.util.Date) 
-			result = new DateTime((java.util.Date) obj);
-		else {
-			String expr = obj.toString();
-			if (datePattern.matcher(expr).matches())
-				result = new DateTime(expr);
-			else if (namePattern.matcher(expr).matches())
-				result = getName(expr);
-			else if (exprPattern.matcher(expr).matches())
-				result = getExpr(expr);
-			else
-				throw new ConfigParseException("Invalid datetime: " + expr);
-			logger.debug(Log.INIT, String.format("getDate(%s)=%s", expr, result));
-		}
+		logger.debug(Log.INIT, String.format("getDate %s", expr));		
+		if (datePattern.matcher(expr).matches())
+			result = new DateTime(expr);
+		else if (namePattern.matcher(expr).matches())
+			result = getName(expr);
+		else if (exprPattern.matcher(expr).matches())
+			result = getExpr(expr);
+		else
+			throw new ConfigParseException("Invalid datetime: " + expr);
+		logger.debug(Log.INIT, String.format("getDate(%s)=%s", expr, result));
 		return result;
 	}
 

@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
  * Holds a list of <b>sys_id</b>s (GUIDs) 
@@ -24,21 +25,14 @@ public class KeySet extends ArrayList<Key> {
 		super(size);
 	}
 	
-	public KeySet(JSONArray array) {
-		this(array.length());
-		for (int i = 0; i < array.length(); ++i) {
-			Object obj = array.get(i);
-			if (obj instanceof String) 
-				this.add(new Key((String) obj));
-			else
-				throw new JsonResponseError("Expected sys_id; found: " + obj.toString());
+	public KeySet(ArrayNode array) {		
+		this(array.size());		
+		for (int i = 0; i < array.size(); ++i) {
+			JsonNode ele = array.get(i);
+			this.add(new Key(ele.asText()));
 		}		
 	}
-	
-	public KeySet(JSONObject obj, String fieldname) {
-		this(obj.getJSONArray(fieldname));
-	}
-	
+		
 	public KeySet(Set<Key> set) {
 		super(set.size());
 		for (Key key : set) {

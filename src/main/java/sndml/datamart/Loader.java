@@ -16,6 +16,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.service.Daemon;
 import sndml.servicenow.*;
 
 public class Loader {
@@ -38,28 +39,41 @@ public class Loader {
 				desc("Property file (required)").build());
 		options.addOption(Option.builder("t").longOpt("table").required(false).hasArg(true).
 				desc("Table name").build());
-		options.addOption(Option.builder("y").longOpt("config").required(false).hasArg(true).
+		options.addOption(Option.builder("y").longOpt("yaml").required(false).hasArg(true).
 				desc("YAML config file (required)").build());
-		
+		options.addOption(Option.builder("d").longOpt("daemon").required(false).hasArg(false).
+				desc("Run as daemon/service").build());
 		CommandLine cmd = new DefaultParser().parse(options,  args);
 		String profilename = cmd.getOptionValue("p");
 		String yamlfilename = cmd.getOptionValue("y");
 		String tablename = cmd.getOptionValue("t");
-		if (yamlfilename != null && tablename != null)
-			throw new CommandOptionsException("Cannot specify both --table and --config");
-		if (yamlfilename == null && tablename == null)
-			throw new CommandOptionsException("Must specify either --table or --config");
-			
+		boolean isDaemon = cmd.hasOption("d");
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
-		Session session = profile.getSession();
-		LoaderConfig config = (tablename != null) ?
-			// Single table load
-			new LoaderConfig(session.table(tablename)) :
-			// YAML config load
-			new LoaderConfig(new File(yamlfilename), profile.getProperties());
-		config.validate();
-		Loader loader = new Loader(profile, config);			
-		loader.loadTables();			
+		if (isDaemon) {
+			if (yamlfilename != null)
+				throw new CommandOptionsException("Cannot specify both --daemon and --yaml");
+			if (tablename != null)
+				throw new CommandOptionsException("Cannot specify both --daemon and --table");
+			Daemon daemon = new Daemon(profile);
+			daemon.run();
+			
+		}
+		else {
+			if (yamlfilename != null && tablename != null)
+				throw new CommandOptionsException("Cannot specify both --table and --yaml");
+			if (yamlfilename == null && tablename == null)
+				throw new CommandOptionsException("Must specify --daemon or --yaml or --table");			
+			Session session = profile.getSession();
+			LoaderConfig config = (tablename != null) ?
+				// Single table load
+				new LoaderConfig(session.table(tablename)) :
+				// YAML config load
+				new LoaderConfig(new File(yamlfilename), profile.getProperties());
+			config.validate();
+			Loader loader = new Loader(profile, config);			
+			loader.loadTables();			
+		}
+			
 	}
 	
 	Loader(Table table, Database database) {
