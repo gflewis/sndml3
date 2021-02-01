@@ -96,4 +96,9 @@ public class XmlRecord extends Record {
 		return result;
 	}
 
+	@Override
+	public String getSource(boolean pretty) {
+		return getXML(pretty);
+	}
+
 }

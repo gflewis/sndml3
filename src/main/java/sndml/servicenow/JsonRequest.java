@@ -43,7 +43,7 @@ public class JsonRequest extends ServiceNowRequest {
 		logger.debug(Log.REQUEST, method.name() + " " + uri.toURL());
 		if (requestObj != null) {
 			requestText = requestObj.toString();
-			if (logger.isTraceEnabled()) logger.trace(Log.REQUEST, JsonFormatter.format(requestText));
+			if (logger.isTraceEnabled()) logger.trace(Log.REQUEST, requestText);
 			requestEntity = new StringEntity(requestText, ContentType.APPLICATION_JSON);
 		}
 		switch (method) {
@@ -102,7 +102,7 @@ public class JsonRequest extends ServiceNowRequest {
 			return null;
 		}
 		if (logger.isTraceEnabled())
-			logger.trace(Log.RESPONSE, JsonFormatter.format(responseText));			
+			logger.trace(Log.RESPONSE, responseText);			
 		if (statusCode == 401 || statusCode == 403) {
 			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);

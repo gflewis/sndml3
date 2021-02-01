@@ -77,12 +77,13 @@ public class JsonRecord extends Record {
 	public String toString() {
 		return root.toString();
 	}
-	
-	/*
+
 	@Override
-	public String toJSON() {
-		return root.toString();
+	public String getSource(boolean pretty) {
+		if (pretty) 
+			return root.toPrettyString();
+		else
+			return root.toString();
 	}
-	*/
-		
+			
 }

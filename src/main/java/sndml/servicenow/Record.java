@@ -37,10 +37,19 @@ public abstract class Record implements InsertResponse {
 
 	abstract public Iterator<String> keys();
 	
-	/*
+	/**
 	 * Get a list of all the fields in the record.
 	 */
 	abstract public FieldNames getFieldNames();
+	
+	/**
+	 * Get the original document used to create this record
+	 */
+	abstract public String getSource(boolean pretty);
+	
+	public String getSource() {
+		return getSource(false);
+	}
 	
 	/**
 	 * Get the sys_id (primary key) of a Record.  

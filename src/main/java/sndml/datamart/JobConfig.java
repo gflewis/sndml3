@@ -128,9 +128,11 @@ public class JobConfig {
 				this.sqlAfter = val.asText();
 				break;
 			case "minrows":
+				if (!val.isInt()) configError("Not integer: minrows");
 				this.minRows = val.asInt();
 				break;
 			case "maxrows":
+				if (!val.isInt()) configError("Not integer: maxrows");
 				this.maxRows = val.asInt();
 				break;
 			case "threads":
