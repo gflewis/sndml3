@@ -58,7 +58,10 @@ public class XmlRecord extends Record {
 	/**
 	 * Returns the underlying JDOM Element as a formatted XML string.  
 	 * Use for debugging and diagnostics.
+	 * 
+	 * Deprecated: Use asText()
 	 */
+	@Deprecated
 	public String getXML() {
 		return getXML(false);
 	}
@@ -66,7 +69,10 @@ public class XmlRecord extends Record {
 	/**
 	 * Returns the underlying JDOM Element as a formatted XML string.  
 	 * Use for debugging and diagnostics.
+	 * 
+	 * Deprecated: Use asText()
 	 */
+	@Deprecated
 	public String getXML(boolean pretty) {
 		return XmlFormatter.format(element, pretty);
 	}
@@ -97,8 +103,8 @@ public class XmlRecord extends Record {
 	}
 
 	@Override
-	public String getSource(boolean pretty) {
-		return getXML(pretty);
+	public String asText(boolean pretty) {
+		return XmlFormatter.format(element, pretty);
 	}
 
 }

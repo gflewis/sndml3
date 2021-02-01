@@ -29,7 +29,13 @@ public class JsonRequest extends ServiceNowRequest {
 	ObjectNode responseObj;
 	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	public JsonRequest(Session session, URI uri, HttpMethod method, ObjectNode body) {
+		super(session.getClient(), uri, method);
+		this.requestObj = body;
+	}
 	
+	@Deprecated
 	public JsonRequest(CloseableHttpClient client, URI uri, HttpMethod method, ObjectNode body) {
 		super(client, uri, method);
 		this.requestObj = body;
@@ -102,7 +108,7 @@ public class JsonRequest extends ServiceNowRequest {
 			return null;
 		}
 		if (logger.isTraceEnabled())
-			logger.trace(Log.RESPONSE, responseText);			
+			logger.trace(Log.RESPONSE, responseText);
 		if (statusCode == 401 || statusCode == 403) {
 			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);
@@ -114,9 +120,14 @@ public class JsonRequest extends ServiceNowRequest {
 		}		
 		if ("text/html".equals(responseContentType))
 			throw new InstanceUnavailableException(this);
+		if (statusCode == 400) {
+			this.logResponseError(logger);
+			throw new NoContentException(this);
+		}
 		
 		responseObj = (ObjectNode) mapper.readTree(responseText);
 		if (responseObj.has("error")) {
+			logger.warn(Log.RESPONSE, method.toString() + " " + uri.toString());
 			logger.warn(Log.RESPONSE, responseText);
 		}
 		return responseObj;

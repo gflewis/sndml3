@@ -14,6 +14,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 
 public class Session {
@@ -25,12 +26,13 @@ public class Session {
 	private final Domain domain;
 	private final UsernamePasswordCredentials userPassCreds;
 	private final CredentialsProvider credsProvider;
+	final private BasicCookieStore cookieStore = new BasicCookieStore();
+	final private PoolingHttpClientConnectionManager connectionManager;	
 	private final ConcurrentHashMap<String,TableSchema> schemaCache = 
 			new ConcurrentHashMap<String,TableSchema>();
 	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
-	final private BasicCookieStore cookieStore = new BasicCookieStore();
-	CloseableHttpClient client;	
+	private final CloseableHttpClient client;	
 
 	final private Logger logger = Log.logger(this.getClass());
 
@@ -51,8 +53,14 @@ public class Session {
 		this.logInitInfo();
 		this.authScope = new AuthScope(instance.getHost());
 		this.credsProvider = new BasicCredentialsProvider();
-		this.userPassCreds = new UsernamePasswordCredentials(username, password);
-		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);		
+		this.userPassCreds = new UsernamePasswordCredentials(username, password);		
+		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);	
+		this.connectionManager = new PoolingHttpClientConnectionManager();
+		this.client = HttpClients.custom().
+				setConnectionManager(connectionManager).
+				setDefaultCredentialsProvider(credsProvider).
+				setDefaultCookieStore(cookieStore).
+				build();			
 		if (this.getPropertyBoolean("verify_session", false)) this.verify();
 	}
 
@@ -97,14 +105,6 @@ public class Session {
 	}
 
 	public CloseableHttpClient getClient() {
-		assert this.credsProvider != null;
-		assert this.cookieStore != null;
-		if (this.client == null) {
-			this.client = HttpClients.custom().
-					setDefaultCredentialsProvider(credsProvider).
-					setDefaultCookieStore(cookieStore).
-					build();			
-		}
 		return this.client;
 	}
 

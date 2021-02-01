@@ -79,7 +79,7 @@ public class JsonRecord extends Record {
 	}
 
 	@Override
-	public String getSource(boolean pretty) {
+	public String asText(boolean pretty) {
 		if (pretty) 
 			return root.toPrettyString();
 		else

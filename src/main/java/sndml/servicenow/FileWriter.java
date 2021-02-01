@@ -92,28 +92,16 @@ public class FileWriter extends RecordWriter {
 	}
 
 	public void processRecord(Record rec) {	
-		// TODO Fix Me
-		throw new UnsupportedOperationException();
-		/*
 		assert writer != null;
-		assert rec !=null;
-		JSONWriter json = new JSONWriter(writer);
-		json.object();
-		for (String name : rec.getFieldNames()) {
-			String value = rec.getValue(name);
-			if (value != null && value.length() > 0) {
-				json.key(name);
-				json.value(value);				
-			}
-		}
-		json.endObject();
+		assert rec != null;
+		assert rec instanceof JsonRecord;
+		writer.print(rec.asText(true));
 		if (format == Format.Import)
 			writer.println();
 		else
 			writer.println(",");
 		writer.flush();
 		writerMetrics.incrementInserted();
-		*/
 	}
 
 	@Override

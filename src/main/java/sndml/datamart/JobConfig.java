@@ -11,7 +11,7 @@ import sndml.servicenow.*;
 public class JobConfig {
 
 	private LoaderConfig parent;
-	private Key id;
+	private Key sys_id;
 	private String number;
 	private String name;
 	private String source;
@@ -32,10 +32,10 @@ public class JobConfig {
 	private Integer threads;
 	private final DateTimeFactory dateFactory;
 
-	public JobConfig(ObjectNode map) {
+	public JobConfig(ObjectNode settings) {
 		this.dateFactory = new DateTimeFactory();
-		this.name = map.get("number").asText();
-		this.setPropertiesFrom(map);;
+		this.name = settings.get("number").asText();
+		this.setPropertiesFrom(settings);;
 	}
 	
 	JobConfig(Table table) {
@@ -44,10 +44,11 @@ public class JobConfig {
 	}
 
 	JobConfig(LoaderConfig parent, JsonNode config) throws ConfigParseException {
+		ObjectNode settings = (ObjectNode) config;
 		this.parent = parent;
 		this.dateFactory = new DateTimeFactory(parent.getStart(), parent.getMetricsFile());
 		if (config.isObject()) {
-			setPropertiesFrom((ObjectNode) config);
+			setPropertiesFrom(settings);
 		} else {
 			name = config.asText();
 		}
@@ -68,8 +69,8 @@ public class JobConfig {
 			case "target":
 				this.target = val.asText();
 				break;
-			case "id":
-				this.id = new Key(val.asText());
+			case "sys_id":
+				this.sys_id = new Key(val.asText());
 				break;
 			case "number":
 				this.number = val.asText();
@@ -208,7 +209,7 @@ public class JobConfig {
 	}
 
 	Key getId() {
-		return this.id;
+		return this.sys_id;
 	}
 	
 	String getNumber() {

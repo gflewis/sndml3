@@ -30,7 +30,7 @@ public class JsonTableAPI extends TableAPI {
 		params.put("sysparm_action",  "getKeys");
 		if (!EncodedQuery.isEmpty(query)) params.put("sysparm_query", query.toString());
 		ObjectNode requestObj = params.toJSON();
-		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);		
+		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);		
 		ObjectNode responseObj = request.execute();
 		// TODO: Is this correct?
 		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");

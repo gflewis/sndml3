@@ -43,12 +43,12 @@ public abstract class Record implements InsertResponse {
 	abstract public FieldNames getFieldNames();
 	
 	/**
-	 * Get the original document used to create this record
+	 * Get String representation of this document.
 	 */
-	abstract public String getSource(boolean pretty);
+	abstract public String asText(boolean pretty);
 	
-	public String getSource() {
-		return getSource(false);
+	public String asText() {
+		return asText(false);
 	}
 	
 	/**

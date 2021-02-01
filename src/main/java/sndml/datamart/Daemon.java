@@ -1,4 +1,4 @@
-package sndml.service;
+package sndml.datamart;
 
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
@@ -10,7 +10,6 @@ import org.apache.commons.daemon.DaemonInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.Log;
 
 
@@ -19,26 +18,33 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	static Logger logger = LoggerFactory.getLogger(Daemon.class);
 		
 	private final ConnectionProfile profile;
-	private ExecutorService workerPool = null;
-	private int intervalSeconds;
-	private int threadCount;
-
+	private final ExecutorService workerPool;
+	private final int intervalSeconds;
+	private final int threadCount;
+	private final Scanner scanner;
 	private Timer timer;
-	private Scanner scanner;
 	
 	public Daemon(ConnectionProfile profile) {
 		this.profile = profile;
+		threadCount = profile.getPropertyInt("daemon.threads", 3);
+		intervalSeconds = profile.getPropertyInt("daemon.interval_seconds", 20);
+		assert threadCount > 0;
+		assert intervalSeconds > 0;
+		workerPool = Executors.newFixedThreadPool(threadCount);
+        scanner = new Scanner(profile, workerPool);
 	}
 	
 	public void run() throws Exception {
+		Log.setGlobalContext();
+		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		start();
 		while (!workerPool.isTerminated()) {
 			logger.info("main awaiting threadpool termination");
 			workerPool.awaitTermination(120, TimeUnit.SECONDS);
 		}
-		stop();	
+		stop();
 	}
-			
+
 	@Override
 	public void init(DaemonContext context) throws DaemonInitException, Exception {
 		logger.info(Log.INIT, "begin init");		
@@ -46,20 +52,10 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 
 	@Override
 	public void start() throws Exception {
-		logger.info(Log.INIT, "begin start");
-				
-		threadCount = profile.getPropertyInt("daemon.threads", 3);
-		intervalSeconds = profile.getPropertyInt("daemon.interval_seconds", 20);
-		assert threadCount > 0;
-		assert intervalSeconds > 0;
-				
-		workerPool = Executors.newFixedThreadPool(threadCount);
+		logger.info(Log.INIT, "begin start");								
         this.timer = new Timer("scanner", true);
-        scanner = new Scanner(profile);
-        
 		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
-		Runtime.getRuntime().addShutdownHook(shutdownHook);
-		
+		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);
 		logger.info(Log.INIT,"end start");		
 	}
@@ -79,7 +75,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 			terminated = false;
 		}
 		if (terminated) {
-			logger.info("Shutdown Successful");
+			logger.info(Log.FINISH, "Shutdown Successful");
 		}
 		else {
 			logger.warn("Some threads failed to terminate");

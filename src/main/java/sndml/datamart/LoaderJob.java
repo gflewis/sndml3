@@ -52,6 +52,17 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		this.metrics = new WriterMetrics();
 		this.config = config;		
 	}
+	
+	LoaderJob(Session session, Database db, JobConfig config) {
+		config.validate();
+		this.session = session;
+		this.db = db;
+		this.table = session.table(config.getSource());
+		this.sqlTableName = config.getTargetName();
+		this.tableLoaderName = config.getName();
+		this.metrics = new WriterMetrics();
+		this.config = config;				
+	}
 
 	private void setLogContext() {
 		Log.setContext(table, tableLoaderName);		

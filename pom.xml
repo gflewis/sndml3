@@ -183,7 +183,6 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>
                   <include>org.jdom:*</include>
-                  <include>com.google.code.gson:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -223,7 +222,6 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>
                   <include>org.jdom:*</include>
-                  <include>com.google.code.gson:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -252,7 +250,6 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>                  
                   <include>org.jdom:*</include>
-                  <include>com.google.code.gson:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -292,7 +289,6 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>                  
                   <include>org.jdom:*</include>
-                  <include>com.google.code.gson:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>

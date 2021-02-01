@@ -1,4 +1,4 @@
-package sndml.service;
+package sndml.datamart;
 
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -6,8 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import sndml.datamart.ConnectionProfile;
 
 public class ShutdownHook extends Thread {
 
@@ -22,6 +20,7 @@ public class ShutdownHook extends Thread {
 		this.profile = profile;
 		this.dispenser = dispenser;
 		this.workerPool = workers;
+		this.setName("ShutdownHook");
 	}
 			
 	@Override

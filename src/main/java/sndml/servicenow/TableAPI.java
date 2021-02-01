@@ -1,7 +1,6 @@
 package sndml.servicenow;
 
 import java.io.IOException;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,14 +8,12 @@ public abstract class TableAPI {
 
 	final protected Table table;
 	final protected Session session;
-	final protected CloseableHttpClient client;
 	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public TableAPI(Table table) {
 		this.table = table;
 		this.session = table.getSession();
-		this.client = this.session.getClient();
 	}
 
 	public Table getTable() {

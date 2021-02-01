@@ -73,7 +73,7 @@ public class DateTimeFactory {
 		assert expr != null;
 		assert expr.length() > 0;
 		DateTime result;
-		logger.debug(Log.INIT, String.format("getDate %s", expr));		
+		// logger.debug(Log.INIT, String.format("getDate %s", expr));		
 		if (datePattern.matcher(expr).matches())
 			result = new DateTime(expr);
 		else if (namePattern.matcher(expr).matches())
