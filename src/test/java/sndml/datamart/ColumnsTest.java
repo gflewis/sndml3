@@ -15,14 +15,14 @@ public class ColumnsTest {
 	final DBUtil util;
 	
 	public ColumnsTest() {
-		profile = TestingManager.getDefaultProfile();
-		TestingManager.setProfile(this.getClass(), profile);
+		profile = TestManager.getDefaultProfile();
+		TestManager.setProfile(this.getClass(), profile);
 		util = new DBUtil(profile.getDatabase());
 	}
 	
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}		
 
 	@After

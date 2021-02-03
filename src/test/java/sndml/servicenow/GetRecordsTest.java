@@ -21,7 +21,7 @@ public class GetRecordsTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
-		return TestingManager.getProfiles("mydevjson mydevsoap mydevrest");
+		return TestManager.getProfiles("mydevjson mydevsoap mydevrest");
 	}
 
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -29,17 +29,17 @@ public class GetRecordsTest {
 	final Session session;
 	
 	public GetRecordsTest(TestingProfile profile) throws IOException {
-		TestingManager.setProfile(this.getClass(), profile);
+		TestManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
 		this.session = profile.getSession();
 	}
 
 	@Test
 	public void testGetSingleRecord() throws Exception {
-		TestingManager.bannerStart("testGetSingleRecord");
+		TestManager.bannerStart("testGetSingleRecord");
 		// logger.info(Log.TEST, String.format("%s %s", profile, "testGetSingleRecord"));
 		Table tbl = session.table("cmn_department");
-		RecordList recs = tbl.api().getRecords("id", TestingManager.getProperty("some_department_id"));
+		RecordList recs = tbl.api().getRecords("id", TestManager.getProperty("some_department_id"));
 		assertTrue(recs.size() == 1);
 		Key sysid = recs.get(0).getKey();
 		assertTrue(Key.isGUID(sysid.toString()));
@@ -49,7 +49,7 @@ public class GetRecordsTest {
 	
 	@Test
 	public void testGetEmptyRecordset() throws Exception {
-		TestingManager.bannerStart("testGetSingleRecord");
+		TestManager.bannerStart("testGetSingleRecord");
 		// logger.info(Log.TEST, String.format("%s %s", profile, "testGetEmptyRecordset"));
 		Table tbl = session.table("sys_user");
 		RecordList recs = tbl.api().getRecords("name", "Zebra Elephant");
@@ -58,8 +58,8 @@ public class GetRecordsTest {
 	
 	@Test
 	public void getGoodKey() throws Exception {
-		TestingManager.bannerStart("getGoodKey");
-		String goodKey = TestingManager.getProperty("some_incident_sys_id");
+		TestManager.bannerStart("getGoodKey");
+		String goodKey = TestManager.getProperty("some_incident_sys_id");
 		Table tbl = session.table("incident");
 		Record rec = tbl.getRecord(new Key(goodKey));
 		assertNotNull(rec);
@@ -68,7 +68,7 @@ public class GetRecordsTest {
 	
 	@Test 
 	public void testGetBadKey() throws Exception {
-		TestingManager.bannerStart("testGetBadKey");
+		TestManager.bannerStart("testGetBadKey");
 		String badKey = "00000000000000000000000000000000";
 		Table tbl = session.table("incident");
 		Record rec = tbl.getRecord(new Key(badKey));

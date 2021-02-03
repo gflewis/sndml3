@@ -14,16 +14,16 @@ import sndml.servicenow.TableReader;
 
 public class RestTableReaderTest {
 
-	final Logger logger = TestingManager.getLogger(this.getClass());
+	final Logger logger = TestManager.getLogger(this.getClass());
 	final Session session;
 	
 	public RestTableReaderTest() {
-		session = TestingManager.getDefaultProfile().getSession();
+		session = TestManager.getDefaultProfile().getSession();
 	}
 
 	@Test
 	public void testSetQuery() throws Exception {
-		String someDeptName = TestingManager.getProperty("some_department_name");
+		String someDeptName = TestManager.getProperty("some_department_name");
 		boolean found = false;
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
@@ -42,8 +42,8 @@ public class RestTableReaderTest {
 
 	@Test
 	public void testSetDisplayValuesTrue() throws Exception {
-		String someDeptName = TestingManager.getProperty("some_department_name");
-		String someDeptHead = TestingManager.getProperty("some_department_head");
+		String someDeptName = TestManager.getProperty("some_department_name");
+		String someDeptHead = TestManager.getProperty("some_department_head");
 		boolean found = false;
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);

@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class LoaderConfig {
 	private final java.util.List<JobConfig> tables = 
 			new java.util.ArrayList<JobConfig>();
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
 	
 	static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
@@ -50,7 +49,7 @@ public class LoaderConfig {
 				metricsFolder = new File(metricsFolderName);
 		}		
 		this.root = parseYAML(reader);		
-		logger.info(Log.INIT, "\n" + root.asText().trim());
+		logger.info(Log.INIT, "\n" + root.toPrettyString());
 		Iterator<String> fieldnames = root.fieldNames();
 		while (fieldnames.hasNext()) {
 			String key = fieldnames.next();
@@ -71,8 +70,9 @@ public class LoaderConfig {
 			case "jobs" :
 				ArrayNode jobs = (ArrayNode) val;
 				for (int i = 0; i < jobs.size(); ++i) {
-					JsonNode job = jobs.get(i);
-					this.tables.add(new JobConfig(this, job));
+					JsonNode jobNode = jobs.get(i);
+					JobConfig jobConfig = new JobConfig(this, jobNode);
+					this.tables.add(jobConfig);
 				}
 				break;
 	    	default:

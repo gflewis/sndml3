@@ -21,25 +21,25 @@ public class CreateTableTest {
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
 		// return new TestingProfile[] {TestingManager.getDefaultProfile()};
-		return TestingManager.allProfiles();
+		return TestManager.allProfiles();
 	}
 
 	TestingProfile profile;
 	Session session;
 	Database database;
 	DBUtil util;
-	Logger logger = TestingManager.getLogger(this.getClass());
+	Logger logger = TestManager.getLogger(this.getClass());
 	
 	public CreateTableTest(TestingProfile profile) throws Exception {
-		TestingManager.setProfile(this.getClass(), profile);
-		session = TestingManager.getProfile().getSession();
+		TestManager.setProfile(this.getClass(), profile);
+		session = TestManager.getProfile().getSession();
 		util = new DBUtil(profile);
 		database = util.getDatabase();
 	}
 
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}
 
 	@Test
@@ -105,5 +105,6 @@ public class CreateTableTest {
 		assertTrue(database.tableExists(tablename));
 		Log.setContext(table, "testCreateTable_problem");
 	}
+	
 	
 }

@@ -17,6 +17,8 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	private final String tableLoaderName;
 	private final JobConfig config;
 	private final WriterMetrics metrics;
+	ProgressLogger progressLogger;
+	
 	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 		
@@ -68,6 +70,10 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		Log.setContext(table, tableLoaderName);		
 	}
 	
+	public void setProgressLogger(ProgressLogger progress) {
+		this.progressLogger = progress;
+	}
+	
 	String getName() {
 		return this.table.getName();
 	}
@@ -83,7 +89,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
-		LoaderAction action = config.getAction();
+		JobAction action = config.getAction();
 		assert action != null;
 		DateTimeRange createdRange = config.getCreated();
 		
@@ -102,10 +108,11 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		}		
 		this.setLogContext();
 
-		if (LoaderAction.DROPTABLE.equals(action)) {
-			db.dropTable(sqlTableName, true);
+		if (JobAction.CREATE.equals(action)) {
+			if (config.getDropTable()) db.dropTable(sqlTableName, true);
+			db.createMissingTable(table, sqlTableName);
 		}
-		else if (LoaderAction.PRUNE.equals(action)) {
+		else if (JobAction.PRUNE.equals(action)) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(metrics);
 			deleteWriter.open();
@@ -127,7 +134,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			auditReader.call();
 			deleteWriter.close();
 		}
-		else if (LoaderAction.SYNC.equals(action)) {
+		else if (JobAction.SYNC.equals(action)) {
 			db.createMissingTable(table, sqlTableName);
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
@@ -159,9 +166,9 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			db.createMissingTable(table, sqlTableName);
 			if (config.getTruncate()) db.truncateTable(sqlTableName);
 			DatabaseTableWriter writer;
-			if (LoaderAction.UPDATE.equals(action))
+			if (JobAction.REFRESH.equals(action))
 				writer = new DatabaseUpdateWriter(db, table, sqlTableName);
-			else if (LoaderAction.INSERT.equals(action))
+			else if (JobAction.LOAD.equals(action))
 				writer = new DatabaseInsertWriter(db, table, sqlTableName);
 			else
 				throw new AssertionError();

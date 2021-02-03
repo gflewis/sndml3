@@ -16,11 +16,11 @@ import java.util.Properties;
 
 public class SessionVerificationTest {
 
-	Logger logger = TestingManager.getLogger(this.getClass());
+	Logger logger = TestManager.getLogger(this.getClass());
 	
 	@Test
 	public void testValidate() throws Exception {
-		Session session = TestingManager.getDefaultProfile().getSession();
+		Session session = TestManager.getDefaultProfile().getSession();
 		session.verify();
 		Table user = session.table("sys_user");
 		TableWSDL wsdl = user.getWSDL();

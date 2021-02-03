@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import sndml.datamart.Loader;
 import sndml.datamart.YamlFile;
-import sndml.servicenow.TestingManager;
+import sndml.servicenow.TestManager;
 import sndml.servicenow.TestingProfile;
 import sndml.servicenow.WriterMetrics;
 
@@ -36,12 +36,12 @@ public class TableLoaderTest {
 	public TableLoaderTest(TestParam param) {
 		this.profile = param.profile;
 		this.yamlFile = new YamlFile(param.yamlFile);
-		TestingManager.setProfile(this.getClass(), profile);		
+		TestManager.setProfile(this.getClass(), profile);		
 	}
 	
 	@Parameters(name = "{index}:{0}")
 	public static TestParam[] getParams() {
-		TestingProfile[] allProfiles = TestingManager.allProfiles();
+		TestingProfile[] allProfiles = TestManager.allProfiles();
 		YamlFile[] allYamlFiles = new TestFolder("Loads").yamlFiles();
 		int size = allProfiles.length * allYamlFiles.length;
 		TestParam[] result = new TestParam[size];

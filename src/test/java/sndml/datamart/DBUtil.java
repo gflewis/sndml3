@@ -15,7 +15,7 @@ import java.sql.Statement;
 
 public class DBUtil {
 		
-	static Logger logger = TestingManager.getLogger(DBUtil.class);
+	static Logger logger = TestManager.getLogger(DBUtil.class);
 	Database db;
 
 	DBUtil(Database database) {
@@ -27,7 +27,7 @@ public class DBUtil {
 	}
 	
 	DBUtil() throws SQLException, URISyntaxException {
-		this(TestingManager.getProfile());
+		this(TestManager.getProfile());
 	}
 	
 	Database getDatabase() {

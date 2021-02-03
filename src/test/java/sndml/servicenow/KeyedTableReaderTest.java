@@ -12,8 +12,8 @@ public class KeyedTableReaderTest {
 	Session session;
 	
 	public KeyedTableReaderTest() {
-		TestingManager.setDefaultProfile(this.getClass());
-		session = TestingManager.getProfile().getSession();
+		TestManager.setDefaultProfile(this.getClass());
+		session = TestManager.getProfile().getSession();
 	}
 	
 	@Test

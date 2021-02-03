@@ -10,14 +10,17 @@ import java.io.File;
 import java.io.StringReader;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class LoaderConfigTest {
 
-	final Logger logger = TestingManager.getLogger(this.getClass());
+	final Logger logger = TestManager.getLogger(this.getClass());
 	final TestFolder folder = new TestFolder("yaml");
 
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}
 	
 	@Test
@@ -50,5 +53,15 @@ public class LoaderConfigTest {
 		LoaderConfig config = new LoaderConfig(goodConfig, null);
 		config.validate();
 	}
+	
+	@Test
+	public void test_createIncident() throws JacksonException {
+		ObjectNode obj = TestManager.yaml("{action: create, source: incident, drop: true}");
+		JobConfig config = new JobConfig(obj);
+		assertEquals(JobAction.CREATE, config.getAction());
+		assertFalse(config.getTruncate());
+		assertTrue(config.dropTable);
+	}
+	
 		
 }

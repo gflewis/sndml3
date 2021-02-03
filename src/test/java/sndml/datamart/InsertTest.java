@@ -2,7 +2,7 @@ package sndml.datamart;
 
 import sndml.datamart.JobConfig;
 import sndml.datamart.Loader;
-import sndml.datamart.LoaderAction;
+import sndml.datamart.JobAction;
 import sndml.datamart.LoaderConfig;
 import sndml.datamart.LoaderJob;
 import sndml.datamart.YamlFile;
@@ -20,22 +20,22 @@ import org.slf4j.Logger;
 public class InsertTest {
 
 	final TestingProfile profile;
-	final Logger logger = TestingManager.getLogger(this.getClass());
+	final Logger logger = TestManager.getLogger(this.getClass());
 	// final TestFolder folder = new TestFolder("yaml");
 	
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
-		return TestingManager.allProfiles();
+		return TestManager.allProfiles();
 	}
 			
 	public InsertTest(TestingProfile profile) throws Exception {
-		TestingManager.setProfile(this.getClass(), profile);
+		TestManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
 	}
 
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}
 
 	@After
@@ -49,7 +49,7 @@ public class InsertTest {
 		LoaderConfig config = new LoaderConfig(yaml, null);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
-		assertEquals(LoaderAction.INSERT, job.getAction());
+		assertEquals(JobAction.LOAD, job.getAction());
 		LoaderJob loader = new LoaderJob(profile, job);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();

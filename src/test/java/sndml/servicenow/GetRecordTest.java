@@ -15,12 +15,12 @@ public class GetRecordTest {
 	Session session;
 	
 	GetRecordTest() {
-		session = TestingManager.getDefaultProfile().getSession();
+		session = TestManager.getDefaultProfile().getSession();
 	}
 	
 	@Ignore @Test
 	public void testRecordByKey() throws IOException {
-		String sys_id = TestingManager.getProperty("some_incident_sys_id");
+		String sys_id = TestManager.getProperty("some_incident_sys_id");
 		Key key = new Key(sys_id);
 		Table inc = session.table("incident");
 		Record rec = inc.getRecord(key);
@@ -30,7 +30,7 @@ public class GetRecordTest {
 	@Test
 	public void testGetRecordByNumber() throws IOException {
 		Table inc = session.table("incident");
-		String number = TestingManager.getProperty("some_incident_number");
+		String number = TestManager.getProperty("some_incident_number");
 		Record rec1 = inc.api().getRecord("number", number);
 		Key key = rec1.getKey();
 		assertEquals(32, key.toString().length());

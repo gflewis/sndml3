@@ -20,7 +20,7 @@ public class SetFieldsTest {
 
 	@Test
 	public void testSetColumns() throws Exception {
-		Session session = TestingManager.getDefaultProfile().getSession();
+		Session session = TestManager.getDefaultProfile().getSession();
 		Table incident = session.table("incident");
 		RecordListAccumulator accumulator = new RecordListAccumulator(incident);
 		TableReader reader = incident.rest().getDefaultReader();

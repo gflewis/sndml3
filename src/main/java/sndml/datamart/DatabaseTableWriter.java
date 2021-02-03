@@ -65,12 +65,18 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		assert reader != null;
 		reader.setLogContext();
 		ReaderMetrics readerMetrics = reader.getReaderMetrics();
-		assert readerMetrics != null;
-		if (readerMetrics.getParent() == null) 
-			logger.info(Log.PROCESS, String.format("%s %s", status, readerMetrics.getProgress()));
-		else
-			logger.info(Log.PROCESS, String.format("%s %s (%s)", status, 
-					readerMetrics.getProgress(), readerMetrics.getParent().getProgress())); 
+		if (progressLogger != null) {
+			progressLogger.logProgress(readerMetrics, writerMetrics);			
+		}
+		else {
+			assert readerMetrics != null;
+			if (readerMetrics.getParent() == null) 
+				logger.info(Log.PROCESS, String.format("%s %s", status, readerMetrics.getProgress()));
+			else
+				logger.info(Log.PROCESS, String.format("%s %s (%s)", status, 
+						readerMetrics.getProgress(), readerMetrics.getParent().getProgress())); 
+			
+		}
 	}
 
 	abstract void writeRecord(Record rec) throws SQLException;

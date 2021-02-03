@@ -20,16 +20,16 @@ public class RowCountExceededTest {
 	final TestingProfile profile;
 	final TestFolder folder = new TestFolder("Exceptions");
 	final YamlFile yamlFile = folder.getYaml("row_count_exceeded");	
-	final Logger logger = TestingManager.getLogger(this.getClass());
+	final Logger logger = TestManager.getLogger(this.getClass());
 			
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
-		return TestingManager.getDatamartProfiles();
+		return TestManager.getDatamartProfiles();
 	}
 
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}
 
 	@After
@@ -38,13 +38,13 @@ public class RowCountExceededTest {
 	}
 	
 	public RowCountExceededTest(TestingProfile profile) {
-		TestingManager.setProfile(this.getClass(), profile);
+		TestManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
 	}
 	
 	@Test
 	public void test() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "test", yamlFile);
+		TestManager.bannerStart(this.getClass(), "test", yamlFile);
 		Loader loader = yamlFile.getLoader(profile);
 		boolean caught = false;
 		try {

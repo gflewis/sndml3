@@ -53,6 +53,7 @@ public class FileWriter extends RecordWriter {
 		EncodedQuery query = querystring == null ? new EncodedQuery(table) :
 			new EncodedQuery(table, querystring);
 		reader.setQuery(query);
+		reader.initialize();
 		writer.open();
 		reader.call();
 		writer.close();
@@ -95,11 +96,13 @@ public class FileWriter extends RecordWriter {
 		assert writer != null;
 		assert rec != null;
 		assert rec instanceof JsonRecord;
-		writer.print(rec.asText(true));
-		if (format == Format.Import)
-			writer.println();
-		else
+		if (format == Format.Import) {			
+			writer.println(rec.asText(false));
+		}
+		else {
+			writer.print(rec.asText(true));
 			writer.println(",");
+		}
 		writer.flush();
 		writerMetrics.incrementInserted();
 	}

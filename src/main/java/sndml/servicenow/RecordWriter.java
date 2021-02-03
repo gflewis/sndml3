@@ -13,6 +13,7 @@ import java.sql.SQLException;
 public abstract class RecordWriter {
 
 	protected WriterMetrics writerMetrics = new WriterMetrics();
+	protected ProgressLogger progressLogger;	
 
 	public RecordWriter() {
 	}
@@ -30,6 +31,10 @@ public abstract class RecordWriter {
 
 	public void setParentMetrics(WriterMetrics parentMetrics) {
 		writerMetrics.setParent(parentMetrics);
+	}
+	
+	public void setProgressLogger(ProgressLogger progressLogger) {
+		this.progressLogger = progressLogger;
 	}
 	
 	public WriterMetrics getMetrics() {

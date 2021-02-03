@@ -3,9 +3,7 @@
 # Generate SQL Create Table statement
 #
 # Usage:
-#   generate-table <profile> <tablename>
-#
-# where <profile> is the name of a directory containing .sndml_profile
+#   sndml-generate <profile> <tablename>
 #
 source sndml-setup $1
 tablename=$2

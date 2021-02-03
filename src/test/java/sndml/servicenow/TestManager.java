@@ -5,23 +5,36 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Properties;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.datamart.ConfigParseException;
 import sndml.datamart.YamlFile;
 import sndml.servicenow.FieldNames;
 import sndml.servicenow.Log;
 import sndml.servicenow.Session;
 
-public class TestingManager {
+public class TestManager {
 	
-	static final Logger logger = LoggerFactory.getLogger(TestingManager.class);
+	static final Logger logger = LoggerFactory.getLogger(TestManager.class);
 	
 	static final String TEST_PROPERTIES = "junit.properties";
 	
 	static Session defaultSession;
 	static Properties testProperties = getTestProperties();
 	static TestingProfile currentProfile;
+	static ObjectMapper jsonMapper = new ObjectMapper();
+	static ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());	
+	
 	@SuppressWarnings("rawtypes")
 	static Class classUnderTest;
 
@@ -185,6 +198,28 @@ public class TestingManager {
 		banner(logger, cls.getSimpleName(), msg);
 	}
 		
+	public static ObjectNode json(String text) throws ConfigParseException {
+		JsonNode node;
+		try {
+			node = jsonMapper.readTree(text);
+		} catch (JsonProcessingException e) {
+			throw new ConfigParseException(e);
+		}
+		assert node.isObject();
+		return (ObjectNode) node;
+	}
+	
+	public static ObjectNode yaml(String text) throws ConfigParseException {		
+		JsonNode node;
+		try {
+			node = (ObjectNode) yamlMapper.readTree(text);
+		} catch (JsonProcessingException e) {
+			throw new ConfigParseException(e);
+		}
+		assert node.isObject();
+		return (ObjectNode) node;
+	}
+	
 	public static String randomName(int length) {
 		final String lexicon = "abcdefghijklmnopqrstuvwxyz";
 		final java.util.Random rand = new java.util.Random();		

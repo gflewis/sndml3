@@ -12,14 +12,14 @@ import sndml.datamart.ConfigParseException;
 import sndml.datamart.LoaderConfig;
 import sndml.datamart.YamlFile;
 import sndml.servicenow.Log;
-import sndml.servicenow.TestingManager;
+import sndml.servicenow.TestManager;
 
 @RunWith(Parameterized.class)
 public class ConfigParseExceptionTest {
 
 	public YamlFile yamlFile;
 	static final TestFolder folder = new TestFolder("ConfigParseError");
-	Logger logger = TestingManager.getLogger(this.getClass());
+	Logger logger = TestManager.getLogger(this.getClass());
 	
 	
 	@Parameters(name = "{index}:{0}")
@@ -33,7 +33,7 @@ public class ConfigParseExceptionTest {
 	
 	@Test
 	public void test() throws Exception {
-		TestingManager.bannerStart(this.getClass(), "test", yamlFile);
+		TestManager.bannerStart(this.getClass(), "test", yamlFile);
 		LoaderConfig config = null;
 		Throwable err = null;
 		try {

@@ -21,24 +21,24 @@ public class TestTableSchema {
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
 		// return new TestingProfile[] {TestingManager.getDefaultProfile()};
-		return TestingManager.allProfiles();
+		return TestManager.allProfiles();
 	}
 
 	TestingProfile profile;
 	Session session;
-	Logger logger = TestingManager.getLogger(this.getClass());
+	Logger logger = TestManager.getLogger(this.getClass());
 
 	final FieldNames testFields = new FieldNames(
 			"sys_created_on,sys_created_by,sys_updated_on,sys_updated_by");
 	
 	public TestTableSchema(TestingProfile profile) throws Exception {
-		TestingManager.setProfile(this.getClass(), profile);
-		session = TestingManager.getProfile().getSession();
+		TestManager.setProfile(this.getClass(), profile);
+		session = TestManager.getProfile().getSession();
 	}
 
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}
 
 	@Test

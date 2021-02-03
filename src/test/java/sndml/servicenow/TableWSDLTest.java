@@ -14,11 +14,11 @@ import static org.junit.Assert.*;
 
 public class TableWSDLTest {
 
-	final Logger logger = TestingManager.getLogger(TableWSDLTest.class);
+	final Logger logger = TestManager.getLogger(TableWSDLTest.class);
 	final Session session;
 
 	public TableWSDLTest() {
-		session = TestingManager.getDefaultProfile().getSession();
+		session = TestManager.getDefaultProfile().getSession();
 	}
 	
 	TableWSDL getWSDL(String tablename) throws IOException {

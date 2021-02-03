@@ -11,31 +11,31 @@ import sndml.servicenow.*;
 public class JobConfig {
 
 	private LoaderConfig parent;
-	private Key sys_id;
-	private String number;
-	private String name;
-	private String source;
-	private String target;
-	private LoaderAction action;
-	private Boolean truncate;
-	private DateTimeRange created;
-	private DateTime since;
-	private String filter;
-	private DateTime.Interval partition;
-	private Integer pageSize;
-	private Integer minRows;
-	private Integer maxRows;
-	private String sqlBefore;
-	private String sqlAfter;
-	private FieldNames includeColumns;
-	private FieldNames excludeColumns;
-	private Integer threads;
+	Key sys_id;
+	String name;
+	String source;
+	String target;
+	JobAction action;
+	Boolean truncate;
+	Boolean dropTable;
+	DateTimeRange created;
+	DateTime since;
+	String filter;
+	DateTime.Interval partition;
+	Integer pageSize;
+	Integer minRows;
+	Integer maxRows;
+	String sqlBefore;
+	String sqlAfter;
+	FieldNames includeColumns;
+	FieldNames excludeColumns;
+	Integer threads;
 	private final DateTimeFactory dateFactory;
 
 	public JobConfig(ObjectNode settings) {
 		this.dateFactory = new DateTimeFactory();
-		this.name = settings.get("number").asText();
-		this.setPropertiesFrom(settings);;
+		if (settings.has("number")) this.name = settings.get("number").asText();
+		this.setPropertiesFrom(settings);
 	}
 	
 	JobConfig(Table table) {
@@ -44,11 +44,10 @@ public class JobConfig {
 	}
 
 	JobConfig(LoaderConfig parent, JsonNode config) throws ConfigParseException {
-		ObjectNode settings = (ObjectNode) config;
 		this.parent = parent;
 		this.dateFactory = new DateTimeFactory(parent.getStart(), parent.getMetricsFile());
 		if (config.isObject()) {
-			setPropertiesFrom(settings);
+			setPropertiesFrom((ObjectNode) config);
 		} else {
 			name = config.asText();
 		}
@@ -61,6 +60,7 @@ public class JobConfig {
 			JsonNode val = map.get(key);
 			switch (key.toLowerCase()) {
 			case "name":
+			case "number":
 				this.name = val.asText();
 				break;
 			case "source":
@@ -72,27 +72,24 @@ public class JobConfig {
 			case "sys_id":
 				this.sys_id = new Key(val.asText());
 				break;
-			case "number":
-				this.number = val.asText();
-				break;
 			case "action":
 				switch (val.asText().toLowerCase()) {
-				case "update":
-				case "refresh":
-					this.action = LoaderAction.UPDATE;
-					break;
 				case "insert":
 				case "load":
-					this.action = LoaderAction.INSERT;
+					this.action = JobAction.LOAD;
 					break;
-				case "prune":
-					this.action = LoaderAction.PRUNE;
+				case "update":
+				case "refresh":
+					this.action = JobAction.REFRESH;
 					break;
 				case "sync":
-					this.action = LoaderAction.SYNC;
+					this.action = JobAction.SYNC;
 					break;
-				case "droptable":
-					this.action = LoaderAction.DROPTABLE;
+				case "prune":
+					this.action = JobAction.PRUNE;
+					break;
+				case "create":
+					this.action = JobAction.CREATE;
 					break;
 				default:
 					throw new ConfigParseException("Not recognized: " + val.asText());
@@ -100,6 +97,9 @@ public class JobConfig {
 				break;
 			case "truncate":
 				this.truncate = val.asBoolean();
+				break;
+			case "drop":
+				this.dropTable = val.asBoolean();
 				break;
 			case "created":
 				this.created = asDateRange(val);
@@ -146,43 +146,53 @@ public class JobConfig {
 	}
 	
 	public JobConfig validate() throws ConfigParseException {
+		new JobConfigValidator(this).validate();
+		return this;
+		/*
 		if (name == null && source == null && target == null)
 			configError("Must specify at least one of Name, Source, Target");
 		switch (getAction()) {
-		case UPDATE:
+		case REFRESH:
+			optionsNotValid("Drop");
 			break;
-		case INSERT:
+		case LOAD:
+			optionsNotValid("Drop");
 			break;
 		case PRUNE:
-			if (getTruncate())     notValid("Truncate");
-			if (created != null)   notValid("Created");
-			if (filter != null)    notValid("Filter");
-			if (threads != null)   notValid("Threads");
-			if (partition != null) notValid("Partition");
+			optionsNotValid("Truncate,Drop,Created,Filter,Threads,Partition");			
 			break;
 		case SYNC:
-			if (getTruncate())     notValid("Truncate");
-			if (since != null)     notValid("Since");
-			if (filter != null)	   notValid("Filter");
+			optionsNotValid("Truncate,Drop,Since,Filter");
 			break;
-		case DROPTABLE:
-			if (getTruncate())     notValid("Truncate");
-			if (created != null)   notValid("Created");
-			if (filter != null)    notValid("Filter");
-			if (threads != null)   notValid("Threads");
-			if (partition != null) notValid("Partition");
+		case CREATE:
+			optionsNotValid("Truncate,Created,Since,Filter,Threads,Partition");
 			break;
 		}
 		if (includeColumns != null && excludeColumns != null) 
 			configError("Cannot specify both Columns and Exclude");
 		return this;
+		*/
 	}
 
+	/*
 	void notValid(String option) {
 		String msg = option + " not valid with Action: " + getAction().toString();
 		configError(msg);
 	}
 
+	void optionsNotValid(FieldNames names) {
+		for (String name : names) {
+			if (settings.has(name.toLowerCase())) {
+				notValid(name);
+			}
+		}		
+	}
+	
+	void optionsNotValid(String names) {
+		optionsNotValid(new FieldNames(names));
+	}
+	*/
+	
 	void configError(String msg) {
 		throw new ConfigParseException(msg);
 	}
@@ -211,18 +221,14 @@ public class JobConfig {
 	Key getId() {
 		return this.sys_id;
 	}
-	
-	String getNumber() {
-		return this.number;
-	}
-	
-	void setAction(LoaderAction action) {
+		
+	void setAction(JobAction action) {
 		this.action = action;
 	}
 
-	LoaderAction getAction() {
+	JobAction getAction() {
 		if (this.action == null)
-			return this.getTruncate() ? LoaderAction.INSERT : LoaderAction.UPDATE;
+			return this.getTruncate() ? JobAction.LOAD : JobAction.REFRESH;
 		else
 			return this.action;
 	}
@@ -234,11 +240,15 @@ public class JobConfig {
 	boolean getTruncate() {
 		return this.truncate == null ? false : this.truncate.booleanValue();
 	}
-	
+		
 	void setCreated(DateTimeRange value) {
 		this.created = value;
 	}
 
+	boolean getDropTable() {
+		return this.dropTable == null ? false : this.dropTable.booleanValue();
+	}
+	
 	DateTimeRange getCreated() {
 		if (this.created == null)
 			return getDefaultRange();

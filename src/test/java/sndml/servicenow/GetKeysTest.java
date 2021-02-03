@@ -17,10 +17,10 @@ import org.junit.Test;
 public class GetKeysTest {
 
 	final TestingProfile profile;
-	final Logger logger = TestingManager.getLogger(this.getClass());
+	final Logger logger = TestManager.getLogger(this.getClass());
 				     
 	public GetKeysTest() {
-		this.profile = TestingManager.getDefaultProfile();
+		this.profile = TestManager.getDefaultProfile();
 	}
 
 	@Test

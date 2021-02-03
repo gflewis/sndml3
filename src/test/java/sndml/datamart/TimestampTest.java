@@ -21,10 +21,10 @@ public class TimestampTest {
 
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
-		return TestingManager.getDatamartProfiles();
+		return TestManager.getDatamartProfiles();
 	}
 	
-	final Logger logger = TestingManager.getLogger(this.getClass());
+	final Logger logger = TestManager.getLogger(this.getClass());
 	final String tablename = "incident";
 	final TestingProfile profile;
 	final Session session;
@@ -35,7 +35,7 @@ public class TimestampTest {
 		this.profile = profile;
 		this.session = profile.getSession();
 		this.database = profile.getDatabase();
-		TestingManager.setProfile(this.getClass(), profile);
+		TestManager.setProfile(this.getClass(), profile);
 		util = new DBUtil(database);
 		util.dropTable(tablename);
 		database.createMissingTable(session.table(tablename));
@@ -43,7 +43,7 @@ public class TimestampTest {
 
 	@AfterClass
 	public static void clear() throws Exception {
-		TestingManager.clearAll();
+		TestManager.clearAll();
 	}
 
 	@After
@@ -62,13 +62,13 @@ public class TimestampTest {
 	
 	@Test
 	public void testIncidentTimestamp() throws Exception {
-		TestingManager.bannerStart("testIncidentTimestamps");
+		TestManager.bannerStart("testIncidentTimestamps");
 		Session session = profile.getSession();
 		Database database = profile.getDatabase();
 		Table tbl = session.table(tablename);
 		database.createMissingTable(tbl, tablename);
 		util.truncateTable(tablename);
-		String sys_id = TestingManager.getProperty("some_incident_sys_id");
+		String sys_id = TestManager.getProperty("some_incident_sys_id");
 		Record rec = tbl.getRecord(new Key(sys_id));
 		String created = rec.getValue("sys_created_on");
 		JobConfig config = new JobConfig(tbl);
@@ -85,7 +85,7 @@ public class TimestampTest {
 	
 	@Test
 	public void testGetTimestamps() throws Exception {
-		TestingManager.bannerStart("testGetTimestamps");
+		TestManager.bannerStart("testGetTimestamps");
 		Session session = profile.getSession();
 		Database database = profile.getDatabase();
 		loadTable();
