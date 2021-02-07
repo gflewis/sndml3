@@ -53,10 +53,11 @@ public class DatabaseTimestampReader {
 		stmt.setString(1, key.toString());
 		ResultSet rs = stmt.executeQuery();
 		if (rs.next()) {
-			Timestamp sys_created_on = rs.getTimestamp(2);			
+			Timestamp sys_created_on = rs.getTimestamp(2);
+			long time = sys_created_on.getTime();
 			result = new DateTime(sys_created_on);
-			logger.debug(Log.TEST, String.format(
-				"%s created=%s (%s)", key.toString(), sys_created_on.toString(), result));
+			logger.info(Log.TEST, String.format(
+				"%s created=%s | %d (%s)", key.toString(), sys_created_on.toString(), time, result));
 		}
 		rs.close();
 		return result;

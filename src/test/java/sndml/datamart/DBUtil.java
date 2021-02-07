@@ -66,21 +66,6 @@ public class DBUtil {
 	 */
 	void dropTable(String tablename) throws SQLException {
 		db.dropTable(tablename, true);
-		/*
-		logger.debug(Log.TEST, "dropTable " + tablename);			
-		Connection dbc = db.getConnection();
-		assertNotNull(dbc);
-		Statement stmt = dbc.createStatement();
-		String sql = "drop table " + db.qualifiedName(tablename);
-		try {
-			stmt.executeUpdate(sql);
-			db.commit();
-			logger.debug(Log.TEST, tablename + " has been dropped");
-		}
-		catch (SQLException e) {
-			logger.warn(Log.TEST, tablename + " could not be dropped");
-		}
-		*/
 	}
 	
 	boolean tableExists(String tablename) throws SQLException {
@@ -118,64 +103,5 @@ public class DBUtil {
 		rs.next();
 		return rs;		
 	}
-
-	
-	/*
-	static String tableName(String name) throws IOException {
-		if (name.indexOf(".") > -1) return name;
-		String schema = AllTests.getSchema();
-		String prefix = schema.length() > 0 ? schema + "." : schema;
-		return prefix + name;
-	}
-				
-	static String replace(String sql) throws IOException {
-		String schema = AllTests.getSchema();
-		String prefix = schema.length() > 0 ? schema + "." : schema;
-		return sql.replaceAll("\\$", prefix);
-	}
-	
-		
-	static int numRows(String tablename) throws SQLException, IOException {
-		String sql = "select count(*) from " + tableName(tablename);
-		return sqlCount(sql);
-	}
-	
-	static void sqlDeleteJupiter() throws IOException, SQLException {
-		String tablename = tableName("cmn_location");
-		sqlUpdate("delete from " + tablename +" where name='Jupiter'");
-		connection.commit();
-	}
-	
-	static int sqlCountJupiter() throws IOException, SQLException {
-		return sqlCountTable("cmn_location", "where name='Jupiter'");
-	}
-	
-	static int sqlCountTable(String name, String qualifier) throws IOException, SQLException {
-		String tablename = tableName(name);
-		String sql = "select count(*) from " + tablename;
-		if (qualifier != null) sql = sql + " " + qualifier;
-		return sqlCount(sql);
-	}
-	
-	static int sqlCountTable(String name) throws IOException, SQLException {
-		return sqlCountTable(name, null);
-	}
-	
-	static void printReport(String query) throws SQLException {
-		Statement stmt = connection.createStatement();
-		ResultSet rs = stmt.executeQuery(query);
-		int colCount = rs.getMetaData().getColumnCount();
-		while (rs.next()) {
-			StringBuilder line = new StringBuilder();
-			for (int col = 1; col <= colCount; ++col) {
-				String value = rs.getString(col);
-				line.append(value);
-				line.append(" ");
-			}
-			logger.info(line.toString());
-		}
-		
-	}
-	*/
 	
 }

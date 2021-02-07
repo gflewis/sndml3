@@ -23,11 +23,12 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 		
 	LoaderJob(Table table, Database database) throws ConfigParseException {
-		this.config = new JobConfig(table);
+		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
+		this.config = configFactory.tableLoader(table);
 		this.session = table.getSession();
 		this.db = database;
 		this.table = table;
-		this.sqlTableName = config.getTargetName();
+		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
 	}
@@ -37,7 +38,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		this.session = parent.getSession();
 		this.db = parent.getDatabase();
 		this.table = session.table(config.getSource());
-		this.sqlTableName = config.getTargetName();
+		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
 		this.metrics.setParent(parent.getMetrics());
@@ -49,7 +50,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		this.session = profile.getSession();
 		this.db = profile.getDatabase();
 		this.table = session.table(config.getSource());
-		this.sqlTableName = config.getTargetName();
+		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
 		this.config = config;		
@@ -60,7 +61,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		this.session = session;
 		this.db = db;
 		this.table = session.table(config.getSource());
-		this.sqlTableName = config.getTargetName();
+		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
 		this.config = config;				

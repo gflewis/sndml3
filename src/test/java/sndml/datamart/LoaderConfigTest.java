@@ -40,8 +40,8 @@ public class LoaderConfigTest {
 		DateTime start = config.getStart();
 		DateTime today = DateTime.today();
 		assertEquals(8, config.getJobs().size());
-		assertEquals("sys_user", config.getJobByName("sys_user").getTargetName());
-		assertEquals("rm_story", config.getJobByName("rm_story").getTargetName());		
+		assertEquals("sys_user", config.getJobByName("sys_user").getTarget());
+		assertEquals("rm_story", config.getJobByName("rm_story").getTarget());		
 		assertEquals(new DateTime("2017-01-01"), config.getJobByName("rm_story").getCreated().getStart());
 		assertEquals(start, config.getJobByName("rm_story").getCreated().getEnd());
 		assertEquals(today, config.getJobByName("cmdb_ci_service").getSince());
@@ -56,8 +56,9 @@ public class LoaderConfigTest {
 	
 	@Test
 	public void test_createIncident() throws JacksonException {
+		ConfigFactory factory = new ConfigFactory();
 		ObjectNode obj = TestManager.yaml("{action: create, source: incident, drop: true}");
-		JobConfig config = new JobConfig(obj);
+		JobConfig config = factory.jobConfig(obj);
 		assertEquals(JobAction.CREATE, config.getAction());
 		assertFalse(config.getTruncate());
 		assertTrue(config.dropTable);

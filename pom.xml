@@ -23,7 +23,7 @@
       <artifactId>junit</artifactId>
       <version>4.13.1</version>
     </dependency>
-
+	
     <!-- Logging -->
     <!-- we use SLF4J and Apache Log4J2 -->
     <dependency>
@@ -183,6 +183,7 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>
                   <include>org.jdom:*</include>
+                  <include>org.yaml:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -222,6 +223,7 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>
                   <include>org.jdom:*</include>
+                  <include>org.yaml:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -250,6 +252,7 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>                  
                   <include>org.jdom:*</include>
+                  <include>org.yaml:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>
@@ -289,6 +292,7 @@
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>                  
                   <include>org.jdom:*</include>
+                  <include>org.yaml:*</include>
                   <include>org.slf4j:*</include>
                   <include>log4j:*</include>
                 </includes>

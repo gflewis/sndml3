@@ -30,6 +30,7 @@ public class TimestampTest {
 	final Session session;
 	final Database database;
 	final DBUtil util;	
+	ConfigFactory factory = new ConfigFactory();
 	
 	public TimestampTest(TestingProfile profile) throws Exception {
 		this.profile = profile;
@@ -37,8 +38,8 @@ public class TimestampTest {
 		this.database = profile.getDatabase();
 		TestManager.setProfile(this.getClass(), profile);
 		util = new DBUtil(database);
-		util.dropTable(tablename);
-		database.createMissingTable(session.table(tablename));
+		// util.dropTable(tablename);
+		// database.createMissingTable(session.table(tablename));
 	}
 
 	@AfterClass
@@ -71,18 +72,20 @@ public class TimestampTest {
 		String sys_id = TestManager.getProperty("some_incident_sys_id");
 		Record rec = tbl.getRecord(new Key(sys_id));
 		String created = rec.getValue("sys_created_on");
-		JobConfig config = new JobConfig(tbl);
-		config.setFilter("sys_id=" + sys_id);
+		JobConfig config = factory.tableLoader(tbl);
+		config.filter = "sys_id=" + sys_id;
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
 		config.setCreated(emptyRange);
 		LoaderJob loader = new LoaderJob(profile, config);
 		loader.call();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new Key(sys_id));
+		logger.info(Log.TEST, "created=" + created + " dbcreated=" + dbcreated);
 		assertNotNull(dbcreated);
 		assertEquals(created, dbcreated.toString());		
 	}
 	
+	@Ignore
 	@Test
 	public void testGetTimestamps() throws Exception {
 		TestManager.bannerStart("testGetTimestamps");

@@ -15,7 +15,7 @@ public class JobConfigValidator {
 	void validate() throws ConfigParseException {
 		if (action == null) configError("Action not specified");
 		if (job.getSource() == null) configError("Source not specified");
-		if (job.getTargetName() == null) configError("Target not specified");
+		if (job.getTarget() == null) configError("Target not specified");
 		if (job.getName() == null) configError("Name not specified");
 		validate("Truncate", job.truncate, EnumSet.of(JobAction.LOAD));
 		validate("Drop", job.dropTable, EnumSet.of(JobAction.CREATE));

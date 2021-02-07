@@ -1,37 +1,41 @@
 package sndml.datamart;
 
-import java.util.Iterator;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import sndml.servicenow.*;
 
 public class JobConfig {
 
 	private LoaderConfig parent;
-	Key sys_id;
-	String name;
-	String source;
-	String target;
-	JobAction action;
-	Boolean truncate;
-	Boolean dropTable;
-	DateTimeRange created;
-	DateTime since;
-	String filter;
-	DateTime.Interval partition;
-	Integer pageSize;
-	Integer minRows;
-	Integer maxRows;
-	String sqlBefore;
-	String sqlAfter;
-	FieldNames includeColumns;
-	FieldNames excludeColumns;
-	Integer threads;
-	private final DateTimeFactory dateFactory;
+	public DateTime start;
+	public Key sys_id;
+	public String number;
+	public String name;
+	public String source;
+	public String target;
+	public JobAction action;
+	public Boolean truncate;
+	@JsonProperty("drop") public Boolean dropTable;
+	@JsonIgnore public DateTimeRange created;
+	@JsonIgnore public DateTime since;
+	public String filter;
+	public DateTime.Interval partition;
+	public Integer pageSize;
+	public Integer minRows;
+	public Integer maxRows;
+	public String sqlBefore;
+	public String sqlAfter;
+	@JsonIgnore public FieldNames includeColumns;
+	@JsonIgnore public FieldNames excludeColumns;
+	public Integer threads;
 
+
+	public JobConfig() {		
+	}
+
+	/*
+	
 	public JobConfig(ObjectNode settings) {
 		this.dateFactory = new DateTimeFactory();
 		if (settings.has("number")) this.name = settings.get("number").asText();
@@ -144,36 +148,68 @@ public class JobConfig {
 			}
 		}		
 	}
+	*/
+
+	void setDefaults(DateTimeFactory dateFactory) {
+		if (start == null) {
+			start = dateFactory.getStart();
+		}
+		if (action == null) {
+			if (Boolean.TRUE.equals(truncate))
+				action = JobAction.LOAD;
+			else
+				action = JobAction.REFRESH;
+		}
+		if (source == null) {
+			source = (name != null ? name : target);
+		}
+		if (name == null) {
+			name = (target != null ? target : source);
+		}
+		if (target == null) {
+			target = (source != null ? source : name);
+		}
+		if (pageSize == null && parent != null) {
+			pageSize = parent.getPageSize();
+		}
+	}
 	
 	public JobConfig validate() throws ConfigParseException {
 		new JobConfigValidator(this).validate();
 		return this;
-		/*
-		if (name == null && source == null && target == null)
-			configError("Must specify at least one of Name, Source, Target");
-		switch (getAction()) {
-		case REFRESH:
-			optionsNotValid("Drop");
-			break;
-		case LOAD:
-			optionsNotValid("Drop");
-			break;
-		case PRUNE:
-			optionsNotValid("Truncate,Drop,Created,Filter,Threads,Partition");			
-			break;
-		case SYNC:
-			optionsNotValid("Truncate,Drop,Since,Filter");
-			break;
-		case CREATE:
-			optionsNotValid("Truncate,Created,Since,Filter,Threads,Partition");
-			break;
-		}
-		if (includeColumns != null && excludeColumns != null) 
-			configError("Cannot specify both Columns and Exclude");
-		return this;
-		*/
 	}
 
+	void configError(String msg) {
+		throw new ConfigParseException(msg);
+	}
+
+	void setCreated(DateTimeRange value) {
+		this.created = value;
+	}
+	
+	String getName() { return this.name; }
+	String getSource() { return this.source; }
+	String getTarget() { return this.target; }
+	Key getId() { return this.sys_id; }
+	JobAction getAction() { return action; }
+	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
+	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }	
+	DateTime getSince() { return this.since; }
+	String getFilter() { return this.filter; }
+	
+	// TODO: Is this best?
+	DateTimeRange getCreated() { return (this.created == null ? getDefaultRange() : this.created); }	
+	DateTime.Interval getPartitionInterval() { return this.partition; }
+	
+	FieldNames getIncludeColumns() { return this.includeColumns; }
+	FieldNames getExcludeColumns() { return this.excludeColumns; }
+	String getSqlBefore() {	return this.sqlBefore; }
+	String getSqlAfter() { return this.sqlAfter; }
+	Integer getPageSize() { return this.pageSize; }
+	Integer getMinRows() { return this.minRows;	}
+	Integer getMaxRows() { return this.maxRows;	}
+	Integer getThreads() { return this.threads;	}
+	
 	/*
 	void notValid(String option) {
 		String msg = option + " not valid with Action: " + getAction().toString();
@@ -193,10 +229,7 @@ public class JobConfig {
 	}
 	*/
 	
-	void configError(String msg) {
-		throw new ConfigParseException(msg);
-	}
-
+	/*
 	String getName() throws ConfigParseException {
 		if (this.name != null)   return this.name;
 		if (this.target != null) return this.target;
@@ -218,9 +251,6 @@ public class JobConfig {
 		throw new ConfigParseException("Target not specified");
 	}
 
-	Key getId() {
-		return this.sys_id;
-	}
 		
 	void setAction(JobAction action) {
 		this.action = action;
@@ -236,115 +266,24 @@ public class JobConfig {
 	void setTruncate(boolean truncate) {
 		this.truncate = truncate;
 	}
-	
-	boolean getTruncate() {
-		return this.truncate == null ? false : this.truncate.booleanValue();
-	}
-		
-	void setCreated(DateTimeRange value) {
-		this.created = value;
-	}
+	*/
+			
 
-	boolean getDropTable() {
-		return this.dropTable == null ? false : this.dropTable.booleanValue();
-	}
-	
-	DateTimeRange getCreated() {
-		if (this.created == null)
-			return getDefaultRange();
-		else
-			return this.created;
-	}
+//	void setSince(DateTime since) {
+//		this.since = since;
+//	}
 
-	void setSince(DateTime since) {
-		this.since = since;
-	}
 
-	DateTime getSince() {
-		return this.since;
-	}
+//	void setFilter(String value) {
+//		this.filter = value;
+//	}
 
-	void setFilter(String value) {
-		this.filter = value;
-	}
 
-	String getFilter() {
-		return this.filter;
-	}
 
-	FieldNames getIncludeColumns() {
-		return this.includeColumns;
-	}
-	
-	FieldNames getExcludeColumns() {
-		return this.excludeColumns;
-	}
-
-	String getSqlBefore() {
-		return this.sqlBefore;
-	}
-
-	String getSqlAfter() {
-		return this.sqlAfter;
-	}
-
-	Integer getPageSize() {
-		if (pageSize != null)
-			return pageSize;
-		if (parent != null)
-			return parent.getPageSize();
-		return null;
-	}
-
-	Integer getMinRows() {
-		return this.minRows;
-	}
-
-	Integer getMaxRows() {
-		return this.maxRows;
-	}
-
-	Integer getThreads() {
-		return this.threads;
-	}
-
-	DateTime.Interval getPartitionInterval() {
-		return this.partition;
-	}
-
-	DateTime.Interval asInterval(Object obj) throws ConfigParseException {
-		DateTime.Interval result;
-		try {
-			result = DateTime.Interval.valueOf(obj.toString().toUpperCase());
-		} catch (IllegalArgumentException e) {
-			throw new ConfigParseException("Invalid partition: " + obj.toString());
-		}
-		return result;
-	}
-
-	DateTime asDate(JsonNode obj) {
-		return dateFactory.getDate(obj);
-	}
-
-	DateTimeRange asDateRange(JsonNode obj) {
-		DateTime start, end;
-		end = dateFactory.getStart();
-		if (obj.isArray()) {
-			ArrayNode dates = (ArrayNode) obj;
-			if (dates.size() < 1 || dates.size() > 2)
-				throw new ConfigParseException("Invalid date range: " + obj.toString());
-			start = dateFactory.getDate(dates.get(0));
-			if (dates.size() > 1)
-				end = dateFactory.getDate(dates.get(1));
-		} else {
-			start = dateFactory.getDate(obj);
-		}
-		return new DateTimeRange(start, end);
-	}
 
 	DateTimeRange getDefaultRange() {
-		assert dateFactory != null;
-		return new DateTimeRange(null, dateFactory.getStart());
+		assert this.start != null;
+		return new DateTimeRange(null, this.start);
 	}
 
 }

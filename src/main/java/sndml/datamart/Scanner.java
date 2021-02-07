@@ -43,6 +43,7 @@ public class Scanner extends TimerTask {
 		
 	@Override
 	public void run() {
+		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
 			ObjectNode response = request.execute();
@@ -51,7 +52,7 @@ public class Scanner extends TimerTask {
 			ArrayNode runlist = (ArrayNode) objResult.get("runs");
 			for (int i = 0; i < runlist.size(); ++i) {
 				ObjectNode obj = (ObjectNode) runlist.get(i);
-				JobConfig config = new JobConfig(obj);
+				JobConfig config = configFactory.jobConfig(obj);
 				statusLogger.setRunKey(config.getId()).setStatus("prepare");
 				// setRunStatus(config.getId(), "prepare");
 				ActionRunner runner = new ActionRunner(session, profile, config);

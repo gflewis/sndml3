@@ -1,7 +1,7 @@
 package sndml.datamart;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -22,9 +22,8 @@ import sndml.servicenow.Log;
  */
 public class DateTimeFactory {
 
-	final DateTime start;
-	File metricsFile = null;
-	Properties lastValues = null;
+	private DateTime start = DateTime.now();
+	private DateTime lastStart = null;
 	
 	final Pattern datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2}:\\d{2})?");
 	final Pattern namePattern = Pattern.compile("[a-z][a-z0-9_.]*", Pattern.CASE_INSENSITIVE);
@@ -33,35 +32,43 @@ public class DateTimeFactory {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	DateTimeFactory() {
-		this.start = DateTime.now();
+	}
+	
+	DateTimeFactory(DateTime start) {
+		this.start = start;
+	}
+	
+	DateTimeFactory(DateTime start, DateTime lastStart) {
+		if (start != null) this.start = start;
+		if (lastStart != null) this.lastStart = lastStart;
 	}
 	
 	DateTimeFactory(DateTime start, File metricsFile) {
 		this.start = (start==null ? DateTime.now() : start);
-		this.metricsFile = metricsFile;
+		this.setMetricsFile(metricsFile);
 	}
 	
 	DateTimeFactory(DateTime start, Properties lastValues) {
 		this.start = (start==null ? DateTime.now() : start);
-		this.lastValues = lastValues;
+		lastStart = new DateTime(lastValues.getProperty("start"));
 	}
 
+	void setMetricsFile(File metricsFile) {
+		Properties lastValues = new Properties();
+		try {
+			lastValues.load(new FileInputStream(metricsFile));
+		} catch (IOException e) {
+			throw new ResourceException(e);
+		}
+		this.lastStart = new DateTime(lastValues.getProperty("start"));		
+	}
+	
 	DateTime getStart() {
 		return this.start;
 	}
-
-	private Properties getLastValues() throws ConfigParseException {
-		if (this.lastValues == null) {
-			this.lastValues = new Properties();
-			if (this.metricsFile != null) {
-				try {
-					lastValues.load(new FileReader(this.metricsFile));
-				} catch (IOException e) {
-					throw new ConfigParseException(e);
-				}							
-			}
-		}
-		return lastValues;
+	
+	DateTime getLastStart() {
+		return this.lastStart;
 	}
 	
 	DateTime getDate(JsonNode obj) throws ConfigParseException {
@@ -85,25 +92,29 @@ public class DateTimeFactory {
 		logger.debug(Log.INIT, String.format("getDate(%s)=%s", expr, result));
 		return result;
 	}
-
+	
 	private DateTime getName(String name) throws ConfigParseException {
 		assert name != null;
 		if (name.equalsIgnoreCase("void")) return null;
 		if (name.equalsIgnoreCase("empty")) return null;
 		if (name.equalsIgnoreCase("start")) return getStart();
 		if (name.equalsIgnoreCase("today")) return getStart().truncate();
-		if (name.equalsIgnoreCase("last")) return getLast("start");
+		if (name.equalsIgnoreCase("last")) return getLastStart();
+		throw new ConfigParseException("Invalid name: name");
+		/*
+		// Functionality removed in 3.4
 		if (name.toLowerCase().startsWith("last.")) {
 			name = name.substring(5);
 			return getLast(name);
 		}
 		return getLast(name);
+		*/
 	}
 
-	/**
+	/*
 	 * Get a DateTime value from the metrics (properties) file.
-	 */
-	DateTime getLast(String propName) throws ConfigParseException {
+	 *
+	private DateTime getLast(String propName) throws ConfigParseException {
 		assert propName != null;
 		Properties values = getLastValues();
 		if (values == null) {
@@ -116,6 +127,7 @@ public class DateTimeFactory {
 			throw new ConfigParseException("Property not found: " + propName);
 		return new DateTime(propValue);
 	}
+	*/
 	
 	private DateTime getExpr(String text) throws ConfigParseException {
 		Matcher m = exprPattern.matcher(text);

@@ -20,27 +20,38 @@ import sndml.servicenow.*;
 public class LoaderConfig {
 	
 	final DateTime start = DateTime.now();
+	private DateTimeFactory dateFactory = new DateTimeFactory(start);
+	private ConfigFactory configFactory = new ConfigFactory(start);
 	
 	private ObjectNode root;
-	private Integer threads = 0;
-	private Integer pageSize;
-	private File metricsFile = null;
+	public Integer threads = 0;
+	public Integer pageSize;
+	public File metricsFile = null;
 	
-	private final java.util.List<JobConfig> tables = 
+	public java.util.List<JobConfig> tables = 
 			new java.util.ArrayList<JobConfig>();
 
 	private static Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
 	
+	@Deprecated
 	static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-
-	public LoaderConfig(Table table) throws IOException, ConfigParseException {
-		this.tables.add(new JobConfig(table));
+	
+	public LoaderConfig() {		
 	}
+
+	@Deprecated
+	public LoaderConfig(Table table) throws IOException, ConfigParseException {
+		JobConfig config = configFactory.tableLoader(table);
+		this.tables.add(config);
+	}
+
+	@Deprecated
 	
 	public LoaderConfig(File configFile, Properties props) throws IOException, ConfigParseException {
 		this(new FileReader(configFile), props);
 	}
-		
+	
+	@Deprecated		
 	public LoaderConfig(Reader reader, Properties props) throws ConfigParseException {
 		File metricsFolder = null;				
 		if (props != null) {
@@ -62,6 +73,8 @@ public class LoaderConfig {
 				String metricsFileName = val.asText();
 				metricsFile = (metricsFolder == null) ?
 						new File (metricsFileName) : new File(metricsFolder, metricsFileName);
+				dateFactory = new DateTimeFactory(start, metricsFile);
+				configFactory.setDateFactory(dateFactory);;
 				break;
 			case "pagesize" : 
 				pageSize = val.asInt();
@@ -71,7 +84,8 @@ public class LoaderConfig {
 				ArrayNode jobs = (ArrayNode) val;
 				for (int i = 0; i < jobs.size(); ++i) {
 					JsonNode jobNode = jobs.get(i);
-					JobConfig jobConfig = new JobConfig(this, jobNode);
+					// JobConfig jobConfig = new JobConfig(this, jobNode);
+					JobConfig jobConfig = configFactory.jobConfig(jobNode);
 					this.tables.add(jobConfig);
 				}
 				break;

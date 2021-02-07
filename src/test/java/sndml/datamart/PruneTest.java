@@ -61,9 +61,8 @@ public class PruneTest {
 		assertNull(api.getRecord(key));
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Prune");
-		JobConfig config = new JobConfig(tbl);
-		config.setAction(JobAction.PRUNE);
-		config.setSince(t0);
+	    ConfigFactory factory = new ConfigFactory();
+		JobConfig config = factory.jobConfigFromYaml("action: prune, source: incident");
 		logger.info(Log.TEST, "PRUNE " + config.getName());
 		LoaderJob loader = new LoaderJob(profile, config);
 		loader.call();
