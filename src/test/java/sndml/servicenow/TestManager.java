@@ -1,5 +1,8 @@
 package sndml.servicenow;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -194,7 +197,8 @@ public class TestManager {
 	public static void banner(Logger logger, @SuppressWarnings("rawtypes") Class cls, String msg) {
 		banner(logger, cls.getSimpleName(), msg);
 	}
-		
+
+	@Deprecated
 	public static ObjectNode json(String text) throws ConfigParseException {
 		JsonNode node;
 		try {
@@ -206,6 +210,7 @@ public class TestManager {
 		return (ObjectNode) node;
 	}
 	
+	@Deprecated
 	public static ObjectNode yaml(String text) throws ConfigParseException {		
 		JsonNode node;
 		try {
@@ -215,6 +220,14 @@ public class TestManager {
 		}
 		assert node.isObject();
 		return (ObjectNode) node;
+	}
+	
+	public static String readFully(File file) throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		StringBuffer text = new StringBuffer();
+		while (reader.ready()) text.append(reader.readLine() + "\n");
+		reader.close();
+		return text.toString();		
 	}
 	
 	public static String randomName(int length) {

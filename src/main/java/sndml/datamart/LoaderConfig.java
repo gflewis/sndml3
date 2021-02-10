@@ -5,8 +5,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -23,13 +25,13 @@ public class LoaderConfig {
 	private DateTimeFactory dateFactory = new DateTimeFactory(start);
 	private ConfigFactory configFactory = new ConfigFactory(start);
 	
-	private ObjectNode root;
-	public Integer threads = 0;
-	public Integer pageSize;
-	public File metricsFile = null;
+	// private ObjectNode root;
+	@JsonProperty("threads") public Integer threads;
+	@JsonProperty("pagesize") public Integer pageSize;
+	@JsonProperty("metrics") public File metricsFile = null;
 	
-	public java.util.List<JobConfig> tables = 
-			new java.util.ArrayList<JobConfig>();
+	@JsonProperty("tables")
+	public List<JobConfig> tables = new java.util.ArrayList<JobConfig>();
 
 	private static Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
 	
@@ -45,8 +47,7 @@ public class LoaderConfig {
 		this.tables.add(config);
 	}
 
-	@Deprecated
-	
+	@Deprecated	
 	public LoaderConfig(File configFile, Properties props) throws IOException, ConfigParseException {
 		this(new FileReader(configFile), props);
 	}
@@ -59,7 +60,7 @@ public class LoaderConfig {
 			if (metricsFolderName != null && metricsFolderName.length() > 0)
 				metricsFolder = new File(metricsFolderName);
 		}		
-		this.root = parseYAML(reader);		
+		JsonNode root = parseYAML(reader);		
 		logger.info(Log.INIT, "\n" + root.toPrettyString());
 		Iterator<String> fieldnames = root.fieldNames();
 		while (fieldnames.hasNext()) {
@@ -110,13 +111,7 @@ public class LoaderConfig {
 	java.util.List<JobConfig> getJobs() {
 		return this.tables;
 	}
-	
-	String getString(String key) {
-		assert root != null;
-		assert key != null;
-		return root.get(key).asText();
-	}
-		
+			
 	/*
 	 * Used for JUnit tests
 	 */

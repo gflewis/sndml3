@@ -19,8 +19,8 @@ public class JobConfigValidator {
 		if (job.getName() == null) configError("Name not specified");
 		validate("Truncate", job.truncate, EnumSet.of(JobAction.LOAD));
 		validate("Drop", job.dropTable, EnumSet.of(JobAction.CREATE));
-		validate("Created", job.created, EnumSet.range(JobAction.LOAD, JobAction.SYNC));
-		validate("Since", job.since, EnumSet.range(JobAction.LOAD, JobAction.REFRESH));
+		validate("Created", job.createdRange, EnumSet.range(JobAction.LOAD, JobAction.SYNC));
+		validate("Since", job.sinceDate, EnumSet.range(JobAction.LOAD, JobAction.REFRESH));
 		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
 			configError("Cannot specify both Columns and Exclude");		
 	}

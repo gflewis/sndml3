@@ -7,11 +7,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * An immutable thread-safe DateTime field in ServiceNow format. 
  * This class can convert the value to or from a Java Date.
  * All DateTime fields are represented in GMT.
  */
+@JsonSerialize(using = DateTimeSerializer.class)
 public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
 	public static final int DATE_ONLY = 10; // length of yyyy-MM-dd

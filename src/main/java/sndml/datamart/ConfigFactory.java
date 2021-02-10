@@ -1,6 +1,8 @@
 package sndml.datamart;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
@@ -9,6 +11,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -26,7 +29,7 @@ public class ConfigFactory {
 	public DateTimeFactory dateFactory;
 	public final ObjectMapper jsonMapper;
 	public final ObjectMapper yamlMapper;
-	private static Logger logger = LoggerFactory.getLogger(ConfigFactory.class);	
+	private Logger logger = LoggerFactory.getLogger(ConfigFactory.class);	
 	
 	ConfigFactory() {
 		this(DateTime.now());
@@ -37,10 +40,18 @@ public class ConfigFactory {
 		jsonMapper = new ObjectMapper();
 		jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 		jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
+		jsonMapper.setSerializationInclusion(Include.NON_NULL);		
 		yamlMapper = new ObjectMapper(new YAMLFactory());
-		jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);		
-		jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);		
+		yamlMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);		
+		yamlMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);	
+		yamlMapper.setSerializationInclusion(Include.NON_NULL);		
 	}
+	
+	/*
+	ObjectMapper jsonMapper() {
+		return this.jsonMapper; 
+	}
+	*/
 	
 	void setDateFactory(DateTimeFactory dateFactory) {
 		this.dateFactory = dateFactory;
@@ -49,49 +60,105 @@ public class ConfigFactory {
 	void setMetricsFile(File metricsFile) {
 		this.dateFactory.setMetricsFile(metricsFile);
 	}
-	
+
+	// Used for JUnit
 	JobConfig jobConfigFromYaml(String yaml) throws ConfigParseException {
 		JsonNode node;
 		try {
 			node = yamlMapper.readTree(yaml);
 		} catch (JsonProcessingException e) {
-			throw new ConfigParseException(e);
+			throw new ConfigParseException(e.getMessage());
 		}
 		return jobConfig(node);
 	}
 
-	JobConfig jobConfig(JsonNode node) throws ConfigParseException {
-		JobConfig config;
-		try {
-			config = jsonMapper.treeToValue(node,  JobConfig.class);
-		} catch (JsonProcessingException e) {
-			throw new ConfigParseException(e);
+	LoaderConfig loaderConfig(File file) throws IOException, ConfigParseException {
+		Reader reader = new FileReader(file);
+		return loaderConfig(reader, null);		
+	}
+	
+	LoaderConfig loaderConfig(Reader reader, Properties props) 
+			throws IOException, ConfigParseException {
+		LoaderConfig loader = yamlMapper.readValue(reader, LoaderConfig.class);
+		for (JobConfig table : loader.tables) {
+			validate(table);
 		}
-		config.setDefaults(this.dateFactory);
-		return config;
+		return loader;
+	}
+	
+	JobConfig jobConfig(JsonNode node) throws ConfigParseException {
+		JobConfig job;
+		try {
+			job = jsonMapper.treeToValue(node, JobConfig.class);
+		} catch (JsonProcessingException e) {
+			throw new ConfigParseException(e.getMessage());
+		}
+		validate(job);
+		return job;
+	}
+
+	void validate(JobConfig job) {
+		if (job.start == null) {
+			job.start = dateFactory.getStart();
+		}
+		if (job.action == null)	job.action = 
+				Boolean.TRUE.equals(job.truncate) ?	
+				JobAction.LOAD : JobAction.REFRESH;
+		if (job.action == JobAction.INSERT) job.action = JobAction.LOAD;
+		if (job.action == JobAction.UPDATE) job.action = JobAction.REFRESH;
+		if (job.source == null)	job.source = 
+				job.name != null ? job.name : job.target;
+		if (job.name == null) job.name = 
+				job.target != null ? job.target : job.source;
+		if (job.target == null)	job.target = 
+				job.source != null ? job.source : job.name;
+		
+		if (job.sinceValue == null) {
+			job.sinceDate = null;
+		}
+		else {
+			job.sinceDate = dateFactory.getDate(job.sinceValue);
+		}
+		
+		if (job.createdValue == null) {
+			job.createdRange = null;
+		}
+		if (job.createdValue != null) {
+			job.setDateFactory(dateFactory);
+			job.setCreated(job.createdValue);
+		}
+		/*
+		if (config.pageSize == null && config.parent() != null) {
+			config.pageSize = config.parent.getPageSize();
+		}
+		*/
 	}
 	
 	JobConfig jobConfig(JsonNode node, DateTimeFactory dateFactory) throws ConfigParseException {
-		JobConfig config;
+		JobConfig job;
 		try {
-			config = jsonMapper.treeToValue(node,  JobConfig.class);
+			job = jsonMapper.treeToValue(node,  JobConfig.class);
 		} catch (JsonProcessingException e) {
-			throw new ConfigParseException(e);
+			throw new ConfigParseException(e.getMessage());
 		}
-		config.setDefaults(dateFactory);
-		return config;
+		// config.setDefaults(dateFactory);
+		return job;
 	}
+	
 	
 	JobConfig tableLoader(Table table) throws ConfigParseException {
 		JobConfig config = new JobConfig();
 		config.source = table.getName();
 		config.target = table.getName();
-		config.setDefaults(dateFactory);
+		// config.setDefaults(dateFactory);
 		return config;
 	}
-		
-	
+
+	/*
 	LoaderConfig loaderConfig(Reader reader, Properties props) throws ConfigParseException {
+		LoaderConfig config = yamlMapper.readValue(reader, LoaderConfig.class);
+		
+		
 		LoaderConfig config = new LoaderConfig();
 		DateTime start = DateTime.now();
 		File metricsFolder = null;
@@ -139,6 +206,7 @@ public class ConfigFactory {
 			throw new ConfigParseException("No tables specified");
 		return config;
 	}
+	*/
 	
 	
 	DateTime.Interval asInterval(Object obj) throws ConfigParseException {

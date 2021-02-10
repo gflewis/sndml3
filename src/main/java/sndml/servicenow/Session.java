@@ -67,7 +67,7 @@ public class Session {
 	private void logInitInfo() {
 		String msg = "instance=" + instance.getURL() + " user=" + username;
 		if (getDomain() != null) msg += " domain=" + getDomain();		
-		logger.info(msg);
+		logger.info(Log.INIT, msg);
 	}
 		
 	/**

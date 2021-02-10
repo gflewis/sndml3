@@ -1,6 +1,7 @@
 package sndml.datamart;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
@@ -54,8 +55,7 @@ public class Loader {
 			if (tablename != null)
 				throw new CommandOptionsException("Cannot specify both --daemon and --table");
 			Daemon daemon = new Daemon(profile);
-			daemon.run();
-			
+			daemon.run();			
 		}
 		else {
 			if (yamlfilename != null && tablename != null)
@@ -63,11 +63,17 @@ public class Loader {
 			if (yamlfilename == null && tablename == null)
 				throw new CommandOptionsException("Must specify --daemon or --yaml or --table");			
 			Session session = profile.getSession();
-			LoaderConfig config = (tablename != null) ?
-				// Single table load
-				new LoaderConfig(session.table(tablename)) :
-				// YAML config load
-				new LoaderConfig(new File(yamlfilename), profile.getProperties());
+			ConfigFactory factory = new ConfigFactory();
+			LoaderConfig config;
+			if (tablename != null) {
+				Table table = session.table(tablename);
+				config = new LoaderConfig();
+				config.tables.add(factory.tableLoader(table));
+			}
+			else {
+				FileReader reader = new FileReader(new File(yamlfilename));
+				config = factory.loaderConfig(reader, profile.getProperties());
+			}
 			config.validate();
 			Loader loader = new Loader(profile, config);			
 			loader.loadTables();			

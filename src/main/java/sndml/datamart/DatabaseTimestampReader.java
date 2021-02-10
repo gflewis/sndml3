@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ public class DatabaseTimestampReader {
 	final Database database;
 	final Connection dbc;
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final Calendar tzGMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
 	DatabaseTimestampReader(Database database) {
 		this.database = database;
@@ -33,10 +36,11 @@ public class DatabaseTimestampReader {
 		stmt.setString(1, key.toString());
 		ResultSet rs = stmt.executeQuery();
 		if (rs.next()) {
-			Timestamp sys_updated_on = rs.getTimestamp(2);
+			Timestamp sys_updated_on = rs.getTimestamp(2, tzGMT);
+			long time = sys_updated_on.getTime();
 			result = new DateTime(sys_updated_on);
 			logger.debug(Log.TEST, String.format(
-					"%s updated=%s (%s)", key.toString(), sys_updated_on.toString(), result));
+					"%s updated=%s time=%d result=%s", key.toString(), sys_updated_on.toString(), time, result));
 		}
 		rs.close();
 		return result;
@@ -53,11 +57,11 @@ public class DatabaseTimestampReader {
 		stmt.setString(1, key.toString());
 		ResultSet rs = stmt.executeQuery();
 		if (rs.next()) {
-			Timestamp sys_created_on = rs.getTimestamp(2);
+			Timestamp sys_created_on = rs.getTimestamp(2, tzGMT);
 			long time = sys_created_on.getTime();
 			result = new DateTime(sys_created_on);
-			logger.info(Log.TEST, String.format(
-				"%s created=%s | %d (%s)", key.toString(), sys_created_on.toString(), time, result));
+			logger.debug(Log.TEST, String.format(
+				"%s created=%s time=%d result=%s", key.toString(), sys_created_on.toString(), time, result));
 		}
 		rs.close();
 		return result;
@@ -97,7 +101,7 @@ public class DatabaseTimestampReader {
 		ResultSet rs = stmt.executeQuery();
 		while (rs.next() ) {
 			String sys_id = rs.getString(1);
-			java.sql.Timestamp sys_updated_on = rs.getTimestamp(2);
+			Timestamp sys_updated_on = rs.getTimestamp(2, tzGMT);
 			Key key = new Key(sys_id);
 			DateTime value = new DateTime(sys_updated_on);
 			result.put(key, value);

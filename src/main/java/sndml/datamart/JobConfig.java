@@ -2,13 +2,15 @@ package sndml.datamart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import sndml.servicenow.*;
 
 public class JobConfig {
 
 	private LoaderConfig parent;
-	public DateTime start;
+	private DateTimeFactory dateFactory;
+	@JsonIgnore public DateTime start;
 	public Key sys_id;
 	public String number;
 	public String name;
@@ -17,8 +19,10 @@ public class JobConfig {
 	public JobAction action;
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
-	@JsonIgnore public DateTimeRange created;
-	@JsonIgnore public DateTime since;
+	@JsonProperty("created") public JsonNode createdValue;
+	@JsonProperty("since") public String sinceValue;
+	@JsonIgnore public DateTimeRange createdRange;
+	@JsonIgnore public DateTime sinceDate;
 	public String filter;
 	public DateTime.Interval partition;
 	public Integer pageSize;
@@ -30,8 +34,11 @@ public class JobConfig {
 	@JsonIgnore public FieldNames excludeColumns;
 	public Integer threads;
 
-
 	public JobConfig() {		
+	}
+	
+	public void setDateFactory(DateTimeFactory factory) {
+		this.dateFactory = factory;
 	}
 
 	/*
@@ -150,6 +157,7 @@ public class JobConfig {
 	}
 	*/
 
+	@Deprecated
 	void setDefaults(DateTimeFactory dateFactory) {
 		if (start == null) {
 			start = dateFactory.getStart();
@@ -183,8 +191,29 @@ public class JobConfig {
 		throw new ConfigParseException(msg);
 	}
 
+	@JsonIgnore
 	void setCreated(DateTimeRange value) {
-		this.created = value;
+		this.createdRange = value;
+	}
+	
+	void setCreated(JsonNode node) {
+		assert node != null;
+		assert dateFactory != null;
+		if (node.isTextual()) {
+			String s1 = node.asText();
+			DateTime d1 = dateFactory.getDate(s1);
+			this.createdRange = new DateTimeRange(d1, null);				
+		}
+		else if (node.isArray()) {
+			int len = node.size();
+			String s1 = len > 0 ? node.get(0).asText() : null;
+			String s2 = len > 1 ? node.get(1).asText() : null;
+			DateTime d1 = dateFactory.getDate(s1);
+			DateTime d2 = dateFactory.getDate(s2);
+			this.createdRange = new DateTimeRange(d1, d2);				
+		}
+		else
+			throw new ConfigParseException("Invalid created: " + node);		
 	}
 	
 	String getName() { return this.name; }
@@ -194,11 +223,11 @@ public class JobConfig {
 	JobAction getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }	
-	DateTime getSince() { return this.since; }
+	DateTime getSince() { return this.sinceDate; }
 	String getFilter() { return this.filter; }
 	
 	// TODO: Is this best?
-	DateTimeRange getCreated() { return (this.created == null ? getDefaultRange() : this.created); }	
+	DateTimeRange getCreated() { return (this.createdRange == null ? getDefaultRange() : this.createdRange); }	
 	DateTime.Interval getPartitionInterval() { return this.partition; }
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }

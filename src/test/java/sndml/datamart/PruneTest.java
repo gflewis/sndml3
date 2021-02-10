@@ -11,7 +11,6 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
 import sndml.datamart.JobConfig;
-import sndml.datamart.JobAction;
 import sndml.datamart.LoaderJob;
 import sndml.servicenow.*;
 

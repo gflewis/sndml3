@@ -39,7 +39,7 @@ public class TimestampTest {
 		TestManager.setProfile(this.getClass(), profile);
 		util = new DBUtil(database);
 		// util.dropTable(tablename);
-		// database.createMissingTable(session.table(tablename));
+		database.createMissingTable(session.table(tablename));
 	}
 
 	@AfterClass
@@ -85,7 +85,6 @@ public class TimestampTest {
 		assertEquals(created, dbcreated.toString());		
 	}
 	
-	@Ignore
 	@Test
 	public void testGetTimestamps() throws Exception {
 		TestManager.bannerStart("testGetTimestamps");
