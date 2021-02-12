@@ -108,7 +108,6 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * @param month - month from 1 to 12
 	 * @param day - day of the month
 	 */
-	@Deprecated
 	public DateTime(int year, int month, int day) {
 		this(String.format("%04d-%02d-%02d", year, month, day));
 	}
