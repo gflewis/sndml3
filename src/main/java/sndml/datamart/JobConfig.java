@@ -33,7 +33,7 @@ public class JobConfig {
 	@JsonIgnore public DateTimeRange createdRange;
 	@JsonIgnore public DateTime sinceDate;
 	public String filter;
-	public DateTime.Interval partition;
+	public Interval partition;
 	public Integer pageSize;
 	public Integer minRows;
 	public Integer maxRows;
@@ -88,7 +88,7 @@ public class JobConfig {
 	DateTimeRange getCreated() { return this.createdRange; }
 	String getFilter() { return this.filter; }
 		
-	DateTime.Interval getPartitionInterval() { return this.partition; }
+	Interval getPartitionInterval() { return this.partition; }
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
 	FieldNames getExcludeColumns() { return this.excludeColumns; }
@@ -231,6 +231,7 @@ public class JobConfig {
 		if (getAutoCreate()) node.put("autocreate", getAutoCreate());
 		if (getSince() != null) node.put("since", getSince().toString());
 		if (getCreated() != null) node.set("created", getCreated().toJsonNode());
+		if (getPartitionInterval() != null) node.put("partition",  getPartitionInterval().toString());
 		if (getFilter() != null) node.put("filter", getFilter());
 		String yaml;
 		try {

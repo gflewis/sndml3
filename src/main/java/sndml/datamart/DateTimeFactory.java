@@ -10,8 +10,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import sndml.servicenow.DateTime;
 import sndml.servicenow.Log;
 

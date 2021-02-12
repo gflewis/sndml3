@@ -137,7 +137,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		}
 		else if (JobAction.SYNC.equals(action)) {
 			db.createMissingTable(table, sqlTableName);
-			DateTime.Interval partitionInterval = config.getPartitionInterval();
+			Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
 			if (partitionInterval == null) {
 				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
@@ -176,7 +176,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			writer.setParentMetrics(metrics);
 			writer.open();
 			
-			DateTime.Interval partitionInterval = config.getPartitionInterval();
+			Interval partitionInterval = config.getPartitionInterval();
 			TableReaderFactory factory;
 			DateTime since = config.getSince();	
 			logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);

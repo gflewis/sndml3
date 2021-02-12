@@ -2,15 +2,15 @@ package sndml.servicenow;
 
 import java.util.ArrayList;
 
-import sndml.servicenow.DateTime.Interval;
+import sndml.servicenow.Interval;
 
 public class DatePartition extends ArrayList<DateTimeRange> {
 
 	private static final long serialVersionUID = 1L;
 	
-	final DateTime.Interval interval;
+	final Interval interval;
 
-	public DatePartition(DateTimeRange range, DateTime.Interval interval) {
+	public DatePartition(DateTimeRange range, Interval interval) {
 		super();
 		assert range != null;
 		assert interval != null;
@@ -31,7 +31,7 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 		} while (range.getEnd().compareTo(end) > 0);
 	}
 	
-	public DateTime.Interval getInterval() {
+	public Interval getInterval() {
 		return interval;
 	}
 	
@@ -42,7 +42,7 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 				this.getClass().getSimpleName(), interval.toString(), size(), first.getStart(), last.getEnd());
 	}
 
-	static public String partName(DateTime.Interval interval, DateTimeRange partRange) {
+	static public String partName(Interval interval, DateTimeRange partRange) {
 		String prefix = interval.toString().substring(0,1);
 		String datepart = partRange.getStart().toString();
 		if (interval == Interval.HOUR) {

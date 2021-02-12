@@ -16,7 +16,7 @@ public class DatePartitionedTableReader extends TableReader {
 
 	final TableReaderFactory factory;
 	final int threads;
-	final DateTime.Interval interval;
+	final Interval interval;
 	final WriterMetrics writerMetrics = new WriterMetrics();
 	
 	DateTimeRange range;
@@ -28,7 +28,7 @@ public class DatePartitionedTableReader extends TableReader {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public DatePartitionedTableReader(TableReaderFactory factory, DateTime.Interval interval, Integer threads) {
+	public DatePartitionedTableReader(TableReaderFactory factory, Interval interval, Integer threads) {
 		super(factory.getTable());
 		this.factory = factory;
 		setQuery(factory.filter);

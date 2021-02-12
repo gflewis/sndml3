@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.DatePartition;
 import sndml.servicenow.DatePartitionedTableReader;
-import sndml.servicenow.DateTime;
 import sndml.servicenow.Log;
 import sndml.servicenow.RecordListAccumulator;
 import sndml.servicenow.RestTableReaderFactory;
@@ -34,7 +33,7 @@ public class DatePartTest {
 		String parentName = "my_parent_reader";
 		factory.setReaderName(parentName);
 		logger.info(Log.TEST, "range=" + stats.getCreated().toString());
-		DateTime.Interval interval = DateTime.Interval.MONTH;
+		Interval interval = Interval.MONTH;
 		DatePartitionedTableReader parentReader = new DatePartitionedTableReader(factory, interval, 0);
 		DatePartition partition;
 		parentReader.initialize();

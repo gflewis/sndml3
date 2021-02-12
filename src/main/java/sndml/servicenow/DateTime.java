@@ -28,7 +28,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static final int SEC_PER_WEEK = 7 * SEC_PER_DAY;
 	public static final int MILLISEC_PER_DAY = 1000 * SEC_PER_DAY;
 	
-	public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR}
+	// public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR}
 	
 	static ThreadLocal<DateFormat> dateOnlyFormat = 
 		new ThreadLocal<DateFormat>() {

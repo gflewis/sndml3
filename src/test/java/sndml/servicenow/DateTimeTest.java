@@ -89,21 +89,21 @@ public class DateTimeTest {
 		assertEquals("2014-05-26 15:34:53", d1.toString());
 		assertEquals(2014, d1.getYear());
 		assertEquals(5, d1.getMonth());
-		assertEquals(new DateTime("2014-06-01"), d1.incrementBy(DateTime.Interval.MONTH));
-		assertEquals(new DateTime("2015-01-01"), d2.incrementBy(DateTime.Interval.MONTH));		
+		assertEquals(new DateTime("2014-06-01"), d1.incrementBy(Interval.MONTH));
+		assertEquals(new DateTime("2015-01-01"), d2.incrementBy(Interval.MONTH));		
 	}
 	
 	@Test
 	public void testTruncate() throws Exception {
 		DateTime start;
 		start = new DateTime("2014-05-10");
-		assertEquals(new DateTime("2014-05-01"), start.truncate(DateTime.Interval.MONTH));
-		assertEquals(new DateTime("2014-04-01"), start.truncate(DateTime.Interval.QUARTER));
-		assertEquals(new DateTime("2014-01-01"), start.truncate(DateTime.Interval.YEAR));	
+		assertEquals(new DateTime("2014-05-01"), start.truncate(Interval.MONTH));
+		assertEquals(new DateTime("2014-04-01"), start.truncate(Interval.QUARTER));
+		assertEquals(new DateTime("2014-01-01"), start.truncate(Interval.YEAR));	
 		start = new DateTime("2016-10-04 17:18:18");
-		assertEquals(new DateTime("2016-10-01"), start.truncate(DateTime.Interval.MONTH));
-		assertEquals(new DateTime("2016-10-01"), start.truncate(DateTime.Interval.QUARTER));
-		assertEquals(new DateTime("2016-01-01"), start.truncate(DateTime.Interval.YEAR));					
+		assertEquals(new DateTime("2016-10-01"), start.truncate(Interval.MONTH));
+		assertEquals(new DateTime("2016-10-01"), start.truncate(Interval.QUARTER));
+		assertEquals(new DateTime("2016-01-01"), start.truncate(Interval.YEAR));					
 	}
 	
 	@Test
@@ -111,11 +111,11 @@ public class DateTimeTest {
 		DateTime start = new DateTime("2014-05-10");
 		DateTime end = new DateTime("2016-12-17");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartition part = new DatePartition(range, DateTime.Interval.MONTH);
+		DatePartition part = new DatePartition(range, Interval.MONTH);
 //		logger.info("partition=" + part.toString());
 		DateTimeRange first = part.get(0);
 		DateTimeRange last = part.get(part.size() - 1);
-		assertEquals(start.truncate(DateTime.Interval.MONTH), first.getStart());
+		assertEquals(start.truncate(Interval.MONTH), first.getStart());
 		assertEquals(new DateTime("2017-01-01"), last.getEnd());
 	}
 	
