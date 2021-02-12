@@ -2,7 +2,7 @@ package sndml.datamart;
 
 import sndml.datamart.JobConfig;
 import sndml.datamart.Loader;
-import sndml.datamart.JobAction;
+import sndml.datamart.Action;
 import sndml.datamart.LoaderConfig;
 import sndml.datamart.LoaderJob;
 import sndml.datamart.YamlFile;
@@ -53,7 +53,7 @@ public class InsertTest {
 		LoaderConfig config = factory.loaderConfig(yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
-		assertEquals(JobAction.LOAD, job.getAction());
+		assertEquals(Action.LOAD, job.getAction());
 		LoaderJob loader = new LoaderJob(profile, job);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();

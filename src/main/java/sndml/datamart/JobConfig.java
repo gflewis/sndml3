@@ -25,7 +25,7 @@ public class JobConfig {
 	public String name;
 	public String source;
 	public String target;
-	public JobAction action;
+	public Action action;
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
 	@JsonProperty("created") public JsonNode createdExpr;
@@ -80,7 +80,7 @@ public class JobConfig {
 	String getSource() { return this.source; }
 	String getTarget() { return this.target; }
 	Key getId() { return this.sys_id; }
-	JobAction getAction() { return action; }
+	Action getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
 	boolean getAutoCreate() { return this.autoCreate == null ? false : this.autoCreate.booleanValue(); }
@@ -113,9 +113,9 @@ public class JobConfig {
 		// Determine Action
 		if (job.action == null)	job.action = 
 				Boolean.TRUE.equals(job.truncate) ?	
-				JobAction.LOAD : JobAction.REFRESH;		
-		if (job.action == JobAction.INSERT) job.action = JobAction.LOAD;
-		if (job.action == JobAction.UPDATE) job.action = JobAction.REFRESH;
+				Action.LOAD : Action.REFRESH;		
+		if (job.action == Action.INSERT) job.action = Action.LOAD;
+		if (job.action == Action.UPDATE) job.action = Action.REFRESH;
 		
 		// Determine Source, Target and Name
 		if (job.source == null)	job.source = 
@@ -127,7 +127,7 @@ public class JobConfig {
 		
 		// AutoCreate defaults to True
 		if (job.autoCreate == null) {
-			if (job.action==JobAction.LOAD || job.action==JobAction.REFRESH || job.action==JobAction.SYNC)
+			if (job.action==Action.LOAD || job.action==Action.REFRESH || job.action==Action.SYNC)
 				job.autoCreate = Boolean.TRUE;			
 		}
 		
@@ -161,13 +161,13 @@ public class JobConfig {
 		if (job.getTarget() == null) configError("Target not specified");
 		if (job.getName() == null) configError("Name not specified");
 		booleanValidForActions("Truncate", job.truncate, action, 
-				EnumSet.of(JobAction.LOAD));
+				EnumSet.of(Action.LOAD));
 		booleanValidForActions("Drop", job.dropTable, action, 
-				EnumSet.of(JobAction.CREATE));
+				EnumSet.of(Action.CREATE));
 		validForActions("Created", job.createdRange, action, 
-				EnumSet.range(JobAction.LOAD, JobAction.SYNC));
+				EnumSet.range(Action.LOAD, Action.SYNC));
 		validForActions("Since", job.sinceDate, action, 
-				EnumSet.range(JobAction.LOAD, JobAction.REFRESH));
+				EnumSet.range(Action.LOAD, Action.REFRESH));
 		
 		if (job.sinceDate == null && job.sinceExpr != null)
 			configError("Missing Since Date");
@@ -195,14 +195,14 @@ public class JobConfig {
 	*/
 	
 	
-	static void booleanValidForActions(String name, Boolean value, JobAction action, EnumSet<JobAction> validActions) {
+	static void booleanValidForActions(String name, Boolean value, Action action, EnumSet<Action> validActions) {
 		if (Boolean.TRUE.equals(value)) {
 			if (!validActions.contains(action))
 				notValid(name, action);
 		}
 	}
 	
-	static void validForActions(String name, Object value, JobAction action, EnumSet<JobAction> validActions)
+	static void validForActions(String name, Object value, Action action, EnumSet<Action> validActions)
 			throws ConfigParseException {
 		if (value != null) {
 			if (!validActions.contains(action))
@@ -210,7 +210,7 @@ public class JobConfig {
 		}		
 	}
 		
-	static void notValid(String option, JobAction action) throws ConfigParseException {
+	static void notValid(String option, Action action) throws ConfigParseException {
 		String msg = option + " not valid with Action: " + action.toString();
 		configError(msg);
 	}

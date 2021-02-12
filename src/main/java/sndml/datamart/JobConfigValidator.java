@@ -6,7 +6,7 @@ import java.util.EnumSet;
 public class JobConfigValidator {
 
 	final JobConfig job;
-	final JobAction action;
+	final Action action;
 	
 	JobConfigValidator(JobConfig job, DateTimeFactory factory) {
 		this.job = job;
@@ -18,16 +18,16 @@ public class JobConfigValidator {
 		if (job.getSource() == null) configError("Source not specified");
 		if (job.getTarget() == null) configError("Target not specified");
 		if (job.getName() == null) configError("Name not specified");
-		validate("Truncate", job.truncate, EnumSet.of(JobAction.LOAD));
-		validate("Drop", job.dropTable, EnumSet.of(JobAction.CREATE));
-		validate("Created", job.createdRange, EnumSet.range(JobAction.LOAD, JobAction.SYNC));
-		validate("Since", job.sinceDate, EnumSet.range(JobAction.LOAD, JobAction.REFRESH));
+		validate("Truncate", job.truncate, EnumSet.of(Action.LOAD));
+		validate("Drop", job.dropTable, EnumSet.of(Action.CREATE));
+		validate("Created", job.createdRange, EnumSet.range(Action.LOAD, Action.SYNC));
+		validate("Since", job.sinceDate, EnumSet.range(Action.LOAD, Action.REFRESH));
 		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
 			configError("Cannot specify both Columns and Exclude");		
 	}
 	
 	
-	void validate(String name, Object value, EnumSet<JobAction> values)
+	void validate(String name, Object value, EnumSet<Action> values)
 		throws ConfigParseException
 	{
 		if (value != null) {
