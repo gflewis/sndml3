@@ -50,7 +50,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		
 	private final String str;
 	private final Date dt;
-	
+		
 	/**
 	 * Construct a {@link DateTime} from a string.
 	 * InvalidDateTimeException will be thrown unless the value is 
@@ -90,7 +90,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			throw new InvalidDateTimeException(value);
 		}
 	}
-
+	
 	/**
 	 * Static function to convert a string to DateTime.
 	 * @param s String to be converted.
@@ -108,6 +108,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * @param month - month from 1 to 12
 	 * @param day - day of the month
 	 */
+	@Deprecated
 	public DateTime(int year, int month, int day) {
 		this(String.format("%04d-%02d-%02d", year, month, day));
 	}
@@ -130,6 +131,14 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		DateFormat df = date_only ? dateOnlyFormat.get() : dateTimeFormat.get();
 		this.dt = new Date(1000 * seconds);
 		this.str = df.format(this.dt);
+	}
+	
+	/**
+	 * Make a copy of a DateTime
+	 */
+	public DateTime(DateTime orig) {
+		this.dt = orig.dt;
+		this.str = orig.str;		
 	}
 	
 	public String toString() {

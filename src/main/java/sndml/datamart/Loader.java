@@ -1,5 +1,6 @@
 package sndml.datamart;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class Loader {
 	WriterMetrics loaderMetrics = new WriterMetrics();	
 	ArrayList<LoaderJob> jobs = new ArrayList<LoaderJob>();
 	
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	static final Logger logger = LoggerFactory.getLogger(Loader.class);
 	
 	public static void main(String[] args) throws Exception {
 		Log.setGlobalContext();
@@ -44,37 +45,39 @@ public class Loader {
 		options.addOption(Option.builder("d").longOpt("daemon").required(false).hasArg(false).
 				desc("Run as daemon/service").build());
 		CommandLine cmd = new DefaultParser().parse(options,  args);
-		String profilename = cmd.getOptionValue("p");
-		String yamlfilename = cmd.getOptionValue("y");
-		String tablename = cmd.getOptionValue("t");
+		String profileName = cmd.getOptionValue("p");
+		String yamlFileName = cmd.getOptionValue("y");
+		String tableName = cmd.getOptionValue("t");
 		boolean isDaemon = cmd.hasOption("d");
-		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
+		ConnectionProfile profile = new ConnectionProfile(new File(profileName));
 		if (isDaemon) {
-			if (yamlfilename != null)
+			if (yamlFileName != null)
 				throw new CommandOptionsException("Cannot specify both --daemon and --yaml");
-			if (tablename != null)
+			if (tableName != null)
 				throw new CommandOptionsException("Cannot specify both --daemon and --table");
 			Daemon daemon = new Daemon(profile);
 			daemon.run();			
 		}
 		else {
-			if (yamlfilename != null && tablename != null)
+			if (yamlFileName != null && tableName != null)
 				throw new CommandOptionsException("Cannot specify both --table and --yaml");
-			if (yamlfilename == null && tablename == null)
+			if (yamlFileName == null && tableName == null)
 				throw new CommandOptionsException("Must specify --daemon or --yaml or --table");			
 			Session session = profile.getSession();
 			ConfigFactory factory = new ConfigFactory();
 			LoaderConfig config;
-			if (tablename != null) {
-				Table table = session.table(tablename);
+			if (tableName != null) {
+				Table table = session.table(tableName);
 				config = new LoaderConfig();
 				config.tables.add(factory.tableLoader(table));
 			}
 			else {
-				FileReader reader = new FileReader(new File(yamlfilename));
+				File yamlFile = new File(yamlFileName);
+				String yamlText = readFully(yamlFile);
+				logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
+				FileReader reader = new FileReader(new File(yamlFileName));
 				config = factory.loaderConfig(reader, profile.getProperties());
 			}
-			config.validate();
 			Loader loader = new Loader(profile, config);			
 			loader.loadTables();			
 		}
@@ -151,4 +154,12 @@ public class Loader {
 		statsWriter.close();		
 	}
 
+	public static String readFully(File file) throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		StringBuffer text = new StringBuffer();
+		while (reader.ready()) text.append(reader.readLine() + "\n");
+		reader.close();
+		return text.toString();		
+	}
+		
 }

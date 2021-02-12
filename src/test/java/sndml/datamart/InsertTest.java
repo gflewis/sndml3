@@ -9,6 +9,7 @@ import sndml.datamart.YamlFile;
 import sndml.servicenow.*;
 
 import static org.junit.Assert.*;
+
 import org.junit.*;
 
 import org.junit.runner.RunWith;
@@ -21,6 +22,8 @@ public class InsertTest {
 
 	final TestingProfile profile;
 	final Logger logger = TestManager.getLogger(this.getClass());
+	final ConfigFactory factory = new ConfigFactory();
+	
 	// final TestFolder folder = new TestFolder("yaml");
 	
 	@Parameters(name = "{index}:{0}")
@@ -42,11 +45,12 @@ public class InsertTest {
 	public void closeProfile() {
 		profile.close();
 	}
-			
+
 	@Test
 	public void testInsert() throws Exception {
-		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_truncate");		
-		LoaderConfig config = new LoaderConfig(yaml, null);
+		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_truncate");
+		TestManager.bannerStart(this.getClass(), "testInsert", profile, yaml);
+		LoaderConfig config = factory.loaderConfig(yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(JobAction.LOAD, job.getAction());
@@ -64,7 +68,8 @@ public class InsertTest {
 	@Test
 	public void testInsertTwice() throws Exception {
 		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_twice");
-		LoaderConfig config = new LoaderConfig(yaml, null);
+		TestManager.bannerStart(this.getClass(), "testInsertTwice", profile, yaml);
+		LoaderConfig config = factory.loaderConfig(yaml);
 		Loader loader = new Loader(profile, config);
 		LoaderJob job1 = loader.jobs.get(0);
 		LoaderJob job2 = loader.jobs.get(1);

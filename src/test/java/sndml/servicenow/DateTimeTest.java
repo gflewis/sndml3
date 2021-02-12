@@ -62,14 +62,14 @@ public class DateTimeTest {
 		DateTime d2 = new DateTime("2014-05-26 15:34:53");
 		DateTime d3 = new DateTime("2014-05-26");
 		DateTime d4 = new DateTime("2014-05-26 00:00:00");
-		DateTime d5 = new DateTime(2014, 5, 26);
+		// DateTime d5 = new DateTime(2014, 5, 26);
 		assertEquals(0, d1.compareTo(d2));
 		assertEquals(0, d2.compareTo(d1));
 		assertTrue(d3.equals(d4));
 		assertTrue(d4.equals(d3));
 		assertFalse(d3.equals(d2));
 		assertTrue(d4.toString().length() > d3.toString().length());
-		assertTrue(d5.equals(d4));
+		// assertTrue(d5.equals(d4));
 	}
 	
 	@Test

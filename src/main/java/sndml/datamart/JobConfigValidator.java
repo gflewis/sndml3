@@ -2,12 +2,13 @@ package sndml.datamart;
 
 import java.util.EnumSet;
 
+@Deprecated
 public class JobConfigValidator {
 
 	final JobConfig job;
 	final JobAction action;
 	
-	JobConfigValidator(JobConfig job) {
+	JobConfigValidator(JobConfig job, DateTimeFactory factory) {
 		this.job = job;
 		this.action = job.action;
 	}
@@ -24,6 +25,7 @@ public class JobConfigValidator {
 		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
 			configError("Cannot specify both Columns and Exclude");		
 	}
+	
 	
 	void validate(String name, Object value, EnumSet<JobAction> values)
 		throws ConfigParseException

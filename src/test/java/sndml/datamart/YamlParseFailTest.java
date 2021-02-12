@@ -32,6 +32,7 @@ public class YamlParseFailTest {
 			String text = TestManager.readFully(file);
 			logger.info(Log.TEST, "Testing " + file.getPath() + "\n" + text);
 			try {
+				@SuppressWarnings("unused")
 				LoaderConfig config = factory.loaderConfig(file);
 				fail("No exception for " + file.getPath());				
 			} catch (ConfigParseException e) {

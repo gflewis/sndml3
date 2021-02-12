@@ -1,14 +1,23 @@
 package sndml.datamart;
 
+import java.util.EnumSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.servicenow.*;
 
 public class JobConfig {
 
-	private LoaderConfig parent;
+	static final Logger logger = LoggerFactory.getLogger(JobConfig.class);	
+	
 	private DateTimeFactory dateFactory;
 	@JsonIgnore public DateTime start;
 	public Key sys_id;
@@ -19,8 +28,8 @@ public class JobConfig {
 	public JobAction action;
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
-	@JsonProperty("created") public JsonNode createdValue;
-	@JsonProperty("since") public String sinceValue;
+	@JsonProperty("created") public JsonNode createdExpr;
+	@JsonProperty("since") public String sinceExpr;
 	@JsonIgnore public DateTimeRange createdRange;
 	@JsonIgnore public DateTime sinceDate;
 	public String filter;
@@ -30,6 +39,7 @@ public class JobConfig {
 	public Integer maxRows;
 	public String sqlBefore;
 	public String sqlAfter;
+	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
 	@JsonIgnore public FieldNames excludeColumns;
 	public Integer threads;
@@ -41,161 +51,11 @@ public class JobConfig {
 		this.dateFactory = factory;
 	}
 
-	/*
-	
-	public JobConfig(ObjectNode settings) {
-		this.dateFactory = new DateTimeFactory();
-		if (settings.has("number")) this.name = settings.get("number").asText();
-		this.setPropertiesFrom(settings);
-	}
-	
-	JobConfig(Table table) {
-		this.name = table.getName();
-		this.dateFactory = new DateTimeFactory();
-	}
-
-	JobConfig(LoaderConfig parent, JsonNode config) throws ConfigParseException {
-		this.parent = parent;
-		this.dateFactory = new DateTimeFactory(parent.getStart(), parent.getMetricsFile());
-		if (config.isObject()) {
-			setPropertiesFrom((ObjectNode) config);
-		} else {
-			name = config.asText();
-		}
-	}
-
-	private void setPropertiesFrom(ObjectNode map) {
-		Iterator<String> fieldnames = map.fieldNames();
-		while (fieldnames.hasNext()) {
-			String key = fieldnames.next();
-			JsonNode val = map.get(key);
-			switch (key.toLowerCase()) {
-			case "name":
-			case "number":
-				this.name = val.asText();
-				break;
-			case "source":
-				this.source = val.asText();
-				break;
-			case "target":
-				this.target = val.asText();
-				break;
-			case "sys_id":
-				this.sys_id = new Key(val.asText());
-				break;
-			case "action":
-				switch (val.asText().toLowerCase()) {
-				case "insert":
-				case "load":
-					this.action = JobAction.LOAD;
-					break;
-				case "update":
-				case "refresh":
-					this.action = JobAction.REFRESH;
-					break;
-				case "sync":
-					this.action = JobAction.SYNC;
-					break;
-				case "prune":
-					this.action = JobAction.PRUNE;
-					break;
-				case "create":
-					this.action = JobAction.CREATE;
-					break;
-				default:
-					throw new ConfigParseException("Not recognized: " + val.asText());
-				}
-				break;
-			case "truncate":
-				this.truncate = val.asBoolean();
-				break;
-			case "drop":
-				this.dropTable = val.asBoolean();
-				break;
-			case "created":
-				this.created = asDateRange(val);
-				break;
-			case "since":
-				this.since = asDate(val);
-				break;
-			case "filter":
-				this.filter = val.toString();
-				break;
-			case "partition":
-				this.partition = asInterval(val);
-				break;
-			case "columns":
-				this.includeColumns = new FieldNames(val.asText());
-				break;
-			case "exclude":
-				this.excludeColumns = new FieldNames(val.asText());
-				break;
-			case "pagesize":
-				this.pageSize = val.asInt();
-				break;
-			case "sqlbefore":
-				this.sqlBefore = val.asText();
-				break;
-			case "sqlafter":
-				this.sqlAfter = val.asText();
-				break;
-			case "minrows":
-				if (!val.isInt()) configError("Not integer: minrows");
-				this.minRows = val.asInt();
-				break;
-			case "maxrows":
-				if (!val.isInt()) configError("Not integer: maxrows");
-				this.maxRows = val.asInt();
-				break;
-			case "threads":
-				this.threads = val.asInt();
-				break;
-			default:
-				throw new ConfigParseException("Not recognized: " + key);
-			}
-		}		
-	}
-	*/
-
-	@Deprecated
-	void setDefaults(DateTimeFactory dateFactory) {
-		if (start == null) {
-			start = dateFactory.getStart();
-		}
-		if (action == null) {
-			if (Boolean.TRUE.equals(truncate))
-				action = JobAction.LOAD;
-			else
-				action = JobAction.REFRESH;
-		}
-		if (source == null) {
-			source = (name != null ? name : target);
-		}
-		if (name == null) {
-			name = (target != null ? target : source);
-		}
-		if (target == null) {
-			target = (source != null ? source : name);
-		}
-		if (pageSize == null && parent != null) {
-			pageSize = parent.getPageSize();
-		}
-	}
-	
-	public JobConfig validate() throws ConfigParseException {
-		new JobConfigValidator(this).validate();
-		return this;
-	}
-
-	void configError(String msg) {
-		throw new ConfigParseException(msg);
-	}
-
 	@JsonIgnore
 	void setCreated(DateTimeRange value) {
 		this.createdRange = value;
 	}
-	
+		
 	void setCreated(JsonNode node) {
 		assert node != null;
 		assert dateFactory != null;
@@ -222,12 +82,12 @@ public class JobConfig {
 	Key getId() { return this.sys_id; }
 	JobAction getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
-	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }	
+	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
+	boolean getAutoCreate() { return this.autoCreate == null ? false : this.autoCreate.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }
+	DateTimeRange getCreated() { return this.createdRange; }
 	String getFilter() { return this.filter; }
-	
-	// TODO: Is this best?
-	DateTimeRange getCreated() { return (this.createdRange == null ? getDefaultRange() : this.createdRange); }	
+		
 	DateTime.Interval getPartitionInterval() { return this.partition; }
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
@@ -237,82 +97,148 @@ public class JobConfig {
 	Integer getPageSize() { return this.pageSize; }
 	Integer getMinRows() { return this.minRows;	}
 	Integer getMaxRows() { return this.maxRows;	}
-	Integer getThreads() { return this.threads;	}
-	
-	/*
-	void notValid(String option) {
-		String msg = option + " not valid with Action: " + getAction().toString();
-		configError(msg);
-	}
-
-	void optionsNotValid(FieldNames names) {
-		for (String name : names) {
-			if (settings.has(name.toLowerCase())) {
-				notValid(name);
-			}
-		}		
-	}
-	
-	void optionsNotValid(String names) {
-		optionsNotValid(new FieldNames(names));
-	}
-	*/
-	
-	/*
-	String getName() throws ConfigParseException {
-		if (this.name != null)   return this.name;
-		if (this.target != null) return this.target;
-		if (this.source != null) return this.source;
-		throw new ConfigParseException("Name not specified");
-	}
-
-	String getSource() throws ConfigParseException {
-		if (this.source != null) return this.source;
-		if (this.target != null) return this.target;
-		if (this.name != null)   return this.name;
-		throw new ConfigParseException("Source not specified");
-	}
-
-	String getTargetName() throws ConfigParseException {
-		if (this.target != null) return this.target;
-		if (this.source != null) return this.source;
-		if (this.name != null)   return this.name;
-		throw new ConfigParseException("Target not specified");
-	}
-
-		
-	void setAction(JobAction action) {
-		this.action = action;
-	}
-
-	JobAction getAction() {
-		if (this.action == null)
-			return this.getTruncate() ? JobAction.LOAD : JobAction.REFRESH;
-		else
-			return this.action;
-	}
-
-	void setTruncate(boolean truncate) {
-		this.truncate = truncate;
-	}
-	*/
-			
-
-//	void setSince(DateTime since) {
-//		this.since = since;
-//	}
-
-
-//	void setFilter(String value) {
-//		this.filter = value;
-//	}
-
-
-
+	Integer getThreads() { return this.threads;	}	
 
 	DateTimeRange getDefaultRange() {
 		assert this.start != null;
 		return new DateTimeRange(null, this.start);
 	}
 
+	void updateFields(DateTimeFactory dateFactory) {
+		JobConfig job = this;
+		// Determine Start
+		if (job.start == null) {
+			job.start = dateFactory.getStart();
+		}
+		// Determine Action
+		if (job.action == null)	job.action = 
+				Boolean.TRUE.equals(job.truncate) ?	
+				JobAction.LOAD : JobAction.REFRESH;		
+		if (job.action == JobAction.INSERT) job.action = JobAction.LOAD;
+		if (job.action == JobAction.UPDATE) job.action = JobAction.REFRESH;
+		
+		// Determine Source, Target and Name
+		if (job.source == null)	job.source = 
+				job.name != null ? job.name : job.target;
+		if (job.name == null) job.name = 
+				job.target != null ? job.target : job.source;
+		if (job.target == null)	job.target = 
+				job.source != null ? job.source : job.name;
+		
+		// AutoCreate defaults to True
+		if (job.autoCreate == null) {
+			if (job.action==JobAction.LOAD || job.action==JobAction.REFRESH || job.action==JobAction.SYNC)
+				job.autoCreate = Boolean.TRUE;			
+		}
+		
+		if (job.sinceExpr == null) {
+			job.sinceDate = null;
+		}
+		else {
+			job.sinceDate = dateFactory.getDate(job.sinceExpr);
+		}
+		
+		if (job.createdExpr == null) {
+			job.createdRange = null;
+		}
+		if (job.createdExpr != null) {
+			job.setDateFactory(dateFactory);
+			job.setCreated(job.createdExpr);
+		}
+
+				
+		/*
+		if (config.pageSize == null && config.parent() != null) {
+			config.pageSize = config.parent.getPageSize();
+		}
+		*/
+	}
+
+	void validate() {
+		JobConfig job = this;
+		if (action == null) configError("Action not specified");
+		if (job.getSource() == null) configError("Source not specified");
+		if (job.getTarget() == null) configError("Target not specified");
+		if (job.getName() == null) configError("Name not specified");
+		booleanValidForActions("Truncate", job.truncate, action, 
+				EnumSet.of(JobAction.LOAD));
+		booleanValidForActions("Drop", job.dropTable, action, 
+				EnumSet.of(JobAction.CREATE));
+		validForActions("Created", job.createdRange, action, 
+				EnumSet.range(JobAction.LOAD, JobAction.SYNC));
+		validForActions("Since", job.sinceDate, action, 
+				EnumSet.range(JobAction.LOAD, JobAction.REFRESH));
+		
+		if (job.sinceDate == null && job.sinceExpr != null)
+			configError("Missing Since Date");
+		if (job.createdRange == null & job.createdExpr != null)
+			configError("Missing Created Range");
+		
+		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
+			configError("Cannot specify both Columns and Exclude");		
+		
+	}
+	
+	/*
+	boolean isValid() {
+		String msg = null;		
+		if (msg==null && action==null) msg = "Missing action";
+		if (msg==null && source==null) msg = "Missing source";
+		if (msg==null && target==null) msg = "Missing target";
+		if (msg==null && sinceDate==null && sinceValue!=null) 
+			msg = "Missing Since Date";
+		if (msg==null && createdRange==null && createdValue!=null) 
+			msg = "Missing Created Range";
+		if (msg != null) logger.warn(Log.INIT, msg);
+		return msg==null ? true : false;
+	}
+	*/
+	
+	
+	static void booleanValidForActions(String name, Boolean value, JobAction action, EnumSet<JobAction> validActions) {
+		if (Boolean.TRUE.equals(value)) {
+			if (!validActions.contains(action))
+				notValid(name, action);
+		}
+	}
+	
+	static void validForActions(String name, Object value, JobAction action, EnumSet<JobAction> validActions)
+			throws ConfigParseException {
+		if (value != null) {
+			if (!validActions.contains(action))
+				notValid(name, action);
+		}		
+	}
+		
+	static void notValid(String option, JobAction action) throws ConfigParseException {
+		String msg = option + " not valid with Action: " + action.toString();
+		configError(msg);
+	}
+
+	static void configError(String msg) {
+		throw new ConfigParseException(msg);
+	}	
+		
+	public String toString() {
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode node = mapper.createObjectNode();
+		node.put("name", getName());
+		node.put("source", getSource());
+		node.put("target", getTarget());
+		node.put("action", action.toString());
+		if (getTruncate()) node.put("truncate", true);
+		if (getDropTable()) node.put("drop", true);
+		if (getAutoCreate()) node.put("autocreate", getAutoCreate());
+		if (getSince() != null) node.put("since", getSince().toString());
+		if (getCreated() != null) node.set("created", getCreated().toJsonNode());
+		if (getFilter() != null) node.put("filter", getFilter());
+		String yaml;
+		try {
+			yaml = mapper.writeValueAsString(node);
+		} catch (JsonProcessingException e) {
+			throw new ConfigParseException(e);
+		}
+		return yaml;
+	}
+		
 }

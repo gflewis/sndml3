@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import sndml.datamart.ConfigParseException;
-import sndml.datamart.LoaderConfig;
 import sndml.datamart.YamlFile;
 import sndml.servicenow.Log;
 import sndml.servicenow.TestManager;
@@ -34,11 +33,12 @@ public class ConfigParseExceptionTest {
 	@Test
 	public void test() throws Exception {
 		TestManager.bannerStart(this.getClass(), "test", yamlFile);
-		LoaderConfig config = null;
+		fail("Not implemented");
+		// LoaderConfig config = null;
 		Throwable err = null;
 		try {
-			config = yamlFile.getConfig(null);
-			config.validate();
+			// config = yamlFile.getConfig(null);
+			// config.validate();
 		}
 		catch (ConfigParseException e) {
 			err = e;

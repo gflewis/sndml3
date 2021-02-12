@@ -2,6 +2,8 @@ package sndml.datamart;
 
 import static org.junit.Assert.*;
 
+import java.io.StringReader;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -10,8 +12,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import sndml.datamart.JobConfig;
-import sndml.datamart.LoaderJob;
 import sndml.servicenow.*;
 
 @RunWith(Parameterized.class)
@@ -61,10 +61,11 @@ public class PruneTest {
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Prune");
 	    ConfigFactory factory = new ConfigFactory();
-		JobConfig config = factory.jobConfigFromYaml("action: prune, source: incident");
-		logger.info(Log.TEST, "PRUNE " + config.getName());
-		LoaderJob loader = new LoaderJob(profile, config);
-		loader.call();
+	    String yaml = "tables: {source: incident, action: prune}";
+	    LoaderConfig config = factory.loaderConfig(new StringReader(yaml));	    
+	    Loader loader = new Loader(profile, config);	    
+		logger.info(Log.TEST, "PRUNE incident");
+		loader.loadTables();
 	}
 
 }

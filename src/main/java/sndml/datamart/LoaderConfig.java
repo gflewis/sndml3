@@ -1,19 +1,10 @@
 package sndml.datamart;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,26 +12,67 @@ import sndml.servicenow.*;
 
 public class LoaderConfig {
 	
-	final DateTime start = DateTime.now();
-	private DateTimeFactory dateFactory = new DateTimeFactory(start);
-	private ConfigFactory configFactory = new ConfigFactory(start);
+	@JsonIgnore final DateTime start = DateTime.now();
+	@JsonIgnore File metricsFolder = null;
 	
-	// private ObjectNode root;
 	@JsonProperty("threads") public Integer threads;
 	@JsonProperty("pagesize") public Integer pageSize;
-	@JsonProperty("metrics") public File metricsFile = null;
+	@JsonProperty("metrics") public String metricsFileName = null;
 	
 	@JsonProperty("tables")
 	public List<JobConfig> tables = new java.util.ArrayList<JobConfig>();
 
 	private static Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
 	
-	@Deprecated
-	static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 	
 	public LoaderConfig() {		
 	}
 
+	void setMetricsFolder(File metricsFolder) {
+		this.metricsFolder = metricsFolder;
+		if (metricsFolder != null)
+			logger.debug(Log.INIT, "metricsFolder=" + metricsFolder);
+	}
+	
+	File getMetricsFile() {
+		return metricsFileName == null ? null : new File(metricsFolder, metricsFileName);
+	}
+
+	DateTimeFactory getDateFactory() {
+		File metricsFile = getMetricsFile();
+		if (metricsFile != null)
+			logger.info(Log.INIT, "metricsFile=" + metricsFile);			
+		DateTimeFactory dateFactory = 
+			(metricsFile != null && metricsFile.canRead()) ?
+			dateFactory = new DateTimeFactory(start, metricsFile) :  
+			new DateTimeFactory(start);
+		logger.info(Log.INIT, String.format("start=%s last=%s", dateFactory.getStart(), dateFactory.getLastStart()));
+		return dateFactory;
+	}
+	
+	java.util.List<JobConfig> getJobs() {
+		return this.tables;
+	}
+		
+	void updateFields() throws ConfigParseException {
+		File metricsFile = getMetricsFile();
+		DateTimeFactory dateFactory = 
+			(metricsFile != null && metricsFile.canRead()) ?
+			dateFactory = new DateTimeFactory(start, metricsFile) :  
+			new DateTimeFactory(start);
+		for (JobConfig table : tables) {
+			table.updateFields(dateFactory);
+		}
+	}
+	
+	void validate() throws ConfigParseException {
+		if (tables.size() < 1) throw new ConfigParseException("No tables");
+		for (JobConfig table : tables) {
+			table.validate();
+		}
+	}
+		
+	/*
 	@Deprecated
 	public LoaderConfig(Table table) throws IOException, ConfigParseException {
 		JobConfig config = configFactory.tableLoader(table);
@@ -51,10 +83,10 @@ public class LoaderConfig {
 	public LoaderConfig(File configFile, Properties props) throws IOException, ConfigParseException {
 		this(new FileReader(configFile), props);
 	}
-	
+
 	@Deprecated		
 	public LoaderConfig(Reader reader, Properties props) throws ConfigParseException {
-		File metricsFolder = null;				
+		File metricsFolder = null;			
 		if (props != null) {
 			String metricsFolderName = props.getProperty("loader.metrics_folder");
 			if (metricsFolderName != null && metricsFolderName.length() > 0)
@@ -108,10 +140,6 @@ public class LoaderConfig {
 		}		
 	}
 	
-	java.util.List<JobConfig> getJobs() {
-		return this.tables;
-	}
-			
 	/*
 	 * Used for JUnit tests
 	 */
@@ -127,10 +155,6 @@ public class LoaderConfig {
 		return this.threads==null ? 0 : this.threads.intValue();
 	}
 		
-	File getMetricsFile() {
-		return this.metricsFile;
-	}
-		
 	Integer getPageSize() {
 		return pageSize;
 	}
@@ -142,8 +166,4 @@ public class LoaderConfig {
 		return start;
 	}
 
-	void validate() throws ConfigParseException {
-		for (JobConfig job : tables) 
-			job.validate();
-	}
 }

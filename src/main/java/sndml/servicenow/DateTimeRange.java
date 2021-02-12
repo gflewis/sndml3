@@ -1,5 +1,8 @@
 package sndml.servicenow;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 public class DateTimeRange {
 
 	protected final DateTime start;
@@ -50,5 +53,13 @@ public class DateTimeRange {
 				hasStart() ? start.toString() : "null", 
 				hasEnd() ? end.toString() : "null");
 	}
-		
+	
+	public ArrayNode toJsonNode() {
+		ObjectMapper mapper = new ObjectMapper();		
+		ArrayNode node = mapper.createArrayNode();
+		node.add(hasStart() ? start.toString() : null);
+		node.add(hasEnd() ? end.toString() : null);
+		return node;
+	}
+
 }

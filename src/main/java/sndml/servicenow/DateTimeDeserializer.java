@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+@SuppressWarnings("serial")
+@Deprecated
 public class DateTimeDeserializer extends StdDeserializer<DateTime> {
 
 	public DateTimeDeserializer(Class<?> vc) {

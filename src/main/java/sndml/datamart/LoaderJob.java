@@ -34,7 +34,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	}
 	
 	LoaderJob(Loader parent, JobConfig config) throws ConfigParseException {
-		config.validate();
+		// config.validate();
 		this.session = parent.getSession();
 		this.db = parent.getDatabase();
 		this.table = session.table(config.getSource());
@@ -46,7 +46,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	}
 	
 	LoaderJob(ConnectionProfile profile, JobConfig config) {
-		config.validate();
+		// config.validate();
 		this.session = profile.getSession();
 		this.db = profile.getDatabase();
 		this.table = session.table(config.getSource());
@@ -57,7 +57,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	}
 	
 	LoaderJob(Session session, Database db, JobConfig config) {
-		config.validate();
+		// config.validate();
 		this.session = session;
 		this.db = db;
 		this.table = session.table(config.getSource());
@@ -178,7 +178,8 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			
 			DateTime.Interval partitionInterval = config.getPartitionInterval();
 			TableReaderFactory factory;
-			DateTime since = config.getSince();			
+			DateTime since = config.getSince();	
+			logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
 			if (since != null) {
 				factory = new KeySetTableReaderFactory(table, writer);
 				factory.setUpdated(since);				

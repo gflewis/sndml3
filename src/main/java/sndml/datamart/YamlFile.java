@@ -1,9 +1,7 @@
 package sndml.datamart;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.Properties;
+import java.io.IOException;
 
 /**
  * A file with YAML Loader Config instructions. 
@@ -16,18 +14,18 @@ public class YamlFile extends File {
 	public YamlFile(File file) {		
 		super(file.getPath());
 	}
-	
-	public FileReader getReader() throws FileNotFoundException {
-		return new FileReader(this);
-	}
-	
-	public LoaderConfig getConfig(Properties profile) throws ConfigParseException, FileNotFoundException {
-		return new LoaderConfig(getReader(), profile);
+		
+	public LoaderConfig getConfig() 
+			throws ConfigParseException, IOException {
+		ConfigFactory factory = new ConfigFactory();
+		LoaderConfig config = factory.loaderConfig(this, null);
+		return config;
 	}
 	
 	public Loader getLoader(ConnectionProfile profile) 
-			throws ConfigParseException, FileNotFoundException{
-		return new Loader(profile, getConfig(profile.getProperties()));
+			throws ConfigParseException, IOException {
+		LoaderConfig config = getConfig();
+		return new Loader(profile, config);
 	}
 	
 	/**

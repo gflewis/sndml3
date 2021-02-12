@@ -80,17 +80,5 @@ public class Parameters extends LinkedHashMap<String, String> {
 		}
 		return node;		
 	}
-		
-	/**
-	 * Append a list of parameters to a JSON Object
-	 * @param params - The parameters which are to be appended
-	 * @param obj - The JSON Object to which the parameters are appended
-	 */
-	/*
-	public static void appendToObject(Parameters params, JSONObject obj) {
-		for (Map.Entry<String,String> entry : params.entrySet()) {
-			obj.put(entry.getKey(), entry.getValue());
-		}		
-	}
-	*/
+			
 }
