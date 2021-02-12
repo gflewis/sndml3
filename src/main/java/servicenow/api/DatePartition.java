@@ -45,7 +45,7 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 	static public String partName(DateTime.Interval interval, DateTimeRange partRange) {
 		String prefix = interval.toString().substring(0,1);
 		String datepart = partRange.getStart().toString();
-		if (interval == Interval.HOUR) {
+		if (interval == Interval.HOUR || interval == Interval.MINUTE) {
 			if (datepart.length() == DateTime.DATE_ONLY) datepart += " 00:00:00";
 			datepart = datepart.replaceAll(" ", "T");
 		}
