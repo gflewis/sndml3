@@ -36,7 +36,7 @@ public class AppRunLogger extends ProgressLogger {
 		body.put("status", status);
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		ObjectNode response = request.execute();
-		logger.info(Log.RESPONSE, response.toPrettyString());
+		logger.info(Log.RESPONSE, "key=" + runKey + " " + response.toString());
 	}	
 
 }

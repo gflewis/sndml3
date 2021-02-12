@@ -39,7 +39,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		start();
 		while (!workerPool.isTerminated()) {
-			logger.info("main awaiting threadpool termination");
+			logger.info(Log.DAEMON, "main awaiting threadpool termination");
 			workerPool.awaitTermination(120, TimeUnit.SECONDS);
 		}
 		stop();

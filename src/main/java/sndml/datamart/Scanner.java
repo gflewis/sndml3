@@ -43,18 +43,19 @@ public class Scanner extends TimerTask {
 		
 	@Override
 	public void run() {
+		Log.setGlobalContext();		
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
 			ObjectNode response = request.execute();
-			logger.info(Log.RESPONSE, response.toPrettyString());
+			logger.debug(Log.RESPONSE, response.toPrettyString());
 			ObjectNode objResult = (ObjectNode) response.get("result");
 			ArrayNode runlist = (ArrayNode) objResult.get("runs");
+			if (runlist.size() == 0) logger.info(Log.DAEMON, "No Runs");				
 			for (int i = 0; i < runlist.size(); ++i) {
 				ObjectNode obj = (ObjectNode) runlist.get(i);
 				JobConfig config = configFactory.jobConfig(obj);
-				statusLogger.setRunKey(config.getId()).setStatus("prepare");
-				// setRunStatus(config.getId(), "prepare");
+				statusLogger.setRunKey(config.getSysId()).setStatus("prepare");
 				ActionRunner runner = new ActionRunner(session, profile, config);
 				workerPool.execute(runner);
 			}

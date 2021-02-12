@@ -79,7 +79,8 @@ public class JobConfig {
 	String getName() { return this.name; }
 	String getSource() { return this.source; }
 	String getTarget() { return this.target; }
-	Key getId() { return this.sys_id; }
+	Key getSysId() { return this.sys_id; }
+	String getNumber() { return this.number; }
 	Action getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
@@ -222,6 +223,8 @@ public class JobConfig {
 	public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
+		if (sys_id != null) node.put("sys_id",  sys_id.toString());
+		if (number != null) node.put("number",  getNumber());
 		node.put("name", getName());
 		node.put("source", getSource());
 		node.put("target", getTarget());

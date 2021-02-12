@@ -11,7 +11,7 @@ public class ActionRunner implements Runnable {
 
 	final Session session;
 	final Database db;
-	final JobConfig settings;
+	final JobConfig config;
 	final Key key;
 	final String jobname;
 	final Thread mainThread;
@@ -21,8 +21,8 @@ public class ActionRunner implements Runnable {
 	public ActionRunner(Session session, ConnectionProfile profile, JobConfig settings) {
 		this.session = session;
 		this.db = profile.getDatabase();
-		this.settings = settings;
-		this.key = settings.getId();
+		this.config = settings;
+		this.key = settings.getSysId();
 		this.jobname = settings.getName();
 		assert key != null;
 		assert key.isGUID();
@@ -34,6 +34,7 @@ public class ActionRunner implements Runnable {
 	
 	@Override
 	public void run() {
+		Thread.currentThread().setName(config.getNumber());
 		try {
 			runLogger.setStatus("running");
 			job.call();
