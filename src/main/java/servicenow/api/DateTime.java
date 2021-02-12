@@ -25,7 +25,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static final int SEC_PER_WEEK = 7 * SEC_PER_DAY;
 	public static final int MILLISEC_PER_DAY = 1000 * SEC_PER_DAY;
 	
-	public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR}
+	public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE}
 	
 	static ThreadLocal<DateFormat> dateOnlyFormat = 
 		new ThreadLocal<DateFormat>() {
@@ -206,6 +206,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	
 	public DateTime truncate(Interval interval) {
 		switch (interval) {
+		case MINUTE:
+			return this.truncate(SEC_PER_MINUTE);
 		case HOUR: 
 			return this.truncate(SEC_PER_HOUR);
 		case DAY:
@@ -293,6 +295,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			return addSeconds(SEC_PER_DAY);
 		case HOUR:
 			return addSeconds(SEC_PER_HOUR);
+		case MINUTE:
+			return addSeconds(SEC_PER_MINUTE);
 		default:
 			throw new AssertionError("Invalid interval");
 		}	
