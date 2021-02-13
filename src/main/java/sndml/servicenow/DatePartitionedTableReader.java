@@ -102,7 +102,7 @@ public class DatePartitionedTableReader extends TableReader {
 		range = stats.getCreated();
 		assert range.getStart() != null;
 		assert range.getEnd() != null;
-		// partition = new DateTimeArrayPartition(range, interval);
+		partition = new DatePartition(range, interval);
 		partReaders = new ArrayList<TableReader>();
 		logger.debug(Log.INIT, "partition=" + partition.toString());		
 		for (DateTimeRange partRange : partition) {
