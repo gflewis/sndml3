@@ -108,7 +108,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * @param month - month from 1 to 12
 	 * @param day - day of the month
 	 */
-	public DateTime(int year, int month, int day) {
+	private DateTime(int year, int month, int day) {
 		this(String.format("%04d-%02d-%02d", year, month, day));
 	}
 	
@@ -125,7 +125,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * <p>Construct a {@link DateTime} which is the number of seconds since 1970-01-01 00:00:00.</p>
 	 * <p><b>Warning:</b> This constructor expects seconds, <b>not</b> milliseconds.</p>
 	 */
-	public DateTime(Long seconds) {
+	private DateTime(Long seconds) {
 		boolean date_only = (seconds % SEC_PER_DAY == 0);
 		DateFormat df = date_only ? dateOnlyFormat.get() : dateTimeFormat.get();
 		this.dt = new Date(1000 * seconds);
@@ -217,12 +217,17 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	
 	public DateTime truncate(Interval interval) {
 		switch (interval) {
+		case MINUTE:
+			return this.truncate(SEC_PER_MINUTE);
+		case FIVEMIN:
+			return this.truncate(SEC_PER_MINUTE * 5);
 		case HOUR: 
 			return this.truncate(SEC_PER_HOUR);
 		case DAY:
 			return this.truncate(SEC_PER_DAY);
 		case WEEK:
-			return this.truncate(SEC_PER_WEEK);
+			// Jan 1, 1970 was a Thursday, so add 3 days
+			return this.truncate(SEC_PER_WEEK).addSeconds(3 * SEC_PER_DAY);
 		case MONTH:
 			return new DateTime(this.toString().substring(0, 7) + "-01");
 		case QUARTER:
@@ -304,9 +309,53 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			return addSeconds(SEC_PER_DAY);
 		case HOUR:
 			return addSeconds(SEC_PER_HOUR);
+		case FIVEMIN:
+			return addSeconds(SEC_PER_MINUTE * 5);
+		case MINUTE:
+			return addSeconds(SEC_PER_MINUTE);
 		default:
 			throw new AssertionError("Invalid interval");
 		}	
+	}
+	
+	public DateTime decrementBy(Interval interval) {
+		int y, m;
+		switch (interval) {
+		case YEAR:
+			return new DateTime(getYear() - 1, 1, 1);
+		case QUARTER:
+			// return first day of prior quarter
+			y = getYear();
+			m = getMonth();
+			m -= 3;
+			if (m < 1) {
+				m = 10;
+				y -= 1;				
+			}
+			return new DateTime(y, m, 1);
+		case MONTH:
+			// return first day of prior month
+			y = getYear();
+			m = getMonth();
+			m -= 1;
+			if (m < 1) {
+				m = 12;
+				y -= 1;
+			}
+			return new DateTime(y, m, 1);
+		case WEEK:
+			return subtractSeconds(SEC_PER_WEEK);
+		case DAY:
+			return subtractSeconds(SEC_PER_DAY);
+		case HOUR:
+			return subtractSeconds(SEC_PER_HOUR);
+		case FIVEMIN:
+			return subtractSeconds(SEC_PER_MINUTE * 5);
+		case MINUTE:
+			return subtractSeconds(SEC_PER_MINUTE);
+		default:
+			throw new AssertionError("Invalid interval");		
+		}
 	}
 	
 	/**

@@ -7,7 +7,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.DatePartition;
 import sndml.servicenow.DateTime;
 import sndml.servicenow.DateTimeRange;
 import sndml.servicenow.InvalidDateTimeException;
@@ -94,6 +93,15 @@ public class DateTimeTest {
 	}
 	
 	@Test
+	public void testDecrement() throws Exception {
+		DateTime d1 = new DateTime("2014-01-01 15:34:53");
+		DateTime d2 = new DateTime("2014-01-01 00:00:00");
+		DateTime d3 = new DateTime("2013-12-01 00:00:00");
+		assertEquals(d3, d1.decrementBy(Interval.MONTH));
+		assertEquals(d3, d2.decrementBy(Interval.MONTH));				
+	}
+	
+	@Test
 	public void testTruncate() throws Exception {
 		DateTime start;
 		start = new DateTime("2014-05-10");
@@ -107,16 +115,34 @@ public class DateTimeTest {
 	}
 	
 	@Test
+	public void testTruncateWeek() throws Exception {
+		// Week should be truncated to Sunday morning
+		DateTime start = new DateTime("2021-02-10 14:30:00");
+		assertEquals(new DateTime("2021-02-07"), start.truncate(Interval.WEEK));				
+	}
+	
+	@Test
 	public void testPartition() throws Exception {
 		DateTime start = new DateTime("2014-05-10");
-		DateTime end = new DateTime("2016-12-17");
+		DateTime end   = new DateTime("2016-12-17");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartition part = new DatePartition(range, Interval.MONTH);
-//		logger.info("partition=" + part.toString());
-		DateTimeRange first = part.get(0);
-		DateTimeRange last = part.get(part.size() - 1);
-		assertEquals(start.truncate(Interval.MONTH), first.getStart());
-		assertEquals(new DateTime("2017-01-01"), last.getEnd());
+		DatePartition partition = new DatePartition(range, Interval.MONTH);
+		logger.info("partition=" + partition.toString());
+		int size = 0;
+		DateTimeRange newest = null;
+		DateTimeRange oldest = null;
+		for (DateTimeRange part : partition) {
+			if (size == 0) newest = part;
+			oldest = part;
+			size += 1;
+		}
+		assertNotNull(newest);
+		assertNotNull(oldest);
+		logger.info(Log.TEST, String.format("Size=%d Newest=%s Oldest=%s", 
+				size, newest.toString(), oldest.toString()));
+		assertTrue(size > 0);
+		assertEquals(start, oldest.getStart());		
+		assertEquals(end, newest.getEnd());
 	}
 	
 }

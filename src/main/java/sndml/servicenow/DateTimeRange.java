@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import java.util.EnumSet;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -60,6 +62,17 @@ public class DateTimeRange {
 		node.add(hasStart() ? start.toString() : null);
 		node.add(hasEnd() ? end.toString() : null);
 		return node;
+	}
+	
+	public String getName(Interval interval) {
+		EnumSet<Interval> smallRange = EnumSet.range(Interval.HOUR, Interval.MINUTE);
+		if (smallRange.contains(interval)) {
+			return this.getStart().toString().replaceAll(" ", "T");
+		}
+		else {
+			String prefix = interval.toString().substring(0,1);			
+			return prefix + this.getStart().toString();
+		}
 	}
 
 }

@@ -1,46 +1,65 @@
 package sndml.servicenow;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 
-import sndml.servicenow.Interval;
-
-public class DatePartition extends ArrayList<DateTimeRange> {
-
-	private static final long serialVersionUID = 1L;
+public class DatePartition implements Iterable<DateTimeRange> {
 	
-	final Interval interval;
+	private final DateTimeRange range;
+	private final Interval interval;
+//	private final int size;
+//	private final DateTimeRange oldest;
+//	private final DateTimeRange newest;
 
 	public DatePartition(DateTimeRange range, Interval interval) {
-		super();
 		assert range != null;
 		assert interval != null;
-		this.interval = interval;		
 		if (range.getStart() == null)
 			throw new IllegalArgumentException("start date is null");
 		if (range.getEnd() == null)
 			throw new IllegalArgumentException("end date is null");
 		if (range.getEnd().compareTo(range.getStart()) < 0)
 			throw new IllegalArgumentException("end date is before start date");
-		DateTime start = range.getStart().truncate(interval);
-		DateTime end;
-		do {
-			end = start.incrementBy(interval);
-			assert end.compareTo(start) > 0;
-			this.add(new DateTimeRange(start, end));
-			start = end;
-		} while (range.getEnd().compareTo(end) > 0);
+		this.range = range;
+		this.interval = interval;
+//		int size = 0;
+//		DateTimeRange oldest = null;
+//		DateTimeRange newest = null;
+//		for (DateTimeRange part : this) {
+//			size += 1;
+//			if (newest == null) newest = part;
+//			oldest = part;
+//		}
+//		this.size = size;
+//		this.oldest = oldest;
+//		this.newest = newest;					
+	}
+	
+	public DateTimeRange getRange() {
+		return this.range;
 	}
 	
 	public Interval getInterval() {
-		return interval;
+		return this.interval;			
 	}
 	
+//	public DateTimeRange getNewest() {
+//		return oldest;
+//	}
+//	
+//	public DateTimeRange getOldest() {
+//		return newest;
+//	}
+//	
+//	public int size() {
+//		return size;
+//	}
+	
 	public String toString() {
-		DateTimeRange first = get(0);
-		DateTimeRange last = get(size() - 1);
-		return String.format("%s[interval=%s size=%d min=%s max=%s]", 
-				this.getClass().getSimpleName(), interval.toString(), size(), first.getStart(), last.getEnd());
+//		return String.format("%s[interval=%s size=%d min=%s max=%s]", 
+//				this.getClass().getSimpleName(), interval.toString(), size, oldest.getStart(), newest.getEnd());
+		return range.toString() + " by " + interval.toString();
 	}
+	
 
 	static public String partName(Interval interval, DateTimeRange partRange) {
 		String prefix = interval.toString().substring(0,1);
@@ -51,4 +70,13 @@ public class DatePartition extends ArrayList<DateTimeRange> {
 		}
 		return prefix + datepart;
 	}
+
+	@Override
+	/**
+	 * Process partitions beginning with the most recent
+	 */
+	public Iterator<DateTimeRange> iterator() {
+		return new DateTimeBackwardsIterator(this.range, this.interval);
+	}
+
 }

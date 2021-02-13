@@ -18,18 +18,18 @@ public class DateTimeExpr extends DateTime {
 		super(value, fmtlen);
 	}
 
-	@Deprecated
-	public DateTimeExpr(int year, int month, int day) {
-		super(year, month, day);
-	}
+//	@Deprecated
+//	public DateTimeExpr(int year, int month, int day) {
+//		super(year, month, day);
+//	}
 
 	public DateTimeExpr(Date value) {
 		super(value);
 	}
 
-	public DateTimeExpr(Long seconds) {
-		super(seconds);
-	}
+//	public DateTimeExpr(Long seconds) {
+//		super(seconds);
+//	}
 	
 	public DateTimeExpr(JsonNode node, DateTimeFactory factory) 
 			throws ConfigParseException {
