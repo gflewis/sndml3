@@ -55,17 +55,18 @@ public class DatePartitionTest {
 		DateTimeRange range = new DateTimeRange(new DateTime(start), new DateTime(end));
 		DatePartition partition = new DatePartition(range, interval);
 		assertNotNull(partition);
-		DateTimeRange first = null, last = null;
+		DateTimeRange oldest = null, newest = null;
 		int size = 0;
 		for (DateTimeRange part : partition) {
-			if (size == 0) last = part;
-			first = part;
+			assertTrue(part.getStart().compareTo(part.getEnd()) < 0);
+			if (size == 0) newest = part;
+			oldest = part;
 			size += 1;
 			logger.info(Log.TEST, String.format("%d %s", size, part.toString()));			
 		}
 		if (size > 0) {
-			assertTrue(first.getStart().equals(new DateTime(start)));
-			assertTrue(last.getEnd().equals(new DateTime(end)));			
+			assertTrue(oldest.getStart().toString().compareTo(start) <= 0);
+			assertTrue(newest.getEnd().toString().compareTo(end) >= 0);
 		}
 		return size;
 		

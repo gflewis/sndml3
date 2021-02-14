@@ -141,8 +141,9 @@ public class DateTimeTest {
 		logger.info(Log.TEST, String.format("Size=%d Newest=%s Oldest=%s", 
 				size, newest.toString(), oldest.toString()));
 		assertTrue(size > 0);
-		assertEquals(start, oldest.getStart());		
-		assertEquals(end, newest.getEnd());
+		assertEquals("2014-05-01", oldest.getStart().toString());
+		assertEquals("2016-12-01", newest.getStart().toString());
+		assertEquals("2017-01-01", newest.getEnd().toString());
 	}
 	
 }

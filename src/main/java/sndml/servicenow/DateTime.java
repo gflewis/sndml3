@@ -216,6 +216,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	}
 	
 	public DateTime truncate(Interval interval) {
+		int y, m;
 		switch (interval) {
 		case MINUTE:
 			return this.truncate(SEC_PER_MINUTE);
@@ -229,18 +230,21 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			// Jan 1, 1970 was a Thursday, so add 3 days
 			return this.truncate(SEC_PER_WEEK).addSeconds(3 * SEC_PER_DAY);
 		case MONTH:
-			return new DateTime(this.toString().substring(0, 7) + "-01");
+			y = this.getYear();
+			m = this.getMonth();
+			return new DateTime(y, m, 1);
 		case QUARTER:
-			int y = this.getYear();
-			int m = 3 * ((this.getMonth() - 1) / 3) + 1;
+			y = this.getYear();
+			m = 3 * ((this.getMonth() - 1) / 3) + 1;
 			return new DateTime(y, m, 1);
 		case YEAR:
-			return new DateTime(this.toString().substring(0, 4) + "-01-01");
+			y = this.getYear();
+			return new DateTime(y, 1, 1);
 		default:
 			throw new AssertionError("Invalid interval");
 		}		
 	}
-
+	
 	/**
 	 * Return 4 digit year
 	 */
@@ -277,6 +281,11 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return new DateTime(this.getSeconds() - seconds);
 	}
 	
+	/**
+	 * Return a new {@link DateTime} which is the original object incremented
+	 * to the start of the next interval.
+	 * Assumes original object is truncated.
+	 */
 	public DateTime incrementBy(Interval interval) {
 		int y, m;
 		switch (interval) {
@@ -318,6 +327,11 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		}	
 	}
 	
+	/**
+	 * Return a new {@link DateTime} which is the original object decremented
+	 * to the start of the prior interval. 
+	 * Assumes original object is truncated.
+	 */
 	public DateTime decrementBy(Interval interval) {
 		int y, m;
 		switch (interval) {

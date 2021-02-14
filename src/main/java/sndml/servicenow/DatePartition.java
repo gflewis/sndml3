@@ -6,9 +6,6 @@ public class DatePartition implements Iterable<DateTimeRange> {
 	
 	private final DateTimeRange range;
 	private final Interval interval;
-//	private final int size;
-//	private final DateTimeRange oldest;
-//	private final DateTimeRange newest;
 
 	public DatePartition(DateTimeRange range, Interval interval) {
 		assert range != null;
@@ -21,17 +18,6 @@ public class DatePartition implements Iterable<DateTimeRange> {
 			throw new IllegalArgumentException("end date is before start date");
 		this.range = range;
 		this.interval = interval;
-//		int size = 0;
-//		DateTimeRange oldest = null;
-//		DateTimeRange newest = null;
-//		for (DateTimeRange part : this) {
-//			size += 1;
-//			if (newest == null) newest = part;
-//			oldest = part;
-//		}
-//		this.size = size;
-//		this.oldest = oldest;
-//		this.newest = newest;					
 	}
 	
 	public DateTimeRange getRange() {
@@ -41,19 +27,7 @@ public class DatePartition implements Iterable<DateTimeRange> {
 	public Interval getInterval() {
 		return this.interval;			
 	}
-	
-//	public DateTimeRange getNewest() {
-//		return oldest;
-//	}
-//	
-//	public DateTimeRange getOldest() {
-//		return newest;
-//	}
-//	
-//	public int size() {
-//		return size;
-//	}
-	
+		
 	public String toString() {
 //		return String.format("%s[interval=%s size=%d min=%s max=%s]", 
 //				this.getClass().getSimpleName(), interval.toString(), size, oldest.getStart(), newest.getEnd());
@@ -73,10 +47,11 @@ public class DatePartition implements Iterable<DateTimeRange> {
 
 	@Override
 	/**
-	 * Process partitions beginning with the most recent
+	 * Process the ranges in a partition beginning with the most recent
+	 * and ending with the earliest.
 	 */
 	public Iterator<DateTimeRange> iterator() {
-		return new DateTimeBackwardsIterator(this.range, this.interval);
+		return new DatePartitionIterator(this.range, this.interval);
 	}
 
 }

@@ -2,7 +2,12 @@ package sndml.servicenow;
 
 import java.util.Iterator;
 
-public class DateTimeBackwardsIterator implements Iterator<DateTimeRange> {
+/**
+ * Iterate through the ranges of a partition backwards, starting with
+ * the most recent, and ending with the earliest.
+ *
+ */
+public class DatePartitionIterator implements Iterator<DateTimeRange> {
 	
 	final DateTimeRange range;
 	final Interval interval;
@@ -11,7 +16,7 @@ public class DateTimeBackwardsIterator implements Iterator<DateTimeRange> {
 	final int size;
 	DateTimeRange current;
 
-	public DateTimeBackwardsIterator(DateTimeRange range, Interval interval) {
+	public DatePartitionIterator(DateTimeRange range, Interval interval) {
 		assert range != null;
 		assert interval != null;
 		if (range.getStart() == null)
@@ -29,8 +34,9 @@ public class DateTimeBackwardsIterator implements Iterator<DateTimeRange> {
 		}
 		else {
 			DateTime end = range.getEnd();
-			DateTime start = end.truncate(interval);
-			if (start.equals(end)) start = start.decrementBy(interval);
+			DateTime endTrunc = end.truncate(interval);
+			if (endTrunc.compareTo(end) < 0) end = endTrunc.incrementBy(interval);
+			DateTime start = end.decrementBy(interval);
 			assert start.compareTo(end) < 0;
 			this.newest = new DateTimeRange(start, end);
 			int size = 1;
@@ -40,7 +46,6 @@ public class DateTimeBackwardsIterator implements Iterator<DateTimeRange> {
 				start = end.decrementBy(interval);
 				assert start.compareTo(end) < 0;
 			}
-			if (start.compareTo(range.getStart()) < 0) start = range.getStart();
 			this.oldest = new DateTimeRange(start, end);
 			this.size = size;
 		}
@@ -59,11 +64,7 @@ public class DateTimeBackwardsIterator implements Iterator<DateTimeRange> {
 		else {
 			DateTime end = current.getStart();
 			DateTime start = end.decrementBy(interval);
-			if (start.compareTo(range.getStart()) < 0) start = range.getStart();
 			assert start.compareTo(end) < 0;
-			assert end.compareTo(start) > 0;
-			assert start.compareTo(range.getStart()) >= 0;
-			assert end.compareTo(range.getEnd()) <= 0;
 			current = new DateTimeRange(start, end);
 		}
 		assert current != null;
