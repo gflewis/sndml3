@@ -3,11 +3,11 @@ package sndml.servicenow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SLF4jProgressLogger extends ProgressLogger {
+public class Log4jProgressLogger extends ProgressLogger {
 	
 	protected final Logger logger;
 
-	public SLF4jProgressLogger(@SuppressWarnings("rawtypes") Class clazz) {
+	public Log4jProgressLogger(@SuppressWarnings("rawtypes") Class clazz) {
 		super();
 		this.logger = LoggerFactory.getLogger(clazz);
 	}
