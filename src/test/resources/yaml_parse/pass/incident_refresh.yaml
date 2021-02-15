@@ -1,0 +1,2 @@
+tables:
+- {source: incident, action: refresh, since: 2021-01-01}

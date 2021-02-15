@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Generate SQL Create Table statement
+#
+# Usage:
+#   sndml-export <profile> <tablename>
+#
+source sndml-setup $1
+tablename=$2
+log4j=$SNDML_HOME/src/main/resources/log4j2-quiet.xml
+java -ea -cp $SNDML_JAR -Dlog4j.configurationFile=$log4j sndml.servicenow.FileWriter -p $SNDML_PROFILE -t $tablename

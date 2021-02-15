@@ -30,6 +30,6 @@
     <Logger name="org.apache.http.headers" level="info" />
     <Logger name="org.apache.http.impl" level="info" />
     <Logger name="org.apache.http.wire" level="info" />
-    <Logger name="servicenow" level="trace" />>
+    <Logger name="sndml" level="trace" />>
   </Loggers>
 </Configuration>
