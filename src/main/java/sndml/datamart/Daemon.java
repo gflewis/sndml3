@@ -23,27 +23,38 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private final int intervalSeconds;
 	private final int threadCount;
 	private final Scanner scanner;
+	static Thread mainThread; 
+	
 	private Timer timer;
 	
 	public Daemon(ConnectionProfile profile) {
+		mainThread = Thread.currentThread();
 		this.profile = profile;
+		agentName = profile.getProperty("loader.agent", "main");
+		Log.setJobContext(agentName);
 		threadCount = profile.getPropertyInt("daemon.threads", 3);
-		intervalSeconds = profile.getPropertyInt("daemon.interval_seconds", 20);
-		agentName = profile.getProperty("loader.agent", "main");		
+		intervalSeconds = profile.getPropertyInt("daemon.interval_seconds", 60);
 		assert threadCount > 0;
 		assert intervalSeconds > 0;
 		workerPool = Executors.newFixedThreadPool(threadCount);
         scanner = new Scanner(profile, workerPool);
 	}
 	
+	/**
+	 * Return the Daemon thread, which is the main thread.
+	 */
+	public static Thread mainThread() {
+		return mainThread;
+	}
+	
 	public void run() throws Exception {
-		Log.setGlobalContext();
+		Log.setJobContext(agentName);
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		start();
+		// Daemon now goes into an endless loop
 		while (!workerPool.isTerminated()) {
-			Log.setJobContext(agentName);			
 			logger.info(Log.DAEMON, "main awaiting threadpool termination");
-			workerPool.awaitTermination(120, TimeUnit.SECONDS);
+			workerPool.awaitTermination(300, TimeUnit.SECONDS);
 		}
 		stop();
 	}
@@ -55,7 +66,8 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 
 	@Override
 	public void start() throws Exception {
-		logger.info(Log.INIT, String.format("interval=%d seconds", intervalSeconds));								
+		Log.setJobContext(agentName);
+		logger.info(Log.INIT, String.format("interval=%ds", intervalSeconds));								
         this.timer = new Timer("scanner", true);
 		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
@@ -65,6 +77,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	
 	@Override
 	public void stop() {
+		Log.setJobContext(agentName);
 		logger.info(Log.FINISH, "begin stop");
 		int waitSec = profile.getPropertyInt("shutdown_seconds", 30);
 		boolean terminated = false;
@@ -82,7 +95,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		else {
 			logger.warn("Some threads failed to terminate");
 		}
-		logger.info("end stop");		
+		logger.info(Log.FINISH, "end stop");		
 	}
 	
 	@Override

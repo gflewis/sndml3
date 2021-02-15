@@ -13,12 +13,10 @@ public class ShutdownHook extends Thread {
 
 	final Logger logger = LoggerFactory.getLogger(ShutdownHook.class);
 	final ConnectionProfile profile;
-	final Thread mainThread; 
 	final TimerTask dispenser;
 	final ExecutorService workerPool;  // null if single threaded
 	
 	ShutdownHook(ConnectionProfile profile, TimerTask dispenser, ExecutorService workers) {
-		this.mainThread = Thread.currentThread();
 		this.profile = profile;
 		this.dispenser = dispenser;
 		this.workerPool = workers;
@@ -36,7 +34,7 @@ public class ShutdownHook extends Thread {
 		if (workerPool == null) {
 			// must be single threaded
 			// interrupt the main thread
-			mainThread.interrupt();
+			Daemon.mainThread().interrupt();
 			terminated = true;
 		}
 		else {

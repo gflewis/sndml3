@@ -17,7 +17,7 @@ public class ActionRunner implements Runnable {
 	final AppRunLogger runLogger;
 	final Logger logger = LoggerFactory.getLogger(ActionRunner.class);
 	
-	public ActionRunner(ConnectionProfile profile,	JobConfig config) {
+	public ActionRunner(ConnectionProfile profile, JobConfig config) {
 		this.session = profile.getSession();
 		this.db = profile.getDatabase();
 		this.config = config;

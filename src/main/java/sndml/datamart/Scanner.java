@@ -18,7 +18,6 @@ public class Scanner extends TimerTask {
 	final ConnectionProfile profile;
 	final String agentName;
 	final Session session;
-	final Thread mainThread; 
 	final ExecutorService workerPool;
 	final URI getRunList;
 	final URI putRunStatus;
@@ -26,7 +25,6 @@ public class Scanner extends TimerTask {
 	Scanner(ConnectionProfile profile, ExecutorService workerPool) {
 		this.profile = profile;
 		this.workerPool = workerPool;
-		this.mainThread = Thread.currentThread();
 		this.session = profile.getSession();
 		// this.statusLogger = new AppRunLogger(logger, profile, session);
 		this.agentName = profile.getProperty("loader.agent", "main");
@@ -64,19 +62,8 @@ public class Scanner extends TimerTask {
 		catch (Exception e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
 			e.printStackTrace();
-			mainThread.interrupt();				
+			Daemon.mainThread().interrupt();
 		}
 	}
 	
-	/*
-	private void setRunStatus(Key runKey, String status) throws IOException {
-		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", runKey.toString());
-		body.put("status", status);
-		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
-		ObjectNode response = request.execute();
-		logger.info(Log.RESPONSE, response.toPrettyString());
-	}
-	*/
-
 }
