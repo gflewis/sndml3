@@ -4,11 +4,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-<<<<<<< HEAD
-  <version>3.2.1</version>
-=======
   <version>3.4.0</version>
->>>>>>> daemon
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
@@ -21,13 +17,13 @@
   </properties>
 
   <dependencies>
-  
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.1</version>
     </dependency>
-	
+
     <!-- Logging -->
     <!-- we use SLF4J and Apache Log4J2 -->
     <dependency>
@@ -72,12 +68,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
       <version>1.9</version>
-    </dependency> 
+    </dependency>
 	<dependency>
 	    <groupId>commons-daemon</groupId>
 	    <artifactId>commons-daemon</artifactId>
 	    <version>1.2.4</version>
-	</dependency>    
+	</dependency>
 
     <!-- Parsers -->
     <dependency>
@@ -99,7 +95,7 @@
 	    <groupId>com.fasterxml.jackson.dataformat</groupId>
 	    <artifactId>jackson-dataformat-yaml</artifactId>
 	    <version>2.12.1</version>
-	</dependency>    
+	</dependency>
     <!-- Database Dependencies -->
     <dependency>
       <groupId>mysql</groupId>
@@ -113,18 +109,18 @@
       <version>42.2.1.jre7</version>
       <scope>compile</scope>
       <optional>true</optional>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
       <version>8.2.2.jre8</version>
       <scope>compile</scope>
       <optional>true</optional>
-    </dependency>        
+    </dependency>
     <dependency>
       <groupId>com.oracle.ojdbc</groupId>
       <artifactId>ojdbc8</artifactId>
-      <version>19.3.0.0</version>      
+      <version>19.3.0.0</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -132,7 +128,7 @@
 
   <build>
     <plugins>
-    
+
       <plugin>
         <!-- Skip Unit Tests -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -142,7 +138,7 @@
           <skipTests>true</skipTests>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -254,7 +250,7 @@
                   <include>com.oracle.*:*</include>
                   <include>org.apache.*:*</include>
                   <include>commons-*:*</include>
-                  <include>com.fasterxml.jackson.*:*</include>                  
+                  <include>com.fasterxml.jackson.*:*</include>
                   <include>org.jdom:*</include>
                   <include>org.yaml:*</include>
                   <include>org.slf4j:*</include>
@@ -262,7 +258,7 @@
                 </includes>
               </artifactSet>
             </configuration>
-          </execution>         
+          </execution>
           <!-- MS SQL Server JAR -->
           <execution>
             <id>mssql</id>
@@ -294,7 +290,7 @@
                   <include>com.microsoft.*:*</include>
                   <include>org.apache.*:*</include>
                   <include>commons-*:*</include>
-                  <include>com.fasterxml.jackson.*:*</include>                  
+                  <include>com.fasterxml.jackson.*:*</include>
                   <include>org.jdom:*</include>
                   <include>org.yaml:*</include>
                   <include>org.slf4j:*</include>
@@ -307,12 +303,12 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <profiles>
     <profile>
       <!--
         To run api tests
-          mvn surefire:test -P test.api 
+          mvn surefire:test -P test.api
        -->
       <id>test.api</id>
       <build>
@@ -334,7 +330,7 @@
     <profile>
       <!--
         To run datamart tests
-          mvn surefire:test -P test.datamart 
+          mvn surefire:test -P test.datamart
        -->
       <id>test.datamart</id>
       <build>
@@ -353,11 +349,11 @@
         </plugins>
       </build>
     </profile>
-    
+
     <profile>
       <!--
         To create zip file for github release:
-          mvn package -P github.release 
+          mvn package -P github.release
        -->
       <id>github.release</id>
       <activation>
@@ -388,7 +384,7 @@
            </plugin>
         </plugins>
       </build>
-    
+
     </profile>
   </profiles>
 

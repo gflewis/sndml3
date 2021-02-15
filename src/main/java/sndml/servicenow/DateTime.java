@@ -10,7 +10,7 @@ import java.util.TimeZone;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * An immutable thread-safe DateTime field in ServiceNow format. 
+ * An immutable thread-safe DateTime field in ServiceNow format.
  * This class can convert the value to or from a Java Date.
  * All DateTime fields are represented in GMT.
  */
@@ -19,7 +19,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
 	public static final int DATE_ONLY = 10; // length of yyyy-MM-dd
 	public static final int DATE_TIME = 19; // length of yyyy-MM-dd HH:mm:ss
-	
+
 	public static final int HOURS_PER_DAY = 24;
 	public static final int MIN_PER_DAY = 60 * HOURS_PER_DAY;
 	public static final int SEC_PER_DAY = 60 * MIN_PER_DAY;
@@ -27,14 +27,10 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static final int SEC_PER_MINUTE = 60;
 	public static final int SEC_PER_WEEK = 7 * SEC_PER_DAY;
 	public static final int MILLISEC_PER_DAY = 1000 * SEC_PER_DAY;
-	
-<<<<<<< HEAD:src/main/java/servicenow/api/DateTime.java
-	public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE}
-=======
+
 	// public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR}
->>>>>>> daemon:src/main/java/sndml/servicenow/DateTime.java
-	
-	static ThreadLocal<DateFormat> dateOnlyFormat = 
+
+	static ThreadLocal<DateFormat> dateOnlyFormat =
 		new ThreadLocal<DateFormat>() {
 			protected DateFormat initialValue() {
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
@@ -43,7 +39,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			}
 		};
 
-	static ThreadLocal<DateFormat> dateTimeFormat = 
+	static ThreadLocal<DateFormat> dateTimeFormat =
 		new ThreadLocal<DateFormat>() {
 			protected DateFormat initialValue() {
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -51,13 +47,13 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 				return df;
 			}
 		};
-		
+
 	private final String str;
 	private final Date dt;
-		
+
 	/**
 	 * Construct a {@link DateTime} from a string.
-	 * InvalidDateTimeException will be thrown unless the value is 
+	 * InvalidDateTimeException will be thrown unless the value is
 	 * "yyyy-MM-dd" or "yyyy-MM-dd HH:mm:ss".
 	 * @throws InvalidDateTimeException if length is not 10 or 19
 	 * or if argument cannot be converted to a Date.
@@ -94,7 +90,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			throw new InvalidDateTimeException(value);
 		}
 	}
-	
+
 	/**
 	 * Static function to convert a string to DateTime.
 	 * @param s String to be converted.
@@ -105,7 +101,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		if (s.length() == 0) return null;
 		return new DateTime(s);
 	}
-	
+
 	/**
 	 * Construct a DateTime from a year, month and day.
 	 * @param year - 4 digit year with century included
@@ -115,7 +111,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	private DateTime(int year, int month, int day) {
 		this(String.format("%04d-%02d-%02d", year, month, day));
 	}
-	
+
 	/**
 	 * Construct a DateTime from a java.util.Date.
 	 * Milliseconds will be truncated since DateTime only stores seconds.
@@ -124,7 +120,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		// this only stores seconds so truncate any milliseconds
 		this(value.getTime() / 1000);
 	}
-	
+
 	/**
 	 * <p>Construct a {@link DateTime} which is the number of seconds since 1970-01-01 00:00:00.</p>
 	 * <p><b>Warning:</b> This constructor expects seconds, <b>not</b> milliseconds.</p>
@@ -135,19 +131,19 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		this.dt = new Date(1000 * seconds);
 		this.str = df.format(this.dt);
 	}
-	
+
 	/**
 	 * Make a copy of a DateTime
 	 */
 	public DateTime(DateTime orig) {
 		this.dt = orig.dt;
-		this.str = orig.str;		
+		this.str = orig.str;
 	}
-	
+
 	public String toString() {
 		return str;
 	}
-	
+
 	public Date toDate() {
 		return dt;
 	}
@@ -156,12 +152,12 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public int compare(DateTime d1, DateTime d2) {
 		return d1.compareTo(d2);
 	}
-	
+
 	@Override
 	public int compareTo(DateTime other) {
 		return (int) (getSeconds() - other.getSeconds());
 	}
-	
+
 	/**
 	 * Return the number of milliseconds since 1970-01-01 00:00:00 GMT
 	 * @return
@@ -180,7 +176,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public java.sql.Timestamp toTimestamp() {
 		return new java.sql.Timestamp(getMillisec());
 	}
-	
+
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) return false;
@@ -198,19 +194,19 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public int hashCode() {
 		return this.dt.hashCode();
 	}
-		
+
 	public boolean before(DateTime other) {
 		// no datetime is before the beginning of time
-		if (other == null) return false; 
+		if (other == null) return false;
 		return getMillisec() < other.getMillisec();
 	}
-	
+
 	public boolean after(DateTime other) {
 		// no datetime is after the end of time
 		if (other == null) return false;
 		return getMillisec() > other.getMillisec();
 	}
-	
+
 	public DateTime truncate() {
 		return this.truncate(SEC_PER_DAY);
 	}
@@ -218,18 +214,15 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	private DateTime truncate(int sec) {
 		return new DateTime(sec * (this.getSeconds() / sec));
 	}
-	
+
 	public DateTime truncate(Interval interval) {
 		int y, m;
 		switch (interval) {
 		case MINUTE:
 			return this.truncate(SEC_PER_MINUTE);
-<<<<<<< HEAD:src/main/java/servicenow/api/DateTime.java
-=======
 		case FIVEMIN:
 			return this.truncate(SEC_PER_MINUTE * 5);
->>>>>>> daemon:src/main/java/sndml/servicenow/DateTime.java
-		case HOUR: 
+		case HOUR:
 			return this.truncate(SEC_PER_HOUR);
 		case DAY:
 			return this.truncate(SEC_PER_DAY);
@@ -249,23 +242,23 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			return new DateTime(y, 1, 1);
 		default:
 			throw new AssertionError("Invalid interval");
-		}		
+		}
 	}
-	
+
 	/**
 	 * Return 4 digit year
 	 */
 	public int getYear() {
 		return Integer.parseInt(this.toString().substring(0, 4));
 	}
-	
+
 	/**
 	 * Return month from 1 to 12 (January = 1)
 	 */
 	public int getMonth() {
 		return Integer.parseInt(this.toString().substring(5, 7));
 	}
-		
+
 	/**
 	 * <p>Returns a new {@link DateTime} which is the original object incremented
 	 * by the specified amount of time (or decremented if the argument
@@ -276,7 +269,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public DateTime addSeconds(int seconds) {
 		return new DateTime(this.getSeconds() + seconds);
 	}
-	
+
 	/**
 	 * <p>Returns a new {@link DateTime} which is the original object decremented
 	 * by the specified amount of time (or incremented if the argument
@@ -287,7 +280,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public DateTime subtractSeconds(int seconds) {
 		return new DateTime(this.getSeconds() - seconds);
 	}
-	
+
 	/**
 	 * Return a new {@link DateTime} which is the original object incremented
 	 * to the start of the next interval.
@@ -306,7 +299,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			m += 3;
 			if (m > 12) {
 				m = 1;
-				y += 1;				
+				y += 1;
 			}
 			return new DateTime(y, m, 1);
 		case MONTH:
@@ -325,21 +318,18 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			return addSeconds(SEC_PER_DAY);
 		case HOUR:
 			return addSeconds(SEC_PER_HOUR);
-<<<<<<< HEAD:src/main/java/servicenow/api/DateTime.java
-=======
 		case FIVEMIN:
 			return addSeconds(SEC_PER_MINUTE * 5);
->>>>>>> daemon:src/main/java/sndml/servicenow/DateTime.java
 		case MINUTE:
 			return addSeconds(SEC_PER_MINUTE);
 		default:
 			throw new AssertionError("Invalid interval");
-		}	
+		}
 	}
-	
+
 	/**
 	 * Return a new {@link DateTime} which is the original object decremented
-	 * to the start of the prior interval. 
+	 * to the start of the prior interval.
 	 * Assumes original object is truncated.
 	 */
 	public DateTime decrementBy(Interval interval) {
@@ -354,7 +344,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			m -= 3;
 			if (m < 1) {
 				m = 10;
-				y -= 1;				
+				y -= 1;
 			}
 			return new DateTime(y, m, 1);
 		case MONTH:
@@ -378,10 +368,10 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		case MINUTE:
 			return subtractSeconds(SEC_PER_MINUTE);
 		default:
-			throw new AssertionError("Invalid interval");		
+			throw new AssertionError("Invalid interval");
 		}
 	}
-	
+
 	/**
 	 * Returns the current time.
 	 * @return Current datetime.
@@ -400,7 +390,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static DateTime now(int lagSeconds) {
 		return now().subtractSeconds(lagSeconds);
 	}
-	
+
 	/**
 	 * Returns the current GMT date.
 	 * @return Midnight of the current GMT date.
@@ -412,5 +402,5 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 //		DateTime result = new DateTime(trunc);
 //		return result;
 	}
-	
+
 }
