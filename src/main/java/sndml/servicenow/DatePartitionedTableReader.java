@@ -111,8 +111,7 @@ public class DatePartitionedTableReader extends TableReader {
 			partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
 			partReader.setReaderName(partReader.getReaderName() + "." + partName);
 			partReader.setParent(this);
-			// add to the beginning of the list so it will be sorted by decreasing date
-			partReaders.add(0, partReader);			
+			partReaders.add(partReader);
 		}
 	}
 
