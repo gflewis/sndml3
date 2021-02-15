@@ -16,34 +16,33 @@ public class Scanner extends TimerTask {
 	static Logger logger = LoggerFactory.getLogger(Scanner.class);
 	
 	final ConnectionProfile profile;
-	final String name;
+	final String agentName;
 	final Session session;
 	final Thread mainThread; 
 	final ExecutorService workerPool;
 	final URI getRunList;
 	final URI putRunStatus;
-	final AppRunLogger statusLogger;
 	
 	Scanner(ConnectionProfile profile, ExecutorService workerPool) {
 		this.profile = profile;
 		this.workerPool = workerPool;
 		this.mainThread = Thread.currentThread();
 		this.session = profile.getSession();
-		this.statusLogger = new AppRunLogger(logger, profile, session);
-		this.name = profile.getProperty("loader.agent", "main");
+		// this.statusLogger = new AppRunLogger(logger, profile, session);
+		this.agentName = profile.getProperty("loader.agent", "main");
 		String getRunListPath = profile.getProperty(
 			"loader.url.getrunlist", 
 			"api/x_108443_sndml/getrunlist/");
 		String putRunStatusPath = profile.getProperty(
 			"loader.api.putrunstatus",
 			"api/x_108443_sndml/putrunstatus");
-		this.getRunList = session.getURI(getRunListPath + name);
+		this.getRunList = session.getURI(getRunListPath + agentName);
 		this.putRunStatus = session.getURI(putRunStatusPath);
 	}
 		
 	@Override
 	public void run() {
-		Log.setGlobalContext();		
+		Log.setJobContext(agentName);
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
@@ -54,9 +53,11 @@ public class Scanner extends TimerTask {
 			if (runlist.size() == 0) logger.info(Log.DAEMON, "No Runs");				
 			for (int i = 0; i < runlist.size(); ++i) {
 				ObjectNode obj = (ObjectNode) runlist.get(i);
-				JobConfig config = configFactory.jobConfig(obj);
-				statusLogger.setRunKey(config.getSysId()).setStatus("prepare");
-				ActionRunner runner = new ActionRunner(session, profile, config);
+				JobConfig jobConfig = configFactory.jobConfig(obj);
+				Key runKey = jobConfig.getSysId();
+				AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
+				statusLogger.setStatus("prepare");
+				ActionRunner runner = new ActionRunner(profile, jobConfig);
 				workerPool.execute(runner);
 			}
 		} 

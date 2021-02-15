@@ -14,15 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import sndml.datamart.ConfigParseException;
 import sndml.datamart.YamlFile;
-import sndml.servicenow.FieldNames;
-import sndml.servicenow.Log;
-import sndml.servicenow.Session;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+ 
 public class TestManager {
 	
 	static final Logger logger = LoggerFactory.getLogger(TestManager.class);

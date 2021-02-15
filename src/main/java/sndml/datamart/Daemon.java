@@ -19,6 +19,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		
 	private final ConnectionProfile profile;
 	private final ExecutorService workerPool;
+	private final String agentName;
 	private final int intervalSeconds;
 	private final int threadCount;
 	private final Scanner scanner;
@@ -28,6 +29,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		this.profile = profile;
 		threadCount = profile.getPropertyInt("daemon.threads", 3);
 		intervalSeconds = profile.getPropertyInt("daemon.interval_seconds", 20);
+		agentName = profile.getProperty("loader.agent", "main");		
 		assert threadCount > 0;
 		assert intervalSeconds > 0;
 		workerPool = Executors.newFixedThreadPool(threadCount);
@@ -39,6 +41,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		start();
 		while (!workerPool.isTerminated()) {
+			Log.setJobContext(agentName);			
 			logger.info(Log.DAEMON, "main awaiting threadpool termination");
 			workerPool.awaitTermination(120, TimeUnit.SECONDS);
 		}
@@ -52,12 +55,12 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 
 	@Override
 	public void start() throws Exception {
-		logger.info(Log.INIT, "begin start");								
+		logger.info(Log.INIT, String.format("interval=%d seconds", intervalSeconds));								
         this.timer = new Timer("scanner", true);
 		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);
-		logger.info(Log.INIT,"end start");		
+		logger.debug(Log.INIT,"end start");		
 	}
 	
 	@Override
@@ -68,8 +71,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdownNow();
 		try {
-			terminated = 
-				workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
+			terminated = workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e) {
 			terminated = false;

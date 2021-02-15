@@ -39,21 +39,20 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public Record getRecord(Key sys_id) throws IOException {
-		throw new UnsupportedOperationException();
-		/*
 		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
 		params.add("sysparm_sys_id",  sys_id.toString());
-		JSONObject requestObj = params.toJSON();		
-		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
-		JSONObject responseObj = request.execute();
+		ObjectNode requestObj = params.toJSON();
+		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);
+		ObjectNode responseObj = request.execute();
 		assert responseObj.has("records");
-		RecordList recs = new RecordList(table, responseObj, "records");
+		assert responseObj.get("records").isArray();
+		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
+		RecordList recs = new RecordList(table, recordsObj);
 		assert recs != null;
 		if (recs.size() == 0) return null;
 		return recs.get(0);
-		*/
 	}
 
 	public RecordList getRecords(KeySet keys, boolean displayValue) throws IOException {
@@ -70,16 +69,15 @@ public class JsonTableAPI extends TableAPI {
 	}
 
 	public RecordList getRecords(Parameters params) throws IOException {
-		throw new UnsupportedOperationException();
-		/*
 		Log.setMethodContext(table, "getRecords");
-		JSONObject requestObj = params.toJSON();
+		ObjectNode requestObj = params.toJSON();
 		requestObj.put("sysparm_action", "getRecords");
-		JsonRequest request = new JsonRequest(client, uri, HttpMethod.POST, requestObj);
-		JSONObject responseObj = request.execute();
+		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);
+		ObjectNode responseObj = request.execute();
 		assert responseObj.has("records");
-		return new RecordList(table, responseObj, "records");
-		*/
+		assert responseObj.get("records").isArray();
+		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
+		return new RecordList(table, recordsObj);
 	}
 		
 	public InsertResponse insertRecord(Parameters fields) throws IOException {

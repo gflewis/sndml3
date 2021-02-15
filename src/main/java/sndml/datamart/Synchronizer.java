@@ -17,15 +17,18 @@ public class Synchronizer extends TableReader {
 	final Database db;
 	final String sqlTableName;
 	final WriterMetrics writerMetrics = new WriterMetrics();
+	final ProgressLogger progressLogger;
 	KeySet insertSet;
 	KeySet updateSet;
 	KeySet deleteSet;
 	KeySet skipSet;
 	
-	public Synchronizer(Table table, Database db, String sqlTableName, WriterMetrics parentMetrics) {
+	public Synchronizer(Table table, Database db, String sqlTableName, 
+			WriterMetrics parentMetrics, ProgressLogger progressLogger) {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;
+		this.progressLogger = progressLogger;
 		writerMetrics.setParent(parentMetrics);
 	}
 
@@ -156,7 +159,8 @@ public class Synchronizer extends TableReader {
 		writerMetrics.start();
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		if (insertSet.size() > 0) {
-			DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);
+			DatabaseInsertWriter insertWriter = 
+					new DatabaseInsertWriter(db, table, sqlTableName, progressLogger);
 			insertWriter.setParentMetrics(this.writerMetrics);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
@@ -177,7 +181,8 @@ public class Synchronizer extends TableReader {
 		// Process the Updates
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
-			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
+			DatabaseUpdateWriter updateWriter = 
+					new DatabaseUpdateWriter(db, table, sqlTableName, progressLogger);
 			updateWriter.setParentMetrics(this.writerMetrics);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
@@ -198,7 +203,8 @@ public class Synchronizer extends TableReader {
 		// Process the Deletes
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
-			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+			DatabaseDeleteWriter deleteWriter = 
+					new DatabaseDeleteWriter(db, table, sqlTableName, progressLogger);
 			deleteWriter.setParentMetrics(this.writerMetrics);
 			deleteWriter.open();
 			setLogContext();

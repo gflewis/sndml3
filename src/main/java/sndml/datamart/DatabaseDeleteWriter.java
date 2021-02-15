@@ -9,8 +9,10 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 
 	protected DatabaseDeleteStatement deleteStmt;
 		
-	public DatabaseDeleteWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(db, table, sqlTableName);
+	public DatabaseDeleteWriter(Database db, Table table, String sqlTableName, ProgressLogger progressLogger)
+			throws IOException, SQLException {
+		super(db, table, sqlTableName, progressLogger);
+		progressLogger.setOperation("Deleted");
 	}
 
 	@Override

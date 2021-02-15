@@ -27,8 +27,9 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	final Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseTableWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super();
+	public DatabaseTableWriter(Database db, Table table, String sqlTableName, ProgressLogger progressLogger) 
+			throws IOException, SQLException {
+		super(progressLogger);
 		this.db = db;
 		this.table = table;
 		this.sqlTableName = sqlTableName == null ? table.getName() : sqlTableName;
@@ -57,17 +58,19 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 			writeRecord(rec);
 		}
 		writerMetrics.finish();
-		logProgress(reader, "loaded");
 		db.commit();
+		progressLogger.logProgress(reader.getReaderMetrics(), writerMetrics);
 	}
 	
+	/*
 	private synchronized void logProgress(TableReader reader, String status) {
 		assert reader != null;
+		assert progressLogger != null;
 		reader.setLogContext();
 		ReaderMetrics readerMetrics = reader.getReaderMetrics();
-		if (progressLogger != null) {
-			progressLogger.logProgress(readerMetrics, writerMetrics);			
-		}
+		progressLogger.logProgress(readerMetrics, writerMetrics);
+		
+		
 		else {
 			assert readerMetrics != null;
 			if (readerMetrics.getParent() == null) 
@@ -78,6 +81,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 			
 		}
 	}
+	 */
 
 	abstract void writeRecord(Record rec) throws SQLException;
 	

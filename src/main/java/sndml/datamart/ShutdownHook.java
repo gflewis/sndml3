@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.servicenow.Log;
+
 public class ShutdownHook extends Thread {
 
 	final Logger logger = LoggerFactory.getLogger(ShutdownHook.class);
@@ -25,7 +27,8 @@ public class ShutdownHook extends Thread {
 			
 	@Override
 	public void run() {
-		logger.info("ShutdownHook invoked");
+		Log.setGlobalContext();		
+		logger.info(Log.FINISH, "ShutdownHook invoked");
 		boolean terminated = false;
 		if (dispenser != null) {
 			dispenser.cancel();
@@ -40,15 +43,15 @@ public class ShutdownHook extends Thread {
 			// send interrupt to all workers
 			workerPool.shutdownNow();
 			int waitSec = profile.getPropertyInt("daemon.shutdown_seconds", 30);
-			logger.info("Awaiting worker pool termination");
+			logger.info(Log.FINISH, "Awaiting worker pool termination");
 			try {
 				terminated = workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				logger.error(e.getMessage(), e);
+				logger.error(Log.FINISH, e.getMessage(), e);
 			}
 		}
-		if (!terminated) logger.warn("Some threads failed to terminate");
-		logger.info("ShutdownHook complete");
+		if (!terminated) logger.warn(Log.FINISH, "Some threads failed to terminate");
+		logger.info(Log.FINISH, "ShutdownHook complete");
 	}
 	
 }

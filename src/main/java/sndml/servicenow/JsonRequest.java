@@ -44,6 +44,7 @@ public class JsonRequest extends ServiceNowRequest {
 	public ObjectNode execute() throws IOException {
 		assert client != null;
 		assert uri != null;
+		assert method != null;
 		HttpUriRequest request;
 		HttpEntity requestEntity = null;
 		logger.debug(Log.REQUEST, method.name() + " " + uri.toURL());

@@ -11,8 +11,9 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 
 	protected DatabaseInsertStatement insertStmt;
 	
-	public DatabaseInsertWriter(Database db, Table table, String sqlTableName) throws IOException, SQLException {
-		super(db, table, sqlTableName);
+	public DatabaseInsertWriter(Database db, Table table, String sqlTableName, ProgressLogger progressLogger) 
+			throws IOException, SQLException {
+		super(db, table, sqlTableName, progressLogger);
 	}
 
 	@Override

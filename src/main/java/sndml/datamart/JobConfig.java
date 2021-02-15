@@ -114,9 +114,9 @@ public class JobConfig {
 		// Determine Action
 		if (job.action == null)	job.action = 
 				Boolean.TRUE.equals(job.truncate) ?	
-				Action.LOAD : Action.REFRESH;		
-		if (job.action == Action.INSERT) job.action = Action.LOAD;
-		if (job.action == Action.UPDATE) job.action = Action.REFRESH;
+				Action.INSERT : Action.UPDATE;
+		if (job.action == Action.LOAD)    job.action = Action.INSERT;
+		if (job.action == Action.REFRESH) job.action = Action.UPDATE;
 		
 		// Determine Source, Target and Name
 		if (job.source == null)	job.source = 
@@ -128,7 +128,7 @@ public class JobConfig {
 		
 		// AutoCreate defaults to True
 		if (job.autoCreate == null) {
-			if (job.action==Action.LOAD || job.action==Action.REFRESH || job.action==Action.SYNC)
+			if (job.action==Action.INSERT || job.action==Action.UPDATE || job.action==Action.SYNC)
 				job.autoCreate = Boolean.TRUE;			
 		}
 		
@@ -162,13 +162,13 @@ public class JobConfig {
 		if (job.getTarget() == null) configError("Target not specified");
 		if (job.getName() == null) configError("Name not specified");
 		booleanValidForActions("Truncate", job.truncate, action, 
-				EnumSet.of(Action.LOAD));
+				EnumSet.of(Action.INSERT));
 		booleanValidForActions("Drop", job.dropTable, action, 
 				EnumSet.of(Action.CREATE));
 		validForActions("Created", job.createdRange, action, 
-				EnumSet.range(Action.LOAD, Action.SYNC));
+				EnumSet.range(Action.INSERT, Action.SYNC));
 		validForActions("Since", job.sinceDate, action, 
-				EnumSet.range(Action.LOAD, Action.REFRESH));
+				EnumSet.range(Action.INSERT, Action.UPDATE));
 		
 		if (job.sinceDate == null && job.sinceExpr != null)
 			configError("Missing Since Date");

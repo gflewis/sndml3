@@ -17,11 +17,9 @@ public class LoaderJob implements Callable<WriterMetrics> {
 	private final String tableLoaderName;
 	private final JobConfig config;
 	private final WriterMetrics metrics;
-	ProgressLogger progressLogger;
-	
-	
-	Logger logger = LoggerFactory.getLogger(this.getClass());
-		
+	private final AppRunLogger appRunLogger;		
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 	LoaderJob(Table table, Database database) throws ConfigParseException {
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		this.config = configFactory.tableLoader(table);
@@ -31,10 +29,10 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
+		this.appRunLogger = null;
 	}
-	
+
 	LoaderJob(Loader parent, JobConfig config) throws ConfigParseException {
-		// config.validate();
 		this.session = parent.getSession();
 		this.db = parent.getDatabase();
 		this.table = session.table(config.getSource());
@@ -43,37 +41,39 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		this.metrics = new WriterMetrics();
 		this.metrics.setParent(parent.getMetrics());
 		this.config = config;
+		this.appRunLogger = null;
 	}
 	
-	LoaderJob(ConnectionProfile profile, JobConfig config) {
-		// config.validate();
-		this.session = profile.getSession();
-		this.db = profile.getDatabase();
+	LoaderJob(Session session, Database db, JobConfig config, AppRunLogger runLogger) {
+		this.session = session;
+		this.db = db;
+		this.appRunLogger = runLogger;
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
 		this.config = config;		
 	}
-	
-	LoaderJob(Session session, Database db, JobConfig config) {
-		// config.validate();
-		this.session = session;
-		this.db = db;
+
+	// Constructor for JUnit tests
+	LoaderJob(ConnectionProfile profile, JobConfig config) {
+		this.session = profile.getSession();
+		this.db = profile.getDatabase();
+		this.config = config;
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
-		this.metrics = new WriterMetrics();
-		this.config = config;				
+		this.metrics = new WriterMetrics();		
+		this.appRunLogger = null;
 	}
-
+	
 	private void setLogContext() {
 		Log.setContext(table, tableLoaderName);		
 	}
 	
-	public void setProgressLogger(ProgressLogger progress) {
-		this.progressLogger = progress;
-	}
+//	public void setProgressLogger(ProgressLogger progress) {
+//		this.progressLogger = progress;
+//	}
 	
 	String getName() {
 		return this.table.getName();
@@ -93,6 +93,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 		Action action = config.getAction();
 		assert action != null;
 		DateTimeRange createdRange = config.getCreated();
+		ProgressLogger progressLogger;
 		
 		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
 		FieldNames fieldNames = null;
@@ -114,7 +115,9 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			db.createMissingTable(table, sqlTableName);
 		}
 		else if (Action.PRUNE.equals(action)) {
-			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+			progressLogger = new CompositeProgressLogger(DatabaseDeleteWriter.class, appRunLogger); 
+			DatabaseDeleteWriter deleteWriter = 
+				new DatabaseDeleteWriter(db, table, sqlTableName, progressLogger);
 			deleteWriter.setParentMetrics(metrics);
 			deleteWriter.open();
 			Table audit = session.table("sys_audit_delete");
@@ -140,7 +143,9 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
 			if (partitionInterval == null) {
-				Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, metrics);
+				progressLogger = new CompositeProgressLogger(Synchronizer.class, appRunLogger);
+				Synchronizer syncReader = 
+					new Synchronizer(table, db, sqlTableName, metrics, progressLogger);
 				syncReader.setFields(fieldNames);
 				syncReader.setPageSize(pageSize);
 				syncReader.initialize(createdRange);
@@ -148,7 +153,7 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			}
 			else {
 				SynchronizerFactory factory = 
-					new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange);
+					new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange, appRunLogger);
 				factory.setFields(fieldNames);
 				factory.setPageSize(pageSize);
 				DatePartitionedTableReader multiReader =
@@ -167,10 +172,14 @@ public class LoaderJob implements Callable<WriterMetrics> {
 			db.createMissingTable(table, sqlTableName);
 			if (config.getTruncate()) db.truncateTable(sqlTableName);
 			DatabaseTableWriter writer;
-			if (Action.REFRESH.equals(action))
-				writer = new DatabaseUpdateWriter(db, table, sqlTableName);
-			else if (Action.LOAD.equals(action))
-				writer = new DatabaseInsertWriter(db, table, sqlTableName);
+			if (Action.UPDATE.equals(action)) {
+				progressLogger = new CompositeProgressLogger(DatabaseUpdateWriter.class, appRunLogger);
+				writer = new DatabaseUpdateWriter(db, table, sqlTableName, progressLogger);
+			}
+			else if (Action.INSERT.equals(action)) {
+				progressLogger = new CompositeProgressLogger(DatabaseInsertWriter.class, appRunLogger);
+				writer = new DatabaseInsertWriter(db, table, sqlTableName, progressLogger);
+			}
 			else
 				throw new AssertionError();
 			writer.setParentMetrics(metrics);

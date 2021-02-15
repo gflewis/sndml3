@@ -7,29 +7,27 @@ import sndml.servicenow.*;
 
 public class ActionRunner implements Runnable {
 	
-	static Logger logger = LoggerFactory.getLogger(ActionRunner.class);
-
 	final Session session;
 	final Database db;
 	final JobConfig config;
-	final Key key;
+	final Key runKey;
 	final String jobname;
 	final Thread mainThread;
 	final LoaderJob job;
 	final AppRunLogger runLogger;
+	final Logger logger = LoggerFactory.getLogger(ActionRunner.class);
 	
-	public ActionRunner(Session session, ConnectionProfile profile, JobConfig settings) {
-		this.session = session;
+	public ActionRunner(ConnectionProfile profile,	JobConfig config) {
+		this.session = profile.getSession();
 		this.db = profile.getDatabase();
-		this.config = settings;
-		this.key = settings.getSysId();
-		this.jobname = settings.getName();
-		assert key != null;
-		assert key.isGUID();
+		this.config = config;
+		this.runKey = config.getSysId();
+		this.jobname = config.getName();
+		assert runKey != null;
+		assert runKey.isGUID();
 		this.mainThread = Thread.currentThread();
-		this.job = new LoaderJob(session, db, settings);
-		runLogger = new AppRunLogger(logger, profile, session);
-		runLogger.setRunKey(this.key);		
+		this.runLogger = new AppRunLogger(profile, session, runKey);
+		this.job = new LoaderJob(session, db, config, runLogger);
 	}
 	
 	@Override
@@ -48,14 +46,4 @@ public class ActionRunner implements Runnable {
 		}
 	}
 	
-	/*
-	private void setRunStatus(String status) throws IOException {
-		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", this.key.toString());
-		body.put("status", status);
-		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
-		request.execute();
-	}
-	*/
-
 }

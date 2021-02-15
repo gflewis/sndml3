@@ -31,7 +31,8 @@ public class KeySetTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, false);
 		int expected = stats.getCount();
-		allKeys = table.soap().getKeys(getQuery());
+		// allKeys = table.soap().getKeys(getQuery());
+		allKeys = jsonAPI.getKeys(getQuery());
 		if (allKeys.size() != expected)
 			logger.warn(Log.PROCESS,
 					String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",

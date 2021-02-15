@@ -1,11 +1,5 @@
 package sndml.datamart;
 
-import sndml.datamart.JobConfig;
-import sndml.datamart.Loader;
-import sndml.datamart.Action;
-import sndml.datamart.LoaderConfig;
-import sndml.datamart.LoaderJob;
-import sndml.datamart.YamlFile;
 import sndml.servicenow.*;
 
 import static org.junit.Assert.*;
@@ -53,7 +47,7 @@ public class InsertTest {
 		LoaderConfig config = factory.loaderConfig(yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
-		assertEquals(Action.LOAD, job.getAction());
+		assertEquals(Action.INSERT, job.getAction());
 		LoaderJob loader = new LoaderJob(profile, job);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();

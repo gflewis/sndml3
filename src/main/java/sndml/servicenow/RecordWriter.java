@@ -13,9 +13,10 @@ import java.sql.SQLException;
 public abstract class RecordWriter {
 
 	protected WriterMetrics writerMetrics = new WriterMetrics();
-	protected ProgressLogger progressLogger;	
+	protected final ProgressLogger progressLogger;
 
-	public RecordWriter() {
+	public RecordWriter(ProgressLogger logger) {
+		this.progressLogger = logger;
 	}
 
 	public abstract void processRecords(TableReader source, RecordList recs) throws IOException, SQLException;	
@@ -32,11 +33,7 @@ public abstract class RecordWriter {
 	public void setParentMetrics(WriterMetrics parentMetrics) {
 		writerMetrics.setParent(parentMetrics);
 	}
-	
-	public void setProgressLogger(ProgressLogger progressLogger) {
-		this.progressLogger = progressLogger;
-	}
-	
+		
 	public WriterMetrics getMetrics() {
 		if (writerMetrics.getFinished() == null) writerMetrics.finish();
 		return writerMetrics;
