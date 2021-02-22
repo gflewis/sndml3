@@ -18,7 +18,7 @@ public class YamlFile extends File {
 	public LoaderConfig getConfig() 
 			throws ConfigParseException, IOException {
 		ConfigFactory factory = new ConfigFactory();
-		LoaderConfig config = factory.loaderConfig(this, null);
+		LoaderConfig config = factory.loaderConfig(null, this);
 		return config;
 	}
 	

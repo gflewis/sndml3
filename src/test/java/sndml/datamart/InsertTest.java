@@ -17,6 +17,7 @@ public class InsertTest {
 	final TestingProfile profile;
 	final Logger logger = TestManager.getLogger(this.getClass());
 	final ConfigFactory factory = new ConfigFactory();
+	TestFolder folder = new TestFolder(this.getClass().getSimpleName());	
 	
 	// final TestFolder folder = new TestFolder("yaml");
 	
@@ -42,13 +43,13 @@ public class InsertTest {
 
 	@Test
 	public void testInsert() throws Exception {
-		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_truncate");
+		YamlFile yaml = folder.getYaml("load_incident_truncate");
 		TestManager.bannerStart(this.getClass(), "testInsert", profile, yaml);
-		LoaderConfig config = factory.loaderConfig(yaml);
+		LoaderConfig config = factory.loaderConfig(profile, yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(Action.INSERT, job.getAction());
-		LoaderJob loader = new LoaderJob(profile, job);
+		JobRunner loader = new TestJobRunner(profile, job);
 		loader.call();
 		WriterMetrics metrics = loader.getMetrics();
 		int processed = metrics.getProcessed();
@@ -61,12 +62,12 @@ public class InsertTest {
 
 	@Test
 	public void testInsertTwice() throws Exception {
-		YamlFile yaml = new TestFolder("yaml").getYaml("load_incident_twice");
+		YamlFile yaml = folder.getYaml("load_incident_twice");
 		TestManager.bannerStart(this.getClass(), "testInsertTwice", profile, yaml);
-		LoaderConfig config = factory.loaderConfig(yaml);
+		LoaderConfig config = factory.loaderConfig(profile, yaml);
 		Loader loader = new Loader(profile, config);
-		LoaderJob job1 = loader.jobs.get(0);
-		LoaderJob job2 = loader.jobs.get(1);
+		JobRunner job1 = loader.jobs.get(0);
+		JobRunner job2 = loader.jobs.get(1);
 		loader.loadTables();
 		int rows = job1.getMetrics().getProcessed();
 		assertTrue(rows > 0);

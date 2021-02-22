@@ -1,9 +1,9 @@
 package sndml.servicenow;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+//import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,6 @@ import sndml.servicenow.RecordListAccumulator;
 import sndml.servicenow.RestTableReaderFactory;
 import sndml.servicenow.Session;
 import sndml.servicenow.Table;
-import sndml.servicenow.TableReader;
 import sndml.servicenow.TableReaderFactory;
 import sndml.servicenow.TableStats;
 
@@ -38,11 +37,12 @@ public class DatePartTest {
 		parentReader.initialize();
 		partition = parentReader.getPartition();
 		assertNotNull(partition);
-		List<TableReader> partReaders = parentReader.getReaders();
-		logger.info(Log.TEST, String.format("readers=%d", partReaders.size()));
-		String childName = partReaders.get(0).getReaderName();
-		logger.info(Log.TEST, partReaders.get(0).getReaderName());
-		assertTrue(childName.startsWith(parentName + ".M"));		
+		fail("Not yet implemented");
+//		List<TableReader> partReaders = parentReader.getReaders();
+//		logger.info(Log.TEST, String.format("readers=%d", partReaders.size()));
+//		String childName = partReaders.get(0).getReaderName();
+//		logger.info(Log.TEST, partReaders.get(0).getReaderName());
+//		assertTrue(childName.startsWith(parentName + ".M"));		
 	}
 
 }

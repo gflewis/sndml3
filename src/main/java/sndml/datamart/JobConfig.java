@@ -22,7 +22,7 @@ public class JobConfig {
 	@JsonIgnore public DateTime start;
 	public Key sys_id;
 	public String number;
-	public String name;
+	@JsonProperty("name") public String jobName;
 	public String source;
 	public String target;
 	public Action action;
@@ -37,46 +37,18 @@ public class JobConfig {
 	public Integer pageSize;
 	public Integer minRows;
 	public Integer maxRows;
+	public String sql; // Action EXECUTE only
 	public String sqlBefore;
 	public String sqlAfter;
 	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
 	@JsonIgnore public FieldNames excludeColumns;
 	public Integer threads;
-
-	public JobConfig() {		
-	}
 	
-	public void setDateFactory(DateTimeFactory factory) {
-		this.dateFactory = factory;
-	}
-
-	@JsonIgnore
-	void setCreated(DateTimeRange value) {
-		this.createdRange = value;
-	}
-		
-	void setCreated(JsonNode node) {
-		assert node != null;
-		assert dateFactory != null;
-		if (node.isTextual()) {
-			String s1 = node.asText();
-			DateTime d1 = dateFactory.getDate(s1);
-			this.createdRange = new DateTimeRange(d1, null);				
-		}
-		else if (node.isArray()) {
-			int len = node.size();
-			String s1 = len > 0 ? node.get(0).asText() : null;
-			String s2 = len > 1 ? node.get(1).asText() : null;
-			DateTime d1 = dateFactory.getDate(s1);
-			DateTime d2 = dateFactory.getDate(s2);
-			this.createdRange = new DateTimeRange(d1, d2);				
-		}
-		else
-			throw new ConfigParseException("Invalid created: " + node);		
-	}
+	static EnumSet<Action> anyLoadAction =
+			EnumSet.of(Action.INSERT, Action.UPDATE, Action.SYNC);
 	
-	String getName() { return this.name; }
+	String getName() { return this.jobName; }
 	String getSource() { return this.source; }
 	String getTarget() { return this.target; }
 	Key getSysId() { return this.sys_id; }
@@ -93,6 +65,7 @@ public class JobConfig {
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
 	FieldNames getExcludeColumns() { return this.excludeColumns; }
+	String getSql() { return this.sql; }
 	String getSqlBefore() {	return this.sqlBefore; }
 	String getSqlAfter() { return this.sqlAfter; }
 	Integer getPageSize() { return this.pageSize; }
@@ -105,105 +78,125 @@ public class JobConfig {
 		return new DateTimeRange(null, this.start);
 	}
 
-	void updateFields(DateTimeFactory dateFactory) {
-		JobConfig job = this;
-		// Determine Start
-		if (job.start == null) {
-			job.start = dateFactory.getStart();
-		}
+	void updateFields(ConnectionProfile profile, DateTimeFactory dateFactory) {
+		updateCoreFields();
+		if (dateFactory != null) updateDateFields(dateFactory);
+		if (profile != null) updateFromProfile(profile);
+	}
+
+	void updateCoreFields() {
 		// Determine Action
-		if (job.action == null)	job.action = 
-				Boolean.TRUE.equals(job.truncate) ?	
+		if (action == null)	action = 
+				Boolean.TRUE.equals(truncate) ?	
 				Action.INSERT : Action.UPDATE;
-		if (job.action == Action.LOAD)    job.action = Action.INSERT;
-		if (job.action == Action.REFRESH) job.action = Action.UPDATE;
+		if (action == Action.LOAD)    action = Action.INSERT;
+		if (action == Action.REFRESH) action = Action.UPDATE;
 		
 		// Determine Source, Target and Name
-		if (job.source == null)	job.source = 
-				job.name != null ? job.name : job.target;
-		if (job.name == null) job.name = 
-				job.target != null ? job.target : job.source;
-		if (job.target == null)	job.target = 
-				job.source != null ? job.source : job.name;
+		if (source == null)  source = (jobName != null) ? jobName : target;
+		if (jobName == null) jobName = (target != null) ? target : source;
+		if (target == null)	 target = (source != null) ? source : jobName;
 		
-		// AutoCreate defaults to True
-		if (job.autoCreate == null) {
-			if (job.action==Action.INSERT || job.action==Action.UPDATE || job.action==Action.SYNC)
-				job.autoCreate = Boolean.TRUE;			
+	}
+
+	void updateFromParent(JobConfig parent) {
+		if (this.pageSize == null && parent.pageSize != null) {
+			this.pageSize = parent.pageSize;
 		}
-		
-		if (job.sinceExpr == null) {
-			job.sinceDate = null;
+	}
+	
+	void updateDateFields(DateTimeFactory dateFactory) {
+		if (sinceExpr == null) {
+			sinceDate = null;
 		}
 		else {
-			job.sinceDate = dateFactory.getDate(job.sinceExpr);
+			sinceDate = dateFactory.getDate(sinceExpr);
 		}
 		
-		if (job.createdExpr == null) {
-			job.createdRange = null;
+		if (createdExpr == null) {
+			createdRange = null;
 		}
-		if (job.createdExpr != null) {
-			job.setDateFactory(dateFactory);
-			job.setCreated(job.createdExpr);
-		}
-
-				
-		/*
-		if (config.pageSize == null && config.parent() != null) {
-			config.pageSize = config.parent.getPageSize();
-		}
-		*/
+		if (createdExpr != null) {
+			setDateFactory(dateFactory);
+			setCreated(createdExpr);
+		}			
 	}
 
-	void validate() {
-		JobConfig job = this;
-		if (action == null) configError("Action not specified");
-		if (job.getSource() == null) configError("Source not specified");
-		if (job.getTarget() == null) configError("Target not specified");
-		if (job.getName() == null) configError("Name not specified");
-		booleanValidForActions("Truncate", job.truncate, action, 
-				EnumSet.of(Action.INSERT));
-		booleanValidForActions("Drop", job.dropTable, action, 
-				EnumSet.of(Action.CREATE));
-		validForActions("Created", job.createdRange, action, 
-				EnumSet.range(Action.INSERT, Action.SYNC));
-		validForActions("Since", job.sinceDate, action, 
-				EnumSet.range(Action.INSERT, Action.UPDATE));
+	public void setDateFactory(DateTimeFactory factory) {
+		this.dateFactory = factory;
+	}
+
+	@JsonIgnore
+	void setCreated(DateTimeRange value) {
+		this.createdRange = value;
+	}
 		
-		if (job.sinceDate == null && job.sinceExpr != null)
+	void setCreated(JsonNode node) {
+		assert node != null;
+		assert dateFactory != null;
+		DateTime defaultEnd = dateFactory.getStart();
+		assert defaultEnd != null;
+		if (node.isTextual()) {
+			String s1 = node.asText();
+			DateTime d1 = dateFactory.getDate(s1);
+			this.createdRange = new DateTimeRange(d1, defaultEnd);				
+		}
+		else if (node.isArray()) {
+			int len = node.size();
+			String s1 = len > 0 ? node.get(0).asText() : null;
+			String s2 = len > 1 ? node.get(1).asText() : null;
+			DateTime d1 = s1 == null ? null : dateFactory.getDate(s1);
+			DateTime d2 = s2 == null ? defaultEnd : dateFactory.getDate(s2);
+			this.createdRange = new DateTimeRange(d1, d2);				
+		}
+		else
+			throw new ConfigParseException("Invalid created: " + node);		
+	}
+		
+	void updateFromProfile(ConnectionProfile profile) {		
+		// AutoCreate defaults to True
+		if (autoCreate == null) {
+			if (anyLoadAction.contains(action))
+				autoCreate = profile.getPropertyBoolean("datamart.autocreate", true);
+			else
+				autoCreate = false;
+		}				
+	}
+		
+	void validateFields() {
+		if (action == Action.EXECUTE) {
+			if (sql == null) configError("Missing SQL");
+		}
+		else {
+			if (action == null) configError("Action not specified");
+			if (source == null) configError("Source not specified");
+			if (target == null) configError("Target not specified");
+			if (jobName == null) configError("Name not specified");
+		}
+		booleanValidForActions("Truncate", truncate, EnumSet.of(Action.INSERT));
+		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
+		validForActions("Created", createdRange, EnumSet.range(Action.INSERT, Action.SYNC));
+		validForActions("Since", sinceDate, EnumSet.range(Action.INSERT, Action.UPDATE));
+		validForActions("SQL", sql, EnumSet.of(Action.EXECUTE));
+		
+		if (sinceDate == null && sinceExpr != null)
 			configError("Missing Since Date");
-		if (job.createdRange == null & job.createdExpr != null)
+		if (createdRange == null & createdExpr != null)
 			configError("Missing Created Range");
 		
-		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
-			configError("Cannot specify both Columns and Exclude");		
+		if (getIncludeColumns() != null && getExcludeColumns() != null) 
+			configError("Cannot specify both Columns and Exclude");
 		
 	}
-	
-	/*
-	boolean isValid() {
-		String msg = null;		
-		if (msg==null && action==null) msg = "Missing action";
-		if (msg==null && source==null) msg = "Missing source";
-		if (msg==null && target==null) msg = "Missing target";
-		if (msg==null && sinceDate==null && sinceValue!=null) 
-			msg = "Missing Since Date";
-		if (msg==null && createdRange==null && createdValue!=null) 
-			msg = "Missing Created Range";
-		if (msg != null) logger.warn(Log.INIT, msg);
-		return msg==null ? true : false;
-	}
-	*/
-	
-	
-	static void booleanValidForActions(String name, Boolean value, Action action, EnumSet<Action> validActions) {
+		
+	void booleanValidForActions(String name, Boolean value, EnumSet<Action> validActions) {
 		if (Boolean.TRUE.equals(value)) {
 			if (!validActions.contains(action))
 				notValid(name, action);
 		}
 	}
 	
-	static void validForActions(String name, Object value, Action action, EnumSet<Action> validActions)
+	void validForActions(String name, Object value, EnumSet<Action> validActions)
 			throws ConfigParseException {
 		if (value != null) {
 			if (!validActions.contains(action))

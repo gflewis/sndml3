@@ -90,6 +90,10 @@ public class ConnectionProfile {
 		return properties;
 	}
 
+	public boolean hasProperty(String name) {
+		return properties.getProperty(name) != null;
+	}
+	
 	/**
 	 * Return a property value.
 	 */

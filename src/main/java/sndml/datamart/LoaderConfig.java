@@ -54,21 +54,21 @@ public class LoaderConfig {
 		return this.tables;
 	}
 		
-	void updateFields() throws ConfigParseException {
+	void updateFields(ConnectionProfile profile) throws ConfigParseException {
 		File metricsFile = getMetricsFile();
 		DateTimeFactory dateFactory = 
 			(metricsFile != null && metricsFile.canRead()) ?
 			dateFactory = new DateTimeFactory(start, metricsFile) :  
 			new DateTimeFactory(start);
 		for (JobConfig table : tables) {
-			table.updateFields(dateFactory);
+			table.updateFields(profile, dateFactory);
 		}
 	}
 	
 	void validate() throws ConfigParseException {
 		if (tables.size() < 1) throw new ConfigParseException("No tables");
 		for (JobConfig table : tables) {
-			table.validate();
+			table.validateFields();
 		}
 	}
 		

@@ -7,7 +7,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	EvaluateTest.class,
-	ConfigParseExceptionTest.class,
+	YamlParseValidTest.class,
+	YamlParseErrorTest.class,
 	LoaderConfigTest.class,
 	DateTimeFactoryTest.class,
 	CreateTableTest.class,

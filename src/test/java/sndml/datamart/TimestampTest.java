@@ -48,10 +48,10 @@ public class TimestampTest {
 	
 	void loadTable() throws Exception {
 		Table table = session.table(tablename);
-		database.truncateTable(table.getName());
-		Loader loader = new Loader(table, profile.getDatabase());
-		loader.loadTables();
-		WriterMetrics metrics = loader.lastJob().getMetrics();
+		database.truncateTable(table.getName());		
+		TableLoadRunner runner = new TableLoadRunner(profile, table, database);
+		runner.call();
+		WriterMetrics metrics = runner.getMetrics();
 		assertTrue(metrics.getProcessed() > 0);		
 	}
 	
@@ -66,12 +66,13 @@ public class TimestampTest {
 		String sys_id = TestManager.getProperty("some_incident_sys_id");
 		Record rec = tbl.getRecord(new Key(sys_id));
 		String created = rec.getValue("sys_created_on");
-		JobConfig config = factory.tableLoader(tbl);
+		JobConfig config = factory.tableLoader(profile, tbl);
 		config.filter = "sys_id=" + sys_id;
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
 		config.setCreated(emptyRange);
-		LoaderJob loader = new LoaderJob(profile, config);
-		loader.call();
+		
+		JobRunner runner = new TestJobRunner(profile, config);
+		runner.call();
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new Key(sys_id));
 		logger.info(Log.TEST, "created=" + created + " dbcreated=" + dbcreated);

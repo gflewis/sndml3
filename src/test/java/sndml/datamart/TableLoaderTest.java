@@ -39,15 +39,16 @@ public class TableLoaderTest {
 		TestManager.setProfile(this.getClass(), profile);		
 	}
 	
-	@Parameters(name = "{index}:{0}")
+	@Parameters(name = "{index}:{0}")	
 	public static TestParam[] getParams() {
 		TestingProfile[] allProfiles = TestManager.allProfiles();
-		YamlFile[] allYamlFiles = new TestFolder("Loads").yamlFiles();
-		int size = allProfiles.length * allYamlFiles.length;
+		TestFolder folder = new TestFolder("TableLoaderTest");	
+		int size = folder.listFiles().length;
 		TestParam[] result = new TestParam[size];
 		int index = 0;
 		for (TestingProfile profile : allProfiles) {
-			for (YamlFile yamlFile : allYamlFiles) {
+			for (YamlFile yamlFile : folder.yamlFiles()) {
+				TestManager.bannerStart(TableLoaderTest.class, "Test", profile, yamlFile);
 				result[index++] = new TestParam(profile, yamlFile);
 			}
 		}

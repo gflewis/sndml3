@@ -29,7 +29,7 @@ public class Loader {
 	File metricsFile = null;
 	PrintWriter statsWriter;
 	WriterMetrics loaderMetrics = new WriterMetrics();	
-	ArrayList<LoaderJob> jobs = new ArrayList<LoaderJob>();
+	ArrayList<JobRunner> jobs = new ArrayList<JobRunner>();
 	
 	static final Logger logger = LoggerFactory.getLogger(Loader.class);
 	
@@ -69,27 +69,21 @@ public class Loader {
 			if (tableName != null) {
 				Table table = session.table(tableName);
 				config = new LoaderConfig();
-				config.tables.add(factory.tableLoader(table));
+				config.tables.add(factory.tableLoader(profile, table));
 			}
 			else {
 				File yamlFile = new File(yamlFileName);
 				String yamlText = readFully(yamlFile);
 				logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
 				FileReader reader = new FileReader(new File(yamlFileName));
-				config = factory.loaderConfig(reader, profile.getProperties());
+				config = factory.loaderConfig(profile, reader);
 			}
 			Loader loader = new Loader(profile, config);			
 			loader.loadTables();			
 		}
 			
 	}
-	
-	Loader(Table table, Database database) {
-		this.session = table.getSession();
-		this.database = database;
-		jobs.add(new LoaderJob(table, database));
-	}
-		
+			
 	Loader(ConnectionProfile profile, LoaderConfig config) {
 		this.session = profile.getSession();
 		this.database = profile.getDatabase();
@@ -98,7 +92,7 @@ public class Loader {
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = config.getMetricsFile();
 		for (JobConfig jobConfig : config.getJobs()) {
-			jobs.add(new LoaderJob(this, jobConfig));
+			jobs.add(new LoaderJobRunner(this, jobConfig));
 		}
 	}
 	
@@ -114,7 +108,7 @@ public class Loader {
 		return loaderMetrics;
 	}
 	
-	LoaderJob lastJob() {
+	JobRunner lastJob() {
 		return jobs.get(jobs.size() - 1);
 	}
 	
@@ -124,7 +118,7 @@ public class Loader {
 		if (threads > 1) {
 			logger.info(Log.INIT, String.format("starting %d threads", threads));
 			ExecutorService executor = Executors.newFixedThreadPool(threads);
-			for (LoaderJob job : jobs) {
+			for (JobRunner job : jobs) {
 				logger.info(Log.INIT, "submitting " + job.getName());
 				executor.submit(job);
 			}
@@ -134,7 +128,7 @@ public class Loader {
 	        }	 			
 		}
 		else {
-			for (LoaderJob job : jobs) {
+			for (JobRunner job : jobs) {
 				job.call();
 			}			
 		}
@@ -148,7 +142,7 @@ public class Loader {
 		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
 		statsWriter = new PrintWriter(metricsFile);
 		loaderMetrics.write(statsWriter);
-		for (LoaderJob job : jobs) {			
+		for (JobRunner job : jobs) {			
 			job.getMetrics().write(statsWriter, job.getName());
 		}
 		statsWriter.close();		

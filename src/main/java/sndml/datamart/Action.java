@@ -5,7 +5,9 @@ public enum Action {
 	UPDATE, 
 	SYNC, 
 	PRUNE, 
-	CREATE, 
+	EXECUTE, // Execute an SQL command
+	CREATE,  // Create a table
+	DROPTABLE, // Used for JUnit tests
 	LOAD,    // Alias for INSERT 
 	REFRESH  // Alias for UPSERT
 	}

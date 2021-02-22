@@ -21,7 +21,7 @@ public class DatePartitionedTableReader extends TableReader {
 	
 	DateTimeRange range;
 	DatePartition partition;
-	List<TableReader> partReaders;
+//	List<TableReader> partReaders;
 	List<Future<TableReader>> futures;
 
 	final int REST_DEFAULT_PAGE_SIZE = 200;
@@ -48,16 +48,13 @@ public class DatePartitionedTableReader extends TableReader {
 	public DatePartition getPartition() {
 		return this.partition;
 	}
-	
-	public List<TableReader> getReaders() {
-		return this.partReaders;
-	}
-	
+		
 	public int getThreadCount() {
 		return this.threads;
 	}
 
 	public int numPartsTotal() {
+		assert futures != null;
 		return futures.size();
 	}
 	
@@ -67,6 +64,7 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 	
 	public int numPartsComplete() {
+		assert futures != null;
 		int count = 0;
 		for (Future<TableReader> part : futures) {
 			count += (part.isDone() ? 1 : 0);
@@ -75,6 +73,7 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 
 	public int numPartsIncomplete() {
+		assert futures != null;
 		int count = 0;
 		for (Future<TableReader> part : futures) {
 			count += (part.isDone() ? 0 : 1);
@@ -103,16 +102,15 @@ public class DatePartitionedTableReader extends TableReader {
 		assert range.getStart() != null;
 		assert range.getEnd() != null;
 		partition = new DatePartition(range, interval);
-		partReaders = new ArrayList<TableReader>();
-		logger.debug(Log.INIT, "partition=" + partition.toString());		
-		for (DateTimeRange partRange : partition) {
-			String partName = partRange.getName(interval);
-			TableReader partReader = factory.createReader();
-			partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
-			partReader.setReaderName(partReader.getReaderName() + "." + partName);
-			partReader.setParent(this);
-			partReaders.add(partReader);
-		}
+	}
+	
+	private TableReader getReader(DateTimeRange partRange) {
+		String partName = interval.getName(partRange.getStart());
+		TableReader partReader = factory.createReader();
+		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
+		partReader.setReaderName(partReader.getReaderName() + "." + partName);
+		partReader.setParent(this);
+		return partReader;		
 	}
 
 	@Override
@@ -125,28 +123,29 @@ public class DatePartitionedTableReader extends TableReader {
 		futures = new ArrayList<Future<TableReader>>();
 		if (threads > 1) {			
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
-			ExecutorService executor = Executors.newFixedThreadPool(this.threads); 
-			for (TableReader reader : partReaders) {
+			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
+			for (DateTimeRange partRange : partition) {
+				TableReader reader = getReader(partRange);
 				logger.debug("Submit " + reader.getReaderName());
 				reader.initialize();
 				Future<TableReader> future = executor.submit(reader);
-				futures.add(future);
+				futures.add(future);				
 			}
+			executor.shutdown();
 			while (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-				logger.debug(Log.FINISH, String.format("Waiting for %d / %d partitions to complete", 
+				logger.info(Log.FINISH, String.format("Waiting for %d / %d partitions to complete", 
 						numPartsIncomplete(), numPartsTotal()));
 			}
 		}
 		else {
-			for (TableReader reader : partReaders) {
+			for (DateTimeRange partRange : partition) {
+				TableReader reader = getReader(partRange);
 				reader.initialize();
 				reader.call();
 			}
 		}
 		// Free resources
 		partition = null;
-		partReaders = null;
-		futures = null;
 		return this;
 	}
 

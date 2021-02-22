@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 public class LoaderConfigTest {
 
 	final Logger logger = TestManager.getLogger(this.getClass());
-	final TestFolder folder = new TestFolder("yaml");
+	final TestingProfile profile = TestManager.getDefaultProfile();
+	final TestFolder folder = new TestFolder(this.getClass().getSimpleName());		
 	final ConfigFactory factory = new ConfigFactory();
+
 
 	@AfterClass
 	public static void clear() throws Exception {
@@ -22,19 +24,30 @@ public class LoaderConfigTest {
 	}
 	
 	@Test
-	public void testSimple() throws Exception {
+	@Ignore
+	// This syntax is no longer supported
+	public void testSimpleOld() throws Exception {
 		String yaml = "tables: [core_company, incident]";
-		LoaderConfig config = factory.loaderConfig(new StringReader(yaml));
+		LoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));
 		assertEquals(2, config.getJobs().size());
 		assertEquals("core_company", config.getJobs().get(0).getName());
 		assertEquals("incident", config.getJobs().get(1).getName());
 		assertEquals(false, config.getJobs().get(0).getTruncate());
 	}
 
+	public void testSimpleNew() throws Exception {
+		String yaml = "tables: [{source: core_company}, {source: incident}]";
+		LoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));
+		assertEquals(2, config.getJobs().size());
+		assertEquals("core_company", config.getJobs().get(0).getName());
+		assertEquals("incident", config.getJobs().get(1).getName());
+		assertEquals(false, config.getJobs().get(0).getTruncate());
+	}
+	
 	@Test
 	public void testGoodConfig1() throws Exception {
-		File config1 = folder.getYaml("goodconfig1");
-		LoaderConfig config = factory.loaderConfig(config1);
+		File config1 = folder.getYaml("multi-table-load");
+		LoaderConfig config = factory.loaderConfig(profile, config1);
 		DateTime start = config.getStart();
 		DateTime today = DateTime.today();
 		assertEquals(8, config.getJobs().size());
@@ -47,8 +60,8 @@ public class LoaderConfigTest {
 	
 	@Test
 	public void testGoodSync1() throws Exception {
-		File goodConfig = folder.getYaml("goodsync1");
-		LoaderConfig config = factory.loaderConfig(goodConfig);
+		File goodConfig = folder.getYaml("incident-sync");
+		LoaderConfig config = factory.loaderConfig(profile, goodConfig);
 		assertNotNull(config);
 	}
 	

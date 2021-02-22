@@ -61,8 +61,8 @@ public class PruneTest {
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Prune");
 	    ConfigFactory factory = new ConfigFactory();
-	    String yaml = "tables: {source: incident, action: prune}";
-	    LoaderConfig config = factory.loaderConfig(new StringReader(yaml));	    
+	    String yaml = "tables: [{source: incident, action: prune}]";
+	    LoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));	    
 	    Loader loader = new Loader(profile, config);	    
 		logger.info(Log.TEST, "PRUNE incident");
 		loader.loadTables();

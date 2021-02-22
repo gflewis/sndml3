@@ -1,0 +1,9 @@
+tables:
+- name: sys_user
+- name: sys_user_group
+- {name: sys_user_grmember, truncate: true}
+- {name: core_company, truncate: false}
+- {name: rm_story, created: [2017-01-01]}
+- {name: incident, target: incident_2017, created: [2017-01-01, start], minrows: 2}
+- {name: problem, since: 2017-03-30}
+- {name: cmdb_ci_service, since: today}

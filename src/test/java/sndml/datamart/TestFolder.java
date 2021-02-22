@@ -14,8 +14,8 @@ public class TestFolder extends File {
 
 	FilenameFilter yamlFilter = (dir, name) -> name.endsWith(".yaml");			
 	
-	public TestFolder(String pathname) {
-		super("src/test/resources/" + pathname);
+	public TestFolder(String name) {
+		super("src/test/resources/YAML", name);
 	}
 	
 	/**

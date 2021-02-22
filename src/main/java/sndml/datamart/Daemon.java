@@ -30,10 +30,10 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	public Daemon(ConnectionProfile profile) {
 		mainThread = Thread.currentThread();
 		this.profile = profile;
-		agentName = profile.getProperty("loader.agent", "main");
+		agentName = profile.getProperty("daemon.agent", "main");
 		Log.setJobContext(agentName);
 		threadCount = profile.getPropertyInt("daemon.threads", 3);
-		intervalSeconds = profile.getPropertyInt("daemon.interval_seconds", 60);
+		intervalSeconds = profile.getPropertyInt("daemon.interval", 60);
 		assert threadCount > 0;
 		assert intervalSeconds > 0;
 		workerPool = Executors.newFixedThreadPool(threadCount);

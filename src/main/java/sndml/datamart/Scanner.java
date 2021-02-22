@@ -29,7 +29,7 @@ public class Scanner extends TimerTask {
 		// this.statusLogger = new AppRunLogger(logger, profile, session);
 		this.agentName = profile.getProperty("loader.agent", "main");
 		String getRunListPath = profile.getProperty(
-			"loader.url.getrunlist", 
+			"loader.api.getrunlist", 
 			"api/x_108443_sndml/getrunlist/");
 		String putRunStatusPath = profile.getProperty(
 			"loader.api.putrunstatus",
@@ -51,11 +51,11 @@ public class Scanner extends TimerTask {
 			if (runlist.size() == 0) logger.info(Log.DAEMON, "No Runs");				
 			for (int i = 0; i < runlist.size(); ++i) {
 				ObjectNode obj = (ObjectNode) runlist.get(i);
-				JobConfig jobConfig = configFactory.jobConfig(obj);
+				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				Key runKey = jobConfig.getSysId();
 				AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
 				statusLogger.setStatus("prepare");
-				ActionRunner runner = new ActionRunner(profile, jobConfig);
+				DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
 				workerPool.execute(runner);
 			}
 		} 
