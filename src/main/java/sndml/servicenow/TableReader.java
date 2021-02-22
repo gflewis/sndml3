@@ -90,9 +90,9 @@ public abstract class TableReader implements Callable<TableReader> {
 		return readerMetrics.getExpected();
 	}
 		
-	public TableReader setPageSize(int size) {
+	public TableReader setPageSize(Integer size) {
 		if (initialized) throw new IllegalStateException();
-		this.pageSize = size;
+		if (size != null) this.pageSize = size;
 		return this;
 	}
 	

@@ -26,18 +26,32 @@ public class AppRunLogger extends ProgressLogger {
 			"api/x_108443_sndml/putrunstatus");
 		this.putRunStatus = session.getURI(putRunStatusPath);		
 	}
-
+	
 	public void setStatus(String status) throws IOException {
 		assert runKey != null;
 		logger.info(Log.REQUEST, String.format("setStatus %s %s", runKey, status));
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", runKey.toString());
+		body.put("sys_id", runKey.toString());		
 		body.put("status", status);
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		ObjectNode response = request.execute();
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 	}	
+	
+	public void logError(Exception e) {
+		assert runKey != null;
+		ObjectNode body = JsonNodeFactory.instance.objectNode();
+		body.put("sys_id", runKey.toString());		
+		body.put("status", "failed");
+		body.put("message", e.getMessage());
+		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
+		try {
+			request.execute();
+		} catch (IOException e1) {
+			logger.error(Log.FINISH, "Unable to log Error: " + e.getMessage());
+		}		
+	}
 	
 	@Override
 	public void logProgress(ReaderMetrics readerMetrics, WriterMetrics writerMetrics) {

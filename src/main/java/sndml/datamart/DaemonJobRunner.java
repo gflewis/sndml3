@@ -42,10 +42,9 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());
 			logger.error(Log.RESPONSE, e.toString(), e);
-			e.printStackTrace();
-			Daemon.mainThread().interrupt();				
+			runLogger.logError(e);
 		}
 		return metrics;
 	}
-	
+		
 }

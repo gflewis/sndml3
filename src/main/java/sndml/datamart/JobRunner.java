@@ -95,6 +95,8 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			deleteWriter.close();
 		}
 		else if (Action.SYNC.equals(action)) {
+			runSync();
+			/*
 			db.createMissingTable(table, sqlTableName);
 			Interval partitionInterval = config.getPartitionInterval();
 			TableReader reader;
@@ -123,9 +125,10 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
 					tableLoaderName, reader.getReaderMetrics().getExpected()));
 			reader.call();
+			*/
 		}
 		else /* Update or Insert */ {
-			db.createMissingTable(table, sqlTableName);
+			if (config.getAutoCreate()) db.createMissingTable(table, sqlTableName);
 			if (config.getTruncate()) db.truncateTable(sqlTableName);
 			DatabaseTableWriter writer;
 			if (Action.UPDATE.equals(action)) {
@@ -190,6 +193,41 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			db.executeStatement(config.getSqlAfter());
 		}
 		return this.metrics;
+	}
+	
+	void runSync() throws SQLException, IOException, InterruptedException {
+		assert config != null;
+		DateTimeRange createdRange = config.getCreated();
+		ProgressLogger progressLogger;
+		if (config.getAutoCreate()) 
+			db.createMissingTable(table, sqlTableName);
+		Interval partitionInterval = config.getPartitionInterval();
+		TableReader reader;
+		if (partitionInterval == null) {
+			progressLogger = new CompositeProgressLogger(Synchronizer.class, appRunLogger);
+			Synchronizer syncReader = 
+				new Synchronizer(table, db, sqlTableName, metrics, progressLogger);
+			syncReader.setFields(config.getColumns(table));
+			syncReader.setPageSize(config.getPageSize());
+			syncReader.initialize(createdRange);
+			reader = syncReader;
+		}
+		else {
+			SynchronizerFactory factory = 
+				new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange, appRunLogger);
+			factory.setFields(config.getColumns(table));
+			factory.setPageSize(config.getPageSize());
+			DatePartitionedTableReader multiReader =
+				new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
+			factory.setParent(multiReader);				
+			multiReader.initialize();
+			reader = multiReader;
+			this.setLogContext();
+			logger.info(Log.INIT, "partition=" + multiReader.getPartition());
+		}
+		logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
+				tableLoaderName, reader.getReaderMetrics().getExpected()));
+		reader.call();
 	}
 
 }

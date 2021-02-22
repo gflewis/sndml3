@@ -10,7 +10,7 @@ public abstract class TableReaderFactory {
 	protected DateTimeRange createdRange = null;
 	protected DateTimeRange updatedRange = null;
 	protected FieldNames fieldNames = null;
-	protected int pageSize = 0;
+	protected Integer pageSize;
 	protected String readerName = null;
 	
 	public TableReaderFactory(Table table, RecordWriter writer) {
@@ -63,7 +63,7 @@ public abstract class TableReaderFactory {
 		this.fieldNames = names;
 	}
 
-	public void setPageSize(int size) {
+	public void setPageSize(Integer size) {
 		this.pageSize = size;
 	}
 

@@ -1,5 +1,6 @@
 package sndml.datamart;
 
+import java.io.IOException;
 import java.util.EnumSet;
 
 import org.slf4j.Logger;
@@ -56,7 +57,6 @@ public class JobConfig {
 	Action getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
-	boolean getAutoCreate() { return this.autoCreate == null ? false : this.autoCreate.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }
 	DateTimeRange getCreated() { return this.createdRange; }
 	String getFilter() { return this.filter; }
@@ -64,7 +64,7 @@ public class JobConfig {
 	Interval getPartitionInterval() { return this.partition; }
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
-	FieldNames getExcludeColumns() { return this.excludeColumns; }
+	FieldNames getExcludeColumns() { return this.excludeColumns; }	
 	String getSql() { return this.sql; }
 	String getSqlBefore() {	return this.sqlBefore; }
 	String getSqlAfter() { return this.sqlAfter; }
@@ -73,6 +73,19 @@ public class JobConfig {
 	Integer getMaxRows() { return this.maxRows;	}
 	Integer getThreads() { return this.threads;	}	
 
+	boolean getAutoCreate() { 
+		return this.autoCreate == null ? true : this.autoCreate.booleanValue();	
+	}
+	
+	FieldNames getColumns(Table table) throws IOException, InterruptedException {
+		if (getIncludeColumns() != null)
+			return getIncludeColumns();
+		else if (getExcludeColumns() != null)
+			return table.getSchema().getFieldsMinus(getExcludeColumns());
+		else
+			return null;
+	}
+		
 	DateTimeRange getDefaultRange() {
 		assert this.start != null;
 		return new DateTimeRange(null, this.start);

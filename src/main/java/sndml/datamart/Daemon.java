@@ -23,6 +23,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private final int intervalSeconds;
 	private final int threadCount;
 	private final Scanner scanner;
+	
 	static Thread mainThread; 
 	
 	private Timer timer;
@@ -67,7 +68,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	@Override
 	public void start() throws Exception {
 		Log.setJobContext(agentName);
-		logger.info(Log.INIT, String.format("interval=%ds", intervalSeconds));								
+		logger.info(Log.INIT, String.format("agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer("scanner", true);
 		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
