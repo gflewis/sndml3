@@ -40,7 +40,7 @@ public class TableWSDL {
 
 		XmlRequest request = new XmlRequest(session.getClient(), uri, null);
 		try {
-			doc = request.execute();
+			doc = request.getDocument();
 		} catch (NoContentException e) {
 			throw new InvalidTableNameException(tablename);
 		}

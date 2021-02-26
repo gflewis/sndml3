@@ -11,6 +11,7 @@ public abstract class ServiceNowRequest {
 	final URI uri;
 	final HttpMethod method;
 	protected StatusLine statusLine;
+	protected int statusCode;
 	protected String responseContentType;
 	protected String requestText;
 	protected String responseText;

@@ -42,15 +42,15 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		assert sqlTableName.length() > 0;
 		Action action = config.getAction();
 		assert action != null;
-		DateTimeRange createdRange = config.getCreated();
-		ProgressLogger progressLogger;
+//		DateTimeRange createdRange = config.getCreated();
+//		ProgressLogger progressLogger;
 		
-		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
-		FieldNames fieldNames = null;
-		if (config.getIncludeColumns() != null)
-			fieldNames = config.getIncludeColumns();
-		else if (config.getExcludeColumns() != null)
-			fieldNames = table.getSchema().getFieldsMinus(config.getExcludeColumns());
+//		int pageSize = config.getPageSize() == null ? 0 : config.getPageSize().intValue();
+//		FieldNames fieldNames = null;
+//		if (config.getIncludeColumns() != null)
+//			fieldNames = config.getIncludeColumns();
+//		else if (config.getExcludeColumns() != null)
+//			fieldNames = table.getSchema().getFieldsMinus(config.getExcludeColumns());
 		
 		this.setLogContext();
 		logger.debug(Log.INIT, 
@@ -59,7 +59,29 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			db.executeStatement(config.getSqlBefore());
 		}		
 		this.setLogContext();
+		
+		switch (action) {
+		case CREATE:
+			if (config.getDropTable()) db.dropTable(sqlTableName, true);
+			db.createMissingTable(table, sqlTableName);
+			break;
+		case DROPTABLE:
+			db.dropTable(sqlTableName, true);
+			break;
+		case EXECUTE:
+			db.executeStatement(config.getSql());
+			break;
+		case PRUNE:
+			runPrune();
+			break;
+		case SYNC:
+			runSync();
+			break;
+		default:
+			runLoad();
+		}
 
+		/*
 		if (Action.CREATE.equals(action)) {
 			if (config.getDropTable()) db.dropTable(sqlTableName, true);
 			db.createMissingTable(table, sqlTableName);
@@ -71,6 +93,7 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			db.executeStatement(config.getSql());
 		}
 		else if (Action.PRUNE.equals(action)) {
+			runSync();
 			progressLogger = new CompositeProgressLogger(DatabaseDeleteWriter.class, appRunLogger); 
 			DatabaseDeleteWriter deleteWriter = 
 				new DatabaseDeleteWriter(db, table, sqlTableName, progressLogger);
@@ -125,9 +148,9 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
 					tableLoaderName, reader.getReaderMetrics().getExpected()));
 			reader.call();
-			*/
 		}
-		else /* Update or Insert */ {
+		else {
+			runLoad();
 			if (config.getAutoCreate()) db.createMissingTable(table, sqlTableName);
 			if (config.getTruncate()) db.truncateTable(sqlTableName);
 			DatabaseTableWriter writer;
@@ -183,6 +206,7 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			reader.call();
 			writer.close();			
 		}
+		*/
 		
 		int processed = metrics.getProcessed();
 		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, processed));
@@ -192,11 +216,36 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		if (config.getSqlAfter() != null) {
 			db.executeStatement(config.getSqlAfter());
 		}
-		return this.metrics;
+		return this.metrics;		
+	}
+	
+	void runPrune() throws SQLException, IOException, InterruptedException {
+		ProgressLogger progressLogger = 
+				new CompositeProgressLogger(DatabaseDeleteWriter.class, appRunLogger); 
+		DatabaseDeleteWriter deleteWriter = 
+			new DatabaseDeleteWriter(db, table, sqlTableName, progressLogger);
+		deleteWriter.setParentMetrics(metrics);
+		deleteWriter.open();
+		Table audit = session.table("sys_audit_delete");
+		EncodedQuery auditQuery = new EncodedQuery(audit);
+		auditQuery.addQuery("tablename", EncodedQuery.EQUALS, table.getName());
+		RestTableReader auditReader = new RestTableReader(audit);
+		auditReader.enableStats(true);
+		auditReader.orderByKeys(true);
+		auditReader.setQuery(auditQuery);			
+		DateTime since = config.getSince();
+		auditReader.setCreatedRange(new DateTimeRange(since, null));
+		auditReader.setMaxRows(config.getMaxRows());
+		auditReader.setWriter(deleteWriter);
+		auditReader.initialize();
+		this.setLogContext();
+		logger.info(Log.INIT, String.format("begin delete %s (%d rows)", 
+			tableLoaderName, auditReader.getReaderMetrics().getExpected()));
+		auditReader.call();
+		deleteWriter.close();		
 	}
 	
 	void runSync() throws SQLException, IOException, InterruptedException {
-		assert config != null;
 		DateTimeRange createdRange = config.getCreated();
 		ProgressLogger progressLogger;
 		if (config.getAutoCreate()) 
@@ -228,6 +277,63 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
 				tableLoaderName, reader.getReaderMetrics().getExpected()));
 		reader.call();
+	}
+	
+	void runLoad() throws SQLException, IOException, InterruptedException {
+		ProgressLogger progressLogger = 
+			new CompositeProgressLogger(DatabaseInsertWriter.class, appRunLogger);
+		Action action = config.getAction();		
+		if (config.getAutoCreate()) db.createMissingTable(table, sqlTableName);
+		if (config.getTruncate()) db.truncateTable(sqlTableName);
+		
+		DatabaseTableWriter writer;
+		if (Action.INSERT.equals(action) || Action.LOAD.equals(action)) {
+			writer = new DatabaseInsertWriter(db, table, sqlTableName, progressLogger);
+		}
+		else {
+			writer = new DatabaseUpdateWriter(db, table, sqlTableName, progressLogger);
+		}
+		writer.setParentMetrics(metrics);
+		writer.open();
+		
+		Interval partitionInterval = config.getPartitionInterval();
+		TableReaderFactory factory;
+		DateTime since = config.getSince();	
+		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
+		if (since != null) {
+			factory = new KeySetTableReaderFactory(table, writer);
+			factory.setUpdated(since);				
+		}
+		else {
+			factory = new RestTableReaderFactory(table, writer);
+		}
+		factory.setReaderName(tableLoaderName);
+		factory.setFilter(new EncodedQuery(table, config.getFilter()));
+		factory.setCreated(config.getCreated());
+		factory.setFields(config.getColumns(table));
+		factory.setPageSize(config.getPageSize());
+		TableReader reader;
+		if (partitionInterval == null) {
+			reader = factory.createReader();
+			reader.setMaxRows(config.getMaxRows());
+			Log.setContext(table, tableLoaderName);
+			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
+			reader.initialize();
+		}
+		else {
+			Integer threads = config.getThreads();
+			DatePartitionedTableReader multiReader = 
+					new DatePartitionedTableReader(factory, partitionInterval, threads);
+			reader = multiReader;
+			factory.setParent(multiReader);
+			multiReader.initialize();
+			Log.setContext(table, tableLoaderName);
+			logger.info(Log.INIT, "partition=" + multiReader.getPartition());
+		}
+		logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
+				tableLoaderName, reader.getReaderMetrics().getExpected()));
+		reader.call();
+		writer.close();						
 	}
 
 }

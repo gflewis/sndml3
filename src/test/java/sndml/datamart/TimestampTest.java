@@ -49,7 +49,7 @@ public class TimestampTest {
 	void loadTable() throws Exception {
 		Table table = session.table(tablename);
 		database.truncateTable(table.getName());		
-		TableLoadRunner runner = new TableLoadRunner(profile, table, database);
+		SimpleTableLoader runner = new SimpleTableLoader(profile, table, database);
 		runner.call();
 		WriterMetrics metrics = runner.getMetrics();
 		assertTrue(metrics.getProcessed() > 0);		

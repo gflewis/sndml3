@@ -38,26 +38,54 @@ public class Scanner extends TimerTask {
 		this.putRunStatus = session.getURI(putRunStatusPath);
 	}
 		
+//	@Override
+//	public void run() {
+//		Log.setJobContext(agentName);
+//		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
+//		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
+//		ScannerInput scannerConfig;
+//		try {
+//			StringReader jsonReader = new StringReader(request.getResponseText());
+//			scannerConfig = configFactory.scannerConfig(profile, jsonReader);
+//			for (JobConfig run : scannerConfig.result.runs) {
+//				run.updateAndValidate(profile, new DateTimeFactory());				
+//				Key runKey = run.getSysId();
+//				AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
+//				statusLogger.setStatus("prepare");
+//				DaemonJobRunner runner = new DaemonJobRunner(profile, run);
+//				workerPool.execute(runner);
+//			}			
+//		} catch (IOException e) {
+//			logger.error(Log.RESPONSE, e.toString(), e);
+//			e.printStackTrace();
+//			Daemon.mainThread().interrupt();
+//		}				
+//	}
+
 	@Override
 	public void run() {
 		Log.setJobContext(agentName);
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
-			ObjectNode response = request.execute();
+			ObjectNode response = request.getObject();
 			logger.debug(Log.RESPONSE, response.toPrettyString());
 			ObjectNode objResult = (ObjectNode) response.get("result");
-			ArrayNode runlist = (ArrayNode) objResult.get("runs");
-			if (runlist.size() == 0) logger.info(Log.DAEMON, "No Runs");				
-			for (int i = 0; i < runlist.size(); ++i) {
-				ObjectNode obj = (ObjectNode) runlist.get(i);
-				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
-				Key runKey = jobConfig.getSysId();
-				AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
-				statusLogger.setStatus("prepare");
-				DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
-				workerPool.execute(runner);
+			if (objResult.has("runs")) {
+				ArrayNode runlist =  (ArrayNode) objResult.get("runs");
+				if (runlist.size() == 0) logger.info(Log.DAEMON, "No Runs");				
+				for (int i = 0; i < runlist.size(); ++i) {
+					ObjectNode obj = (ObjectNode) runlist.get(i);
+					JobConfig jobConfig = configFactory.jobConfig(profile, obj);
+					Key runKey = jobConfig.getSysId();
+					AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
+					statusLogger.setStatus("prepare");
+					DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
+					workerPool.execute(runner);
+				}
 			}
+			else
+				logger.info(Log.DAEMON, "No Runs");
 		} 
 		catch (Exception e) {
 			logger.error(Log.RESPONSE, e.toString(), e);

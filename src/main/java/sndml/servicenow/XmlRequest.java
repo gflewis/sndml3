@@ -54,10 +54,10 @@ class XmlRequest extends ServiceNowRequest {
 			return HttpMethod.POST;
 	}
 	
-	public Document execute() throws IOException {
+	public Document getDocument() throws IOException {
 		CloseableHttpResponse response = client.execute(request);		
 		statusLine = response.getStatusLine();		
-		int statusCode = statusLine.getStatusCode();
+		statusCode = statusLine.getStatusCode();
 		HttpEntity responseEntity = response.getEntity();
 		Header contentTypeHeader = responseEntity.getContentType();
 		responseContentType = contentTypeHeader == null ? null : contentTypeHeader.getValue();

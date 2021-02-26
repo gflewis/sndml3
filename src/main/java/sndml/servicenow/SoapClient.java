@@ -68,7 +68,7 @@ public class SoapClient {
 		}
 		
 		XmlRequest xmlRequest = new XmlRequest(session.getClient(), uri, requestDoc);
-		Document responseDoc = xmlRequest.execute();
+		Document responseDoc = xmlRequest.getDocument();
 		if (logger.isDebugEnabled()) {
 			String responseText = XmlFormatter.format(responseDoc);
 			logger.debug(Log.RESPONSE, "\n" + Log.abbreviate(responseText));

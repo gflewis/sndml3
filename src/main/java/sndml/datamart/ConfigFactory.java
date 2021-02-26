@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import sndml.servicenow.DateTime;
@@ -40,20 +40,13 @@ public class ConfigFactory {
 		yamlMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);	
 		yamlMapper.setSerializationInclusion(Include.NON_NULL);		
 	}
-
-//	LoaderConfig loaderConfig(File file) throws IOException, ConfigParseException {
-//		return loaderConfig(file, null);
-//	}
 	
-	LoaderConfig loaderConfig(ConnectionProfile profile, File yamlFile) throws IOException, ConfigParseException {
+	LoaderConfig loaderConfig(ConnectionProfile profile, File yamlFile) 
+			throws IOException, ConfigParseException {
 		Reader reader = new FileReader(yamlFile);
 		return loaderConfig(profile, reader);		
 	}
-	
-//	LoaderConfig loaderConfig(Reader reader) {
-//		return loaderConfig(reader);
-//	}
-	
+		
 	LoaderConfig loaderConfig(ConnectionProfile profile, Reader reader) 
 			throws IOException, ConfigParseException {
 		File metricsFolder = null;			
@@ -66,7 +59,7 @@ public class ConfigFactory {
 		try {
 			loader = yamlMapper.readValue(reader, LoaderConfig.class);			
 		}
-		catch (InvalidFormatException e) {
+		catch (JsonProcessingException e) {
 			throw new ConfigParseException(e);
 		}
 		loader.setMetricsFolder(metricsFolder);
@@ -74,13 +67,46 @@ public class ConfigFactory {
 		// logger.info(Log.INIT, "loaderConfig last=" + dateFactory.getLastStart());
 		logger.info(Log.INIT, "loaderConfig: " + jsonMapper.writeValueAsString(loader));
 		for (JobConfig job : loader.tables) {
-			job.updateFields(profile, dateFactory);
-			job.validateFields();
+			job.initialize(profile, dateFactory);
+			job.validate();
 			logger.info(Log.INIT, job.getName() + ": " + job.toString());
 		}
 		return loader;
 	}
-
+	
+//	ScannerInput scannerConfig(ConnectionProfile profile, Reader reader) 
+//			throws IOException, ConfigParseException {
+//		ScannerInput config = null;
+//		try {
+//			config = jsonMapper.readValue(reader,  ScannerInput.class);
+//		} catch (InvalidFormatException e) {
+//			throw new ConfigParseException(e);
+//		}
+//		return config;
+//	}
+	
+	JobConfig yamlJob(ConnectionProfile profile, File yamlFile) 
+			throws IOException, ConfigParseException {
+		return yamlJob(profile, new FileReader(yamlFile));
+	}
+	
+	JobConfig yamlJob(ConnectionProfile profile, String yamlText) 
+			throws IOException, ConfigParseException {
+		return yamlJob(profile, new StringReader(yamlText));		
+	}
+	
+	JobConfig yamlJob(ConnectionProfile profile, Reader yamlReader) 
+			throws IOException, ConfigParseException {
+		JobConfig job;
+		try {
+			job = yamlMapper.readValue(yamlReader, JobConfig.class);			
+		}
+		catch (JsonProcessingException e1) {
+			throw new ConfigParseException(e1);
+		}
+		return job;
+	}
+		
 	JobConfig jobConfig(ConnectionProfile profile, JsonNode node) throws ConfigParseException {
 		DateTimeFactory dateFactory = new DateTimeFactory();
 		JobConfig job;
@@ -89,8 +115,8 @@ public class ConfigFactory {
 		} catch (JsonProcessingException e) {
 			throw new ConfigParseException(e.getMessage());
 		}
-		job.updateFields(profile, dateFactory);
-		job.validateFields();
+		job.initialize(profile, dateFactory);
+		job.validate();
 		logger.info(Log.INIT, "jobConfig: " + job.toString());
 		return job;
 	}
@@ -99,8 +125,8 @@ public class ConfigFactory {
 		DateTimeFactory dateFactory = new DateTimeFactory();
 		JobConfig job = new JobConfig();
 		job.source = table.getName();
-		job.updateFields(profile, dateFactory);
-		job.validateFields();
+		job.initialize(profile, dateFactory);
+		job.validate();
 		logger.info(Log.INIT, "tableLoader: " + job.toString());
 		return job;
 	}

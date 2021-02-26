@@ -34,7 +34,7 @@ public class AppRunLogger extends ProgressLogger {
 		body.put("sys_id", runKey.toString());		
 		body.put("status", status);
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
-		ObjectNode response = request.execute();
+		ObjectNode response = request.getObject();
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 	}	
@@ -47,7 +47,7 @@ public class AppRunLogger extends ProgressLogger {
 		body.put("message", e.getMessage());
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		try {
-			request.execute();
+			request.getObject();
 		} catch (IOException e1) {
 			logger.error(Log.FINISH, "Unable to log Error: " + e.getMessage());
 		}		
@@ -66,7 +66,7 @@ public class AppRunLogger extends ProgressLogger {
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		ObjectNode response;
 		try {
-			response = request.execute();
+			response = request.getObject();
 		} catch (IOException e) {
 			throw new ResourceException(e);
 		}

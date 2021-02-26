@@ -1,7 +1,7 @@
 package sndml.datamart;
 
 import java.io.File;
-import java.util.List;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,7 +20,7 @@ public class LoaderConfig {
 	@JsonProperty("metrics") public String metricsFileName = null;
 	
 	@JsonProperty("tables")
-	public List<JobConfig> tables = new java.util.ArrayList<JobConfig>();
+	public ArrayList<JobConfig> tables; // = new java.util.ArrayList<JobConfig>();
 
 	private static Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
 	
@@ -61,14 +61,14 @@ public class LoaderConfig {
 			dateFactory = new DateTimeFactory(start, metricsFile) :  
 			new DateTimeFactory(start);
 		for (JobConfig table : tables) {
-			table.updateFields(profile, dateFactory);
+			table.initialize(profile, dateFactory);
 		}
 	}
 	
 	void validate() throws ConfigParseException {
 		if (tables.size() < 1) throw new ConfigParseException("No tables");
 		for (JobConfig table : tables) {
-			table.validateFields();
+			table.validate();
 		}
 	}
 		

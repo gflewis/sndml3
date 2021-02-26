@@ -91,7 +91,14 @@ public class JobConfig {
 		return new DateTimeRange(null, this.start);
 	}
 
-	void updateFields(ConnectionProfile profile, DateTimeFactory dateFactory) {
+	void initializeAndValidate(ConnectionProfile profile, DateTimeFactory dateFactory) {
+		updateCoreFields();
+		if (dateFactory != null) updateDateFields(dateFactory);
+		if (profile != null) updateFromProfile(profile);
+		validate();		
+	}
+	
+	void initialize(ConnectionProfile profile, DateTimeFactory dateFactory) {
 		updateCoreFields();
 		if (dateFactory != null) updateDateFields(dateFactory);
 		if (profile != null) updateFromProfile(profile);
@@ -176,7 +183,7 @@ public class JobConfig {
 		}				
 	}
 		
-	void validateFields() {
+	void validate() {
 		if (action == Action.EXECUTE) {
 			if (sql == null) configError("Missing SQL");
 		}
