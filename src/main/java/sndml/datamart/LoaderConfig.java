@@ -38,15 +38,15 @@ public class LoaderConfig {
 		return metricsFileName == null ? null : new File(metricsFolder, metricsFileName);
 	}
 
-	DateTimeFactory getDateFactory() {
+	private DateCalculator getDateFactory() {
 		File metricsFile = getMetricsFile();
 		if (metricsFile != null)
 			logger.info(Log.INIT, "metricsFile=" + metricsFile);			
-		DateTimeFactory dateFactory = 
+		DateCalculator dateFactory = 
 			(metricsFile != null && metricsFile.canRead()) ?
-			dateFactory = new DateTimeFactory(start, metricsFile) :  
-			new DateTimeFactory(start);
-		logger.info(Log.INIT, String.format("start=%s last=%s", dateFactory.getStart(), dateFactory.getLastStart()));
+			dateFactory = new DateCalculator(start, metricsFile) :  
+			new DateCalculator(start);
+		logger.info(Log.INIT, String.format("start=%s last=%s", dateFactory.getStart(), dateFactory.getLast()));
 		return dateFactory;
 	}
 	
@@ -56,10 +56,10 @@ public class LoaderConfig {
 		
 	void updateFields(ConnectionProfile profile) throws ConfigParseException {
 		File metricsFile = getMetricsFile();
-		DateTimeFactory dateFactory = 
+		DateCalculator dateFactory = 
 			(metricsFile != null && metricsFile.canRead()) ?
-			dateFactory = new DateTimeFactory(start, metricsFile) :  
-			new DateTimeFactory(start);
+			dateFactory = new DateCalculator(start, metricsFile) :  
+			new DateCalculator(start);
 		for (JobConfig table : tables) {
 			table.initialize(profile, dateFactory);
 		}

@@ -8,7 +8,7 @@ public class JobConfigValidator {
 	final JobConfig job;
 	final Action action;
 	
-	JobConfigValidator(JobConfig job, DateTimeFactory factory) {
+	JobConfigValidator(JobConfig job, DateCalculator factory) {
 		this.job = job;
 		this.action = job.action;
 	}

@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import java.util.Properties;
 import org.junit.Test;
 
-import sndml.datamart.DateTimeFactory;
+import sndml.datamart.DateCalculator;
 import sndml.servicenow.*;
 
 public class DateTimeFactoryTest {
@@ -19,13 +19,13 @@ public class DateTimeFactoryTest {
 		return props;
 	}
 	
-	DateTimeFactory getFactory() {
-		return new DateTimeFactory(myStart, getProperties());
+	DateCalculator getFactory() {
+		return new DateCalculator(myStart, getProperties());
 	}
 	
 	@Test
 	public void testDateTimeFactory() throws Exception {
-		DateTimeFactory factory = getFactory();
+		DateCalculator factory = getFactory();
 		assertEquals(myStart, factory.getDate("2017-06-15 10:15:00"));
 		assertEquals(myStart, factory.getDate("start"));
 		assertEquals(myStart, factory.getDate("START"));

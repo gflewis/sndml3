@@ -13,6 +13,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	DateTimeFactoryTest.class,
 	CreateTableTest.class,
 	InsertTest.class,
+	RefreshTest1.class,
+	RefreshTest2.class,
 	PruneTest.class,
 	TimestampTest.class,
 	TableLoaderTest.class,

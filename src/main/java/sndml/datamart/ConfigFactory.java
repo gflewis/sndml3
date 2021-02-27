@@ -63,7 +63,7 @@ public class ConfigFactory {
 			throw new ConfigParseException(e);
 		}
 		loader.setMetricsFolder(metricsFolder);
-		DateTimeFactory dateFactory = loader.getDateFactory();
+		DateCalculator dateFactory = new DateCalculator();
 		// logger.info(Log.INIT, "loaderConfig last=" + dateFactory.getLastStart());
 		logger.info(Log.INIT, "loaderConfig: " + jsonMapper.writeValueAsString(loader));
 		for (JobConfig job : loader.tables) {
@@ -108,7 +108,7 @@ public class ConfigFactory {
 	}
 		
 	JobConfig jobConfig(ConnectionProfile profile, JsonNode node) throws ConfigParseException {
-		DateTimeFactory dateFactory = new DateTimeFactory();
+		DateCalculator dateFactory = new DateCalculator();
 		JobConfig job;
 		try {
 			job = jsonMapper.treeToValue(node, JobConfig.class);
@@ -122,7 +122,7 @@ public class ConfigFactory {
 	}
 		
 	JobConfig tableLoader(ConnectionProfile profile, Table table) throws ConfigParseException {
-		DateTimeFactory dateFactory = new DateTimeFactory();
+		DateCalculator dateFactory = new DateCalculator();
 		JobConfig job = new JobConfig();
 		job.source = table.getName();
 		job.initialize(profile, dateFactory);

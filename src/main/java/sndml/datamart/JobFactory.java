@@ -9,10 +9,13 @@ import java.io.StringReader;
 public class JobFactory {
 
 	ConfigFactory configFactory = new ConfigFactory();
+	DateCalculator dateFactory = new DateCalculator();
 		
 	public JobRunner yamlJob(ConnectionProfile profile, Reader yamlReader) 
 			throws ConfigParseException, IOException {
 		JobConfig config = configFactory.yamlJob(profile, yamlReader);
+		config.initialize(profile, dateFactory);
+		config.validate();
 		return new JobConfigRunner(profile, config);
 	}
 	

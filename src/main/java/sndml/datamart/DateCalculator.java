@@ -18,10 +18,10 @@ import sndml.servicenow.Log;
  * and perform date arithmetic.
  *
  */
-public class DateTimeFactory {
+public class DateCalculator {
 
-	private final DateTime start;
-	private final DateTime lastStart;
+	private DateTime start;
+	private DateTime last;
 	
 	final Pattern datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2}:\\d{2})?");
 	final Pattern namePattern = Pattern.compile("[a-z][a-z0-9_.]*", Pattern.CASE_INSENSITIVE);
@@ -29,32 +29,54 @@ public class DateTimeFactory {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	DateTimeFactory() {
+	DateCalculator() {
 		this.start = DateTime.now();
-		this.lastStart = null;
+		this.last = null;
 	}
 	
-	DateTimeFactory(DateTime start) {
+	DateCalculator(DateTime start) {
 		this.start = start;
-		this.lastStart = null;
+		this.last = null;
 	}
 	
-	DateTimeFactory(DateTime start, DateTime lastStart) {
+	DateCalculator(DateTime start, DateTime lastStart) {
 		this.start = start;
-		this.lastStart = lastStart;
+		this.last = lastStart;
 	}
 	
-	DateTimeFactory(DateTime start, File metricsFile) {
+	DateCalculator(DateTime start, File metricsFile) {
 		this.start = (start==null ? DateTime.now() : start);
-		this.lastStart = getLastStart(metricsFile);
+		this.last = getLastStart(metricsFile);
 	}
 	
-	DateTimeFactory(DateTime start, Properties lastValues) {
+	DateCalculator(DateTime start, Properties lastValues) {
 		this.start = (start==null ? DateTime.now() : start);
-		this.lastStart = getLastStart(lastValues);
+		this.last = getLastStart(lastValues);
 	}
 
-	static DateTime getLastStart(File metricsFile) {
+    DateCalculator setStart(DateTime start) {
+    	this.start = start;
+    	return this;
+    }
+        
+	DateTime getStart() {
+		return this.start;
+	}
+	
+	DateCalculator setLast(DateTime last) {
+		this.last = last;
+		return this;
+	}
+	
+	boolean hasLast() {
+		return this.last != null;
+	}
+	
+	DateTime getLast() {
+		return this.last;
+	}
+
+	private static DateTime getLastStart(File metricsFile) {
 		Properties lastValues = new Properties();
 		try {
 			lastValues.load(new FileInputStream(metricsFile));
@@ -64,26 +86,9 @@ public class DateTimeFactory {
 		return new DateTime(lastValues.getProperty("start"));		
 	}
 	
-	static DateTime getLastStart(Properties props) {
+	private static DateTime getLastStart(Properties props) {
 		return new DateTime(props.getProperty("start"));				
 	}
-	
-	DateTime getStart() {
-		return this.start;
-	}
-	
-	boolean hasLastStart() {
-		return this.lastStart != null;
-	}
-	
-	DateTime getLastStart() {
-		return this.lastStart;
-	}
-		
-//	DateTime getDate(JsonNode obj) throws ConfigParseException {
-//		assert obj != null;
-//		return getDate(obj.asText());
-//	}
 	
 	DateTime getDate(String expr) throws ConfigParseException {
 		assert expr != null;
@@ -110,9 +115,9 @@ public class DateTimeFactory {
 		if (name.equalsIgnoreCase("start")) return getStart();
 		if (name.equalsIgnoreCase("today")) return getStart().truncate();
 		if (name.equalsIgnoreCase("last")) {
-			if (!hasLastStart())
+			if (!hasLast())
 				throw new ConfigParseException("Metrics file not found. Unable to determine value of LAST.");
-			return getLastStart();
+			return getLast();
 		}
 		throw new ConfigParseException("Invalid name: " + name);
 		/*

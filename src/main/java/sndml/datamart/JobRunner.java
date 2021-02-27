@@ -35,7 +35,8 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 	WriterMetrics getMetrics() {
 		return metrics;
 	}
-
+	
+	@Override
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		assert config != null;
 		assert sqlTableName != null;

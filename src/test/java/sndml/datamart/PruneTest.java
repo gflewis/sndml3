@@ -2,8 +2,6 @@ package sndml.datamart;
 
 import static org.junit.Assert.*;
 
-import java.io.StringReader;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -43,29 +41,42 @@ public class PruneTest {
 	@Test
 	public void testPrune() throws Exception {
 		TestManager.bannerStart("testPrune");
+		String tableName = "incident";
 		Session session = TestManager.getProfile().getSession();
-		DateTime t0 = DateTime.now();
-		Table tbl = session.table("incident");
+		Table tbl = session.table(tableName);
+		DBUtil db = new DBUtil(profile);
+		JobFactory jf = new JobFactory();
+		
 		TableAPI api = tbl.api();
-		TestManager.banner(logger, "Insert");
+		TestManager.banner(logger, "Insert");		
 	    FieldValues values = new FieldValues();
-	    String descr1 = "This is a test " + t0.toString();
+	    String descr1 = String.format(
+    		"%s %s", this.getClass().getName(), 
+    		DateTime.now().toString());	    	   
 	    values.put("short_description", descr1);
 	    values.put("cmdb_ci",  TestManager.getProperty("some_ci"));
 	    Key key = api.insertRecord(values).getKey();
 	    assertNotNull(api.getRecord(key));
+		TestManager.banner(logger, "Load");
+		assertTrue(db.tableExists(tableName));
+		JobRunner load = jf.yamlJob(profile, "{source: incident, action: update}");
+		WriterMetrics loadMetrics = load.call();
+	    
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Delete");
 	    api.deleteRecord(key);
 		assertNull(api.getRecord(key));
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Prune");
-	    ConfigFactory factory = new ConfigFactory();
-	    String yaml = "tables: [{source: incident, action: prune}]";
-	    LoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));	    
-	    Loader loader = new Loader(profile, config);	    
-		logger.info(Log.TEST, "PRUNE incident");
-		loader.loadTables();
-	}
+	    String yaml = String.format(
+	    	"{source: incident, action: prune, since: %s}", 
+	    	loadMetrics.getStarted().toString());
+	    JobRunner jr = jf.yamlJob(profile, yaml);
+	    logger.info(Log.TEST, yaml);	    
+	    WriterMetrics pruneMetrics = jr.call();
+	    assertEquals(0, pruneMetrics.getInserted());
+	    assertEquals(0, pruneMetrics.getUpdated());
+	    assertEquals(1, pruneMetrics.getDeleted());
+	    }
 
 }

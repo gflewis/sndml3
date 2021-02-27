@@ -19,8 +19,9 @@ public class JobConfig {
 
 	static final Logger logger = LoggerFactory.getLogger(JobConfig.class);	
 	
-	private DateTimeFactory dateFactory;
-	@JsonIgnore public DateTime start;
+	private DateCalculator dateFactory;
+	public DateTime start;
+	public DateTime last;
 	public Key sys_id;
 	public String number;
 	@JsonProperty("name") public String jobName;
@@ -91,20 +92,18 @@ public class JobConfig {
 		return new DateTimeRange(null, this.start);
 	}
 
-	void initializeAndValidate(ConnectionProfile profile, DateTimeFactory dateFactory) {
-		updateCoreFields();
-		if (dateFactory != null) updateDateFields(dateFactory);
-		if (profile != null) updateFromProfile(profile);
+	void initializeAndValidate(ConnectionProfile profile, DateCalculator dateCalculator) {
+		initialize(profile, dateCalculator);
 		validate();		
 	}
 	
-	void initialize(ConnectionProfile profile, DateTimeFactory dateFactory) {
+	void initialize(ConnectionProfile profile, DateCalculator dateCalculator) {
 		updateCoreFields();
-		if (dateFactory != null) updateDateFields(dateFactory);
+		updateDateFields(dateFactory);
 		if (profile != null) updateFromProfile(profile);
 	}
 
-	void updateCoreFields() {
+	private void updateCoreFields() {
 		// Determine Action
 		if (action == null)	action = 
 				Boolean.TRUE.equals(truncate) ?	
@@ -119,30 +118,33 @@ public class JobConfig {
 		
 	}
 
-	void updateFromParent(JobConfig parent) {
+	private void updateFromParent(JobConfig parent) {
 		if (this.pageSize == null && parent.pageSize != null) {
 			this.pageSize = parent.pageSize;
 		}
 	}
 	
-	void updateDateFields(DateTimeFactory dateFactory) {
+	private void updateDateFields(DateCalculator calculator) {
+		if (calculator == null) calculator = new DateCalculator();
+		if (start != null) calculator.setStart(start);
+		if (last != null) calculator.setLast(last);
 		if (sinceExpr == null) {
 			sinceDate = null;
 		}
 		else {
-			sinceDate = dateFactory.getDate(sinceExpr);
+			sinceDate = calculator.getDate(sinceExpr);
 		}
 		
 		if (createdExpr == null) {
 			createdRange = null;
 		}
 		if (createdExpr != null) {
-			setDateFactory(dateFactory);
+			setDateFactory(calculator);
 			setCreated(createdExpr);
 		}			
 	}
 
-	public void setDateFactory(DateTimeFactory factory) {
+	public void setDateFactory(DateCalculator factory) {
 		this.dateFactory = factory;
 	}
 
@@ -196,7 +198,7 @@ public class JobConfig {
 		booleanValidForActions("Truncate", truncate, EnumSet.of(Action.INSERT));
 		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
 		validForActions("Created", createdRange, EnumSet.range(Action.INSERT, Action.SYNC));
-		validForActions("Since", sinceDate, EnumSet.range(Action.INSERT, Action.UPDATE));
+		validForActions("Since", sinceDate, EnumSet.of(Action.INSERT, Action.UPDATE, Action.PRUNE));
 		validForActions("SQL", sql, EnumSet.of(Action.EXECUTE));
 		
 		if (sinceDate == null && sinceExpr != null)

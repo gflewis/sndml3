@@ -8,13 +8,13 @@ import sndml.servicenow.DateTime;
 import sndml.servicenow.InvalidDateTimeException;
 
 @Deprecated
-public class DateTimeExpr extends DateTime {
+public class DateExpression extends DateTime {
 
-	public DateTimeExpr(String value) throws InvalidDateTimeException {
+	public DateExpression(String value) throws InvalidDateTimeException {
 		super(value);
 	}
 
-	public DateTimeExpr(String value, int fmtlen) throws InvalidDateTimeException {
+	public DateExpression(String value, int fmtlen) throws InvalidDateTimeException {
 		super(value, fmtlen);
 	}
 
@@ -23,7 +23,7 @@ public class DateTimeExpr extends DateTime {
 //		super(year, month, day);
 //	}
 
-	public DateTimeExpr(Date value) {
+	public DateExpression(Date value) {
 		super(value);
 	}
 
@@ -31,7 +31,7 @@ public class DateTimeExpr extends DateTime {
 //		super(seconds);
 //	}
 	
-	public DateTimeExpr(JsonNode node, DateTimeFactory factory) 
+	public DateExpression(JsonNode node, DateCalculator factory) 
 			throws ConfigParseException {
 		super(factory.getDate(node.asText()));
 	}
