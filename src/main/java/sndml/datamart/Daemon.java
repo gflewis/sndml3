@@ -22,9 +22,9 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private final String agentName;
 	private final int intervalSeconds;
 	private final int threadCount;
-	private final Scanner scanner;
 	
 	static Thread mainThread; 
+	static Scanner scanner;
 	
 	private Timer timer;
 	
@@ -65,6 +65,10 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		logger.info(Log.INIT, "begin init");		
 	}
 
+	public static void rescan() {
+		if (scanner != null) scanner.run();
+	}
+	
 	@Override
 	public void start() throws Exception {
 		Log.setJobContext(agentName);

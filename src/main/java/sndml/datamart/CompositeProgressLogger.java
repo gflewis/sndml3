@@ -9,16 +9,10 @@ public class CompositeProgressLogger extends ProgressLogger {
 
 	final Log4jProgressLogger slf4jLogger;
 	final AppRunLogger appLogger;
-	
-//	public CompositeProgressLogger(SLF4jProgressLogger slf4jLogger, AppRunLogger appLogger) {
-//		super();
-//		this.slf4jLogger = slf4jLogger;
-//		this.appLogger = appLogger;
-//	}
-	
-	public CompositeProgressLogger(@SuppressWarnings("rawtypes") Class clazz, AppRunLogger appLogger) {
+		
+	public CompositeProgressLogger(@SuppressWarnings("rawtypes") Class cls, AppRunLogger appLogger) {
 		super();
-		this.slf4jLogger = new Log4jProgressLogger(clazz);
+		this.slf4jLogger = new Log4jProgressLogger(cls);
 		this.appLogger = appLogger; 		
 	}
 

@@ -38,17 +38,17 @@ public class LoaderConfig {
 		return metricsFileName == null ? null : new File(metricsFolder, metricsFileName);
 	}
 
-	private DateCalculator getDateFactory() {
-		File metricsFile = getMetricsFile();
-		if (metricsFile != null)
-			logger.info(Log.INIT, "metricsFile=" + metricsFile);			
-		DateCalculator dateFactory = 
-			(metricsFile != null && metricsFile.canRead()) ?
-			dateFactory = new DateCalculator(start, metricsFile) :  
-			new DateCalculator(start);
-		logger.info(Log.INIT, String.format("start=%s last=%s", dateFactory.getStart(), dateFactory.getLast()));
-		return dateFactory;
-	}
+//	private DateCalculator getDateFactory() {
+//		File metricsFile = getMetricsFile();
+//		if (metricsFile != null)
+//			logger.info(Log.INIT, "metricsFile=" + metricsFile);			
+//		DateCalculator dateFactory = 
+//			(metricsFile != null && metricsFile.canRead()) ?
+//			dateFactory = new DateCalculator(start, metricsFile) :  
+//			new DateCalculator(start);
+//		logger.info(Log.INIT, String.format("start=%s last=%s", dateFactory.getStart(), dateFactory.getLast()));
+//		return dateFactory;
+//	}
 	
 	java.util.List<JobConfig> getJobs() {
 		return this.tables;
@@ -70,75 +70,7 @@ public class LoaderConfig {
 		for (JobConfig table : tables) {
 			table.validate();
 		}
-	}
-		
-	/*
-	@Deprecated
-	public LoaderConfig(Table table) throws IOException, ConfigParseException {
-		JobConfig config = configFactory.tableLoader(table);
-		this.tables.add(config);
-	}
-
-	@Deprecated	
-	public LoaderConfig(File configFile, Properties props) throws IOException, ConfigParseException {
-		this(new FileReader(configFile), props);
-	}
-
-	@Deprecated		
-	public LoaderConfig(Reader reader, Properties props) throws ConfigParseException {
-		File metricsFolder = null;			
-		if (props != null) {
-			String metricsFolderName = props.getProperty("loader.metrics_folder");
-			if (metricsFolderName != null && metricsFolderName.length() > 0)
-				metricsFolder = new File(metricsFolderName);
-		}		
-		JsonNode root = parseYAML(reader);		
-		logger.info(Log.INIT, "\n" + root.toPrettyString());
-		Iterator<String> fieldnames = root.fieldNames();
-		while (fieldnames.hasNext()) {
-			String key = fieldnames.next();
-		    JsonNode val = root.get(key);
-			switch (key.toLowerCase()) {
-			case "threads" : 
-				threads = val.asInt();
-				break;
-			case "metrics" :
-				String metricsFileName = val.asText();
-				metricsFile = (metricsFolder == null) ?
-						new File (metricsFileName) : new File(metricsFolder, metricsFileName);
-				dateFactory = new DateTimeFactory(start, metricsFile);
-				configFactory.setDateFactory(dateFactory);;
-				break;
-			case "pagesize" : 
-				pageSize = val.asInt();
-				break;
-			case "tables" :
-			case "jobs" :
-				ArrayNode jobs = (ArrayNode) val;
-				for (int i = 0; i < jobs.size(); ++i) {
-					JsonNode jobNode = jobs.get(i);
-					// JobConfig jobConfig = new JobConfig(this, jobNode);
-					JobConfig jobConfig = configFactory.jobConfig(jobNode);
-					this.tables.add(jobConfig);
-				}
-				break;
-	    	default:
-	    		throw new ConfigParseException("Not recognized: " + key);
-			}
-		}
-		if (tables.size() == 0)
-			throw new ConfigParseException("No tables specified");
-	}
-
-	public ObjectNode parseYAML(Reader reader) throws ConfigParseException {
-		try {
-			JsonNode root = yamlMapper.readTree(reader);
-			return (ObjectNode) root;
-		}
-		catch (Exception e) {
-			throw new ConfigParseException(e);
-		}		
-	}
+	}		
 	
 	/*
 	 * Used for JUnit tests
