@@ -9,17 +9,17 @@ public class SimpleTableLoader extends JobRunner implements Runnable {
 	}
 	
 	public SimpleTableLoader(ConnectionProfile profile, Table table, Database database) {
-		assert profile != null;
-		assert table != null;
-		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
-		this.config = configFactory.tableLoader(profile, table);
-		this.session = table.getSession();
-		this.db = database;
+		super(table.getSession(), database, jobConfig(profile, table));
 		this.table = table;
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
 		this.metrics = new WriterMetrics();
 		this.appRunLogger = null;
+	}
+	
+	private static JobConfig jobConfig(ConnectionProfile profile, Table table) {
+		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
+		return configFactory.tableLoader(profile, table);		
 	}
 
 	@Override

@@ -10,16 +10,22 @@ import sndml.servicenow.*;
 
 public abstract class JobRunner implements Callable<WriterMetrics> {
 
-	protected Session session;
-	protected Database db;
+	protected final Session session;
+	protected final Database db;
+	protected final JobConfig config;
 	protected Table table;
 	protected String sqlTableName;
 	protected String tableLoaderName;
-	protected JobConfig config;
 	protected WriterMetrics metrics;
 	protected Key runKey;
 	protected AppRunLogger appRunLogger;		
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	JobRunner(Session session, Database db, JobConfig config) {
+		this.session = session;
+		this.db = db;
+		this.config = config;		
+	}
 	
 	private void setLogContext() {
 		Log.setContext(table, tableLoaderName);		
@@ -37,31 +43,28 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		return metrics;
 	}
 	
+	protected void close() throws ResourceException {		
+	}
+	
 	@Override
 	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		assert config != null;
-		assert sqlTableName != null;
-		assert sqlTableName.length() > 0;
 		Action action = config.getAction();
-		assert action != null;
-		
+		assert action != null;		
 		this.setLogContext();
 		logger.debug(Log.INIT, 
 			String.format("call table=%s action=%s", table.getName(), action.toString()));
-		
-		if (config.getSqlBefore() != null) db.executeStatement(config.getSqlBefore());
+		if (config.getSqlBefore() != null) runSQL(config.getSqlBefore());
 		this.setLogContext();
-		
 		switch (action) {
 		case CREATE:
-			if (config.getDropTable()) db.dropTable(sqlTableName, true);
-			db.createMissingTable(table, sqlTableName);
+			runCreate();
 			break;
 		case DROPTABLE:
 			db.dropTable(sqlTableName, true);
 			break;
 		case EXECUTE:
-			db.executeStatement(config.getSql());
+			runSQL(config.getSql());
 			break;
 		case PRUNE:
 			runPrune();
@@ -78,11 +81,26 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		Integer minRows = config.getMinRows();
 		if (minRows != null && processed < minRows)
 			throw new TooFewRowsException(table, minRows, processed);
-		if (config.getSqlAfter() != null) db.executeStatement(config.getSqlAfter());
+		if (config.getSqlAfter() != null) runSQL(config.getSqlAfter());
+		this.close();
 		return this.metrics;		
 	}
 	
+	void runSQL(String sqlCommand) throws SQLException {		
+		db.executeStatement(sqlCommand);
+		db.commit();
+	}
+	
+	void runCreate() throws SQLException, IOException, InterruptedException {
+		assert sqlTableName != null;
+		assert sqlTableName.length() > 0;
+		if (config.getDropTable()) db.dropTable(sqlTableName, true);
+		db.createMissingTable(table, sqlTableName);		
+	}
+	
 	void runPrune() throws SQLException, IOException, InterruptedException {
+		assert sqlTableName != null;
+		assert sqlTableName.length() > 0;
 		ProgressLogger progressLogger = 
 				new CompositeProgressLogger(DatabaseDeleteWriter.class, appRunLogger); 
 		DatabaseDeleteWriter deleteWriter = 
@@ -109,6 +127,8 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 	}
 	
 	void runSync() throws SQLException, IOException, InterruptedException {
+		assert sqlTableName != null;
+		assert sqlTableName.length() > 0;
 		DateTimeRange createdRange = config.getCreated();
 		ProgressLogger progressLogger;
 		if (config.getAutoCreate()) 
@@ -143,6 +163,8 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 	}
 	
 	void runLoad() throws SQLException, IOException, InterruptedException {
+		assert sqlTableName != null;
+		assert sqlTableName.length() > 0;
 		if (this instanceof DaemonJobRunner) {
 			assert appRunLogger != null;
 		}

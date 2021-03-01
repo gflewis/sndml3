@@ -1,5 +1,6 @@
 package sndml.datamart;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -83,23 +84,29 @@ public class Scanner extends TimerTask {
 				}
 				for (JsonNode node : runlist) {
 					assert node.isObject();
-					ObjectNode obj = (ObjectNode) node;
-					JobConfig jobConfig = configFactory.jobConfig(profile, obj);
-					logger.info(Log.DAEMON, jobConfig.toString());
-					Key runKey = jobConfig.getSysId();
+					Key runKey = new Key(node.get("sys_id").asText());
+					assert runKey != null;
 					AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
-					statusLogger.setStatus("prepare");
-					DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
-					workerPool.execute(runner);
+					ObjectNode obj = (ObjectNode) node;
+					try {
+						JobConfig jobConfig = configFactory.jobConfig(profile, obj);
+						logger.info(Log.DAEMON, jobConfig.toString());
+						statusLogger.setStatus("prepare");
+						DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
+						workerPool.execute(runner);
+					}
+					catch (ConfigParseException e) {
+						logger.error(Log.RESPONSE, e.toString(), e);
+						statusLogger.logError(e);
+					}
 				}
 			}
 			else
 				logger.info(Log.DAEMON, "No Runs");
 		} 
-		catch (Exception e) {
+		catch (IOException e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
-			e.printStackTrace();
-			Daemon.mainThread().interrupt();
+			Daemon.getThread().interrupt();
 		}
 	}
 	

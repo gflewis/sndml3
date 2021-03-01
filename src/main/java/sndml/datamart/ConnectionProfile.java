@@ -140,7 +140,7 @@ public class ConnectionProfile {
 	 * If {@link #close()} has been called, then a new connection will be opened and returned.
 	 */
 	public Database getDatabase() throws ResourceException {
-		if (database == null) {
+		if (database == null || database.isClosed()) {
 			try {
 				database = new Database(properties);
 			} catch (SQLException | URISyntaxException e) {

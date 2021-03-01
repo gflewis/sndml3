@@ -105,8 +105,10 @@ public class Generator {
 		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
 
 		
-		logger.info(Log.INIT, String.format("dialect=%s schema=%s namecase=%s namequotes=%s", 
-				getDialectName(), getSchemaName(), namecase.toString(), namequotes.toString()));
+		logger.info(Log.INIT, String.format(
+				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b", 
+				getDialectName(), getSchemaName(), namecase.toString(), 
+				namequotes.toString(), getAutoCommit()));
 	}
 	
 	Element getProtocolTree(URI dbURI) {

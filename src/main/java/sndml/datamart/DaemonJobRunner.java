@@ -8,9 +8,7 @@ import sndml.servicenow.*;
 public class DaemonJobRunner extends JobRunner implements Runnable {
 		
 	public DaemonJobRunner(ConnectionProfile profile, JobConfig config) {
-		this.session = profile.getSession();
-		this.db = profile.getDatabase();
-		this.config = config;
+		super(profile.getSession(), profile.getDatabase(), config);
 		this.runKey = config.getSysId();
 		assert runKey != null;
 		assert runKey.isGUID();
@@ -25,7 +23,17 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	public void run() {
 		this.call();
 	}
-		
+
+	@Override
+	protected void close() throws ResourceException {
+		// Close the database connection
+		try {
+			db.close();
+		} catch (SQLException e) {
+			throw new ResourceException(e);
+		}
+	}
+	
 	@Override
 	public WriterMetrics call() {
 		assert session != null;

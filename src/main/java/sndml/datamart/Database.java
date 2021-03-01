@@ -32,26 +32,28 @@ import sndml.servicenow.*;
 public class Database {
 
 	private final Logger logger = Log.logger(this.getClass());
+	private final String dburl;
 	private final URI dbURI;
 	private final String protocol;
 	private final String dbuser;
-	private final boolean autocommit;
+	private final String dbpass;
 	private final boolean warnOnTruncate;
 	private final String schema;
 	private final Properties properties = new Properties();
 	private final File templates;
-	private final Generator generator;
 	private Connection dbc = null;
+	private Generator generator;
+//	private boolean autocommit;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
 	public Database(Properties props) throws SQLException, URISyntaxException {
 		this.properties.putAll(props);
-		String dburl = props.getProperty("datamart.url");
+		this.dburl = props.getProperty("datamart.url");
 		this.dbURI = new URI(dburl);
 		this.protocol = getProtocol(this.dbURI);
 		this.dbuser = props.getProperty("datamart.username");
-		String dbpass = props.getProperty("datamart.password", "");
+		this.dbpass = props.getProperty("datamart.password", "");
 		schema = props.getProperty("datamart.schema");
 		
 		assert dbc == null;
@@ -61,12 +63,13 @@ public class Database {
 		String logmsg = "database=" + dburl + " user=" + dbuser;
 		if (schema != null) logmsg += " schema=" + getSchema();
 		logger.info(Log.INIT, logmsg);
-		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));
 		this.templates = (props.getProperty("datamart.templates", "").length() > 0) ?
-			new File(props.getProperty("datamart.templates")) : null;
-		this.generator = new Generator(this, this.properties, this.templates);
-		this.autocommit = this.generator.getAutoCommit();
+				new File(props.getProperty("datamart.templates")) : null;
+		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));		
+				
+//		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
+//		this.generator = new Generator(this, this.properties, this.templates);
+//		this.autocommit = this.generator.getAutoCommit();
 		this.initialize();
 		assert dbc != null;
 	}
@@ -76,9 +79,10 @@ public class Database {
 	 * Set the timezoneName to GMT.
 	 * Set the date format to YYYY-MM-DD
 	 */
-	private void initialize() throws SQLException {
-		
-		dbc.setAutoCommit(this.autocommit);
+	private void initialize() throws SQLException {		
+		dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
+		generator = new Generator(this, this.properties, this.templates);
+		dbc.setAutoCommit(generator.getAutoCommit());
 		Statement stmt = dbc.createStatement();
 		Iterator<String> iter = generator.getInitializations().listIterator();
 		while (iter.hasNext()) {
@@ -118,7 +122,7 @@ public class Database {
 	}
 	
 	boolean isAutoCommitEnabled() {
-		return this.autocommit;
+		return generator.getAutoCommit();
 	}
 	
 	boolean getWarnOnTruncate() {
@@ -175,7 +179,7 @@ public class Database {
 	}
 	
 	void commit() throws SQLException {
-		if (!autocommit) dbc.commit();
+		if (!generator.getAutoCommit()) dbc.commit();
 	}
 	
 	void truncateTable(String sqlTableName) throws SQLException {

@@ -23,13 +23,13 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private final int intervalSeconds;
 	private final int threadCount;
 	
-	static Thread mainThread; 
+	static Thread daemonThread; 
 	static Scanner scanner;
 	
 	private Timer timer;
 	
 	public Daemon(ConnectionProfile profile) {
-		mainThread = Thread.currentThread();
+		daemonThread = Thread.currentThread();
 		this.profile = profile;
 		agentName = profile.getProperty("daemon.agent", "main");
 		Log.setJobContext(agentName);
@@ -44,8 +44,8 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	/**
 	 * Return the Daemon thread, which is the main thread.
 	 */
-	public static Thread mainThread() {
-		return mainThread;
+	public static Thread getThread() {
+		return daemonThread;
 	}
 	
 	public void run() throws Exception {
