@@ -1,6 +1,6 @@
 package sndml.datamart;
 
-import sndml.servicenow.WriterMetrics;
+//import sndml.servicenow.WriterMetrics;
 
 public class JobConfigRunner extends JobRunner {
 
@@ -9,7 +9,7 @@ public class JobConfigRunner extends JobRunner {
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
-		this.metrics = new WriterMetrics();
+//		this.metrics = new WriterMetrics();
 		this.appRunLogger = null;				
 	}
 		

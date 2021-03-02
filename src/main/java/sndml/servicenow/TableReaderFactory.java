@@ -32,7 +32,7 @@ public abstract class TableReaderFactory {
 		reader.setFields(fieldNames);
 		reader.setPageSize(pageSize);
 		reader.setWriter(writer);
-		reader.setReaderName(readerName);		
+		reader.setReaderName(readerName);
 	}
 
 	public Table getTable() { 

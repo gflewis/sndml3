@@ -1,0 +1,6 @@
+tables:
+- {name: drop, action: droptable, target: change_request}
+# first step should be successful
+- {name: load1, source: change_request, truncate: true}
+# second step should fail
+- {name: load2, source: change_request, action: insert}

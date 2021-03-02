@@ -7,14 +7,14 @@ public class Log4jProgressLogger extends ProgressLogger {
 	
 	protected final Logger logger;
 
-	public Log4jProgressLogger(@SuppressWarnings("rawtypes") Class clazz) {
-		super();
+	public Log4jProgressLogger(TableReader reader, @SuppressWarnings("rawtypes") Class clazz) {
+		super(reader);
 		this.logger = LoggerFactory.getLogger(clazz);
 	}
 	
-	public void logProgress(ReaderMetrics readerMetrics, WriterMetrics writerMetrics) {
-		assert this.logger != null;
-		assert readerMetrics != null;
+	public void logProgress() {
+		ReaderMetrics readerMetrics = getReaderMetrics();
+		if (readerMetrics == null) return;
 		if (readerMetrics.getParent() == null) 
 			logger.info(Log.PROCESS, String.format("%s %s", 
 				operation, readerMetrics.getProgress()));
@@ -22,5 +22,15 @@ public class Log4jProgressLogger extends ProgressLogger {
 			logger.info(Log.PROCESS, String.format("%s %s (%s)", 
 				operation, readerMetrics.getProgress(), readerMetrics.getParent().getProgress())); 		
 	}
+	
+//	public void logPartProgress(
+//			String partName, 
+//			ReaderMetrics readerMetrics, 
+//			WriterMetrics writerMetrics) {
+//		ReaderMetrics parentMetrics = readerMetrics.getParent();
+//		assert parentMetrics != null;
+//		logger.info(Log.PROCESS, String.format("%s %s (%s)", 
+//				operation, readerMetrics.getProgress(), parentMetrics.getProgress())); 						
+//	}
 
 }

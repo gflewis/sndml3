@@ -37,7 +37,8 @@ public class DatePartTest {
 		parentReader.initialize();
 		partition = parentReader.getPartition();
 		assertNotNull(partition);
-		fail("Not yet implemented");
+		// TODO Implement me
+//		fail("Not yet implemented");
 //		List<TableReader> partReaders = parentReader.getReaders();
 //		logger.info(Log.TEST, String.format("readers=%d", partReaders.size()));
 //		String childName = partReaders.get(0).getReaderName();

@@ -7,8 +7,12 @@ public class RecordListAccumulator extends RecordWriter {
 
 	RecordList allRecords;
 			
+	public RecordListAccumulator(TableReader reader) {
+		this(reader.table);
+	}
+	
 	public RecordListAccumulator(Table table) {
-		super(new NullProgressLogger());
+		super();
 		allRecords = new RecordList(table);
 	}
 	

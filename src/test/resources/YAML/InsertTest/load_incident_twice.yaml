@@ -1,5 +1,0 @@
-tables:
-# first step should be successful
-- {name: incident1, source: incident, truncate: true}
-# second step should fail
-- {name: incident2, source: incident, action: insert}

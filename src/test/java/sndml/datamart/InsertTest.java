@@ -43,7 +43,7 @@ public class InsertTest {
 
 	@Test
 	public void testInsert() throws Exception {
-		YamlFile yaml = folder.getYaml("load_incident_truncate");
+		YamlFile yaml = folder.getYaml("load_truncate");
 		TestManager.bannerStart(this.getClass(), "testInsert", profile, yaml);
 		LoaderConfig config = factory.loaderConfig(profile, yaml);
 		JobConfig job = config.getJobs().get(0);
@@ -62,14 +62,16 @@ public class InsertTest {
 
 	@Test
 	public void testInsertTwice() throws Exception {
-		YamlFile yaml = folder.getYaml("load_incident_twice");
+		YamlFile yaml = folder.getYaml("load_twice");
 		TestManager.bannerStart(this.getClass(), "testInsertTwice", profile, yaml);
 		LoaderConfig config = factory.loaderConfig(profile, yaml);
 		Loader loader = new Loader(profile, config);
-		JobRunner job1 = loader.jobs.get(0);
-		JobRunner job2 = loader.jobs.get(1);
+		// job[0] is droptable
+		JobRunner job1 = loader.jobs.get(1);
+		JobRunner job2 = loader.jobs.get(2);
 		loader.loadTables();
 		int rows = job1.getMetrics().getProcessed();
+		logger.info(Log.TEST, String.format("rows=%d", rows));
 		assertTrue(rows > 0);
 		WriterMetrics metrics2 = job2.getMetrics();
 		int processed = metrics2.getProcessed();

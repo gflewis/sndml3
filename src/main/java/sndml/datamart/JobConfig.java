@@ -114,14 +114,7 @@ public class JobConfig {
 		// Determine Source, Target and Name
 		if (source == null)  source = (jobName != null) ? jobName : target;
 		if (jobName == null) jobName = (target != null) ? target : source;
-		if (target == null)	 target = (source != null) ? source : jobName;
-		
-	}
-
-	private void updateFromParent(JobConfig parent) {
-		if (this.pageSize == null && parent.pageSize != null) {
-			this.pageSize = parent.pageSize;
-		}
+		if (target == null)	 target = (source != null) ? source : jobName;		
 	}
 	
 	private void updateDateFields(DateCalculator calculator) {

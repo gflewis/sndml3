@@ -27,15 +27,18 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	final Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseTableWriter(Database db, Table table, String sqlTableName, ProgressLogger progressLogger) 
+	public DatabaseTableWriter(Database db, Table table, String sqlTableName) 
 			throws IOException, SQLException {
-		super(progressLogger);
+		super();
+		assert db != null;
+		assert table != null;
+		assert progressLogger != null;
 		this.db = db;
 		this.table = table;
 		this.sqlTableName = sqlTableName == null ? table.getName() : sqlTableName;
 		Log.setTableContext(this.table);
 	}
-	
+		
 	@Override
 	public DatabaseTableWriter open() throws SQLException, IOException {
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
@@ -57,9 +60,9 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));
 			writeRecord(rec);
 		}
-		writerMetrics.finish();
+		// writerMetrics.finish();
 		db.commit();
-		progressLogger.logProgress(reader.getReaderMetrics(), writerMetrics);
+		progressLogger.logProgress();
 	}
 	
 	/*

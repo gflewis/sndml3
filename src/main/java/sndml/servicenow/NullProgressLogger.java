@@ -9,10 +9,10 @@ public class NullProgressLogger extends ProgressLogger {
 	public NullProgressLogger() {
 		super();
 	}
-
+	
 	@Override
-	public void logProgress(ReaderMetrics readerMetrics, WriterMetrics writerMetrics) {
-		return;
+	public void logProgress() {
+		return;		
 	}
 	
 }

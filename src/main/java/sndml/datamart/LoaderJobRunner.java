@@ -2,6 +2,7 @@ package sndml.datamart;
 
 import sndml.servicenow.WriterMetrics;
 
+@Deprecated
 public class LoaderJobRunner extends JobRunner {
 
 
@@ -10,8 +11,8 @@ public class LoaderJobRunner extends JobRunner {
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
-		this.metrics = new WriterMetrics();
-		this.metrics.setParent(parent.getMetrics());
+//		this.metrics = new WriterMetrics();
+//		this.metrics.setParent(parent.getMetrics());
 		this.appRunLogger = null;		
 	}
 

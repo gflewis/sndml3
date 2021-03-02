@@ -41,9 +41,9 @@ public class Database {
 	private final String schema;
 	private final Properties properties = new Properties();
 	private final File templates;
+	
 	private Connection dbc = null;
 	private Generator generator;
-//	private boolean autocommit;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
@@ -63,23 +63,20 @@ public class Database {
 		String logmsg = "database=" + dburl + " user=" + dbuser;
 		if (schema != null) logmsg += " schema=" + getSchema();
 		logger.info(Log.INIT, logmsg);
-		this.templates = (props.getProperty("datamart.templates", "").length() > 0) ?
-				new File(props.getProperty("datamart.templates")) : null;
+		String templateName = props.getProperty("datamart.templates", "");
+		this.templates = (templateName.length() > 0) ? new File(templateName) : null;
 		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));		
 				
-//		this.dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-//		this.generator = new Generator(this, this.properties, this.templates);
-//		this.autocommit = this.generator.getAutoCommit();
-		this.initialize();
+		this.open();
 		assert dbc != null;
 	}
 
 	/**
-	 * Initialize the database connection.
+	 * Open the database connection.
 	 * Set the timezoneName to GMT.
 	 * Set the date format to YYYY-MM-DD
 	 */
-	private void initialize() throws SQLException {		
+	void open() throws SQLException {		
 		dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
 		generator = new Generator(this, this.properties, this.templates);
 		dbc.setAutoCommit(generator.getAutoCommit());
@@ -99,6 +96,10 @@ public class Database {
 		this.dbc.close();
 		this.dbc = null;
 		assert this.isClosed();
+	}
+
+	boolean isClosed() {
+		return (this.dbc == null);
 	}
 	
 	Properties getProperties() {
@@ -129,10 +130,6 @@ public class Database {
 		return this.warnOnTruncate;
 	}
 	
-	boolean isClosed() {
-		return (this.dbc == null);
-	}
-
 	URI getURI() {
 		return this.dbURI;
 	}

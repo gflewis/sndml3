@@ -13,7 +13,6 @@ public class SimpleTableLoader extends JobRunner implements Runnable {
 		this.table = table;
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
-		this.metrics = new WriterMetrics();
 		this.appRunLogger = null;
 	}
 	

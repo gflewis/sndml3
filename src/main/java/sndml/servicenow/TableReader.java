@@ -10,15 +10,17 @@ import org.slf4j.LoggerFactory;
 public abstract class TableReader implements Callable<TableReader> {
  
 	public final Table table;
+	private TableReader parent;
 	
 	private String readerName;
-	private TableReader parent;
+	private String partName;
 	private EncodedQuery query;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
 	private Key keyExclusion = null;
 	
-	protected static enum OrderBy {NONE, FIELDS, KEYS}; 
+	protected static enum OrderBy {NONE, FIELDS, KEYS};
+	// Note: RestTableReader sets this value to KEYS
 	protected OrderBy orderBy = OrderBy.NONE;
 	protected RecordWriter writer;
 	protected int pageSize;
@@ -26,12 +28,14 @@ public abstract class TableReader implements Callable<TableReader> {
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
 	protected ReaderMetrics readerMetrics;
+	protected ProgressLogger progressLogger;
+
 	protected Integer maxRows;
 	protected boolean initialized = false;
 	protected final Logger logger;
 
 	@Deprecated
-	protected EncodedQuery orderByQuery;	
+	protected EncodedQuery orderByQuery;
 	
 	public TableReader(Table table) {
 		this.table = table;
@@ -41,11 +45,16 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 			
 	public void initialize() throws IOException, SQLException, InterruptedException {
+		// Note: Only Synchronizer can throw SQLException during initialization
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
 		setLogContext();
 		initialized = true;
 	}
-	
+
+	public void setLogContext() {
+		Log.setContext(table, getReaderName());
+	}
+		
 	public abstract int getDefaultPageSize();
 	
 	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
@@ -59,10 +68,6 @@ public abstract class TableReader implements Callable<TableReader> {
 		return readerName == null ? table.getName() : readerName;
 	}
 	
-	public void setLogContext() {
-		Log.setContext(table, getReaderName());
-	}
-	
 	public void setParent(TableReader parent) {
 		if (initialized) throw new IllegalStateException();
 		this.parent = parent;
@@ -73,6 +78,18 @@ public abstract class TableReader implements Callable<TableReader> {
 		return this.parent;
 	}
 	
+	public void setPartName(String name) {
+		assert !initialized;
+		assert parent != null;
+		this.partName = name;		
+	}
+	
+	public String getPartname() {
+		assert parent != null;
+		assert partName != null;
+		return partName;
+	}
+		
 	public ReaderMetrics getReaderMetrics() {
 		return this.readerMetrics;
 	}
@@ -160,6 +177,8 @@ public abstract class TableReader implements Callable<TableReader> {
 	 * @param fieldnames - Comma delimited list of field names.
 	 * each of which may be prefixed with "+" or "-" 
 	 * to indicate ascending or descending respectively. 
+	 * 
+	 * This code is no longer used. RestTableReader always orders by KEYS.
 	 */
 	@Deprecated
 	public TableReader setOrderBy(String fieldnames) {
@@ -273,10 +292,19 @@ public abstract class TableReader implements Callable<TableReader> {
 	public WriterMetrics getWriterMetrics() {
 		return this.writer.getMetrics();
 	}
+	
+	public void setProgressLogger(ProgressLogger logger) {
+		this.progressLogger = logger;
+	}
+	
+	public ProgressLogger getProgressLogger() {
+		assert progressLogger != null;
+		return progressLogger;
+	}
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		if (!initialized) throw new IllegalStateException("Not initialized");
-		RecordListAccumulator accumulator = new RecordListAccumulator(this.table);
+		RecordListAccumulator accumulator = new RecordListAccumulator(this);
 		this.writer = accumulator;
 		try {
 			this.call();

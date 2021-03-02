@@ -73,6 +73,7 @@ public class Generator {
 		String dialectName = properties.getProperty("datamart.dialect");
 		// only check properties if file was not passed in as an argument
 		if (templatesFile == null) {
+			// TODO Redundant. Same code appears in ConnectionProfile.
 			String templatesPath = properties.getProperty("datamart.templates", "");
 			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
 		}
@@ -103,7 +104,6 @@ public class Generator {
 		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
 		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
 		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
-
 		
 		logger.info(Log.INIT, String.format(
 				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b", 

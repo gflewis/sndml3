@@ -2,14 +2,6 @@ package sndml.servicenow;
 
 import org.slf4j.Logger;
 
-import sndml.servicenow.JsonTableAPI;
-import sndml.servicenow.KeySet;
-import sndml.servicenow.RestTableAPI;
-import sndml.servicenow.Session;
-import sndml.servicenow.SoapTableAPI;
-import sndml.servicenow.Table;
-import sndml.servicenow.TableStats;
-
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -26,16 +18,15 @@ public class GetKeysTest {
 	@Test
 	public void test() throws Exception {
 		Session session = profile.getSession();
-		Table table = session.table("cmdb_ci");
-		SoapTableAPI apiSoap = new SoapTableAPI(table);
-		JsonTableAPI apiJson = new JsonTableAPI(table);
-		RestTableAPI apiRest = new RestTableAPI(table);
-		TableStats stats = apiRest.getStats(null, false);
-		int numRecs = stats.getCount();
-		KeySet ksSoap = apiSoap.getKeys();
-		assertEquals(numRecs, ksSoap.size());
-		KeySet ksJson = apiJson.getKeys();
-		assertEquals(numRecs, ksJson.size());		
+		Table table = session.table("incident");
+		TableStats stats = table.rest().getStats(null, false);
+		Integer numRecs = stats.getCount();
+		assertTrue(numRecs > 20000);		
+		KeySetTableReader reader = new KeySetTableReader(table);
+		reader.initialize();
+		Integer numKeys = reader.getExpected();
+		logger.info(Log.TEST, String.format("Count=%d Keys=%d",  numRecs, numKeys));
+		assertEquals(numRecs, numKeys);
 	}
 	
 }

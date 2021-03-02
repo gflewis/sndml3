@@ -54,8 +54,12 @@ public class AppRunLogger extends ProgressLogger {
 	}
 	
 	@Override
-	public void logProgress(ReaderMetrics readerMetrics, WriterMetrics writerMetrics) {
+	public void logProgress() {
 		assert runKey != null;
+		ReaderMetrics readerMetrics = getReaderMetrics();
+		WriterMetrics writerMetrics = getWriterMetrics();
+		assert readerMetrics != null;
+		assert writerMetrics != null;
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
 		body.put("status", "running");

@@ -16,7 +16,6 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 		this.table = session.table(config.getSource());
 		this.sqlTableName = config.getTarget();
 		this.tableLoaderName = config.getName();
-		this.metrics = new WriterMetrics();
 	}
 
 	@Override

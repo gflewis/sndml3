@@ -12,14 +12,27 @@ import java.sql.SQLException;
  */
 public abstract class RecordWriter {
 
-	protected WriterMetrics writerMetrics = new WriterMetrics();
-	protected final ProgressLogger progressLogger;
+	protected final WriterMetrics writerMetrics;
+	protected ProgressLogger progressLogger;
 
-	public RecordWriter(ProgressLogger logger) {
-		this.progressLogger = logger;
+	public RecordWriter() {
+		this.writerMetrics = new WriterMetrics();
+		this.progressLogger = null;
+	}
+	
+	@Deprecated
+	public RecordWriter(ProgressLogger progressLogger) {
+		this.writerMetrics = new WriterMetrics();
+		this.progressLogger = progressLogger;
 	}
 
-	public abstract void processRecords(TableReader source, RecordList recs) throws IOException, SQLException;	
+	public void setProgressLogger(ProgressLogger progressLogger) {
+		assert progressLogger != null;
+		this.progressLogger = progressLogger;
+	}
+	
+	public abstract void processRecords(TableReader source, RecordList recs) 
+		throws IOException, SQLException;	
 
 	public RecordWriter open() throws IOException, SQLException {
 		writerMetrics.start();

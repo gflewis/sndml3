@@ -17,11 +17,10 @@ public class DatePartitionedTableReader extends TableReader {
 	final TableReaderFactory factory;
 	final int threads;
 	final Interval interval;
-	final WriterMetrics writerMetrics = new WriterMetrics();
+	final WriterMetrics writerMetrics;
 	
 	DateTimeRange range;
 	DatePartition partition;
-//	List<TableReader> partReaders;
 	List<Future<TableReader>> futures;
 
 	final int REST_DEFAULT_PAGE_SIZE = 200;
@@ -38,6 +37,7 @@ public class DatePartitionedTableReader extends TableReader {
 		setPageSize(factory.pageSize);
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
+		this.writerMetrics = new WriterMetrics();
 		setWriter(factory.getWriter());
 	}
 
@@ -60,7 +60,7 @@ public class DatePartitionedTableReader extends TableReader {
 	
 	@Override
 	public WriterMetrics getWriterMetrics() {
-		return this.writer.getMetrics();
+		return this.writerMetrics;
 	}
 	
 	public int numPartsComplete() {
@@ -86,9 +86,11 @@ public class DatePartitionedTableReader extends TableReader {
 		try {
 			super.initialize();
 		} catch (SQLException e) {
-			// impossible
+			// Impossible. 
+			// Only a Syncronizer can throw SQLException during initialization.
 			throw new AssertionError(e);
 		}
+		// Use Stats API to determine min and max dates
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, true);
@@ -104,12 +106,15 @@ public class DatePartitionedTableReader extends TableReader {
 		partition = new DatePartition(range, interval);
 	}
 	
-	private TableReader getReader(DateTimeRange partRange) {
+	private TableReader createReader(DateTimeRange partRange) {
 		String partName = interval.getName(partRange.getStart());
 		TableReader partReader = factory.createReader();
 		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
+		partReader.setPartName(partName);
 		partReader.setReaderName(partReader.getReaderName() + "." + partName);
 		partReader.setParent(this);
+		partReader.getReaderMetrics().setParent(this.readerMetrics);
+		partReader.getWriterMetrics().setParent(this.writerMetrics);
 		return partReader;		
 	}
 
@@ -125,7 +130,7 @@ public class DatePartitionedTableReader extends TableReader {
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
 			for (DateTimeRange partRange : partition) {
-				TableReader reader = getReader(partRange);
+				TableReader reader = createReader(partRange);
 				logger.debug("Submit " + reader.getReaderName());
 				reader.initialize();
 				Future<TableReader> future = executor.submit(reader);
@@ -139,7 +144,7 @@ public class DatePartitionedTableReader extends TableReader {
 		}
 		else {
 			for (DateTimeRange partRange : partition) {
-				TableReader reader = getReader(partRange);
+				TableReader reader = createReader(partRange);
 				reader.initialize();
 				reader.call();
 			}

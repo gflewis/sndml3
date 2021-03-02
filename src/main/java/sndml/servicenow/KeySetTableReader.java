@@ -31,8 +31,8 @@ public class KeySetTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, false);
 		int expected = stats.getCount();
-		// allKeys = table.soap().getKeys(getQuery());
-		allKeys = jsonAPI.getKeys(getQuery());
+		// Use SOAP here because JSON limits results to 10000 but SOAP does not
+		allKeys = table.soap().getKeys(getQuery());
 		if (allKeys.size() != expected)
 			logger.warn(Log.PROCESS,
 					String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
@@ -59,7 +59,7 @@ public class KeySetTableReader extends TableReader {
 	}
 		
 	@Override
-	public TableReader call() throws IOException, SQLException, InterruptedException {
+	public KeySetTableReader call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
 		setLogContext();
 		RecordWriter writer = this.getWriter();

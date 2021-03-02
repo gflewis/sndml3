@@ -16,20 +16,17 @@ public class Synchronizer extends TableReader {
 
 	final Database db;
 	final String sqlTableName;
-	final WriterMetrics writerMetrics = new WriterMetrics();
-	final ProgressLogger progressLogger;
+	final WriterMetrics writerMetrics;
 	KeySet insertSet;
 	KeySet updateSet;
 	KeySet deleteSet;
 	KeySet skipSet;
 	
-	public Synchronizer(Table table, Database db, String sqlTableName, 
-			WriterMetrics parentMetrics, ProgressLogger progressLogger) {
+	public Synchronizer(Table table, Database db, String sqlTableName) {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;
-		this.progressLogger = progressLogger;
-		writerMetrics.setParent(parentMetrics);
+		writerMetrics = new WriterMetrics();
 	}
 
 	@Override
@@ -152,16 +149,17 @@ public class Synchronizer extends TableReader {
 	}
 	
 	@Override
-	public TableReader call() throws IOException, SQLException, InterruptedException {
+	public Synchronizer call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
+		assert progressLogger != null;
 		// Process the Inserts
 		setLogContext();
 		writerMetrics.start();
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		if (insertSet.size() > 0) {
-			DatabaseInsertWriter insertWriter = 
-					new DatabaseInsertWriter(db, table, sqlTableName, progressLogger);
+			DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);			
 			insertWriter.setParentMetrics(this.writerMetrics);
+			insertWriter.setProgressLogger(progressLogger);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
 			insertReader.setFields(this.fieldNames);
@@ -181,9 +179,9 @@ public class Synchronizer extends TableReader {
 		// Process the Updates
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
-			DatabaseUpdateWriter updateWriter = 
-					new DatabaseUpdateWriter(db, table, sqlTableName, progressLogger);
+			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
 			updateWriter.setParentMetrics(this.writerMetrics);
+			updateWriter.setProgressLogger(progressLogger);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
 			updateReader.setFields(this.fieldNames);
@@ -203,9 +201,9 @@ public class Synchronizer extends TableReader {
 		// Process the Deletes
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
-			DatabaseDeleteWriter deleteWriter = 
-					new DatabaseDeleteWriter(db, table, sqlTableName, progressLogger);
+			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(this.writerMetrics);
+			deleteWriter.setProgressLogger(progressLogger);
 			deleteWriter.open();
 			setLogContext();
 			deleteWriter.deleteRecords(deleteSet);

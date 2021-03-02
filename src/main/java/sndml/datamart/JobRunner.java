@@ -16,7 +16,7 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 	protected Table table;
 	protected String sqlTableName;
 	protected String tableLoaderName;
-	protected WriterMetrics metrics;
+	protected WriterMetrics writerMetrics;
 	protected Key runKey;
 	protected AppRunLogger appRunLogger;		
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -39,8 +39,9 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		return this.config;
 	}
 
+	@Deprecated
 	WriterMetrics getMetrics() {
-		return metrics;
+		return writerMetrics;
 	}
 	
 	protected void close() throws ResourceException {		
@@ -56,6 +57,7 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			String.format("call table=%s action=%s", table.getName(), action.toString()));
 		if (config.getSqlBefore() != null) runSQL(config.getSqlBefore());
 		this.setLogContext();
+		WriterMetrics writerMetrics = null;
 		switch (action) {
 		case CREATE:
 			runCreate();
@@ -67,23 +69,25 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 			runSQL(config.getSql());
 			break;
 		case PRUNE:
-			runPrune();
+			writerMetrics = runPrune();
 			break;
 		case SYNC:
-			runSync();
+			writerMetrics = runSync();
 			break;
 		default:
-			runLoad();
+			writerMetrics = runLoad();
 		}
-		
-		int processed = metrics.getProcessed();
-		logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, processed));
-		Integer minRows = config.getMinRows();
-		if (minRows != null && processed < minRows)
-			throw new TooFewRowsException(table, minRows, processed);
+		if (writerMetrics != null) {
+			int processed = writerMetrics.getProcessed();
+			logger.info(Log.FINISH, String.format("end load %s (%d rows)", tableLoaderName, processed));
+			Integer minRows = config.getMinRows();
+			if (minRows != null && processed < minRows)
+				throw new TooFewRowsException(table, minRows, processed);			
+		}
 		if (config.getSqlAfter() != null) runSQL(config.getSqlAfter());
 		this.close();
-		return this.metrics;		
+		this.writerMetrics = writerMetrics;
+		return writerMetrics;		
 	}
 	
 	void runSQL(String sqlCommand) throws SQLException {		
@@ -98,15 +102,9 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		db.createMissingTable(table, sqlTableName);		
 	}
 	
-	void runPrune() throws SQLException, IOException, InterruptedException {
+	WriterMetrics runPrune() throws SQLException, IOException, InterruptedException {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
-		ProgressLogger progressLogger = 
-				new CompositeProgressLogger(DatabaseDeleteWriter.class, appRunLogger); 
-		DatabaseDeleteWriter deleteWriter = 
-			new DatabaseDeleteWriter(db, table, sqlTableName, progressLogger);
-		deleteWriter.setParentMetrics(metrics);
-		deleteWriter.open();
 		Table audit = session.table("sys_audit_delete");
 		EncodedQuery auditQuery = new EncodedQuery(audit);
 		auditQuery.addQuery("tablename", EncodedQuery.EQUALS, table.getName());
@@ -117,16 +115,23 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		DateTime since = config.getSince();
 		auditReader.setCreatedRange(new DateTimeRange(since, null));
 		auditReader.setMaxRows(config.getMaxRows());
-		auditReader.setWriter(deleteWriter);
+		DatabaseDeleteWriter deleteWriter = 
+			new DatabaseDeleteWriter(db, table, sqlTableName);
+		ProgressLogger progressLogger = 
+				new CompositeProgressLogger(auditReader, appRunLogger);
+		deleteWriter.setProgressLogger(progressLogger);
+		deleteWriter.open();
+		auditReader.setWriter(deleteWriter);		
 		auditReader.initialize();
 		this.setLogContext();
 		logger.info(Log.INIT, String.format("begin delete %s (%d rows)", 
 			tableLoaderName, auditReader.getReaderMetrics().getExpected()));
 		auditReader.call();
-		deleteWriter.close();		
+		deleteWriter.close();
+		return deleteWriter.getMetrics();
 	}
 	
-	void runSync() throws SQLException, IOException, InterruptedException {
+	WriterMetrics runSync() throws SQLException, IOException, InterruptedException {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		DateTimeRange createdRange = config.getCreated();
@@ -134,54 +139,54 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		if (config.getAutoCreate()) 
 			db.createMissingTable(table, sqlTableName);
 		Interval partitionInterval = config.getPartitionInterval();
-		TableReader reader;
 		if (partitionInterval == null) {
-			progressLogger = new CompositeProgressLogger(Synchronizer.class, appRunLogger);
-			Synchronizer syncReader = 
-				new Synchronizer(table, db, sqlTableName, metrics, progressLogger);
+			Synchronizer syncReader = new Synchronizer(table, db, sqlTableName);
+			progressLogger = new CompositeProgressLogger(syncReader, appRunLogger);
+			syncReader.setProgressLogger(progressLogger);
 			syncReader.setFields(config.getColumns(table));
 			syncReader.setPageSize(config.getPageSize());
 			syncReader.initialize(createdRange);
-			reader = syncReader;
+			logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
+					tableLoaderName, syncReader.getReaderMetrics().getExpected()));
+			syncReader.call();
+			return syncReader.getWriterMetrics();
 		}
 		else {
 			SynchronizerFactory factory = 
-				new SynchronizerFactory(table, db, sqlTableName, this.metrics, createdRange, appRunLogger);
+				new SynchronizerFactory(table, db, sqlTableName, createdRange, appRunLogger);
 			factory.setFields(config.getColumns(table));
 			factory.setPageSize(config.getPageSize());
 			DatePartitionedTableReader multiReader =
 				new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
 			factory.setParent(multiReader);				
 			multiReader.initialize();
-			reader = multiReader;
 			this.setLogContext();
 			logger.info(Log.INIT, "partition=" + multiReader.getPartition());
+			logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
+					tableLoaderName, multiReader.getReaderMetrics().getExpected()));
+			multiReader.call();
+			return multiReader.getWriterMetrics();
 		}
-		logger.info(Log.INIT, String.format("begin sync %s (%d rows)", 
-				tableLoaderName, reader.getReaderMetrics().getExpected()));
-		reader.call();
 	}
 	
-	void runLoad() throws SQLException, IOException, InterruptedException {
+	WriterMetrics runLoad() throws SQLException, IOException, InterruptedException {
 		assert sqlTableName != null;
 		assert sqlTableName.length() > 0;
 		if (this instanceof DaemonJobRunner) {
 			assert appRunLogger != null;
 		}
-		ProgressLogger progressLogger = 
-			new CompositeProgressLogger(DatabaseInsertWriter.class, appRunLogger);
 		Action action = config.getAction();		
 		if (config.getAutoCreate()) db.createMissingTable(table, sqlTableName);
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
 		
 		DatabaseTableWriter writer;
 		if (Action.INSERT.equals(action) || Action.LOAD.equals(action)) {
-			writer = new DatabaseInsertWriter(db, table, sqlTableName, progressLogger);
+			writer = new DatabaseInsertWriter(db, table, sqlTableName);
 		}
 		else {
-			writer = new DatabaseUpdateWriter(db, table, sqlTableName, progressLogger);
+			writer = new DatabaseUpdateWriter(db, table, sqlTableName);
 		}
-		writer.setParentMetrics(metrics);
+//		writer.setParentMetrics(metrics);
 		writer.open();
 		
 		Interval partitionInterval = config.getPartitionInterval();
@@ -201,9 +206,12 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		factory.setFields(config.getColumns(table));
 		factory.setPageSize(config.getPageSize());
 		TableReader reader;
+		ProgressLogger progressLogger;
 		if (partitionInterval == null) {
 			reader = factory.createReader();
 			reader.setMaxRows(config.getMaxRows());
+			progressLogger = new CompositeProgressLogger(reader, appRunLogger);
+			reader.setProgressLogger(progressLogger);
 			Log.setContext(table, tableLoaderName);
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 			reader.initialize();
@@ -221,7 +229,8 @@ public abstract class JobRunner implements Callable<WriterMetrics> {
 		logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
 				tableLoaderName, reader.getReaderMetrics().getExpected()));
 		reader.call();
-		writer.close();						
+		writer.close();	
+		return reader.getWriterMetrics();
 	}
 
 }

@@ -47,7 +47,7 @@ public class RefreshTest1 {
 		JobRunner create = jf.yamlJob(profile, "{source: incident, action: create}");
 		create.call();
 		assertTrue(db.tableExists(tableName));
-		JobRunner load = jf.yamlJob(profile, "{source: incident, action: load}");
+		JobRunner load = jf.yamlJob(profile, "{source: incident, action: load, created: 2020-01-01}");
 		WriterMetrics loadMetrics = load.call();
 		int count1 = db.sqlCount(tableName, null);
 		assertTrue(count1 > 0);

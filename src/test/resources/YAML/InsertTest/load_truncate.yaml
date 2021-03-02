@@ -1,0 +1,2 @@
+tables:
+- {name: change_request, truncate: true}

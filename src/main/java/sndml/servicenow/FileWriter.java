@@ -60,7 +60,7 @@ public class FileWriter extends RecordWriter {
 	}
 
 	public FileWriter(File file) {
-		super(new NullProgressLogger());
+		super();
 		this.file = file;
 	}
 
