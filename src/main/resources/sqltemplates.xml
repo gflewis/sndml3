@@ -49,7 +49,7 @@
       <create>create table $schema.$table (
 $fielddefinitions,
 primary key ("sys_id"))</create>
-      <grant>grant select on $schema.$table to public</grant>
+      <grant/>
       <select_created>SELECT sys_id, sys_created_on FROM $schema.$table</select_created>
       <select_updated>SELECT sys_id, sys_updated_on FROM $schema.$table</select_updated>
       <insert>insert into $schema.$table (
