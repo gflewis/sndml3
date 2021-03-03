@@ -108,7 +108,7 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 	
 	private TableReader createReader(DateTimeRange partRange) {
-		String partName = interval.getName(partRange.getStart());
+		String partName = DatePart.getName(interval, partRange.getStart());
 		TableReader partReader = factory.createReader();
 		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
 		partReader.setPartName(partName);

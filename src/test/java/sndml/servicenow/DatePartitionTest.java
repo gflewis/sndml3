@@ -2,22 +2,12 @@ package sndml.servicenow;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
 public class DatePartitionTest {
 	
 	Logger logger = TestManager.getLogger(DatePartitionTest.class);
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	@Test
 	public void testSimple() {
@@ -81,7 +71,7 @@ public class DatePartitionTest {
 			oldest = part;
 			size += 1;
 			logger.info(Log.TEST, String.format(
-				"%d %s %s", size, part.toString(), Interval.getName(interval,  pstart)));			
+				"%d %s %s", size, part.toString(), DatePart.getName(interval,  pstart)));			
 		}
 		if (size > 0) {
 			assertTrue(oldest.getStart().toString().compareTo(start) <= 0);

@@ -16,8 +16,6 @@ public class JobRunner implements Callable<JobRunner> {
 	
 	protected Action action;
 	protected Table table;
-//	protected String sqlTableName;
-//	protected AppRunLogger appRunLogger;		
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private WriterMetrics writerMetrics = null;
 	
@@ -136,8 +134,6 @@ public class JobRunner implements Callable<JobRunner> {
 		auditReader.initialize();
 		Log.setTableContext(table, config.getName());
 		progressLogger.logStart(auditReader, "delete");
-//		logger.info(Log.INIT, String.format("begin delete %s (%d rows)", 
-//			tableLoaderName, auditReader.getReaderMetrics().getExpected()));
 		auditReader.call();
 		deleteWriter.close();
 		return deleteWriter.getWriterMetrics();
@@ -154,7 +150,6 @@ public class JobRunner implements Callable<JobRunner> {
 			Synchronizer syncReader = new Synchronizer(table, db, sqlTableName);
 			ProgressLogger progressLogger = newProgressLogger(syncReader);
 			progressLogger.setOperation("sync");
-//			syncReader.setProgressLogger(progressLogger); -- redundant
 			syncReader.setFields(config.getColumns(table));
 			syncReader.setPageSize(config.getPageSize());
 			syncReader.initialize(createdRange);
@@ -174,14 +169,11 @@ public class JobRunner implements Callable<JobRunner> {
 			logger.info(Log.INIT, "partition=" + partition.toString());
 			factory.setParent(multiReader);				
 			ProgressLogger progressLogger = newProgressLogger(multiReader);
-//			multiReader.setProgressLogger(progressLogger); -- redundant
 			multiReader.initialize();
 			Log.setTableContext(table, config.getName());
 			progressLogger.logStart(multiReader, "sync");
-//			logger.info(Log.INIT, String.format("begin load %s (%d rows) partition=%s", 
-//					tableLoaderName, multiReader.getReaderMetrics().getExpected(),
-//					multiReader.getPartition().toString()));
 			multiReader.call();
+			progressLogger.logFinish(multiReader);
 			return multiReader.getWriterMetrics();
 		}
 	}
@@ -229,8 +221,6 @@ public class JobRunner implements Callable<JobRunner> {
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 			reader.initialize();
 			progressLogger.logStart(reader, "load");
-//			logger.info(Log.INIT, String.format("begin load %s (%d rows)", 
-//					tableLoaderName, reader.getReaderMetrics().getExpected()));
 			reader.call();
 			progressLogger.logFinish(reader);
 			metrics = reader.getWriterMetrics();
@@ -238,7 +228,7 @@ public class JobRunner implements Callable<JobRunner> {
 		else {
 			Integer threads = config.getThreads();
 			DatePartitionedTableReader multiReader = 
-					new DatePartitionedTableReader(factory, partitionInterval, threads);
+				new DatePartitionedTableReader(factory, partitionInterval, threads);
 			factory.setParent(multiReader);
 			progressLogger = newProgressLogger(multiReader);
 			multiReader.setProgressLogger(progressLogger);
@@ -249,9 +239,6 @@ public class JobRunner implements Callable<JobRunner> {
 			logger.info(Log.INIT, "partition=" + partition.toString());
 			Log.setTableContext(table, config.getName());
 			progressLogger.logStart(multiReader, "load");
-//			logger.info(Log.INIT, String.format("begin load %s (%d rows) partition=%s", 
-//					tableLoaderName, multiReader.getReaderMetrics().getExpected(),
-//					multiReader.getPartition().toString()));
 			multiReader.call();
 			progressLogger.logFinish(multiReader);
 			metrics = multiReader.getWriterMetrics();

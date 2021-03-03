@@ -62,9 +62,9 @@ public class DateTimeRange {
 		return node;
 	}
 
-	@Deprecated
-	public String getName(Interval interval) {
-		return interval.getName(this.getStart());
-	}
+//	@Deprecated
+//	public String getName(Interval interval) {
+//		return interval.getName(this.getStart());
+//	}
 
 }

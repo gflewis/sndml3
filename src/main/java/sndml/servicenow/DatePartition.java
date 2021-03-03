@@ -2,7 +2,7 @@ package sndml.servicenow;
 
 import java.util.Iterator;
 
-public class DatePartition implements Iterable<DateTimeRange> {
+public class DatePartition implements Iterable<DatePart> {
 	
 	private final DateTimeRange range;
 	private final Interval interval;
@@ -37,7 +37,7 @@ public class DatePartition implements Iterable<DateTimeRange> {
 	 * Process the ranges in a partition beginning with the most recent
 	 * and ending with the earliest.
 	 */
-	public Iterator<DateTimeRange> iterator() {
+	public Iterator<DatePart> iterator() {
 		return new DatePartitionIterator(this.range, this.interval);
 	}
 

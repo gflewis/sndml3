@@ -57,8 +57,9 @@ public abstract class TableReader implements Callable<TableReader> {
 		
 	public abstract int getDefaultPageSize();
 	
-	public abstract TableReader call() throws IOException, SQLException, InterruptedException;
-			
+	public abstract TableReader call() 
+		throws IOException, SQLException, InterruptedException;
+				
 	public void setReaderName(String name) {
 		if (initialized) throw new IllegalStateException();
 		this.readerName = name;

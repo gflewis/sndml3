@@ -7,14 +7,14 @@ import java.util.Iterator;
  * the most recent, and ending with the earliest.
  *
  */
-public class DatePartitionIterator implements Iterator<DateTimeRange> {
+public class DatePartitionIterator implements Iterator<DatePart> {
 	
 	final DateTimeRange range;
 	final Interval interval;
-	final DateTimeRange newest;
-	final DateTimeRange oldest;
+	final DatePart newest;
+	final DatePart oldest;
 	final int size;
-	DateTimeRange current;
+	DatePart current;
 
 	public DatePartitionIterator(DateTimeRange range, Interval interval) {
 		assert range != null;
@@ -38,7 +38,7 @@ public class DatePartitionIterator implements Iterator<DateTimeRange> {
 			if (endTrunc.compareTo(end) < 0) end = endTrunc.incrementBy(interval);
 			DateTime start = end.decrementBy(interval);
 			assert start.compareTo(end) < 0;
-			this.newest = new DateTimeRange(start, end);
+			this.newest = new DatePart(interval, start, end);
 			int size = 1;
 			while (start.compareTo(range.getStart()) > 0) {
 				size += 1;
@@ -46,7 +46,7 @@ public class DatePartitionIterator implements Iterator<DateTimeRange> {
 				start = end.decrementBy(interval);
 				assert start.compareTo(end) < 0;
 			}
-			this.oldest = new DateTimeRange(start, end);
+			this.oldest = new DatePart(interval, start, end);
 			this.size = size;
 		}
 	}
@@ -58,14 +58,14 @@ public class DatePartitionIterator implements Iterator<DateTimeRange> {
 	}
 
 	@Override
-	public DateTimeRange next() {
+	public DatePart next() {
 		if (current == null) 
 			current = newest;
 		else {
 			DateTime end = current.getStart();
 			DateTime start = end.decrementBy(interval);
 			assert start.compareTo(end) < 0;
-			current = new DateTimeRange(start, end);
+			current = new DatePart(interval, start, end);
 		}
 		assert current != null;
 		assert current.getStart().compareTo(current.getEnd()) < 0;

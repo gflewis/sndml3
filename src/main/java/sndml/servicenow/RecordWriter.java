@@ -12,17 +12,10 @@ import java.sql.SQLException;
  */
 public abstract class RecordWriter {
 
-	protected final WriterMetrics writerMetrics;
+	protected final WriterMetrics writerMetrics = new WriterMetrics();
 	protected ProgressLogger progressLogger;
 
 	public RecordWriter() {
-		this.writerMetrics = new WriterMetrics();
-	}
-
-	@Deprecated
-	public RecordWriter(ProgressLogger progressLogger) {
-		this.writerMetrics = new WriterMetrics();
-		this.progressLogger = progressLogger;
 	}
 
 	public void setProgressLogger(ProgressLogger progressLogger) {
