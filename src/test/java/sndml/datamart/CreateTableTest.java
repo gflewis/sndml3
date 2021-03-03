@@ -48,7 +48,7 @@ public class CreateTableTest {
 		Table table = session.table(tablename);
 		TableSchema schema = table.getSchema();
 		FieldNames schemaFields = schema.getFieldNames();
-		Log.setContext(table, "testSchema_sys_template");
+		Log.setTableContext(table, "testSchema_sys_template");
 		FieldNames testFields = new FieldNames(
 				"sys_created_on,sys_created_by,sys_updated_on,sys_updated_by");
 		for (String name: testFields) {
@@ -63,7 +63,7 @@ public class CreateTableTest {
 		Table table = session.table(tablename);
 		Generator generator = database.getGenerator();		
 		String sql = generator.getCreateTable(table);		
-		Log.setContext(table, "testCreateTable_incident");
+		Log.setTableContext(table, "testCreateTable_incident");
 		logger.info(Log.TEST, sql);
 		sql = sql.toLowerCase();
 		assertTrue(sql.indexOf(tablename) > 5);
@@ -83,7 +83,7 @@ public class CreateTableTest {
 		Table table = session.table(tablename);
 		Generator generator = database.getGenerator();		
 		String sql = generator.getCreateTable(table);		
-		Log.setContext(table, "testCreateTable_sys_template");
+		Log.setTableContext(table, "testCreateTable_sys_template");
 		logger.info(Log.TEST, sql);
 		sql = sql.toLowerCase();
 		assertTrue(sql.indexOf(tablename) > 5);
@@ -103,7 +103,7 @@ public class CreateTableTest {
 		assertFalse(database.tableExists(tablename));
 		database.createMissingTable(table, null);
 		assertTrue(database.tableExists(tablename));
-		Log.setContext(table, "testCreateTable_problem");
+		Log.setTableContext(table, "testCreateTable_problem");
 	}
 	
 	

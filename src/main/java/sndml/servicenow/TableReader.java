@@ -52,7 +52,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 
 	public void setLogContext() {
-		Log.setContext(table, getReaderName());
+		Log.setTableContext(table, getReaderName());
 	}
 		
 	public abstract int getDefaultPageSize();
@@ -68,6 +68,15 @@ public abstract class TableReader implements Callable<TableReader> {
 		return readerName == null ? table.getName() : readerName;
 	}
 	
+	public void setProgressLogger(ProgressLogger progressLogger) {
+		this.progressLogger = progressLogger;
+	}
+	
+	public ProgressLogger getProgressLogger() {
+		assert progressLogger != null;
+		return progressLogger;
+	}
+	
 	public void setParent(TableReader parent) {
 		if (initialized) throw new IllegalStateException();
 		this.parent = parent;
@@ -75,18 +84,20 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 	
 	public TableReader getParent() {
+		assert initialized;
 		return this.parent;
+	}
+	
+	public boolean hasParent() {
+		return this.parent != null;
 	}
 	
 	public void setPartName(String name) {
 		assert !initialized;
-		assert parent != null;
 		this.partName = name;		
 	}
 	
-	public String getPartname() {
-		assert parent != null;
-		assert partName != null;
+	public String getPartName() {
 		return partName;
 	}
 		
@@ -290,18 +301,9 @@ public abstract class TableReader implements Callable<TableReader> {
 	}
 	
 	public WriterMetrics getWriterMetrics() {
-		return this.writer.getMetrics();
+		return this.writer.getWriterMetrics();
 	}
-	
-	public void setProgressLogger(ProgressLogger logger) {
-		this.progressLogger = logger;
-	}
-	
-	public ProgressLogger getProgressLogger() {
-		assert progressLogger != null;
-		return progressLogger;
-	}
-
+		
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		if (!initialized) throw new IllegalStateException("Not initialized");
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);

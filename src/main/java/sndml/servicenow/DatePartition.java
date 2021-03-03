@@ -29,22 +29,9 @@ public class DatePartition implements Iterable<DateTimeRange> {
 	}
 		
 	public String toString() {
-//		return String.format("%s[interval=%s size=%d min=%s max=%s]", 
-//				this.getClass().getSimpleName(), interval.toString(), size, oldest.getStart(), newest.getEnd());
 		return range.toString() + " by " + interval.toString();
 	}
 	
-
-	static public String partName(Interval interval, DateTimeRange partRange) {
-		String prefix = interval.toString().substring(0,1);
-		String datepart = partRange.getStart().toString();
-		if (interval == Interval.HOUR) {
-			if (datepart.length() == DateTime.DATE_ONLY) datepart += " 00:00:00";
-			datepart = datepart.replaceAll(" ", "T");
-		}
-		return prefix + datepart;
-	}
-
 	@Override
 	/**
 	 * Process the ranges in a partition beginning with the most recent

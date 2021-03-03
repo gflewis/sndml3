@@ -11,9 +11,6 @@ public class SimpleTableLoader extends JobRunner implements Runnable {
 	public SimpleTableLoader(ConnectionProfile profile, Table table, Database database) {
 		super(table.getSession(), database, jobConfig(profile, table));
 		this.table = table;
-		this.sqlTableName = config.getTarget();
-		this.tableLoaderName = config.getName();
-		this.appRunLogger = null;
 	}
 	
 	private static JobConfig jobConfig(ConnectionProfile profile, Table table) {

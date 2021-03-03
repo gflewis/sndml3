@@ -46,33 +46,34 @@ public class DatePartitionedTableReader extends TableReader {
 	}
 	
 	public DatePartition getPartition() {
-		return this.partition;
+		assert partition != null : "Not initialized";
+		return partition;
 	}
 		
-	public int getThreadCount() {
-		return this.threads;
-	}
+//	private int getThreadCount() {
+//		return this.threads;
+//	}
 
-	public int numPartsTotal() {
-		assert futures != null;
-		return futures.size();
-	}
-	
 	@Override
 	public WriterMetrics getWriterMetrics() {
 		return this.writerMetrics;
 	}
-	
-	public int numPartsComplete() {
-		assert futures != null;
-		int count = 0;
-		for (Future<TableReader> part : futures) {
-			count += (part.isDone() ? 1 : 0);
-		}
-		return count;
-	}
 
-	public int numPartsIncomplete() {
+	private int numPartsTotal() {
+		assert futures != null;
+		return futures.size();
+	}
+		
+//	private int numPartsComplete() {
+//		assert futures != null;
+//		int count = 0;
+//		for (Future<TableReader> part : futures) {
+//			count += (part.isDone() ? 1 : 0);
+//		}
+//		return count;
+//	}
+
+	private int numPartsIncomplete() {
 		assert futures != null;
 		int count = 0;
 		for (Future<TableReader> part : futures) {
@@ -115,6 +116,8 @@ public class DatePartitionedTableReader extends TableReader {
 		partReader.setParent(this);
 		partReader.getReaderMetrics().setParent(this.readerMetrics);
 		partReader.getWriterMetrics().setParent(this.writerMetrics);
+		assert this.progressLogger != null;
+		partReader.setProgressLogger(this.progressLogger);
 		return partReader;		
 	}
 
@@ -125,8 +128,8 @@ public class DatePartitionedTableReader extends TableReader {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
 			return this;
 		}
-		futures = new ArrayList<Future<TableReader>>();
 		if (threads > 1) {			
+			futures = new ArrayList<Future<TableReader>>();
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
 			for (DateTimeRange partRange : partition) {
@@ -150,6 +153,7 @@ public class DatePartitionedTableReader extends TableReader {
 			}
 		}
 		// Free resources
+		futures = null;
 		partition = null;
 		return this;
 	}

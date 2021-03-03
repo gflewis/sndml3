@@ -12,13 +12,13 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	public DatabaseDeleteWriter(Database db, Table table, String sqlTableName)
 			throws IOException, SQLException {
 		super(db, table, sqlTableName);
-		progressLogger.setOperation("Deleted");
 	}
 
 	@Override
 	public DatabaseDeleteWriter open() throws SQLException, IOException {
 		super.open();
 		deleteStmt = new DatabaseDeleteStatement(this.db, this.sqlTableName);
+		progressLogger.setOperation("Deleted");
 		return this;
 	}
 	

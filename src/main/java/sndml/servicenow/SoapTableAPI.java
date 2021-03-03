@@ -20,7 +20,7 @@ public class SoapTableAPI extends TableAPI {
 	
 	public TableWSDL getWSDL() throws IOException {
 		if (wsdl==null) {
-			Log.setContext(this.table, getTableName() + ".WSDL");
+			Log.setTableContext(this.table, getTableName() + ".WSDL");
 			Log.setMethodContext(table, "WSDL");					
 			wsdl = new TableWSDL(this.session, getTableName());
 		}

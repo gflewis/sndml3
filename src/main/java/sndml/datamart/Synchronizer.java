@@ -170,7 +170,7 @@ public class Synchronizer extends TableReader {
 			insertReader.initialize(insertSet);
 			insertReader.call();
 			insertWriter.close();
-			int rowsInserted = insertWriter.getMetrics().getInserted();
+			int rowsInserted = insertWriter.getWriterMetrics().getInserted();
 			if (rowsInserted != insertSet.size())
 				logger.error(Log.PROCESS, String.format("inserted %d, expected to insert %d", 
 					rowsInserted, insertSet.size()));
@@ -192,7 +192,7 @@ public class Synchronizer extends TableReader {
 			updateReader.initialize(updateSet);
 			updateReader.call();
 			updateWriter.close();
-			int rowsUpdated = updateWriter.getMetrics().getUpdated();
+			int rowsUpdated = updateWriter.getWriterMetrics().getUpdated();
 			if (rowsUpdated != updateSet.size())
 				logger.error(Log.PROCESS, String.format("updated %d, expected to update %d", 
 					rowsUpdated, updateSet.size()));
@@ -208,7 +208,7 @@ public class Synchronizer extends TableReader {
 			setLogContext();
 			deleteWriter.deleteRecords(deleteSet);
 			deleteWriter.close();
-			int rowsDeleted = deleteWriter.getMetrics().getDeleted();
+			int rowsDeleted = deleteWriter.getWriterMetrics().getDeleted();
 			if (rowsDeleted != deleteSet.size())
 				logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
 					rowsDeleted, deleteSet.size()));

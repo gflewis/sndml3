@@ -1,7 +1,5 @@
 package sndml.servicenow;
 
-import java.util.EnumSet;
-
 public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, FIVEMIN, MINUTE;
 
 	/**
@@ -12,13 +10,18 @@ public enum Interval {YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, FIVEMIN, MINUTE;
 	}
 	
 	static public String getName(Interval interval, DateTime start) {
-		EnumSet<Interval> smallRange = EnumSet.range(Interval.HOUR, Interval.MINUTE);
-		if (smallRange.contains(interval)) {
-			return start.toString().replaceAll(" ", "T");
-		}
-		else {
-			String prefix = interval.toString().substring(0,1);			
-			return prefix + start.toString();
+		String prefix = (interval.equals(FIVEMIN) || interval.equals(MINUTE)) ? 
+				"" : interval.toString().substring(0,1);
+		switch (interval) {
+		case YEAR: 
+			return prefix + start.toString().substring(0, 4);
+		case QUARTER:
+		case MONTH:
+		case WEEK:
+		case DAY:
+			return prefix + start.toString().substring(0, 10);
+		default: 
+			return prefix + start.toFullString().replaceAll(" ", "T");
 		}
 	}
 

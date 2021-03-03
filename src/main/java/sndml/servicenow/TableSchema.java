@@ -33,7 +33,7 @@ public class TableSchema {
 		hierarchy = session.table("sys_db_object");
 		String saveJob = Log.getJobContext();
 		String myname = dictionary.getName() + "." + this.tablename;
-		Log.setContext(dictionary,  myname);
+		Log.setTableContext(dictionary,  myname);
 		logger.debug(Log.SCHEMA, "get definition for table " + tablename);
 		fields = new TreeMap<String,FieldDefinition>();
 		parentname = determineParentName();
@@ -90,7 +90,7 @@ public class TableSchema {
 	
 	private String determineParentName() throws IOException {
 		// if (tablename.startsWith("sys_")) return null;
-		Log.setContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
+		Log.setTableContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
 		Record myRec = hierarchy.api().getRecord("name", this.tablename);
 		if (myRec == null) {
 			logger.error(Log.SCHEMA, "Unable to read schema for: " + tablename +

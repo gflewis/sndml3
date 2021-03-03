@@ -50,8 +50,7 @@ public class TimestampTest {
 		Table table = session.table(tablename);
 		database.truncateTable(table.getName());		
 		SimpleTableLoader runner = new SimpleTableLoader(profile, table, database);
-		runner.call();
-		WriterMetrics metrics = runner.getMetrics();
+		WriterMetrics metrics = runner.call().getWriterMetrics();
 		assertTrue(metrics.getProcessed() > 0);		
 	}
 	

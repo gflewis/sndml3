@@ -78,7 +78,7 @@ public class RestTableReader extends TableReader {
 			logger.debug(Log.RESPONSE, String.format("retrieved %d rows", recs.size()));
 			getReaderMetrics().increment(recs.size());
 			maxKey = recs.maxKey();
-			writer.processRecords(this, recs);			
+			writer.processRecords(this, recs);	
 			rowCount += recs.size();
 			offset += recs.size();
 			if (isFinished(recs.size(), rowCount)) finished = true;

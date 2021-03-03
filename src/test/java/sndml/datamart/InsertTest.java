@@ -51,7 +51,7 @@ public class InsertTest {
 		assertEquals(Action.INSERT, job.getAction());
 		JobRunner loader = new TestJobRunner(profile, job);
 		loader.call();
-		WriterMetrics metrics = loader.getMetrics();
+		WriterMetrics metrics = loader.getWriterMetrics();
 		int processed = metrics.getProcessed();
 		assertTrue(processed > 0);
 		assertEquals(processed, metrics.getInserted());
@@ -70,10 +70,10 @@ public class InsertTest {
 		JobRunner job1 = loader.jobs.get(1);
 		JobRunner job2 = loader.jobs.get(2);
 		loader.loadTables();
-		int rows = job1.getMetrics().getProcessed();
+		int rows = job1.getWriterMetrics().getProcessed();
 		logger.info(Log.TEST, String.format("rows=%d", rows));
 		assertTrue(rows > 0);
-		WriterMetrics metrics2 = job2.getMetrics();
+		WriterMetrics metrics2 = job2.getWriterMetrics();
 		int processed = metrics2.getProcessed();
 		assertEquals(rows, processed);
 		assertEquals(0, metrics2.getInserted());

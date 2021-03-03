@@ -17,9 +17,8 @@ public abstract class RecordWriter {
 
 	public RecordWriter() {
 		this.writerMetrics = new WriterMetrics();
-		this.progressLogger = null;
 	}
-	
+
 	@Deprecated
 	public RecordWriter(ProgressLogger progressLogger) {
 		this.writerMetrics = new WriterMetrics();
@@ -47,7 +46,7 @@ public abstract class RecordWriter {
 		writerMetrics.setParent(parentMetrics);
 	}
 		
-	public WriterMetrics getMetrics() {
+	public WriterMetrics getWriterMetrics() {
 		if (writerMetrics.getFinished() == null) writerMetrics.finish();
 		return writerMetrics;
 	}

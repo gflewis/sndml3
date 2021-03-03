@@ -5,14 +5,19 @@ public class ReaderMetrics {
 	private int count = 0;
 	private Integer expected = null;
 	private ReaderMetrics parent = null;
-
-	ReaderMetrics() {		
-	}
 	
 	public void setParent(ReaderMetrics parent) {
 		this.parent = parent;
 	}
 	
+	public boolean hasParent() {
+		return this.parent != null;		
+	}
+	
+	public ReaderMetrics getParent() {
+		return this.parent;
+	}
+
 	public void increment() {
 		increment(1);
 	}
@@ -26,10 +31,6 @@ public class ReaderMetrics {
 		return count;
 	}
 	
-	public ReaderMetrics getParent() {
-		return this.parent;
-	}
-
 	/**
 	 * Set the number of rows that the reader is expected to return
 	 */

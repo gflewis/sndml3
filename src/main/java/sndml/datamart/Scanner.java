@@ -41,30 +41,6 @@ public class Scanner extends TimerTask {
 		this.putRunStatus = session.getURI(putRunStatusPath);
 	}
 		
-//	@Override
-//	public void run() {
-//		Log.setJobContext(agentName);
-//		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
-//		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
-//		ScannerInput scannerConfig;
-//		try {
-//			StringReader jsonReader = new StringReader(request.getResponseText());
-//			scannerConfig = configFactory.scannerConfig(profile, jsonReader);
-//			for (JobConfig run : scannerConfig.result.runs) {
-//				run.updateAndValidate(profile, new DateTimeFactory());				
-//				Key runKey = run.getSysId();
-//				AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
-//				statusLogger.setStatus("prepare");
-//				DaemonJobRunner runner = new DaemonJobRunner(profile, run);
-//				workerPool.execute(runner);
-//			}			
-//		} catch (IOException e) {
-//			logger.error(Log.RESPONSE, e.toString(), e);
-//			e.printStackTrace();
-//			Daemon.mainThread().interrupt();
-//		}				
-//	}
-
 	@Override
 	public synchronized void run() {
 		Log.setJobContext(agentName);
@@ -85,8 +61,10 @@ public class Scanner extends TimerTask {
 				for (JsonNode node : runlist) {
 					assert node.isObject();
 					Key runKey = new Key(node.get("sys_id").asText());
+					String number = node.get("number").asText();
 					assert runKey != null;
-					AppRunLogger statusLogger = new AppRunLogger(profile, session, runKey);
+					assert number != null;
+					AppRunLogger statusLogger = new AppRunLogger(profile, session, number, runKey);
 					ObjectNode obj = (ObjectNode) node;
 					try {
 						JobConfig jobConfig = configFactory.jobConfig(profile, obj);

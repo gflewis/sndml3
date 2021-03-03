@@ -18,6 +18,10 @@ public class WriterMetrics {
 		this.parent = parent;
 	}
 	
+	public boolean hasParent() {
+		return this.parent != null;
+	}
+	
 	public WriterMetrics getParent() {
 		return this.parent;
 	}

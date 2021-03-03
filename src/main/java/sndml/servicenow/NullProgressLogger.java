@@ -5,14 +5,20 @@ package sndml.servicenow;
  *
  */
 public class NullProgressLogger extends ProgressLogger {
-
-	public NullProgressLogger() {
-		super();
+	
+	@Override
+	public void logStart(TableReader reader, String operation) {
+		return;
 	}
 	
 	@Override
-	public void logProgress() {
+	public void logProgress(TableReader reader) {
 		return;		
 	}
-	
+
+	@Override
+	public void logFinish(TableReader reader) {
+		return;
+	}
+
 }

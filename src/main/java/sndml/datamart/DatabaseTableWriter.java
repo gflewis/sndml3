@@ -32,7 +32,6 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		super();
 		assert db != null;
 		assert table != null;
-		assert progressLogger != null;
 		this.db = db;
 		this.table = table;
 		this.sqlTableName = sqlTableName == null ? table.getName() : sqlTableName;
@@ -53,39 +52,17 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	}
 
 	@Override
-	public synchronized void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
-		writerMetrics.start();
+	public synchronized void processRecords(TableReader reader, RecordList recs) 
+			throws IOException, SQLException {
 		for (Record rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
 				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));
 			writeRecord(rec);
 		}
-		// writerMetrics.finish();
 		db.commit();
-		progressLogger.logProgress();
+		progressLogger.logProgress(reader);
 	}
 	
-	/*
-	private synchronized void logProgress(TableReader reader, String status) {
-		assert reader != null;
-		assert progressLogger != null;
-		reader.setLogContext();
-		ReaderMetrics readerMetrics = reader.getReaderMetrics();
-		progressLogger.logProgress(readerMetrics, writerMetrics);
-		
-		
-		else {
-			assert readerMetrics != null;
-			if (readerMetrics.getParent() == null) 
-				logger.info(Log.PROCESS, String.format("%s %s", status, readerMetrics.getProgress()));
-			else
-				logger.info(Log.PROCESS, String.format("%s %s (%s)", status, 
-						readerMetrics.getProgress(), readerMetrics.getParent().getProgress())); 
-			
-		}
-	}
-	 */
-
 	abstract void writeRecord(Record rec) throws SQLException;
 	
 }

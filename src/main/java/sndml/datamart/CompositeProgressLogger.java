@@ -4,39 +4,39 @@ import sndml.servicenow.*;
 
 public class CompositeProgressLogger extends ProgressLogger {
 
-	final Log4jProgressLogger slf4jLogger;
+	final Log4jProgressLogger log4jLogger;
 	final AppRunLogger appLogger;
-	
-	@Deprecated
-	public CompositeProgressLogger(
-			TableReader reader, 
-			@SuppressWarnings("rawtypes") Class cls, 
-			AppRunLogger appLogger) {
-		super();
-		this.slf4jLogger = new Log4jProgressLogger(reader, cls);
-		this.appLogger = appLogger; 		
-	}
-	
+		
+//	public CompositeProgressLogger(Log4jProgressLogger log4jLogger, AppRunLogger appLogger) {
+//		super(log4jLogger.getName(), log4jLogger.getReader());
+//		this.log4jLogger = log4jLogger;
+//		this.appLogger = appLogger;		
+//	}
+		
 	public CompositeProgressLogger(TableReader reader, AppRunLogger appLogger) {
-		super();
-		this.slf4jLogger = new Log4jProgressLogger(reader, reader.getClass());
+		this.log4jLogger = new Log4jProgressLogger(reader);
 		this.appLogger = appLogger; 		
 	}
 
 	@Override
-	public void logProgress() {
-		if (appLogger != null) appLogger.logProgress();
-		if (slf4jLogger != null) slf4jLogger.logProgress();
+	public void logStart(TableReader reader, String operation) {
+		if (appLogger != null) appLogger.logStart(reader, operation);
+		if (log4jLogger != null) log4jLogger.logStart(reader, operation);		
+	}
+	
+	@Override
+	public void logProgress(TableReader reader) {
+		if (appLogger != null) appLogger.logProgress(reader);
+		if (log4jLogger != null) log4jLogger.logProgress(reader);
 	}
 
-//	@Override
-//	public void logPartProgress(
-//			String partName, 
-//			ReaderMetrics readerMetrics, 
-//			WriterMetrics writerMetrics) {
-//		if (appLogger != null) appLogger.logPartProgress(partName, readerMetrics, writerMetrics);
-//		if (slf4jLogger != null) slf4jLogger.logPartProgress(partName, readerMetrics, writerMetrics);
-//		
-//	}
+
+	@Override
+	public void logFinish(TableReader reader) {
+		if (appLogger != null) appLogger.logFinish(reader);
+		if (log4jLogger != null) log4jLogger.logFinish(reader);
+		
+	}
+
 
 }

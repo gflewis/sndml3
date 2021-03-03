@@ -39,16 +39,16 @@ public class RefreshTest2 {
 	@Test
 	public void testRefresh() throws Exception {
 		String tableName = "incident";
-		JobFactory jf = new JobFactory();
 		DBUtil db = new DBUtil(profile);
+		JobFactory jf = new JobFactory(profile, db.getDatabase());		
 		TableAPI api = profile.getSession().table(tableName).api();
 	    TestManager.banner(logger, "Load");
 		db.dropTable(tableName);
-		JobRunner create = jf.yamlJob(profile, "{source: incident, action: create}");
+		JobRunner create = jf.yamlJob("{source: incident, action: create}");
 		create.call();
 		assertTrue(db.tableExists(tableName));
-		JobRunner load = jf.yamlJob(profile, "{source: incident, action: load}");
-		WriterMetrics loadMetrics = load.call();
+		JobRunner load = jf.yamlJob("{source: incident, action: load}");
+		WriterMetrics loadMetrics = load.call().getWriterMetrics();
 		int count1 = db.sqlCount(tableName, null);
 		assertTrue(count1 > 0);
 		assertEquals(count1, loadMetrics.getInserted());
@@ -67,8 +67,8 @@ public class RefreshTest2 {
 	    	"{source: incident, action: refresh, since: last, last: %s}", 
 	    	loadMetrics.getStarted().toString());
 	    logger.info(Log.TEST, yaml);
-	    JobRunner refresh = jf.yamlJob(profile,  yaml);
-	    WriterMetrics refreshMetrics = refresh.call();
+	    JobRunner refresh = jf.yamlJob(yaml);
+	    WriterMetrics refreshMetrics = refresh.call().getWriterMetrics();
 	    assertEquals(1, refreshMetrics.getInserted());
 	    assertEquals(0, refreshMetrics.getUpdated());
 	    int count2 = db.sqlCount(tableName, null);

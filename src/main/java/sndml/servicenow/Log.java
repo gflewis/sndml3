@@ -34,13 +34,22 @@ public class Log {
 		MDC.put("job", "GLOBAL");
 	}
 	
-	static public void setContext(Table table, String jobname) {
+	static public void setTableContext(Table table, String jobname) {
 		MDC.clear();
 		MDC.put("table", table.getName());
 		MDC.put("user", table.getSession().getUsername());
 		MDC.put("job", jobname);
 	}
+
+	static public void setTableContext(Table table) {
+		MDC.put("table", table.getName());
+		MDC.put("user", table.getSession().getUsername());
+	}
 	
+	static public void setTableContext(String tablename) {
+		MDC.put("table", tablename);
+	}
+				
 	static public void setJobContext(String jobname) {
 		MDC.put("job", jobname);
 	}
@@ -54,15 +63,6 @@ public class Log {
 		MDC.put("method", method);
 	}
 	
-	static public void setTableContext(Table table) {
-		MDC.put("table", table.getName());
-		MDC.put("user", table.getSession().getUsername());
-	}
-	
-	static public void setTableContext(String tablename) {
-		MDC.put("table", tablename);
-	}
-			
 	static public void setURIContext(URI uri) {
 		MDC.put("uri", uri.toString());
 	}

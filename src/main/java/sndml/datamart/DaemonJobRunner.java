@@ -6,18 +6,32 @@ import java.sql.SQLException;
 import sndml.servicenow.*;
 
 public class DaemonJobRunner extends JobRunner implements Runnable {
+	
+	final Key runKey;
+	final String number;
+	AppRunLogger appRunLogger;
 		
 	public DaemonJobRunner(ConnectionProfile profile, JobConfig config) {
 		super(profile.getSession(), profile.getDatabase(), config);
 		this.runKey = config.getSysId();
+		this.number = config.getNumber();
 		assert runKey != null;
 		assert runKey.isGUID();
-		this.appRunLogger = new AppRunLogger(profile, session, runKey);
+		assert number != null;
+		assert number.length() > 0;
+		this.appRunLogger = new AppRunLogger(profile, session, number, runKey);
 		this.table = session.table(config.getSource());
-		this.sqlTableName = config.getTarget();
-		this.tableLoaderName = config.getName();
 	}
 
+	@Override
+	protected ProgressLogger newProgressLogger(TableReader reader) {
+		assert appRunLogger != null;
+		assert reader != null;
+		ProgressLogger progressLogger = new CompositeProgressLogger(reader, appRunLogger);
+		reader.setProgressLogger(progressLogger);
+		return progressLogger;
+	}
+		
 	@Override
 	public void run() {
 		this.call();
@@ -34,16 +48,15 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	}
 	
 	@Override
-	public WriterMetrics call() {
+	public DaemonJobRunner call() {
 		assert session != null;
 		assert db != null;
 		assert appRunLogger != null;
 		assert config.getNumber() != null;
-		WriterMetrics metrics = null;
 		Thread.currentThread().setName(config.number);
 		try {
 			appRunLogger.setStatus("running");
-			metrics = super.call();
+			super.call();
 			appRunLogger.setStatus("complete");
 			Daemon.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {
@@ -51,7 +64,7 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 			logger.error(Log.RESPONSE, e.toString(), e);
 			appRunLogger.logError(e);
 		}
-		return metrics;
+		return this;
 	}
 		
 }

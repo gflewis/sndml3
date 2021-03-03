@@ -17,8 +17,7 @@ public class AppRunLogger extends ProgressLogger {
 	final Key runKey;
 	final Logger logger = LoggerFactory.getLogger(AppRunLogger.class);
 	
-	AppRunLogger(ConnectionProfile profile, Session session, Key runKey) {
-		super();
+	AppRunLogger(ConnectionProfile profile, Session session, String number, Key runKey) {
 		this.session = session;
 		this.runKey = runKey;
 		String putRunStatusPath = profile.getProperty(
@@ -54,19 +53,34 @@ public class AppRunLogger extends ProgressLogger {
 	}
 	
 	@Override
-	public void logProgress() {
+	public void logProgress(TableReader reader) {
 		assert runKey != null;
-		ReaderMetrics readerMetrics = getReaderMetrics();
-		WriterMetrics writerMetrics = getWriterMetrics();
+		ReaderMetrics readerMetrics = reader.getReaderMetrics();
+		WriterMetrics writerMetrics = reader.getWriterMetrics();
 		assert readerMetrics != null;
 		assert writerMetrics != null;
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
 		body.put("status", "running");
-		body.put("expected", readerMetrics.getExpected());
-		body.put("inserted",  writerMetrics.getInserted());
-		body.put("updated",  writerMetrics.getUpdated());
-		body.put("deleted",  writerMetrics.getDeleted());
+		if (reader.getPartName() != null) {
+			assert readerMetrics.hasParent();
+			assert writerMetrics.hasParent();
+			body.put("part_name", reader.getPartName());
+			body.put("expected", readerMetrics.getParent().getExpected());
+			body.put("inserted",  writerMetrics.getParent().getInserted());
+			body.put("updated",  writerMetrics.getParent().getUpdated());
+			body.put("deleted",  writerMetrics.getParent().getDeleted());			
+			body.put("part_expected", readerMetrics.getExpected());
+			body.put("part_inserted",  writerMetrics.getInserted());
+			body.put("part_updated",  writerMetrics.getUpdated());
+			body.put("part_deleted",  writerMetrics.getDeleted());						
+		}
+		else {
+			body.put("expected", readerMetrics.getExpected());
+			body.put("inserted",  writerMetrics.getInserted());
+			body.put("updated",  writerMetrics.getUpdated());
+			body.put("deleted",  writerMetrics.getDeleted());			
+		}
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		ObjectNode response;
 		try {
@@ -76,6 +90,18 @@ public class AppRunLogger extends ProgressLogger {
 		}
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "logProgress " + runKey + " " + response.toString());
+	}
+
+	@Override
+	public void logStart(TableReader reader, String operation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void logFinish(TableReader reader) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 

@@ -50,9 +50,21 @@ public class JobConfig {
 	static EnumSet<Action> anyLoadAction =
 			EnumSet.of(Action.INSERT, Action.UPDATE, Action.SYNC);
 	
-	String getName() { return this.jobName; }
-	String getSource() { return this.source; }
-	String getTarget() { return this.target; }
+	String getName() {
+		assert jobName != null;
+		return jobName; 
+	}
+	
+	String getSource() {
+		assert source != null;
+		return source; 		
+	}
+	
+	String getTarget() {
+		assert target != null;
+		return this.target; 
+	}
+	
 	Key getSysId() { return this.sys_id; }
 	String getNumber() { return this.number; }
 	Action getAction() { return action; }
@@ -190,7 +202,8 @@ public class JobConfig {
 		}
 		booleanValidForActions("Truncate", truncate, EnumSet.of(Action.INSERT));
 		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
-		validForActions("Created", createdRange, EnumSet.range(Action.INSERT, Action.SYNC));
+		validForActions("Created", createdRange, Action.anyLoadAction);
+		validForActions("Partition", partition, Action.anyLoadAction);
 		validForActions("Since", sinceDate, EnumSet.of(Action.INSERT, Action.UPDATE, Action.PRUNE));
 		validForActions("SQL", sql, EnumSet.of(Action.EXECUTE));
 		
@@ -201,6 +214,8 @@ public class JobConfig {
 		
 		if (getIncludeColumns() != null && getExcludeColumns() != null) 
 			configError("Cannot specify both Columns and Exclude");
+		if (threads != null && partition == null)
+			configError("Threads only valid with Partition");
 		
 	}
 		

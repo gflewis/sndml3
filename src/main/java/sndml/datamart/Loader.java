@@ -29,6 +29,7 @@ public class Loader {
 	File metricsFile = null;
 	PrintWriter statsWriter;
 	WriterMetrics loaderMetrics = new WriterMetrics();	
+	
 	ArrayList<JobRunner> jobs = new ArrayList<JobRunner>();
 	
 	static final Logger logger = LoggerFactory.getLogger(Loader.class);
@@ -92,7 +93,8 @@ public class Loader {
 		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = config.getMetricsFile();
 		for (JobConfig jobConfig : config.getJobs()) {
-			jobs.add(new LoaderJobRunner(this, jobConfig));
+			JobRunner runner = new JobRunner(session, database, jobConfig);
+			jobs.add(runner);
 		}
 	}
 	
@@ -143,7 +145,7 @@ public class Loader {
 		statsWriter = new PrintWriter(metricsFile);
 		loaderMetrics.write(statsWriter);
 		for (JobRunner job : jobs) {			
-			job.getMetrics().write(statsWriter, job.getName());
+			job.getWriterMetrics().write(statsWriter, job.getName());
 		}
 		statsWriter.close();		
 	}

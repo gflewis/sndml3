@@ -45,7 +45,7 @@ public class PruneTest {
 		Session session = TestManager.getProfile().getSession();
 		Table tbl = session.table(tableName);
 		DBUtil db = new DBUtil(profile);
-		JobFactory jf = new JobFactory();
+		JobFactory jf = new JobFactory(profile, db.getDatabase());
 		
 		TableAPI api = tbl.api();
 		TestManager.banner(logger, "Insert");		
@@ -59,8 +59,8 @@ public class PruneTest {
 	    assertNotNull(api.getRecord(key));
 		TestManager.banner(logger, "Load");
 		assertTrue(db.tableExists(tableName));
-		JobRunner load = jf.yamlJob(profile, "{source: incident, action: update}");
-		WriterMetrics loadMetrics = load.call();
+		JobRunner load = jf.yamlJob("{source: incident, action: update}");
+		WriterMetrics loadMetrics = load.call().getWriterMetrics();
 	    
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Delete");
@@ -71,9 +71,9 @@ public class PruneTest {
 	    String yaml = String.format(
 	    	"{source: incident, action: prune, since: %s}", 
 	    	loadMetrics.getStarted().toString());
-	    JobRunner jr = jf.yamlJob(profile, yaml);
+	    JobRunner jr = jf.yamlJob(yaml);
 	    logger.info(Log.TEST, yaml);	    
-	    WriterMetrics pruneMetrics = jr.call();
+	    WriterMetrics pruneMetrics = jr.call().getWriterMetrics();
 	    assertEquals(0, pruneMetrics.getInserted());
 	    assertEquals(0, pruneMetrics.getUpdated());
 	    assertEquals(1, pruneMetrics.getDeleted());
