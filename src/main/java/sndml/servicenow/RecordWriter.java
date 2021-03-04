@@ -13,17 +13,16 @@ import java.sql.SQLException;
 public abstract class RecordWriter {
 
 	protected final WriterMetrics writerMetrics = new WriterMetrics();
-	protected ProgressLogger progressLogger;
 
 	public RecordWriter() {
 	}
 
-	public void setProgressLogger(ProgressLogger progressLogger) {
-		assert progressLogger != null;
-		this.progressLogger = progressLogger;
-	}
+//	public void setProgressLogger(ProgressLogger progressLogger) {
+//		assert progressLogger != null;
+//		this.progressLogger = progressLogger;
+//	}
 	
-	public abstract void processRecords(TableReader source, RecordList recs) 
+	public abstract void processRecords(RecordList recs, ProgressLogger progressLogger) 
 		throws IOException, SQLException;	
 
 	public RecordWriter open() throws IOException, SQLException {

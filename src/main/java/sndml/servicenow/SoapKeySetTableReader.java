@@ -26,11 +26,12 @@ public class SoapKeySetTableReader extends TableReader {
 
 	@Override
 	public void initialize() throws IOException, InterruptedException, SQLException {
+		beginInitialize();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, "initialize query=" + query);
-		super.initialize();
 		allKeys = soapAPI.getKeys(query);
-		setExpected(allKeys.size());
+//		setExpected(allKeys.size());
+		endInitialize(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 	}
 
@@ -40,6 +41,7 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 		
 	public SoapKeySetTableReader call() throws IOException, InterruptedException, SQLException {
+		logStart();
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null;
@@ -57,11 +59,12 @@ public class SoapKeySetTableReader extends TableReader {
 			if (viewName != null) params.add("__use_view", viewName);
 			RecordList recs = soapAPI.getRecords(params, this.displayValue);
 			getReaderMetrics().increment(recs.size());						
-			writer.processRecords(this, recs);
+			writer.processRecords(recs, progressLogger);
 			rowCount += recs.size();
 			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));
 			fromIndex += pageSize;
 		}
+		logComplete();
 		return this;
 	}
 

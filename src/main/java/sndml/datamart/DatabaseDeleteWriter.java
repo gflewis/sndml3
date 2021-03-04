@@ -18,7 +18,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	public DatabaseDeleteWriter open() throws SQLException, IOException {
 		super.open();
 		deleteStmt = new DatabaseDeleteStatement(this.db, this.sqlTableName);
-		progressLogger.setOperation("Deleted");
+//		progressLogger.setOperation("Deleted");
 		return this;
 	}
 	
@@ -30,7 +30,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 		deleteRecord(key);
 	}
 	
-	void deleteRecords(KeySet keys) throws SQLException {
+	void deleteRecords(KeySet keys, ProgressLogger progressLogger) throws SQLException {
 		for (Key key : keys) {
 			deleteRecord(key);
 		}

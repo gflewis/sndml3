@@ -64,7 +64,7 @@ public class Scanner extends TimerTask {
 					String number = node.get("number").asText();
 					assert runKey != null;
 					assert number != null;
-					AppRunLogger statusLogger = new AppRunLogger(profile, session, number, runKey);
+					DaemonProgressLogger statusLogger = new DaemonProgressLogger(profile, session, null, number, runKey);
 					ObjectNode obj = (ObjectNode) node;
 					try {
 						JobConfig jobConfig = configFactory.jobConfig(profile, obj);

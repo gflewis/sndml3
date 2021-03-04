@@ -49,7 +49,8 @@ public class ConfigFactory {
 		
 	LoaderConfig loaderConfig(ConnectionProfile profile, Reader reader) 
 			throws IOException, ConfigParseException {
-		File metricsFolder = null;			
+		DateTime start = DateTime.now();
+		File metricsFolder = null;
 		if (profile != null) {
 			String metricsFolderName = profile.getProperty("loader.metrics_folder");
 			if (metricsFolderName != null && metricsFolderName.length() > 0)
@@ -62,28 +63,20 @@ public class ConfigFactory {
 		catch (JsonProcessingException e) {
 			throw new ConfigParseException(e);
 		}
-		loader.setMetricsFolder(metricsFolder);
-		DateCalculator dateFactory = new DateCalculator();
-		// logger.info(Log.INIT, "loaderConfig last=" + dateFactory.getLastStart());
 		logger.info(Log.INIT, "loaderConfig: " + jsonMapper.writeValueAsString(loader));
+		loader.setMetricsFolder(metricsFolder);
+		File metricsFile = loader.getMetricsFile();
+		if (metricsFile != null)
+			logger.info(Log.INIT, String.format("metrics=%s", metricsFile));
+		DateCalculator dateCalculator = new DateCalculator(start, metricsFile);
 		for (JobConfig job : loader.tables) {
-			job.initialize(profile, dateFactory);
+			job.initialize(profile, dateCalculator);
 			job.validate();
 			logger.info(Log.INIT, job.getName() + ": " + job.toString());
 		}
 		return loader;
 	}
 	
-//	ScannerInput scannerConfig(ConnectionProfile profile, Reader reader) 
-//			throws IOException, ConfigParseException {
-//		ScannerInput config = null;
-//		try {
-//			config = jsonMapper.readValue(reader,  ScannerInput.class);
-//		} catch (InvalidFormatException e) {
-//			throw new ConfigParseException(e);
-//		}
-//		return config;
-//	}
 	
 	JobConfig yamlJob(ConnectionProfile profile, File yamlFile) 
 			throws IOException, ConfigParseException {

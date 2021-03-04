@@ -35,7 +35,10 @@ public class LoaderConfig {
 	}
 	
 	File getMetricsFile() {
-		return metricsFileName == null ? null : new File(metricsFolder, metricsFileName);
+		if (metricsFileName == null) return null;
+		if (metricsFolder == null) return new File(metricsFileName);
+		if (metricsFileName.startsWith("/")) return new File(metricsFileName);
+		return new File(metricsFolder, metricsFileName);
 	}
 
 //	private DateCalculator getDateFactory() {

@@ -2,23 +2,44 @@ package sndml.servicenow;
 
 public abstract class ProgressLogger {
 
-//	protected String name;
-	protected String operation = "Processed";
-			
-//	public String getName() { return this.name; }
-				
-	public void setOperation(String operation) {
-		this.operation = operation;
+	protected final TableReader reader;
+	protected final DatePart datePart;	
+								
+	public ProgressLogger(TableReader reader) {
+		this(reader, null);
+	}
+
+	public ProgressLogger(TableReader reader, DatePart part) {
+		this.reader = reader;
+		this.datePart = part;
+	}
+
+	protected DatePart getPart() {
+		return datePart;
 	}
 	
-	public void resetOperation() {
-		this.operation = "Processed";
+	protected boolean hasPart() {
+		return datePart != null;
 	}
+		
+	public abstract ProgressLogger newPartLogger(TableReader newReader, DatePart newPart);	
+
+	/**
+	 * We are starting the initialization process, which includes
+	 * calculating the number of expected records that will be processed.
+	 */
+	public abstract void logPrepare();
+
+	/**
+	 * We are starting the actuall processing of records.
+	 */
+	public abstract void logStart(Integer expected);
 	
-	public abstract void logStart(TableReader reader, String operation);
-	
-	public abstract void logProgress(TableReader reader);	
-	
-	public abstract void logFinish(TableReader reader);
+	public abstract void logProgress();	
+
+	/**
+	 * We have completed all processing of record.
+	 */
+	public abstract void logFinish();
 	
 }

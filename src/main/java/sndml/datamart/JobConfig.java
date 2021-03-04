@@ -19,7 +19,6 @@ public class JobConfig {
 
 	static final Logger logger = LoggerFactory.getLogger(JobConfig.class);	
 	
-	private DateCalculator dateFactory;
 	public DateTime start;
 	public DateTime last;
 	public Key sys_id;
@@ -111,7 +110,7 @@ public class JobConfig {
 	
 	void initialize(ConnectionProfile profile, DateCalculator dateCalculator) {
 		updateCoreFields();
-		updateDateFields(dateFactory);
+		updateDateFields(dateCalculator);
 		if (profile != null) updateFromProfile(profile);
 	}
 
@@ -144,13 +143,8 @@ public class JobConfig {
 			createdRange = null;
 		}
 		if (createdExpr != null) {
-			setDateFactory(calculator);
-			setCreated(createdExpr);
+			setCreated(createdExpr, calculator);
 		}			
-	}
-
-	public void setDateFactory(DateCalculator factory) {
-		this.dateFactory = factory;
 	}
 
 	@JsonIgnore
@@ -158,22 +152,22 @@ public class JobConfig {
 		this.createdRange = value;
 	}
 		
-	void setCreated(JsonNode node) {
+	private void setCreated(JsonNode node, DateCalculator calculator) {
 		assert node != null;
-		assert dateFactory != null;
-		DateTime defaultEnd = dateFactory.getStart();
+		assert calculator != null;
+		DateTime defaultEnd = calculator.getStart();
 		assert defaultEnd != null;
 		if (node.isTextual()) {
 			String s1 = node.asText();
-			DateTime d1 = dateFactory.getDate(s1);
+			DateTime d1 = calculator.getDate(s1);
 			this.createdRange = new DateTimeRange(d1, defaultEnd);				
 		}
 		else if (node.isArray()) {
 			int len = node.size();
 			String s1 = len > 0 ? node.get(0).asText() : null;
 			String s2 = len > 1 ? node.get(1).asText() : null;
-			DateTime d1 = s1 == null ? null : dateFactory.getDate(s1);
-			DateTime d2 = s2 == null ? defaultEnd : dateFactory.getDate(s2);
+			DateTime d1 = s1 == null ? null : calculator.getDate(s1);
+			DateTime d2 = s2 == null ? defaultEnd : calculator.getDate(s2);
 			this.createdRange = new DateTimeRange(d1, d2);				
 		}
 		else

@@ -14,7 +14,8 @@ public class NullWriter extends RecordWriter {
 	}
 
 	@Override
-	public void processRecords(TableReader reader, RecordList recs) throws IOException, SQLException {
+	public void processRecords(RecordList recs, ProgressLogger progressLogger) 
+			throws IOException, SQLException {
 		writerMetrics.addSkipped(recs.size());
 	}
 

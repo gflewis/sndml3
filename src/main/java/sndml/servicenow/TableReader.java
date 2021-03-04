@@ -35,7 +35,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	protected final Logger logger;
 
 	@Deprecated
-	protected EncodedQuery orderByQuery;
+	private EncodedQuery orderByQuery;
 	
 	public TableReader(Table table) {
 		this.table = table;
@@ -43,25 +43,45 @@ public abstract class TableReader implements Callable<TableReader> {
 		this.pageSize = getDefaultPageSize();
 		this.readerMetrics = new ReaderMetrics();
 	}
-			
-	public void initialize() throws IOException, SQLException, InterruptedException {
-		// Note: Only Synchronizer can throw SQLException during initialization
+	
+	protected void beginInitialize() {
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
 		setLogContext();
-		initialized = true;
+		if (progressLogger != null) progressLogger.logPrepare();		
+	}
+	
+	protected void endInitialize(Integer expected) {
+		readerMetrics.setExpected(expected);
+		initialized = true;		
 	}
 
-	public void setLogContext() {
+	// Note: Only Synchronizer can throw SQLException during initialization	
+	public abstract void initialize() 
+		throws IOException, SQLException, InterruptedException;
+
+	protected void setLogContext() {
+		//TODO Would like to deprecate but still used by Synchronizer
 		Log.setTableContext(table, getReaderName());
 	}
-		
+
+	protected void logStart() {
+		assert initialized;
+		if (progressLogger != null) 
+			progressLogger.logStart(readerMetrics.getExpected());		
+		Log.setTableContext(table, getReaderName());
+	}
+	
+	protected void logComplete() {
+		if (progressLogger != null)	progressLogger.logFinish();
+	}
+	
 	public abstract int getDefaultPageSize();
 	
 	public abstract TableReader call() 
 		throws IOException, SQLException, InterruptedException;
 				
 	public void setReaderName(String name) {
-		if (initialized) throw new IllegalStateException();
+		if (initialized) throw new IllegalStateException();		
 		this.readerName = name;
 	}
 	
@@ -106,10 +126,11 @@ public abstract class TableReader implements Callable<TableReader> {
 		return this.readerMetrics;
 	}
 	
-	public void setExpected(Integer value) {
+	@Deprecated
+	protected void setExpected(Integer value) {
 		readerMetrics.setExpected(value);
 	}
-
+	
 	/**
 	 * Return number of expected rows, if available. 
 	 */

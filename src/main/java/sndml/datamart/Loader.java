@@ -98,23 +98,53 @@ public class Loader {
 		}
 	}
 	
+	@Deprecated
 	Session getSession() {
 		return session;
 	}
 	
+	@Deprecated
 	Database getDatabase() {
 		return database;
 	}
 	
+	@Deprecated
 	WriterMetrics getMetrics() {
 		return loaderMetrics;
 	}
 	
+	@Deprecated
 	JobRunner lastJob() {
 		return jobs.get(jobs.size() - 1);
 	}
 	
 	public WriterMetrics loadTables() throws SQLException, IOException, InterruptedException {
+		ArrayList<String> allJobNames = new ArrayList<String>();
+		ArrayList<WriterMetrics> allJobMetrics = new ArrayList<WriterMetrics>();
+		Log.setGlobalContext();
+		loaderMetrics.start();		
+		for (JobRunner job : jobs) {
+			WriterMetrics jobMetrics = job.call();
+			allJobNames.add(job.getName());
+			allJobMetrics.add(jobMetrics);
+		}
+		assert allJobNames.size() == allJobMetrics.size();
+		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
+		statsWriter = new PrintWriter(metricsFile);
+		loaderMetrics.write(statsWriter);
+		for (int i = 0; i < allJobNames.size(); ++i) {			
+			String jobName = allJobNames.get(i);
+			WriterMetrics jobMetrics = allJobMetrics.get(i);
+			// some actions (e.g. execute, create) return no metrics
+			if (jobMetrics != null) 
+				jobMetrics.write(statsWriter, jobName);
+		}
+		statsWriter.close();		
+		return loaderMetrics;
+	}
+	
+	@Deprecated
+	public WriterMetrics loadTables_old() throws SQLException, IOException, InterruptedException {
 		Log.setGlobalContext();
 		loaderMetrics.start();
 		if (threads > 1) {
@@ -140,6 +170,7 @@ public class Loader {
 		return loaderMetrics;
 	}
 	
+	@Deprecated
 	void writeAllMetrics() throws IOException {
 		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
 		statsWriter = new PrintWriter(metricsFile);

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.*;
 
-public class JobRunner implements Callable<JobRunner> {
+public class JobRunner implements Callable<WriterMetrics> {
 
 	protected final Session session;
 	protected final Database db;
@@ -17,7 +17,7 @@ public class JobRunner implements Callable<JobRunner> {
 	protected Action action;
 	protected Table table;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private WriterMetrics writerMetrics = null;
+	private WriterMetrics finalMetrics = null;
 	
 	JobRunner(Session session, Database db, JobConfig config) {
 		this.session = session;
@@ -26,20 +26,21 @@ public class JobRunner implements Callable<JobRunner> {
 	}
 			
 	String getName() {
-		return this.table.getName();
+		return config.getName();
 	}
 	
 	JobConfig getConfig() {
-		return this.config;
+		return config;
 	}
 
+	@Deprecated
 	WriterMetrics getWriterMetrics() {
-		assert writerMetrics != null : "Not yet called";
-		return writerMetrics;
+		assert finalMetrics != null : "Not yet called";
+		return finalMetrics;
 	}
 	
 	protected ProgressLogger newProgressLogger(TableReader reader) {
-		ProgressLogger progressLogger = new Log4jProgressLogger(reader);
+		ProgressLogger progressLogger = new Log4jProgressLogger(reader, action);
 		reader.setProgressLogger(progressLogger);
 		return progressLogger;
 	}
@@ -48,7 +49,7 @@ public class JobRunner implements Callable<JobRunner> {
 	}
 	
 	@Override
-	public JobRunner call() throws SQLException, IOException, InterruptedException {
+	public WriterMetrics call() throws SQLException, IOException, InterruptedException {
 		assert config != null;
 		action = config.getAction();
 		assert action != null;
@@ -63,9 +64,8 @@ public class JobRunner implements Callable<JobRunner> {
 				"call table=%s action=%s", 
 				table.getName(), action.toString()));
 		}
-		if (writerMetrics != null) throw new IllegalStateException("Already called");
+		if (finalMetrics != null) throw new IllegalStateException("Already called");
 		if (config.getSqlBefore() != null) runSQL(config.getSqlBefore());
-		WriterMetrics writerMetrics = null;
 		switch (action) {
 		case CREATE:
 			runCreate();
@@ -77,26 +77,25 @@ public class JobRunner implements Callable<JobRunner> {
 			runSQL(config.getSql());
 			break;
 		case PRUNE:
-			writerMetrics = runPrune();
+			finalMetrics = runPrune();
 			break;
 		case SYNC:
-			writerMetrics = runSync();
+			finalMetrics = runSync();
 			break;
 		default:
-			writerMetrics = runLoad();
+			finalMetrics = runLoad();
 		}
-		if (writerMetrics != null) {
-			int processed = writerMetrics.getProcessed();
-			logger.info(Log.FINISH, String.format("end load %s (%d rows)", 
-					config.getName(), processed));
+		if (finalMetrics != null) {
+			int processed = finalMetrics.getProcessed();
+//			logger.info(Log.FINISH, String.format("end load %s (%d rows)", 
+//					config.getName(), processed));
 			Integer minRows = config.getMinRows();
 			if (minRows != null && processed < minRows)
 				throw new TooFewRowsException(table, minRows, processed);			
 		}
 		if (config.getSqlAfter() != null) runSQL(config.getSqlAfter());
 		this.close();
-		this.writerMetrics = writerMetrics;
-		return this;
+		return finalMetrics;
 	}
 	
 	void runSQL(String sqlCommand) throws SQLException {		
@@ -128,12 +127,12 @@ public class JobRunner implements Callable<JobRunner> {
 		DatabaseDeleteWriter deleteWriter = 
 			new DatabaseDeleteWriter(db, table, sqlTableName);
 		ProgressLogger progressLogger = newProgressLogger(auditReader);
-		deleteWriter.setProgressLogger(progressLogger);
+//		deleteWriter.setProgressLogger(progressLogger);
 		deleteWriter.open();
-		auditReader.setWriter(deleteWriter);		
+		auditReader.setWriter(deleteWriter);
+		auditReader.setProgressLogger(progressLogger);
 		auditReader.initialize();
 		Log.setTableContext(table, config.getName());
-		progressLogger.logStart(auditReader, "delete");
 		auditReader.call();
 		deleteWriter.close();
 		return deleteWriter.getWriterMetrics();
@@ -149,13 +148,11 @@ public class JobRunner implements Callable<JobRunner> {
 		if (partitionInterval == null) {
 			Synchronizer syncReader = new Synchronizer(table, db, sqlTableName);
 			ProgressLogger progressLogger = newProgressLogger(syncReader);
-			progressLogger.setOperation("sync");
+			syncReader.setProgressLogger(progressLogger);
 			syncReader.setFields(config.getColumns(table));
 			syncReader.setPageSize(config.getPageSize());
 			syncReader.initialize(createdRange);
-			progressLogger.logStart(syncReader, "sync");
 			syncReader.call();
-			progressLogger.logFinish(syncReader);
 			return syncReader.getWriterMetrics();
 		}
 		else {
@@ -165,15 +162,14 @@ public class JobRunner implements Callable<JobRunner> {
 			factory.setPageSize(config.getPageSize());
 			DatePartitionedTableReader multiReader =
 				new DatePartitionedTableReader(factory, partitionInterval, config.getThreads());
-			DatePartition partition = multiReader.getPartition();
-			logger.info(Log.INIT, "partition=" + partition.toString());
 			factory.setParent(multiReader);				
 			ProgressLogger progressLogger = newProgressLogger(multiReader);
+			multiReader.setProgressLogger(progressLogger);
 			multiReader.initialize();
+			DatePartition partition = multiReader.getPartition();
+			logger.info(Log.INIT, "partition=" + partition.toString());
 			Log.setTableContext(table, config.getName());
-			progressLogger.logStart(multiReader, "sync");
 			multiReader.call();
-			progressLogger.logFinish(multiReader);
 			return multiReader.getWriterMetrics();
 		}
 	}
@@ -215,14 +211,13 @@ public class JobRunner implements Callable<JobRunner> {
 			TableReader reader = factory.createReader();
 			reader.setMaxRows(config.getMaxRows());
 			progressLogger = newProgressLogger(reader);
-			writer.setProgressLogger(progressLogger);
+//			writer.setProgressLogger(progressLogger);
 			writer.open();
 			Log.setTableContext(table, config.getName());					
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
+			reader.setProgressLogger(progressLogger);
 			reader.initialize();
-			progressLogger.logStart(reader, "load");
 			reader.call();
-			progressLogger.logFinish(reader);
 			metrics = reader.getWriterMetrics();
 		}
 		else {
@@ -232,15 +227,13 @@ public class JobRunner implements Callable<JobRunner> {
 			factory.setParent(multiReader);
 			progressLogger = newProgressLogger(multiReader);
 			multiReader.setProgressLogger(progressLogger);
-			writer.setProgressLogger(progressLogger);
+//			writer.setProgressLogger(progressLogger);
 			writer.open();
 			multiReader.initialize();
 			DatePartition partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 			Log.setTableContext(table, config.getName());
-			progressLogger.logStart(multiReader, "load");
 			multiReader.call();
-			progressLogger.logFinish(multiReader);
 			metrics = multiReader.getWriterMetrics();
 		}
 		writer.close();

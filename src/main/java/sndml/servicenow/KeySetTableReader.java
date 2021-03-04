@@ -21,12 +21,13 @@ public class KeySetTableReader extends TableReader {
 	}
 
 	public void initialize() throws IOException, InterruptedException {
-		try {
-			super.initialize();
-		} catch (SQLException e) {
-			// impossible
-			throw new AssertionError(e);
-		}
+		beginInitialize();
+//		try {
+//			super.initialize();
+//		} catch (SQLException e) {
+//			// impossible
+//			throw new AssertionError(e);
+//		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, false);
@@ -37,20 +38,23 @@ public class KeySetTableReader extends TableReader {
 			logger.warn(Log.PROCESS,
 					String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
 						expected, allKeys.size()));				
-		setExpected(allKeys.size());
+//		setExpected(allKeys.size());
+		endInitialize(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
 	public void initialize(KeySet keys) throws IOException {
-		try {
-			super.initialize();
-		} catch (SQLException | InterruptedException e) {
-			// impossible
-			throw new AssertionError(e);
-		}
+		beginInitialize();
+//		try {
+//			super.initialize();
+//		} catch (SQLException | InterruptedException e) {
+//			// impossible
+//			throw new AssertionError(e);
+//		}
 		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;
-		setExpected(allKeys.size());
+//		setExpected(allKeys.size());
+		endInitialize(allKeys.size());
 	}
 	
 	public Integer getExpected() {
@@ -60,8 +64,7 @@ public class KeySetTableReader extends TableReader {
 		
 	@Override
 	public KeySetTableReader call() throws IOException, SQLException, InterruptedException {
-		assert initialized;
-		setLogContext();
+		logStart();
 		RecordWriter writer = this.getWriter();
 		int pageSize = this.getPageSize();
 		if (writer == null) throw new IllegalStateException("writer not defined");
@@ -81,7 +84,7 @@ public class KeySetTableReader extends TableReader {
 			params.add("sysparm_query", sliceQuery.toString());
 			RecordList recs = jsonAPI.getRecords(params);
 			getReaderMetrics().increment(recs.size());			
-			writer.processRecords(this, recs);
+			writer.processRecords(recs, progressLogger);
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
 			if (maxRows != null && rowCount > maxRows)

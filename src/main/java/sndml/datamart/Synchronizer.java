@@ -68,8 +68,8 @@ public class Synchronizer extends TableReader {
 			throws IOException, SQLException, InterruptedException {
 		TimestampHash dbTimestamps;
 		RecordList snTimestamps;
-		super.initialize();
-		logger.info(Log.INIT, "begin compare");
+		beginInitialize();
+		logger.info(Log.INIT, "Begin compare");
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
 		if (createdRange == null) 
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName);
@@ -113,11 +113,11 @@ public class Synchronizer extends TableReader {
 			DateTime dbts = dbTimestamps.get(key);
 			if (key.equals(snMinKey)) {			
 				logger.debug(Log.INIT, String.format(
-						"servicenow min key=%s snts=%s dbts=%s", key, snts, dbts));
+						"ServiceNow min key=%s snts=%s dbts=%s", key, snts, dbts));
 			}
 			if (key.equals(snMaxKey)) {			
 				logger.debug(Log.INIT, String.format(
-						"servicenow max key=%s snts=%s dbts=%s", key, snts, dbts));
+						"ServiceNow max key=%s snts=%s dbts=%s", key, snts, dbts));
 			}
 			if (dbts == null)
 				insertSet.add(key);
@@ -137,10 +137,10 @@ public class Synchronizer extends TableReader {
 				deleteSet.add(key);
 		}
 		logger.info(Log.INIT, String.format(
-			"compare identified %d inserts, %d updates, %d deletes, %d skips", 
+			"Compare identified %d inserts, %d updates, %d deletes, %d skips", 
 			insertSet.size(), updateSet.size(), deleteSet.size(), skipSet.size()));
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size();
-		this.setExpected(expected);
+		endInitialize(expected);
 	}
 
 	@Override
@@ -153,18 +153,18 @@ public class Synchronizer extends TableReader {
 		assert initialized;
 		assert progressLogger != null;
 		// Process the Inserts
-		setLogContext();
+		logStart();
 		writerMetrics.start();
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		if (insertSet.size() > 0) {
 			DatabaseInsertWriter insertWriter = new DatabaseInsertWriter(db, table, sqlTableName);			
 			insertWriter.setParentMetrics(this.writerMetrics);
-			insertWriter.setProgressLogger(progressLogger);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
 			insertReader.setFields(this.fieldNames);
 			insertReader.setPageSize(this.getPageSize());
 			insertReader.setWriter(insertWriter);
+			insertReader.setProgressLogger(progressLogger);
 			insertWriter.open();
 			setLogContext();
 			insertReader.initialize(insertSet);
@@ -181,12 +181,12 @@ public class Synchronizer extends TableReader {
 		if (updateSet.size() > 0) {
 			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
 			updateWriter.setParentMetrics(this.writerMetrics);
-			updateWriter.setProgressLogger(progressLogger);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
 			updateReader.setFields(this.fieldNames);
 			updateReader.setPageSize(this.getPageSize());
 			updateReader.setWriter(updateWriter);
+			updateReader.setProgressLogger(progressLogger);;
 			updateWriter.open();
 			setLogContext();
 			updateReader.initialize(updateSet);
@@ -203,10 +203,10 @@ public class Synchronizer extends TableReader {
 		if (deleteSet.size() > 0) {
 			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
 			deleteWriter.setParentMetrics(this.writerMetrics);
-			deleteWriter.setProgressLogger(progressLogger);
+//			deleteWriter.setProgressLogger(progressLogger);
 			deleteWriter.open();
 			setLogContext();
-			deleteWriter.deleteRecords(deleteSet);
+			deleteWriter.deleteRecords(deleteSet, progressLogger);
 			deleteWriter.close();
 			int rowsDeleted = deleteWriter.getWriterMetrics().getDeleted();
 			if (rowsDeleted != deleteSet.size())

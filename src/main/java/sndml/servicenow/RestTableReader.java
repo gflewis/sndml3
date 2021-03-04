@@ -27,28 +27,32 @@ public class RestTableReader extends TableReader {
 		return this;
 	}
 	
-	public void initialize() throws IOException, InterruptedException  {		
-		try {
-			super.initialize();
-		} catch (SQLException e) {
-			// impossible
-			throw new AssertionError(e);
-		}
+	public void initialize() throws IOException, InterruptedException  {
+		beginInitialize();
+//		try {
+//			super.initialize();
+//		} catch (SQLException e) {
+//			// impossible
+//			throw new AssertionError(e);
+//		}
 		EncodedQuery statsQuery = getStatsQuery();
 		logger.debug(Log.INIT, String.format(
 			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, statsQuery));
 		if (statsEnabled) {
 			stats = restAPI.getStats(statsQuery, false);
-			setExpected(stats.getCount());
-			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
+//			setExpected(stats.getCount());
+			endInitialize(stats.getCount());
+			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
+		}
+		else {
+			endInitialize(null);
 		}
 	}
 	
 	public RestTableReader call() throws IOException, SQLException, InterruptedException {
-		assert initialized;
+		logStart();
 		RecordWriter writer = getWriter();
 		assert writer != null;
-		setLogContext();
 		int rowCount = 0;
 		Key maxKey = null;
 		boolean finished = false;
@@ -78,7 +82,7 @@ public class RestTableReader extends TableReader {
 			logger.debug(Log.RESPONSE, String.format("retrieved %d rows", recs.size()));
 			getReaderMetrics().increment(recs.size());
 			maxKey = recs.maxKey();
-			writer.processRecords(this, recs);	
+			writer.processRecords(recs, progressLogger);	
 			rowCount += recs.size();
 			offset += recs.size();
 			if (isFinished(recs.size(), rowCount)) finished = true;
@@ -92,6 +96,7 @@ public class RestTableReader extends TableReader {
 					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
 			}
 		}
+		logComplete();
 		return this;
 	}
 	

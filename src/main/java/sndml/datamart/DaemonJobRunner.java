@@ -7,29 +7,34 @@ import sndml.servicenow.*;
 
 public class DaemonJobRunner extends JobRunner implements Runnable {
 	
+	final ConnectionProfile profile;
 	final Key runKey;
 	final String number;
-	AppRunLogger appRunLogger;
+	final DaemonStatusLogger statusLogger;
+//	DaemonProgressLogger progressLogger;
 		
 	public DaemonJobRunner(ConnectionProfile profile, JobConfig config) {
 		super(profile.getSession(), profile.getDatabase(), config);
+		this.profile = profile;
 		this.runKey = config.getSysId();
 		this.number = config.getNumber();
 		assert runKey != null;
 		assert runKey.isGUID();
 		assert number != null;
 		assert number.length() > 0;
-		this.appRunLogger = new AppRunLogger(profile, session, number, runKey);
 		this.table = session.table(config.getSource());
+		this.statusLogger = new DaemonStatusLogger(profile, session);
+		
 	}
 
 	@Override
 	protected ProgressLogger newProgressLogger(TableReader reader) {
-		assert appRunLogger != null;
 		assert reader != null;
-		ProgressLogger progressLogger = new CompositeProgressLogger(reader, appRunLogger);
-		reader.setProgressLogger(progressLogger);
-		return progressLogger;
+		DaemonProgressLogger appLogger = 
+			new DaemonProgressLogger(profile, session, reader, number, runKey);
+		ProgressLogger compositeLogger = new CompositeProgressLogger(reader, action, appLogger);
+		reader.setProgressLogger(compositeLogger);
+		return compositeLogger;
 	}
 		
 	@Override
@@ -48,23 +53,28 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	}
 	
 	@Override
-	public DaemonJobRunner call() {
-		assert session != null;
-		assert db != null;
-		assert appRunLogger != null;
-		assert config.getNumber() != null;
-		Thread.currentThread().setName(config.number);
+	public WriterMetrics call() {
 		try {
-			appRunLogger.setStatus("running");
-			super.call();
-			appRunLogger.setStatus("complete");
+			assert session != null;
+			assert db != null;
+			assert config.getNumber() != null;
+			Thread.currentThread().setName(config.number);			
+			statusLogger.setStatus(runKey, "running");
+			WriterMetrics metrics = super.call();
+			statusLogger.setStatus(runKey, "complete");
 			Daemon.rescan();
+			return metrics;
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());
-			logger.error(Log.RESPONSE, e.toString(), e);
-			appRunLogger.logError(e);
+			logger.error(Log.FINISH, e.toString(), e);
+			statusLogger.logError(runKey, e);
+			return null;
+		} catch (Error e) {
+			logger.error(Log.FINISH, e.toString(), e);			
+			logger.error(Log.FINISH, "Critical error detected. Halting JVM.");
+			Runtime.getRuntime().halt(-1);
+			return null;
 		}
-		return this;
 	}
 		
 }

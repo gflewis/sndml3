@@ -4,39 +4,49 @@ import sndml.servicenow.*;
 
 public class CompositeProgressLogger extends ProgressLogger {
 
-	final Log4jProgressLogger log4jLogger;
-	final AppRunLogger appLogger;
-		
-//	public CompositeProgressLogger(Log4jProgressLogger log4jLogger, AppRunLogger appLogger) {
-//		super(log4jLogger.getName(), log4jLogger.getReader());
-//		this.log4jLogger = log4jLogger;
-//		this.appLogger = appLogger;		
-//	}
-		
-	public CompositeProgressLogger(TableReader reader, AppRunLogger appLogger) {
-		this.log4jLogger = new Log4jProgressLogger(reader);
+	public final Log4jProgressLogger textLogger;
+	public final DaemonProgressLogger appLogger;
+
+	public CompositeProgressLogger(TableReader reader, Action action, DaemonProgressLogger appLogger) {
+		this(reader, action, appLogger, null);
+	}
+	
+	public CompositeProgressLogger(TableReader reader, Action action, DaemonProgressLogger appLogger, DatePart part) {
+		super(reader, part);
+		this.textLogger = new Log4jProgressLogger(reader, action);
 		this.appLogger = appLogger; 		
 	}
 
 	@Override
-	public void logStart(TableReader reader, String operation) {
-		if (appLogger != null) appLogger.logStart(reader, operation);
-		if (log4jLogger != null) log4jLogger.logStart(reader, operation);		
+	public CompositeProgressLogger newPartLogger(TableReader newReader, DatePart newPart) {
+		DaemonProgressLogger newAppLogger = appLogger.newPartLogger(newReader, newPart);
+		return new CompositeProgressLogger(newReader, textLogger.getAction(), newAppLogger, newPart);
 	}
 	
 	@Override
-	public void logProgress(TableReader reader) {
-		if (appLogger != null) appLogger.logProgress(reader);
-		if (log4jLogger != null) log4jLogger.logProgress(reader);
+	public void logPrepare() {
+		if (appLogger != null) appLogger.logPrepare();
+		if (textLogger != null) textLogger.logPrepare();		
+	}
+	
+	@Override
+	public void logStart(Integer expected) {
+		if (appLogger != null) appLogger.logStart(expected);
+		if (textLogger != null) textLogger.logStart(expected);		
+	}
+	
+	@Override
+	public void logProgress() {
+		if (appLogger != null) appLogger.logProgress();
+		if (textLogger != null) textLogger.logProgress();
 	}
 
 
 	@Override
-	public void logFinish(TableReader reader) {
-		if (appLogger != null) appLogger.logFinish(reader);
-		if (log4jLogger != null) log4jLogger.logFinish(reader);
+	public void logFinish() {
+		if (appLogger != null) appLogger.logFinish();
+		if (textLogger != null) textLogger.logFinish();
 		
 	}
-
 
 }

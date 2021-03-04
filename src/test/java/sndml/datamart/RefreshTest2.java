@@ -47,8 +47,8 @@ public class RefreshTest2 {
 		JobRunner create = jf.yamlJob("{source: incident, action: create}");
 		create.call();
 		assertTrue(db.tableExists(tableName));
-		JobRunner load = jf.yamlJob("{source: incident, action: load}");
-		WriterMetrics loadMetrics = load.call().getWriterMetrics();
+		JobRunner load = jf.yamlJob("{source: incident, action: load, created: 2020-01-01}");
+		WriterMetrics loadMetrics = load.call();
 		int count1 = db.sqlCount(tableName, null);
 		assertTrue(count1 > 0);
 		assertEquals(count1, loadMetrics.getInserted());
@@ -68,7 +68,7 @@ public class RefreshTest2 {
 	    	loadMetrics.getStarted().toString());
 	    logger.info(Log.TEST, yaml);
 	    JobRunner refresh = jf.yamlJob(yaml);
-	    WriterMetrics refreshMetrics = refresh.call().getWriterMetrics();
+	    WriterMetrics refreshMetrics = refresh.call();
 	    assertEquals(1, refreshMetrics.getInserted());
 	    assertEquals(0, refreshMetrics.getUpdated());
 	    int count2 = db.sqlCount(tableName, null);

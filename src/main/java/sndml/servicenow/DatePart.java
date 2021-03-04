@@ -15,10 +15,11 @@ public class DatePart extends DateTimeRange {
 		assert interval != null;
 		assert start != null;
 		assert end != null;
-		assert start.equals(start.truncate(interval));
-		assert end.equals(end.truncate(interval));
 		assert start.compareTo(end) < 0;
-		assert start.incrementBy(interval).equals(end);
+		assert start.equals(start.truncate(interval)) : String.format("DatePart.start=%s", start);
+		assert end.equals(end.truncate(interval)) : String.format("DatePart end=%s", end);
+		assert start.incrementBy(interval).equals(end) :
+			String.format("DatePart start=%s end=%s", start, end);
 	}
 	
 	public String getName() {

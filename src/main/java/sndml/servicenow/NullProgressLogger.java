@@ -2,23 +2,48 @@ package sndml.servicenow;
 
 /**
  * {@link ProgressLogger} that discards metrics.
- *
  */
 public class NullProgressLogger extends ProgressLogger {
 	
-	@Override
-	public void logStart(TableReader reader, String operation) {
-		return;
+	final protected DatePart part;
+	
+	public NullProgressLogger(TableReader reader) {
+		this(reader, null);
 	}
 	
+	public NullProgressLogger(TableReader reader, DatePart part) {
+		super(reader);
+		this.part = part;		
+	}
+		
 	@Override
-	public void logProgress(TableReader reader) {
+	public NullProgressLogger newPartLogger(TableReader newReader, DatePart newPart) {
+		return new NullProgressLogger(newReader, newPart);
+	}
+		
+	@Override
+	public void logPrepare() {	
+	}
+
+	@Override
+	public void logStart(Integer expected) {
 		return;		
 	}
 
 	@Override
-	public void logFinish(TableReader reader) {
+	public void logProgress() {
+		return;		
+	}
+
+	@Override
+	public void logFinish() {
 		return;
 	}
+
+	@Override
+	public DatePart getPart() {
+		return part;
+	}
+
 
 }

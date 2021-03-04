@@ -32,6 +32,12 @@ public class DateTimeRange {
 	public boolean hasEnd() {
 		return end != null;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		DateTimeRange other = (DateTimeRange) obj;
+		return start.equals(other.start) && end.equals(other.end); 
+	}
 
 	/**
 	 * Determine the overlap of two date ranges

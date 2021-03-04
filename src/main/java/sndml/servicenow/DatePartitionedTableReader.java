@@ -50,9 +50,10 @@ public class DatePartitionedTableReader extends TableReader {
 		return partition;
 	}
 		
-//	private int getThreadCount() {
-//		return this.threads;
-//	}
+	@SuppressWarnings("unused")
+	private int getThreadCount() {
+		return this.threads;
+	}
 
 	@Override
 	public WriterMetrics getWriterMetrics() {
@@ -64,14 +65,15 @@ public class DatePartitionedTableReader extends TableReader {
 		return futures.size();
 	}
 		
-//	private int numPartsComplete() {
-//		assert futures != null;
-//		int count = 0;
-//		for (Future<TableReader> part : futures) {
-//			count += (part.isDone() ? 1 : 0);
-//		}
-//		return count;
-//	}
+	@SuppressWarnings("unused")
+	private int numPartsComplete() {
+		assert futures != null;
+		int count = 0;
+		for (Future<TableReader> part : futures) {
+			count += (part.isDone() ? 1 : 0);
+		}
+		return count;
+	}
 
 	private int numPartsIncomplete() {
 		assert futures != null;
@@ -84,20 +86,15 @@ public class DatePartitionedTableReader extends TableReader {
 	
 	@Override
 	public void initialize() throws IOException, InterruptedException {
-		try {
-			super.initialize();
-		} catch (SQLException e) {
-			// Impossible. 
-			// Only a Syncronizer can throw SQLException during initialization.
-			throw new AssertionError(e);
-		}
+		beginInitialize();
 		// Use Stats API to determine min and max dates
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, true);
-		setExpected(stats.getCount());
-		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
-		if (getExpected() == 0) {
+		Integer expected = stats.getCount();
+		endInitialize(expected);
+		logger.debug(Log.INIT, String.format("expected=%d", expected));	
+		if (expected == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; no readers created");
 			return;
 		}
@@ -107,7 +104,7 @@ public class DatePartitionedTableReader extends TableReader {
 		partition = new DatePartition(range, interval);
 	}
 	
-	private TableReader createReader(DateTimeRange partRange) {
+	private TableReader createReader(DatePart partRange) {
 		String partName = DatePart.getName(interval, partRange.getStart());
 		TableReader partReader = factory.createReader();
 		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
@@ -116,14 +113,16 @@ public class DatePartitionedTableReader extends TableReader {
 		partReader.setParent(this);
 		partReader.getReaderMetrics().setParent(this.readerMetrics);
 		partReader.getWriterMetrics().setParent(this.writerMetrics);
-		assert this.progressLogger != null;
-		partReader.setProgressLogger(this.progressLogger);
+		ProgressLogger partLogger = progressLogger.newPartLogger(partReader, partRange);
+		assert partLogger.reader == partReader;
+		assert partLogger.hasPart();
+		partReader.setProgressLogger(partLogger);
 		return partReader;		
 	}
 
 	@Override
 	public DatePartitionedTableReader call() throws IOException, SQLException, InterruptedException {
-		setLogContext();
+		logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
 			return this;
@@ -132,7 +131,7 @@ public class DatePartitionedTableReader extends TableReader {
 			futures = new ArrayList<Future<TableReader>>();
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
-			for (DateTimeRange partRange : partition) {
+			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
 				logger.debug("Submit " + reader.getReaderName());
 				reader.initialize();
@@ -146,12 +145,13 @@ public class DatePartitionedTableReader extends TableReader {
 			}
 		}
 		else {
-			for (DateTimeRange partRange : partition) {
+			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
 				reader.initialize();
 				reader.call();
 			}
 		}
+		logComplete();
 		// Free resources
 		futures = null;
 		partition = null;

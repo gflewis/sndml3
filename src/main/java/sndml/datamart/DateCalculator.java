@@ -2,6 +2,7 @@ package sndml.datamart;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -45,11 +46,13 @@ public class DateCalculator {
 	}
 	
 	DateCalculator(DateTime start, File metricsFile) {
-		this.start = (start==null ? DateTime.now() : start);
-		this.last = getLastStart(metricsFile);
+		this.start = start==null ? DateTime.now() : start;
+		this.last = metricsFile==null ? null : getLastStart(metricsFile);
+		logger.info(Log.INIT, String.format("start=%s last=%s", start, last));
 	}
 	
 	DateCalculator(DateTime start, Properties lastValues) {
+		assert lastValues != null;
 		this.start = (start==null ? DateTime.now() : start);
 		this.last = getLastStart(lastValues);
 	}
@@ -80,14 +83,18 @@ public class DateCalculator {
 		Properties lastValues = new Properties();
 		try {
 			lastValues.load(new FileInputStream(metricsFile));
+		} catch (FileNotFoundException e) {
+			return null;
 		} catch (IOException e) {
 			throw new ResourceException(e);
 		}
-		return new DateTime(lastValues.getProperty("start"));		
+		return getLastStart(lastValues);
 	}
 	
 	private static DateTime getLastStart(Properties props) {
-		return new DateTime(props.getProperty("start"));				
+		String propValue = props.getProperty("start");
+		if (propValue == null) return null;
+		return  new DateTime(propValue);
 	}
 	
 	DateTime getDate(String expr) throws ConfigParseException {

@@ -52,7 +52,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	}
 
 	@Override
-	public synchronized void processRecords(TableReader reader, RecordList recs) 
+	public synchronized void processRecords(RecordList recs, ProgressLogger progressLogger) 
 			throws IOException, SQLException {
 		for (Record rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
@@ -60,7 +60,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 			writeRecord(rec);
 		}
 		db.commit();
-		progressLogger.logProgress(reader);
+		progressLogger.logProgress();
 	}
 	
 	abstract void writeRecord(Record rec) throws SQLException;

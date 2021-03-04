@@ -33,9 +33,9 @@ public class DatePartitionIterator implements Iterator<DatePart> {
 			this.size = 0;
 		}
 		else {
-			DateTime end = range.getEnd();
-			DateTime endTrunc = end.truncate(interval);
-			if (endTrunc.compareTo(end) < 0) end = endTrunc.incrementBy(interval);
+			DateTime end = range.getEnd().truncate(interval);
+			if (end.compareTo(range.getEnd()) < 0) end = end.incrementBy(interval);
+			assert end.compareTo(range.getEnd()) >= 0;
 			DateTime start = end.decrementBy(interval);
 			assert start.compareTo(end) < 0;
 			this.newest = new DatePart(interval, start, end);

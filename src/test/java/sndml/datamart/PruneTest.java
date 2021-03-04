@@ -59,8 +59,8 @@ public class PruneTest {
 	    assertNotNull(api.getRecord(key));
 		TestManager.banner(logger, "Load");
 		assertTrue(db.tableExists(tableName));
-		JobRunner load = jf.yamlJob("{source: incident, action: update}");
-		WriterMetrics loadMetrics = load.call().getWriterMetrics();
+		JobRunner load = jf.yamlJob("{source: incident, action: update, created: 2020-01-01}");
+		WriterMetrics loadMetrics = load.call();
 	    
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Delete");
@@ -73,7 +73,7 @@ public class PruneTest {
 	    	loadMetrics.getStarted().toString());
 	    JobRunner jr = jf.yamlJob(yaml);
 	    logger.info(Log.TEST, yaml);	    
-	    WriterMetrics pruneMetrics = jr.call().getWriterMetrics();
+	    WriterMetrics pruneMetrics = jr.call();
 	    assertEquals(0, pruneMetrics.getInserted());
 	    assertEquals(0, pruneMetrics.getUpdated());
 	    assertEquals(1, pruneMetrics.getDeleted());

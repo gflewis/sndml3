@@ -78,7 +78,7 @@ public class SoapPetitTableReader extends TableReader {
 			if (this.viewName != null) params.add("__use_view", viewName);
 			RecordList recs = soapAPI.getRecords(params, this.displayValue);
 			getReaderMetrics().increment(recs.size());			
-			writer.processRecords(this, recs);
+			writer.processRecords(recs, progressLogger);
 			rowCount += recs.size();
 			finished = (recs.size() < pageSize);
 			firstRow = lastRow;

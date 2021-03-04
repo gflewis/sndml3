@@ -84,7 +84,7 @@ public class FileWriter extends RecordWriter {
 	}
 
 	@Override
-	public synchronized void processRecords(TableReader reader, RecordList recs) {
+	public synchronized void processRecords(RecordList recs, ProgressLogger progressLogger) {
 		assert writer != null;
 		assert recs != null;
 		for (Record rec : recs) {
