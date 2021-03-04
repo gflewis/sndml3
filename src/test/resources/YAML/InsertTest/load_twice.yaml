@@ -1,3 +1,4 @@
+metrics: /tmp/load_twice.metrics
 tables:
 - {name: drop, action: droptable, target: change_request}
 # first step should be successful

@@ -19,10 +19,12 @@ public class GetKeysTest {
 	public void test() throws Exception {
 		Session session = profile.getSession();
 		Table table = session.table("incident");
+		logger.info(Log.TEST, "Calling getStats");
 		TableStats stats = table.rest().getStats(null, false);
 		Integer numRecs = stats.getCount();
 		assertTrue(numRecs > 20000);		
 		KeySetTableReader reader = new KeySetTableReader(table);
+		logger.info(Log.TEST, "Calling initialize");
 		reader.initialize();
 		Integer numKeys = reader.getExpected();
 		logger.info(Log.TEST, String.format("Count=%d Keys=%d",  numRecs, numKeys));

@@ -29,18 +29,11 @@ public class RestTableReader extends TableReader {
 	
 	public void initialize() throws IOException, InterruptedException  {
 		beginInitialize();
-//		try {
-//			super.initialize();
-//		} catch (SQLException e) {
-//			// impossible
-//			throw new AssertionError(e);
-//		}
 		EncodedQuery statsQuery = getStatsQuery();
 		logger.debug(Log.INIT, String.format(
 			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, statsQuery));
 		if (statsEnabled) {
 			stats = restAPI.getStats(statsQuery, false);
-//			setExpected(stats.getCount());
 			endInitialize(stats.getCount());
 			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 		}

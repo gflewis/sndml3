@@ -54,14 +54,16 @@ public class RestTableAPI extends TableAPI {
 			DateTime maxCreated = DateTime.from(maxValues.get("sys_created_on").asText());
 			if (minCreated == null || maxCreated == null) 
 				logger.warn(Log.PROCESS, String.format(
-					"getStats query=\"%s\" minCreated=%s maxCreated=%s", filter, minCreated, maxCreated));
+					"getStats minCreated=%s maxCreated=%s query=%s", 
+					minCreated, maxCreated, filter));
 			tableStats.created = new DateTimeRange(minCreated, maxCreated);
 			logger.info(Log.PROCESS, String.format(
-				"getStats count=%d query=\"%s\" createdRange=%s", tableStats.count, filter, tableStats.created));			
+				"getStats count=%d createdRange=%s query=%s", 
+				tableStats.count, tableStats.created, filter));			
 		}
 		else {
 			logger.info(Log.PROCESS, String.format(
-				"getStats count=%d query=\"%s\"", tableStats.count, filter));			
+				"getStats count=%d query=%s", tableStats.count, filter));			
 		}
 		return tableStats;		
 	}

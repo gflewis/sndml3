@@ -109,7 +109,6 @@ public class WriterMetrics {
 		if (parent != null) parent.addSkipped(count);
 	}
 	
-	@Deprecated
 	public synchronized void add(WriterMetrics stats) {
 		assert stats != null;
 		assert stats.started != null;

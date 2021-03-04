@@ -22,12 +22,6 @@ public class KeySetTableReader extends TableReader {
 
 	public void initialize() throws IOException, InterruptedException {
 		beginInitialize();
-//		try {
-//			super.initialize();
-//		} catch (SQLException e) {
-//			// impossible
-//			throw new AssertionError(e);
-//		}
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, false);
@@ -38,22 +32,14 @@ public class KeySetTableReader extends TableReader {
 			logger.warn(Log.PROCESS,
 					String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
 						expected, allKeys.size()));				
-//		setExpected(allKeys.size());
 		endInitialize(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
 	public void initialize(KeySet keys) throws IOException {
 		beginInitialize();
-//		try {
-//			super.initialize();
-//		} catch (SQLException | InterruptedException e) {
-//			// impossible
-//			throw new AssertionError(e);
-//		}
 		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;
-//		setExpected(allKeys.size());
 		endInitialize(allKeys.size());
 	}
 	

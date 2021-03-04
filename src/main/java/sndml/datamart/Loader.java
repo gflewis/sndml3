@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -28,7 +25,7 @@ public class Loader {
 	int threads;
 	File metricsFile = null;
 	PrintWriter statsWriter;
-	WriterMetrics loaderMetrics = new WriterMetrics();	
+//	WriterMetrics loaderMetrics = new WriterMetrics();	
 	
 	ArrayList<JobRunner> jobs = new ArrayList<JobRunner>();
 	
@@ -81,8 +78,7 @@ public class Loader {
 			}
 			Loader loader = new Loader(profile, config);			
 			loader.loadTables();			
-		}
-			
+		}			
 	}
 			
 	Loader(ConnectionProfile profile, LoaderConfig config) {
@@ -108,78 +104,83 @@ public class Loader {
 		return database;
 	}
 	
-	@Deprecated
-	WriterMetrics getMetrics() {
-		return loaderMetrics;
-	}
-	
-	@Deprecated
-	JobRunner lastJob() {
-		return jobs.get(jobs.size() - 1);
-	}
+//	@Deprecated
+//	WriterMetrics getMetrics() {
+//		return loaderMetrics;
+//	}
+//	
+//	@Deprecated
+//	JobRunner lastJob() {
+//		return jobs.get(jobs.size() - 1);
+//	}
 	
 	public WriterMetrics loadTables() throws SQLException, IOException, InterruptedException {
 		ArrayList<String> allJobNames = new ArrayList<String>();
 		ArrayList<WriterMetrics> allJobMetrics = new ArrayList<WriterMetrics>();
 		Log.setGlobalContext();
+		WriterMetrics loaderMetrics = new WriterMetrics();			
 		loaderMetrics.start();		
 		for (JobRunner job : jobs) {
 			WriterMetrics jobMetrics = job.call();
-			allJobNames.add(job.getName());
-			allJobMetrics.add(jobMetrics);
+			// some actions (e.g. execute, create) return no metrics
+			if (jobMetrics != null) {
+				loaderMetrics.add(jobMetrics);
+				allJobNames.add(job.getName());
+				allJobMetrics.add(jobMetrics);				
+			}
 		}
 		assert allJobNames.size() == allJobMetrics.size();
-		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
-		statsWriter = new PrintWriter(metricsFile);
-		loaderMetrics.write(statsWriter);
-		for (int i = 0; i < allJobNames.size(); ++i) {			
-			String jobName = allJobNames.get(i);
-			WriterMetrics jobMetrics = allJobMetrics.get(i);
-			// some actions (e.g. execute, create) return no metrics
-			if (jobMetrics != null) 
+		if (metricsFile != null) {
+			logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
+			statsWriter = new PrintWriter(metricsFile);
+			loaderMetrics.write(statsWriter);
+			for (int i = 0; i < allJobNames.size(); ++i) {			
+				String jobName = allJobNames.get(i);
+				WriterMetrics jobMetrics = allJobMetrics.get(i);
 				jobMetrics.write(statsWriter, jobName);
-		}
-		statsWriter.close();		
-		return loaderMetrics;
-	}
-	
-	@Deprecated
-	public WriterMetrics loadTables_old() throws SQLException, IOException, InterruptedException {
-		Log.setGlobalContext();
-		loaderMetrics.start();
-		if (threads > 1) {
-			logger.info(Log.INIT, String.format("starting %d threads", threads));
-			ExecutorService executor = Executors.newFixedThreadPool(threads);
-			for (JobRunner job : jobs) {
-				logger.info(Log.INIT, "submitting " + job.getName());
-				executor.submit(job);
 			}
-	        executor.shutdown();
-	        while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-	        		logger.debug(Log.FINISH, "awaiting job completion");
-	        }	 			
+			statsWriter.close();					
 		}
-		else {
-			for (JobRunner job : jobs) {
-				job.call();
-			}			
-		}
-		Log.setGlobalContext();
-		loaderMetrics.finish();
-		if (metricsFile != null) writeAllMetrics();
 		return loaderMetrics;
 	}
 	
-	@Deprecated
-	void writeAllMetrics() throws IOException {
-		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
-		statsWriter = new PrintWriter(metricsFile);
-		loaderMetrics.write(statsWriter);
-		for (JobRunner job : jobs) {			
-			job.getWriterMetrics().write(statsWriter, job.getName());
-		}
-		statsWriter.close();		
-	}
+//	@Deprecated
+//	public WriterMetrics loadTables_old() throws SQLException, IOException, InterruptedException {
+//		Log.setGlobalContext();
+//		loaderMetrics.start();
+//		if (threads > 1) {
+//			logger.info(Log.INIT, String.format("starting %d threads", threads));
+//			ExecutorService executor = Executors.newFixedThreadPool(threads);
+//			for (JobRunner job : jobs) {
+//				logger.info(Log.INIT, "submitting " + job.getName());
+//				executor.submit(job);
+//			}
+//	        executor.shutdown();
+//	        while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+//	        		logger.debug(Log.FINISH, "awaiting job completion");
+//	        }	 			
+//		}
+//		else {
+//			for (JobRunner job : jobs) {
+//				job.call();
+//			}			
+//		}
+//		Log.setGlobalContext();
+//		loaderMetrics.finish();
+//		if (metricsFile != null) writeAllMetrics();
+//		return loaderMetrics;
+//	}
+//	
+//	@Deprecated
+//	void writeAllMetrics() throws IOException {
+//		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
+//		statsWriter = new PrintWriter(metricsFile);
+//		loaderMetrics.write(statsWriter);
+//		for (JobRunner job : jobs) {			
+//			job.getWriterMetrics().write(statsWriter, job.getName());
+//		}
+//		statsWriter.close();		
+//	}
 
 	public static String readFully(File file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
