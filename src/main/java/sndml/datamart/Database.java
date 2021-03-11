@@ -58,7 +58,6 @@ public class Database {
 		
 		assert dbc == null;
 		assert dburl != null;
-		assert dbuser != null;
 		assert schema==null || schema.length() > 0;
 		String logmsg = "database=" + dburl + " user=" + dbuser;
 		if (schema != null) logmsg += " schema=" + getSchema();

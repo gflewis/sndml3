@@ -43,6 +43,7 @@ public class JobConfig {
 	public String sqlAfter;
 	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
+	@Deprecated
 	@JsonIgnore public FieldNames excludeColumns;
 	public Integer threads;
 	
@@ -87,6 +88,10 @@ public class JobConfig {
 
 	boolean getAutoCreate() { 
 		return this.autoCreate == null ? true : this.autoCreate.booleanValue();	
+	}
+	
+	void setColumns(String columnNames) {
+		this.includeColumns = new FieldNames(columnNames);
 	}
 	
 	FieldNames getColumns(Table table) throws IOException, InterruptedException {
@@ -253,6 +258,7 @@ public class JobConfig {
 		if (getCreated() != null) node.set("created", getCreated().toJsonNode());
 		if (getPartitionInterval() != null) node.put("partition",  getPartitionInterval().toString());
 		if (getFilter() != null) node.put("filter", getFilter());
+		if (includeColumns != null) node.put("columns", includeColumns.toString());
 		String yaml;
 		try {
 			yaml = mapper.writeValueAsString(node);

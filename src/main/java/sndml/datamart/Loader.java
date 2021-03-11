@@ -61,23 +61,24 @@ public class Loader {
 				throw new CommandOptionsException("Cannot specify both --table and --yaml");
 			if (yamlFileName == null && tableName == null)
 				throw new CommandOptionsException("Must specify --daemon or --yaml or --table");			
-			Session session = profile.getSession();
+//			Session session = profile.getSession();
 			ConfigFactory factory = new ConfigFactory();
-			LoaderConfig config;
 			if (tableName != null) {
-				Table table = session.table(tableName);
-				config = new LoaderConfig();
-				config.tables.add(factory.tableLoader(profile, table));
+//				Table table = session.table(tableName);
+				SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName);
+				tableLoader.call();
+//				config = new LoaderConfig();
+//				config.tables.add(factory.tableLoader(profile, table));
 			}
 			else {
 				File yamlFile = new File(yamlFileName);
 				String yamlText = readFully(yamlFile);
 				logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
 				FileReader reader = new FileReader(new File(yamlFileName));
-				config = factory.loaderConfig(profile, reader);
+				LoaderConfig config = factory.loaderConfig(profile, reader);
+				Loader loader = new Loader(profile, config);			
+				loader.loadTables();			
 			}
-			Loader loader = new Loader(profile, config);			
-			loader.loadTables();			
 		}			
 	}
 			
