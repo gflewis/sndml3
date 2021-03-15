@@ -12,7 +12,7 @@ public class RecordListAccumulator extends RecordWriter {
 	}
 	
 	public RecordListAccumulator(Table table) {
-		super();
+		super(null);
 		allRecords = new RecordList(table);
 	}
 	

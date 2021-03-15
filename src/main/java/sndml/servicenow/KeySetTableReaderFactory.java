@@ -1,9 +1,9 @@
 package sndml.servicenow;
 
 public class KeySetTableReaderFactory extends TableReaderFactory {
-	
-	public KeySetTableReaderFactory(Table table, RecordWriter writer) {
-		super(table, writer);
+
+	public KeySetTableReaderFactory(Table table) {
+		super(table);
 	}
 	
 	public KeySetTableReader createReader() {

@@ -38,6 +38,7 @@ public class DatePartitionedTableReader extends TableReader {
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
 		this.writerMetrics = new WriterMetrics();
+		this.writerMetrics.setParent(factory.getWriter().getWriterMetrics());
 		setWriter(factory.getWriter());
 	}
 
@@ -107,12 +108,18 @@ public class DatePartitionedTableReader extends TableReader {
 	private TableReader createReader(DatePart partRange) {
 		String partName = DatePart.getName(interval, partRange.getStart());
 		TableReader partReader = factory.createReader();
+		String parentName = partReader.getPartName();
+		assert parentName != null;		
+		String metricsName = parentName + "." + partName;
 		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
 		partReader.setPartName(partName);
 		partReader.setReaderName(partReader.getReaderName() + "." + partName);
 		partReader.setParent(this);
-		partReader.getReaderMetrics().setParent(this.readerMetrics);
-		partReader.getWriterMetrics().setParent(this.writerMetrics);
+		ReaderMetrics readerMetrics = partReader.getReaderMetrics();
+		WriterMetrics writerMetrics = partReader.getWriterMetrics();
+		readerMetrics.setParent(this.readerMetrics);		
+		writerMetrics.setParent(this.writerMetrics);
+		writerMetrics.setName(metricsName);		
 		ProgressLogger partLogger = progressLogger.newPartLogger(partReader, partRange);
 		assert partLogger.reader == partReader;
 		assert partLogger.hasPart();

@@ -18,7 +18,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	RestTableReaderTest.class,
 	SetFieldsTest.class,
 	CRUDTest.class,
-	DatePartTest.class,
 	})
 
 public class AllTests {

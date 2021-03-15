@@ -10,7 +10,7 @@ import java.sql.SQLException;
 public class NullWriter extends RecordWriter {
 
 	public NullWriter() {
-		super();
+		super(null);
 	}
 
 	@Override

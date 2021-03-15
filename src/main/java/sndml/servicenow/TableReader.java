@@ -243,7 +243,8 @@ public abstract class TableReader implements Callable<TableReader> {
 	 * plus created range, updated range and key exclusion
 	 */
 	public EncodedQuery getStatsQuery() {
-		EncodedQuery result = query == null ? new EncodedQuery(table) : new EncodedQuery(query);
+		EncodedQuery result = (query == null) ? 
+				new EncodedQuery(table) : new EncodedQuery(query);
 		if (createdRange != null) result.addCreated(createdRange);
 		if (updatedRange != null) result.addUpdated(updatedRange);
 		if (keyExclusion != null) result.excludeKeys(keyExclusion);

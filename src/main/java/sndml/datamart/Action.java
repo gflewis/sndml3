@@ -13,13 +13,19 @@ public enum Action {
 	LOAD,    // Alias for INSERT 
 	REFRESH;  // Alias for UPSERT
 	
-	public static EnumSet<Action> anyLoadAction =
+	public static EnumSet<Action> INSERT_UPDATE =
+			EnumSet.of(INSERT, UPDATE, LOAD, REFRESH);
+	
+	public static EnumSet<Action> INSERT_UPDATE_SYNC =
 			EnumSet.of(INSERT, UPDATE, SYNC, LOAD, REFRESH);
 
-	public static EnumSet<Action> anyTableAction =
+	public static EnumSet<Action> INSERT_UPDATE_PRUNE =
+			EnumSet.of(INSERT, UPDATE, PRUNE, LOAD, REFRESH);
+
+	public static EnumSet<Action> ANY_TABLE_ACTION =
 			EnumSet.of(INSERT, UPDATE, SYNC, PRUNE, CREATE, DROPTABLE, LOAD, REFRESH);
 
-	public static EnumSet<Action> anyGlobalAction =
+	public static EnumSet<Action> EXECUTE_ONLY =
 			EnumSet.of(EXECUTE);
 	
 }

@@ -12,9 +12,10 @@ import java.sql.SQLException;
  */
 public abstract class RecordWriter {
 
-	protected final WriterMetrics writerMetrics = new WriterMetrics();
+	protected final WriterMetrics writerMetrics;
 
-	public RecordWriter() {
+	public RecordWriter(RecordWriter parent) {
+		this.writerMetrics = new WriterMetrics();
 	}
 
 //	public void setProgressLogger(ProgressLogger progressLogger) {
@@ -34,10 +35,10 @@ public abstract class RecordWriter {
 		writerMetrics.finish();
 	}
 
-	public void setParentMetrics(WriterMetrics parentMetrics) {
-		writerMetrics.setParent(parentMetrics);
-	}
-		
+//	public void setParentMetrics(WriterMetrics parentMetrics) {
+//		writerMetrics.setParent(parentMetrics);
+//	}
+			
 	public WriterMetrics getWriterMetrics() {
 		if (writerMetrics.getFinished() == null) writerMetrics.finish();
 		return writerMetrics;

@@ -252,6 +252,8 @@ public class Database {
 	
 	void createTable(Table table, String sqlTableName)
 			throws SQLException, IOException, InterruptedException {
+		logger.debug(Log.INIT, String.format(
+			"createTable source=%s target=%s", table.getName(), sqlTableName));
 		assert table != null;
 		assert sqlTableName != null;
 		Log.setTableContext(table);

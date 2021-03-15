@@ -32,7 +32,7 @@ public class RestTableAPI extends TableAPI {
 		Log.setMethodContext(table, "STATS");
 		TableStats tableStats = new TableStats();
 		Parameters params = new Parameters();
-		if (filter != null) params.add("sysparm_query", filter.toString());
+		if (filter != null && !filter.isEmpty()) params.add("sysparm_query", filter.toString());
 		String aggregateFields = "sys_created_on";
 		params.add("sysparm_count", "true");
 		if (includeDates) {
@@ -59,7 +59,7 @@ public class RestTableAPI extends TableAPI {
 			tableStats.created = new DateTimeRange(minCreated, maxCreated);
 			logger.info(Log.PROCESS, String.format(
 				"getStats count=%d createdRange=%s query=%s", 
-				tableStats.count, tableStats.created, filter));			
+				tableStats.count, tableStats.created, filter));	
 		}
 		else {
 			logger.info(Log.PROCESS, String.format(

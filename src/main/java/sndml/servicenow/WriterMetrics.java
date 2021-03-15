@@ -1,19 +1,27 @@
 package sndml.servicenow;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
 public class WriterMetrics {
 
+	private String name = null;
+	private WriterMetrics parent = null;
 	private int inserted = 0;
 	private int updated = 0;
 	private int deleted = 0;
 	private int skipped = 0;
 	private Date started = null;
 	private Date finished = null;
-	private WriterMetrics parent = null;
 
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+	
 	public void setParent(WriterMetrics parent) {
 		this.parent = parent;
 	}
@@ -46,11 +54,13 @@ public class WriterMetrics {
 		return finished == null ? null : new DateTime(finished);
 	}
 	
-	public int getElapsedSec() {
+	public double getElapsedSec() {
 		if (started == null || finished == null)
 			return 0;
-		else
-			return (int) ((finished.getTime() - started.getTime()) / 1000);
+		else {
+			double result = ((finished.getTime() - started.getTime()) / 1000.0);			
+			return result;
+		}
 	}
 		
 	public int getProcessed() {
@@ -120,18 +130,12 @@ public class WriterMetrics {
 		deleted += stats.deleted;
 		skipped += stats.skipped;
 	}
-	
-	public void write(PrintWriter writer) throws IOException {
-		write(writer, null);
-	}
-
-	public void write(PrintWriter writer, String prefix) throws IOException {
-		assert writer != null;
-		if (prefix == null) prefix = "";
-		if (prefix.length() > 0) prefix = prefix + ".";
+		
+	public void write(PrintWriter writer) {
+		String prefix = (name == null ? "" : name + ".");
 		writer.println(prefix + "start="     + getStarted());
 		writer.println(prefix + "finish="    + getFinished());
-		writer.println(prefix + "elapsed="   + String.valueOf(getElapsedSec()));
+		writer.println(prefix + "elapsed="   + String.format("%.1f", getElapsedSec()));
 		writer.println(prefix + "inserted="  + String.valueOf(getInserted()));
 		writer.println(prefix + "updated="   + String.valueOf(getUpdated()));
 		writer.println(prefix + "deleted="   + String.valueOf(getDeleted()));

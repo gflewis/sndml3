@@ -2,8 +2,8 @@ package sndml.servicenow;
 
 public class RestTableReaderFactory extends TableReaderFactory {
 
-	public RestTableReaderFactory(Table table, RecordWriter writer) {
-		super(table, writer);
+	public RestTableReaderFactory(Table table) {
+		super(table);
 	}
 	
 	public RestTableReader createReader() {

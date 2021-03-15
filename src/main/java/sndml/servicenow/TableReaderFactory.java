@@ -10,7 +10,7 @@ public abstract class TableReaderFactory {
 	protected DateTimeRange updatedRange = null;
 	protected FieldNames fieldNames = null;
 	protected Integer pageSize;
-	protected String readerName = null;
+	protected String parentName = null;
 //	protected ProgressLogger progressLogger = null;
 		
 	public TableReaderFactory(Table table) {
@@ -18,10 +18,11 @@ public abstract class TableReaderFactory {
 		this.writer = new NullWriter();
 	}
 	
-	public TableReaderFactory(Table table, RecordWriter writer) {
-		this.table = table;
-		this.writer = writer;
-	}
+//	@Deprecated
+//	public TableReaderFactory(Table table, RecordWriter writer) {
+//		this.table = table;
+//		this.writer = writer;
+//	}
 	
 	public Table getTable() { return table; } 	
 	public EncodedQuery getFilter() { return filter; }
@@ -41,11 +42,12 @@ public abstract class TableReaderFactory {
 		reader.setFields(getFieldNames());
 		reader.setPageSize(getPageSize());
 		reader.setWriter(writer);
-		reader.setReaderName(readerName);
+		reader.setReaderName(parentName);
 //		reader.setProgressLogger(progressLogger);
 	}
 
 	public void setWriter(RecordWriter writer) {
+		assert writer != null;
 		this.writer = writer;
 	}
 	
@@ -58,6 +60,7 @@ public abstract class TableReaderFactory {
 	}
 
 	public void setUpdated(DateTime since) {
+		assert since != null;
 		this.setUpdated(new DateTimeRange(since, null));
 	}
 	
@@ -77,12 +80,12 @@ public abstract class TableReaderFactory {
 		this.pageSize = size;
 	}
 
-	public void setReaderName(String name) {
-		this.readerName = name;
+	public void setParentName(String name) {
+		this.parentName = name;
 	}
 	
-	public String getReaderName() {
-		return this.readerName;
+	public String getParentName() {
+		return this.parentName;
 	}
 	
 }

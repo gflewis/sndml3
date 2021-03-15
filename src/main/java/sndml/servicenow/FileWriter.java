@@ -60,7 +60,7 @@ public class FileWriter extends RecordWriter {
 	}
 
 	public FileWriter(File file) {
-		super();
+		super(null);
 		this.file = file;
 	}
 

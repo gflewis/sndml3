@@ -1,6 +1,5 @@
 package sndml.datamart;
 
-import java.io.IOException;
 import java.util.EnumSet;
 
 import org.slf4j.Logger;
@@ -77,7 +76,8 @@ public class JobConfig {
 	Interval getPartitionInterval() { return this.partition; }
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
-	FieldNames getExcludeColumns() { return this.excludeColumns; }	
+	
+//	@Deprecated	FieldNames getExcludeColumns() { return this.excludeColumns; }	
 	String getSql() { return this.sql; }
 	String getSqlBefore() {	return this.sqlBefore; }
 	String getSqlAfter() { return this.sqlAfter; }
@@ -94,14 +94,18 @@ public class JobConfig {
 		this.includeColumns = new FieldNames(columnNames);
 	}
 	
-	FieldNames getColumns(Table table) throws IOException, InterruptedException {
-		if (getIncludeColumns() != null)
-			return getIncludeColumns();
-		else if (getExcludeColumns() != null)
-			return table.getSchema().getFieldsMinus(getExcludeColumns());
-		else
-			return null;
+	FieldNames getColumns() {
+		return this.includeColumns;
 	}
+	
+//	FieldNames getColumns(Table table) throws IOException, InterruptedException {
+//		if (getIncludeColumns() != null)
+//			return getIncludeColumns();
+//		else if (getExcludeColumns() != null)
+//			return table.getSchema().getFieldsMinus(getExcludeColumns());
+//		else
+//			return null;
+//	}
 		
 	DateTimeRange getDefaultRange() {
 		assert this.start != null;
@@ -201,21 +205,24 @@ public class JobConfig {
 		}
 		booleanValidForActions("Truncate", truncate, EnumSet.of(Action.INSERT));
 		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
-		validForActions("Created", createdRange, Action.anyLoadAction);
-		validForActions("Partition", partition, Action.anyLoadAction);
-		validForActions("Since", sinceDate, EnumSet.of(Action.INSERT, Action.UPDATE, Action.PRUNE));
-		validForActions("SQL", sql, EnumSet.of(Action.EXECUTE));
+		validForActions("Created", createdRange, Action.INSERT_UPDATE_SYNC);
+		validForActions("Partition", partition, Action.INSERT_UPDATE_SYNC);
+		validForActions("Filter", filter, Action.INSERT_UPDATE);
+		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
+		validForActions("SQL", sql, Action.EXECUTE_ONLY);
 		
 		if (sinceDate == null && sinceExpr != null)
 			configError("Missing Since Date");
 		if (createdRange == null & createdExpr != null)
 			configError("Missing Created Range");
 		
-		if (getIncludeColumns() != null && getExcludeColumns() != null) 
-			configError("Cannot specify both Columns and Exclude");
+//		if (getIncludeColumns() != null && getExcludeColumns() != null) 
+//			configError("Cannot specify both Columns and Exclude");
 		if (threads != null && partition == null)
 			configError("Threads only valid with Partition");
 		
+		if (sqlBefore != null) logger.warn(Log.INIT, "Deprecated option: SQLBefore");
+		if (sqlAfter != null) logger.warn(Log.INIT, "Deprecated option: SQLAfter");		
 	}
 		
 	void booleanValidForActions(String name, Boolean value, EnumSet<Action> validActions) {

@@ -22,8 +22,8 @@ public class JobConfigValidator {
 		validate("Drop", job.dropTable, EnumSet.of(Action.CREATE));
 		validate("Created", job.createdRange, EnumSet.range(Action.INSERT, Action.SYNC));
 		validate("Since", job.sinceDate, EnumSet.range(Action.INSERT, Action.UPDATE));
-		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
-			configError("Cannot specify both Columns and Exclude");		
+//		if (job.getIncludeColumns() != null && job.getExcludeColumns() != null) 
+//			configError("Cannot specify both Columns and Exclude");		
 	}
 	
 	

@@ -29,7 +29,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	public DatabaseTableWriter(Database db, Table table, String sqlTableName) 
 			throws IOException, SQLException {
-		super();
+		super(null);
 		assert db != null;
 		assert table != null;
 		this.db = db;
