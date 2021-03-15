@@ -19,7 +19,6 @@ public class Scanner extends TimerTask {
 	static Logger logger = LoggerFactory.getLogger(Scanner.class);
 	
 	final ConnectionProfile profile;
-	final String agentName;
 	final Session session;
 	final ExecutorService workerPool;
 	final URI getRunList;
@@ -29,8 +28,7 @@ public class Scanner extends TimerTask {
 		this.profile = profile;
 		this.workerPool = workerPool;
 		this.session = profile.getSession();
-		// this.statusLogger = new AppRunLogger(logger, profile, session);
-		this.agentName = profile.getProperty("loader.agent", "main");
+		String agentName = Daemon.agentName();
 		String getRunListPath = profile.getProperty(
 			"loader.api.getrunlist", 
 			"api/x_108443_sndml/getrunlist/");
@@ -43,7 +41,7 @@ public class Scanner extends TimerTask {
 		
 	@Override
 	public synchronized void run() {
-		Log.setJobContext(agentName);
+		Log.setJobContext(Daemon.agentName());
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {

@@ -19,12 +19,12 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		
 	private final ConnectionProfile profile;
 	private final ExecutorService workerPool;
-	private final String agentName;
 	private final int intervalSeconds;
 	private final int threadCount;
 	
-	static Thread daemonThread; 
-	static Scanner scanner;
+	private static Thread daemonThread; 
+	private static Scanner scanner;
+	private static String agentName;
 	
 	private Timer timer;
 	
@@ -46,6 +46,10 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	 */
 	public static Thread getThread() {
 		return daemonThread;
+	}
+	
+	public static String agentName() {
+		return agentName;
 	}
 	
 	public void run() throws Exception {
