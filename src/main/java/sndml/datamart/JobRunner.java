@@ -17,7 +17,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 	protected Action action;
 	protected Table table;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-//	private WriterMetrics finalMetrics = null;
 	
 	JobRunner(Session session, Database db, JobConfig config) {
 		this.session = session;
@@ -32,12 +31,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 	JobConfig getConfig() {
 		return config;
 	}
-
-//	@Deprecated
-//	WriterMetrics getWriterMetrics() {
-//		assert finalMetrics != null : "Not yet called";
-//		return finalMetrics;
-//	}
 	
 	protected ProgressLogger newProgressLogger(TableReader reader) {
 		ProgressLogger progressLogger = new Log4jProgressLogger(reader, action);
@@ -115,7 +108,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 		assert table != null;
 		assert sqlTableName != null;
 		if (config.getDropTable()) db.dropTable(sqlTableName, true);
-		db.createMissingTable(table, sqlTableName);		
+		db.createMissingTable(table, sqlTableName, config.getColumns());		
 		writerMetrics.finish();
 		return writerMetrics;
 	}
@@ -162,7 +155,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 		assert sqlTableName != null;
 		DateTimeRange createdRange = config.getCreated();
 		if (config.getAutoCreate()) 
-			db.createMissingTable(table, sqlTableName);
+			db.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
 		SynchronizerFactory factory = new SynchronizerFactory(table, db, config, createdRange);
 		WriterMetrics writerMetrics;		
@@ -198,7 +191,8 @@ public class JobRunner implements Callable<WriterMetrics> {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		Action action = config.getAction();		
-		if (config.getAutoCreate()) db.createMissingTable(table, sqlTableName);
+		if (config.getAutoCreate()) 
+			db.createMissingTable(table, sqlTableName, config.getColumns());
 		if (config.getTruncate()) db.truncateTable(sqlTableName);
 		
 		DatabaseTableWriter writer;

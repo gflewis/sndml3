@@ -250,7 +250,7 @@ public class Database {
 		}
 	}
 	
-	void createTable(Table table, String sqlTableName)
+	void createTable(Table table, String sqlTableName, FieldNames columns)
 			throws SQLException, IOException, InterruptedException {
 		logger.debug(Log.INIT, String.format(
 			"createTable source=%s target=%s", table.getName(), sqlTableName));
@@ -258,7 +258,7 @@ public class Database {
 		assert sqlTableName != null;
 		Log.setTableContext(table);
 		Statement stmt = dbc.createStatement();
-		String createSql = generator.getCreateTable(table, sqlTableName);
+		String createSql = generator.getCreateTable(table, sqlTableName, columns);
 		logger.info(Log.INIT, createSql);
 		try {
 			stmt.execute(createSql);
@@ -284,7 +284,18 @@ public class Database {
 	 * Create a table in the target database if it does not already exist.
 	 * If the table already exists then do nothing.
 	 */
+
+	void createMissingTable(Table table) 
+			throws SQLException, IOException, InterruptedException {
+		createMissingTable(table, table.getName());
+	}
+	
 	void createMissingTable(Table table, String sqlTableName) 
+			throws SQLException, IOException, InterruptedException  {
+		createMissingTable(table, sqlTableName, null);
+	}
+
+	void createMissingTable(Table table, String sqlTableName, FieldNames columns) 
 			throws SQLException, IOException, InterruptedException  {
 		assert table != null;
 		if (sqlTableName == null) sqlTableName = table.getName();
@@ -292,13 +303,8 @@ public class Database {
 			return;
 		}
 		else {
-			createTable(table, sqlTableName);			
+			createTable(table, sqlTableName, columns);
 		}
 	}
-	
-	void createMissingTable(Table table) 
-			throws SQLException, IOException, InterruptedException {
-		createMissingTable(table, table.getName());
-	}
-	
+		
 }

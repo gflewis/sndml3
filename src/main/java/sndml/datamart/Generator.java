@@ -252,10 +252,15 @@ public class Generator {
 	}
 	
 	String getCreateTable(Table table) throws IOException, InterruptedException {
-		return getCreateTable(table, table.getName());
+		return getCreateTable(table, table.getName(), null);
 	}
 	
 	String getCreateTable(Table table, String sqlTableName) throws IOException, InterruptedException {
+		return getCreateTable(table, sqlTableName, null);
+	}
+	
+	String getCreateTable(Table table, String sqlTableName, FieldNames includeColumns) 
+			throws IOException, InterruptedException {
 		assert sqlTableName != null;
 		// We may be pulling the schema from a different ServiceNow instance
 		TableSchema tableSchema = table.getSchema();
@@ -268,11 +273,15 @@ public class Generator {
 		Iterator<FieldDefinition> iter = tableSchema.iterator();
 		while (iter.hasNext()) {
 			FieldDefinition fd = iter.next();
-			if (fd.getName().equals("sys_id")) {
+			String name = fd.getName();
+			if (name.equals("sys_id")) {
 				// sys_id already added above
 				continue;
 			}
-			if (!tableWSDL.canReadField(fd.getName())) {
+			if (includeColumns != null) {
+				if (!includeColumns.contains(name)) continue;
+			}
+			if (!tableWSDL.canReadField(name)) {
 				// it is in the dictionary, but not the WSDL
 				// it could be blocked by an access control
 				// skip it

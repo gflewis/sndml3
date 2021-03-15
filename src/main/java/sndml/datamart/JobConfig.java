@@ -42,8 +42,6 @@ public class JobConfig {
 	public String sqlAfter;
 	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
-	@Deprecated
-	@JsonIgnore public FieldNames excludeColumns;
 	public Integer threads;
 	
 	static EnumSet<Action> anyLoadAction =
@@ -77,7 +75,6 @@ public class JobConfig {
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
 	
-//	@Deprecated	FieldNames getExcludeColumns() { return this.excludeColumns; }	
 	String getSql() { return this.sql; }
 	String getSqlBefore() {	return this.sqlBefore; }
 	String getSqlAfter() { return this.sqlAfter; }
@@ -91,22 +88,20 @@ public class JobConfig {
 	}
 	
 	void setColumns(String columnNames) {
-		this.includeColumns = new FieldNames(columnNames);
+		includeColumns = new FieldNames();
+		includeColumns.add("sys_id");
+		includeColumns.add("sys_created_on");
+		includeColumns.add("sys_updated_on");
+		FieldNames temp = new FieldNames(columnNames);
+		for (String name : temp) {
+			if (!includeColumns.contains(name)) includeColumns.add(name);
+		}
 	}
 	
 	FieldNames getColumns() {
 		return this.includeColumns;
 	}
-	
-//	FieldNames getColumns(Table table) throws IOException, InterruptedException {
-//		if (getIncludeColumns() != null)
-//			return getIncludeColumns();
-//		else if (getExcludeColumns() != null)
-//			return table.getSchema().getFieldsMinus(getExcludeColumns());
-//		else
-//			return null;
-//	}
-		
+			
 	DateTimeRange getDefaultRange() {
 		assert this.start != null;
 		return new DateTimeRange(null, this.start);
