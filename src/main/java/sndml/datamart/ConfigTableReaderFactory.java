@@ -5,7 +5,6 @@ import sndml.servicenow.EncodedQuery;
 import sndml.servicenow.FieldNames;
 import sndml.servicenow.Table;
 import sndml.servicenow.TableReader;
-import sndml.servicenow.TableReaderFactory;
 
 public abstract class ConfigTableReaderFactory extends TableReaderFactory {
 

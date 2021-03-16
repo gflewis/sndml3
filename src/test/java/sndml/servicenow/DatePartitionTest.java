@@ -5,6 +5,10 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import sndml.datamart.DatePart;
+import sndml.datamart.DatePartition;
+import sndml.datamart.Interval;
+
 public class DatePartitionTest {
 	
 	Logger logger = TestManager.getLogger(DatePartitionTest.class);

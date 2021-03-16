@@ -1,4 +1,7 @@
-package sndml.servicenow;
+package sndml.datamart;
+
+import sndml.servicenow.DateTime;
+import sndml.servicenow.DateTimeRange;
 
 /**
  * One piece of a {@link DatePartition}. 

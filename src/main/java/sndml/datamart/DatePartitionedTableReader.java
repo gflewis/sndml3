@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.datamart;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -12,33 +12,48 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatePartitionedTableReader extends TableReader {
+import sndml.servicenow.DateTimeRange;
+import sndml.servicenow.EncodedQuery;
+import sndml.servicenow.Log;
+import sndml.servicenow.ProgressLogger;
+import sndml.servicenow.ReaderMetrics;
+import sndml.servicenow.TableReader;
+import sndml.servicenow.TableStats;
+import sndml.servicenow.WriterMetrics;
 
-	final TableReaderFactory factory;
+public final class DatePartitionedTableReader extends TableReader {
+
+	final TableReaderFactory factory;	
 	final int threads;
 	final Interval interval;
+	// A normal TableReader does not have WriterMetrics
+	// but a DatePartitionedTable reader does
+	// because it needs to accumulate the metrics of its children
 	final WriterMetrics writerMetrics;
 	
-	DateTimeRange range;
-	DatePartition partition;
-	List<Future<TableReader>> futures;
+	private DateTimeRange range;
+	private DatePartition partition;
+	private List<Future<WriterMetrics>> futures;
 
 	final int REST_DEFAULT_PAGE_SIZE = 200;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public DatePartitionedTableReader(TableReaderFactory factory, Interval interval, Integer threads) {
+	public DatePartitionedTableReader(
+			TableReaderFactory factory, String readerName, 
+			Interval interval, Integer threads) {
 		super(factory.getTable());
 		this.factory = factory;
-		setQuery(factory.filter);
-		setCreatedRange(factory.createdRange);
-		setUpdatedRange(factory.updatedRange);
-		setFields(factory.fieldNames);
-		setPageSize(factory.pageSize);
+		this.setReaderName(readerName);
+		setQuery(factory.getFilter());
+		setCreatedRange(factory.getCreatedRange());
+		setUpdatedRange(factory.getUpdatedRange());
+		setFields(factory.getFieldNames());
+		setPageSize(factory.getPageSize());
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
 		this.writerMetrics = new WriterMetrics();
-		this.writerMetrics.setParent(factory.getWriter().getWriterMetrics());
+		this.writerMetrics.setName(readerName);
 		setWriter(factory.getWriter());
 	}
 
@@ -70,7 +85,7 @@ public class DatePartitionedTableReader extends TableReader {
 	private int numPartsComplete() {
 		assert futures != null;
 		int count = 0;
-		for (Future<TableReader> part : futures) {
+		for (Future<WriterMetrics> part : futures) {
 			count += (part.isDone() ? 1 : 0);
 		}
 		return count;
@@ -79,7 +94,7 @@ public class DatePartitionedTableReader extends TableReader {
 	private int numPartsIncomplete() {
 		assert futures != null;
 		int count = 0;
-		for (Future<TableReader> part : futures) {
+		for (Future<WriterMetrics> part : futures) {
 			count += (part.isDone() ? 0 : 1);
 		}
 		return count;
@@ -87,13 +102,12 @@ public class DatePartitionedTableReader extends TableReader {
 	
 	@Override
 	public void initialize() throws IOException, InterruptedException {
-		beginInitialize();
+		super.beginInitialize();
 		// Use Stats API to determine min and max dates
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, true);
 		Integer expected = stats.getCount();
-		endInitialize(expected);
 		logger.debug(Log.INIT, String.format("expected=%d", expected));	
 		if (expected == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; no readers created");
@@ -102,47 +116,56 @@ public class DatePartitionedTableReader extends TableReader {
 		range = stats.getCreated();
 		assert range.getStart() != null;
 		assert range.getEnd() != null;
-		partition = new DatePartition(range, interval);
+		this.partition = new DatePartition(range, interval);
+		super.endInitialize(expected);
 	}
 	
 	private TableReader createReader(DatePart partRange) {
-		String partName = DatePart.getName(interval, partRange.getStart());
+		assert this.readerName != null;
+		String newPartName = DatePart.getName(interval, partRange.getStart());
 		TableReader partReader = factory.createReader();
-		String parentName = partReader.getPartName();
-		assert parentName != null;		
-		String metricsName = parentName + "." + partName;
+		logger.debug(Log.INIT, String.format("partReader.readerName=%s", partReader.getReaderName()));		
+		factory.configure(partReader);		
+		assert partReader.hasParent();
+		assert partReader.getParent() == this;
 		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
-		partReader.setPartName(partName);
-		partReader.setReaderName(partReader.getReaderName() + "." + partName);
-		partReader.setParent(this);
-		ReaderMetrics readerMetrics = partReader.getReaderMetrics();
-		WriterMetrics writerMetrics = partReader.getWriterMetrics();
-		readerMetrics.setParent(this.readerMetrics);		
-		writerMetrics.setParent(this.writerMetrics);
-		writerMetrics.setName(metricsName);		
+		partReader.setPartName(newPartName);
+		partReader.setReaderName(this.readerName + "." + newPartName);
+		ReaderMetrics partReaderMetrics = partReader.getReaderMetrics();
+		WriterMetrics partWriterMetrics = partReader.getWriterMetrics();
+		logger.debug(Log.INIT, String.format("partWriterMetrics.name(1)=%s", partWriterMetrics.getName()));
+		assert partWriterMetrics.getName() == null;
+		assert partReaderMetrics != this.getReaderMetrics();
+		assert partWriterMetrics != this.getWriterMetrics();
+		partReaderMetrics.setParent(this.readerMetrics);		
+		partWriterMetrics.setParent(this.writerMetrics);
+		logger.debug(Log.INIT, String.format("partWriterMetrics.name(2)=%s", partWriterMetrics.getName()));
+		partWriterMetrics.setName(newPartName);		
+		assert partWriterMetrics.hasParent();
+		assert partWriterMetrics.getParent() == this.writerMetrics;
 		ProgressLogger partLogger = progressLogger.newPartLogger(partReader, partRange);
-		assert partLogger.reader == partReader;
+		assert partLogger.getReader() == partReader;
 		assert partLogger.hasPart();
 		partReader.setProgressLogger(partLogger);
 		return partReader;		
 	}
 
 	@Override
-	public DatePartitionedTableReader call() throws IOException, SQLException, InterruptedException {
+	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
 		logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
-			return this;
+			return writerMetrics;
 		}
 		if (threads > 1) {			
-			futures = new ArrayList<Future<TableReader>>();
+			futures = new ArrayList<Future<WriterMetrics>>();
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
 			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
 				logger.debug("Submit " + reader.getReaderName());
 				reader.initialize();
-				Future<TableReader> future = executor.submit(reader);
+				Future<WriterMetrics> future = executor.submit(reader);
 				futures.add(future);				
 			}
 			executor.shutdown();
@@ -162,7 +185,7 @@ public class DatePartitionedTableReader extends TableReader {
 		// Free resources
 		futures = null;
 		partition = null;
-		return this;
+		return writerMetrics;
 	}
 
 }

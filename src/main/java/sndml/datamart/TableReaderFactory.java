@@ -1,29 +1,31 @@
-package sndml.servicenow;
+package sndml.datamart;
+
+import sndml.servicenow.DateTime;
+import sndml.servicenow.DateTimeRange;
+import sndml.servicenow.EncodedQuery;
+import sndml.servicenow.FieldNames;
+import sndml.servicenow.NullWriter;
+import sndml.servicenow.RecordWriter;
+import sndml.servicenow.Table;
+import sndml.servicenow.TableReader;
 
 public abstract class TableReaderFactory {
 
 	protected final Table table;
 	protected RecordWriter writer;
-	protected TableReader parent = null;
-	protected EncodedQuery filter = null;
-	protected DateTimeRange createdRange = null;
-	protected DateTimeRange updatedRange = null;
-	protected FieldNames fieldNames = null;
+	protected TableReader parentReader;
+	protected String parentName;
+	protected EncodedQuery filter;
+	protected DateTimeRange createdRange;
+	protected DateTimeRange updatedRange;
+	protected FieldNames fieldNames;
 	protected Integer pageSize;
-	protected String parentName = null;
-//	protected ProgressLogger progressLogger = null;
 		
 	public TableReaderFactory(Table table) {
 		this.table = table;
 		this.writer = new NullWriter();
 	}
-	
-//	@Deprecated
-//	public TableReaderFactory(Table table, RecordWriter writer) {
-//		this.table = table;
-//		this.writer = writer;
-//	}
-	
+		
 	public Table getTable() { return table; } 	
 	public EncodedQuery getFilter() { return filter; }
 	public DateTimeRange getCreatedRange() { return createdRange; }
@@ -31,19 +33,18 @@ public abstract class TableReaderFactory {
 	public FieldNames getFieldNames() { return fieldNames; }
 	public Integer getPageSize() { return pageSize; }
 	public RecordWriter getWriter() { return writer; }
-//	public ProgressLogger getProgressLogger() { return progressLogger; }
 		
 	public abstract TableReader createReader();
 	
 	public void configure(TableReader reader) {
-		reader.setQuery(getFilter());
-		reader.setCreatedRange(getCreatedRange());
-		reader.setUpdatedRange(getUpdatedRange());
-		reader.setFields(getFieldNames());
-		reader.setPageSize(getPageSize());
-		reader.setWriter(writer);
-		reader.setReaderName(parentName);
-//		reader.setProgressLogger(progressLogger);
+		if (getFilter() != null) reader.setQuery(getFilter());
+		if (getCreatedRange() != null) reader.setCreatedRange(getCreatedRange());
+		if (getUpdatedRange() != null) reader.setUpdatedRange(getUpdatedRange());
+		if (getFieldNames() != null) reader.setFields(getFieldNames());
+		if (getPageSize() != null) reader.setPageSize(getPageSize());
+		if (writer != null) reader.setWriter(writer);
+		if (parentName != null) reader.setReaderName(parentName);
+		if (parentReader != null) reader.setParent(parentReader);
 	}
 
 	public void setWriter(RecordWriter writer) {
@@ -51,10 +52,15 @@ public abstract class TableReaderFactory {
 		this.writer = writer;
 	}
 	
-	public void setParent(TableReader parent) {
-		this.parent = parent;
+	public void setParentReader(TableReader parent) {
+		this.parentReader = parent;
 	}
 
+	public TableReader getParentReader() {
+		assert parentReader != null;
+		return parentReader;
+	}
+	
 	public void setFilter(EncodedQuery query) {
 		this.filter = query;
 	}
@@ -80,12 +86,15 @@ public abstract class TableReaderFactory {
 		this.pageSize = size;
 	}
 
+	@Deprecated
 	public void setParentName(String name) {
 		this.parentName = name;
 	}
 	
+	@Deprecated
 	public String getParentName() {
-		return this.parentName;
+		assert parentName != null;
+		return parentName;
 	}
 	
 }

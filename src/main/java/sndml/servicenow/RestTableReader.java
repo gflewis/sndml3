@@ -42,7 +42,7 @@ public class RestTableReader extends TableReader {
 		}
 	}
 	
-	public RestTableReader call() throws IOException, SQLException, InterruptedException {
+	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
 		logStart();
 		RecordWriter writer = getWriter();
 		assert writer != null;
@@ -90,7 +90,7 @@ public class RestTableReader extends TableReader {
 			}
 		}
 		logComplete();
-		return this;
+		return writer.getWriterMetrics();
 	}
 	
 	protected boolean isFinished(int pageRows, int totalRows) {

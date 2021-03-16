@@ -49,7 +49,7 @@ public class KeySetTableReader extends TableReader {
 	}
 		
 	@Override
-	public KeySetTableReader call() throws IOException, SQLException, InterruptedException {
+	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
 		logStart();
 		RecordWriter writer = this.getWriter();
 		int pageSize = this.getPageSize();
@@ -77,7 +77,7 @@ public class KeySetTableReader extends TableReader {
 				throw new TooManyRowsException(table, maxRows, rowCount);
 			fromIndex += pageSize;
 		}
-		return this;
+		return writer.getWriterMetrics();
 	}
 
 }

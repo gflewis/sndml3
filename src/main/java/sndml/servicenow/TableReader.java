@@ -7,13 +7,13 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class TableReader implements Callable<TableReader> {
+public abstract class TableReader implements Callable<WriterMetrics> {
  
 	public final Table table;
-	private TableReader parent;
 	
-	private String readerName;
-	private String partName;
+	protected TableReader parentReader;
+	protected String readerName;
+	protected String partName;
 	private EncodedQuery query;
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
@@ -27,7 +27,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	protected boolean displayValue = false;
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
-	protected ReaderMetrics readerMetrics;
+	protected final ReaderMetrics readerMetrics;
 	protected ProgressLogger progressLogger;
 
 	protected Integer maxRows;
@@ -77,7 +77,7 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	public abstract int getDefaultPageSize();
 	
-	public abstract TableReader call() 
+	public abstract WriterMetrics call() 
 		throws IOException, SQLException, InterruptedException;
 				
 	public void setReaderName(String name) {
@@ -100,22 +100,24 @@ public abstract class TableReader implements Callable<TableReader> {
 	
 	public void setParent(TableReader parent) {
 		if (initialized) throw new IllegalStateException();
-		this.parent = parent;
+		assert parent != null;
+		assert readerMetrics != null;
+		this.parentReader = parent;
 		this.readerMetrics.setParent(parent.readerMetrics);
 	}
 	
 	public TableReader getParent() {
-		assert initialized;
-		return this.parent;
+		return this.parentReader;
 	}
 	
 	public boolean hasParent() {
-		return this.parent != null;
+		return this.parentReader != null;
 	}
 	
-	public void setPartName(String name) {
-		assert !initialized;
-		this.partName = name;		
+	public void setPartName(String partName) {
+		assert parentReader != null;
+		assert partName != null;
+		this.partName = partName;		
 	}
 	
 	public String getPartName() {

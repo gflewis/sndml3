@@ -40,7 +40,7 @@ public class SoapKeySetTableReader extends TableReader {
 		return allKeys.size();
 	}
 		
-	public SoapKeySetTableReader call() throws IOException, InterruptedException, SQLException {
+	public WriterMetrics call() throws IOException, InterruptedException, SQLException {
 		logStart();
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
@@ -65,7 +65,7 @@ public class SoapKeySetTableReader extends TableReader {
 			fromIndex += pageSize;
 		}
 		logComplete();
-		return this;
+		return writer.getWriterMetrics();
 	}
 
 	@Override

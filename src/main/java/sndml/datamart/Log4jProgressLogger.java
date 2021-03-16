@@ -3,7 +3,6 @@ package sndml.datamart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.DatePart;
 import sndml.servicenow.Log;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.ReaderMetrics;

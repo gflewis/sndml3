@@ -9,6 +9,8 @@ import java.util.TimeZone;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import sndml.datamart.Interval;
+
 /**
  * An immutable thread-safe DateTime field in ServiceNow format.
  * This class can convert the value to or from a Java Date.

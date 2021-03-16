@@ -66,14 +66,10 @@ public class Loader {
 				throw new CommandOptionsException("Cannot specify both --table and --yaml");
 			if (yamlFileName == null && tableName == null)
 				throw new CommandOptionsException("Must specify --daemon or --yaml or --table");			
-//			Session session = profile.getSession();
 			ConfigFactory factory = new ConfigFactory();
 			if (tableName != null) {
-//				Table table = session.table(tableName);
 				SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName);
 				tableLoader.call();
-//				config = new LoaderConfig();
-//				config.tables.add(factory.tableLoader(profile, table));
 			}
 			else {
 				File yamlFile = new File(yamlFileName);
@@ -100,15 +96,15 @@ public class Loader {
 		}
 	}
 	
-	@Deprecated
-	Session getSession() {
-		return session;
-	}
-	
-	@Deprecated
-	Database getDatabase() {
-		return database;
-	}
+//	@Deprecated
+//	Session getSession() {
+//		return session;
+//	}
+//	
+//	@Deprecated
+//	Database getDatabase() {
+//		return database;
+//	}
 		
 	public WriterMetrics loadTables() throws SQLException, IOException, InterruptedException {
 		ArrayList<String> allJobNames = new ArrayList<String>();
@@ -161,6 +157,10 @@ public class Loader {
         		logger.debug(Log.FINISH, "awaiting job completion");
         }	 			
 		Log.setGlobalContext();
+		for (Future<WriterMetrics> future : futures) {
+			WriterMetrics jobMetrics = future.get();
+			loaderMetrics.add(jobMetrics);
+		}
 		loaderMetrics.finish();
 		statsWriter = new PrintWriter(metricsFile);
 		for (Future<WriterMetrics> future : futures) {

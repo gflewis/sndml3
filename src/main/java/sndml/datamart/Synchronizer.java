@@ -16,6 +16,9 @@ public class Synchronizer extends TableReader {
 
 	final Database db;
 	final String sqlTableName;
+	// A normal TableReader does not have WriterMetrics
+	// but a Synchronizer does
+	// because it needs to accumulate the metrics of its 3 children
 	final WriterMetrics writerMetrics;
 	final String writerName;
 	
@@ -31,11 +34,6 @@ public class Synchronizer extends TableReader {
 		this.writerMetrics = new WriterMetrics();
 		this.writerName = writerName;
 	}
-
-//	private static String getMyName(Table table, String sqlTableName) {
-//		if (sqlTableName != null) return sqlTableName;
-//		return table.getName();
-//	}
 		
 	@Override
 	public WriterMetrics getWriterMetrics() {
@@ -157,7 +155,7 @@ public class Synchronizer extends TableReader {
 	}
 	
 	@Override
-	public Synchronizer call() throws IOException, SQLException, InterruptedException {
+	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
 		assert progressLogger != null;
 		// Process the Inserts
@@ -231,7 +229,7 @@ public class Synchronizer extends TableReader {
 		updateSet = null;
 		deleteSet = null;
 		skipSet = null;
-		return this;
+		return writerMetrics;
 	}
 
 }

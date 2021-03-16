@@ -62,7 +62,7 @@ public class SoapPetitTableReader extends TableReader {
 		throw new UnsupportedOperationException();
 	}		
 	
-	public SoapPetitTableReader call() throws IOException, SQLException {
+	public WriterMetrics call() throws IOException, SQLException {
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert pageSize > 1;
@@ -84,7 +84,7 @@ public class SoapPetitTableReader extends TableReader {
 			firstRow = lastRow;
 			logger.info(String.format("processed %d rows", rowCount));			
 		}
-		return this;
+		return writer.getWriterMetrics();
 	}
 
 }

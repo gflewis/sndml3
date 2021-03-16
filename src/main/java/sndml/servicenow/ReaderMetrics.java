@@ -1,6 +1,6 @@
 package sndml.servicenow;
 
-public class ReaderMetrics {
+public final class ReaderMetrics {
 
 	private int count = 0;
 	private Integer expected = null;

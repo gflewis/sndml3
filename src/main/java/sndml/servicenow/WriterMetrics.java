@@ -3,7 +3,10 @@ package sndml.servicenow;
 import java.io.PrintWriter;
 import java.util.Date;
 
-public class WriterMetrics {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class WriterMetrics {
 
 	private String name = null;
 	private WriterMetrics parent = null;
@@ -14,8 +17,14 @@ public class WriterMetrics {
 	private Date started = null;
 	private Date finished = null;
 
-	public void setName(String name) {
-		this.name = name;
+	private static Logger logger = LoggerFactory.getLogger(WriterMetrics.class);
+	
+	public void setName(String newName) {
+		// name cannot be changed being set; old value must be null		
+		assert this.name == null;
+		// new value cannot be null
+		assert newName != null;
+		this.name = newName;
 	}
 	
 	public String getName() {
@@ -23,6 +32,9 @@ public class WriterMetrics {
 	}
 	
 	public void setParent(WriterMetrics parent) {
+		assert parent != null;
+		assert parent != this;
+		assert parent.parent == null || parent.parent.parent == null;
 		this.parent = parent;
 	}
 	
@@ -101,7 +113,13 @@ public class WriterMetrics {
 
 	public synchronized void addInserted(int count) {
 		inserted += count;
-		if (parent != null) parent.addInserted(count);
+		if (parent != null) {
+			logger.debug(Log.PROCESS, String.format(
+				"addInserted name=%s count=%d parent=%s", getName(), count, parent.getName()));
+			assert parent != this;
+			assert parent == null || parent.parent == null;  // avoid recursive calls
+			parent.addInserted(count);
+		}
 	}
 	
 	public synchronized void addUpdated(int count) {

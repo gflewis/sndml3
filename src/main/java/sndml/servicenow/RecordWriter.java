@@ -17,11 +17,6 @@ public abstract class RecordWriter {
 	public RecordWriter(RecordWriter parent) {
 		this.writerMetrics = new WriterMetrics();
 	}
-
-//	public void setProgressLogger(ProgressLogger progressLogger) {
-//		assert progressLogger != null;
-//		this.progressLogger = progressLogger;
-//	}
 	
 	public abstract void processRecords(RecordList recs, ProgressLogger progressLogger) 
 		throws IOException, SQLException;	
@@ -34,10 +29,6 @@ public abstract class RecordWriter {
 	public void close() throws IOException, SQLException {
 		writerMetrics.finish();
 	}
-
-//	public void setParentMetrics(WriterMetrics parentMetrics) {
-//		writerMetrics.setParent(parentMetrics);
-//	}
 			
 	public WriterMetrics getWriterMetrics() {
 		if (writerMetrics.getFinished() == null) writerMetrics.finish();

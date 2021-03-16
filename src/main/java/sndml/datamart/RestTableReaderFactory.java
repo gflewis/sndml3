@@ -1,4 +1,7 @@
-package sndml.servicenow;
+package sndml.datamart;
+
+import sndml.servicenow.RestTableReader;
+import sndml.servicenow.Table;
 
 public class RestTableReaderFactory extends TableReaderFactory {
 

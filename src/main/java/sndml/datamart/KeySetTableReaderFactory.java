@@ -1,4 +1,7 @@
-package sndml.servicenow;
+package sndml.datamart;
+
+import sndml.servicenow.KeySetTableReader;
+import sndml.servicenow.Table;
 
 public class KeySetTableReaderFactory extends TableReaderFactory {
 

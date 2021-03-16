@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import sndml.datamart.DatePart;
+
 public abstract class ProgressLogger {
 
 	protected final TableReader reader;
@@ -14,11 +16,15 @@ public abstract class ProgressLogger {
 		this.datePart = part;
 	}
 
-	protected DatePart getPart() {
+	public TableReader getReader() {
+		return this.reader;
+	}
+	
+	public DatePart getPart() {
 		return datePart;
 	}
 	
-	protected boolean hasPart() {
+	public boolean hasPart() {
 		return datePart != null;
 	}
 		
