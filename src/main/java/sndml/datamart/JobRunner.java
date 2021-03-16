@@ -90,8 +90,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 	}
 	
 	WriterMetrics runSQL(String sqlCommand) throws SQLException {
-		WriterMetrics writerMetrics = new WriterMetrics();
-		writerMetrics.setName(config.getName());
+		WriterMetrics writerMetrics = new WriterMetrics(config.getName());
 		writerMetrics.start();
 		db.executeStatement(sqlCommand);
 		db.commit();
@@ -101,8 +100,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 	
 	WriterMetrics runCreateTable() throws SQLException, IOException, InterruptedException {
 		logger.debug(Log.INIT, "runCreateTable " + config.getTarget());
-		WriterMetrics writerMetrics = new WriterMetrics();
-		writerMetrics.setName(config.getName());
+		WriterMetrics writerMetrics = new WriterMetrics(config.getName());
 		writerMetrics.start();
 		String sqlTableName = config.getTarget();
 		assert table != null;
@@ -115,8 +113,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 	
 	WriterMetrics runDropTable() throws SQLException {
 		logger.debug(Log.INIT, "runDropTable " + config.getTarget());
-		WriterMetrics writerMetrics = new WriterMetrics();
-		writerMetrics.setName(config.getName());
+		WriterMetrics writerMetrics = new WriterMetrics(config.getName());
 		writerMetrics.start();
 		db.dropTable(config.getTarget(), true);
 		writerMetrics.finish();
@@ -137,7 +134,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 		auditReader.setCreatedRange(new DateTimeRange(since, null));
 		auditReader.setMaxRows(config.getMaxRows());
 		DatabaseDeleteWriter deleteWriter = 
-			new DatabaseDeleteWriter(db, table, sqlTableName);
+			new DatabaseDeleteWriter(db, table, sqlTableName, config.getName());
 		ProgressLogger progressLogger = newProgressLogger(auditReader);
 //		deleteWriter.setProgressLogger(progressLogger);
 		deleteWriter.open();
@@ -153,25 +150,25 @@ public class JobRunner implements Callable<WriterMetrics> {
 	WriterMetrics runSync() throws SQLException, IOException, InterruptedException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
-		DateTimeRange createdRange = config.getCreated();
+//		DateTimeRange createdRange = config.getCreated();
 		if (config.getAutoCreate()) 
 			db.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
-		SynchronizerFactory factory = new SynchronizerFactory(table, db, config, createdRange);
+		TableReaderFactory factory = new TableReaderFactory(table, db, config);
+		TableReader reader;
 		WriterMetrics writerMetrics;		
 		if (partitionInterval == null) {
-//			Synchronizer syncReader = new Synchronizer(table, db, sqlTableName, config.getName());
-			Synchronizer syncReader = factory.createReader();
-			ProgressLogger progressLogger = newProgressLogger(syncReader);
-			syncReader.setProgressLogger(progressLogger);
-			syncReader.setFields(config.getColumns());
-			syncReader.setPageSize(config.getPageSize());
-			syncReader.initialize(createdRange);
-			writerMetrics = syncReader.call();
+			reader = factory.createReader();
+			ProgressLogger progressLogger = newProgressLogger(reader);
+			reader.setProgressLogger(progressLogger);
+			reader.setFields(config.getColumns());
+			reader.setPageSize(config.getPageSize());
+			reader.initialize();
+			writerMetrics = reader.call();
 		}
 		else {
-			factory.setFields(config.getColumns());
-			factory.setPageSize(config.getPageSize());
+//			factory.setFields(config.getColumns());
+//			factory.setPageSize(config.getPageSize());
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(
 					factory, config.getName(), partitionInterval, config.getThreads());
@@ -184,7 +181,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 			Log.setTableContext(table, config.getName());
 			writerMetrics = multiReader.call();
 		}
-		writerMetrics.setName(config.getName());
+//		writerMetrics.setName(config.getName());
 		return writerMetrics;
 	}
 	
@@ -198,29 +195,30 @@ public class JobRunner implements Callable<WriterMetrics> {
 		
 		DatabaseTableWriter writer;
 		if (Action.INSERT.equals(action) || Action.LOAD.equals(action)) {
-			writer = new DatabaseInsertWriter(db, table, sqlTableName);
+			writer = new DatabaseInsertWriter(db, table, sqlTableName, config.getName());
 		}
 		else {
-			writer = new DatabaseUpdateWriter(db, table, sqlTableName);
+			writer = new DatabaseUpdateWriter(db, table, sqlTableName, config.getName());
 		}
 		assert writer.getWriterMetrics() != null;
-		writer.getWriterMetrics().setName(config.getName());
+//		writer.getWriterMetrics().setName(config.getName());
 		Interval partitionInterval = config.getPartitionInterval();
-		TableReaderFactory factory;
 		DateTime since = config.getSince();	
 		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
-		if (since != null) {
-			factory = new KeySetTableReaderFactory(table);
-			factory.setUpdated(since);				
-		}
-		else {
-			factory = new RestTableReaderFactory(table);
-		}
+//		if (since != null) {
+//			factory = new KeySetTableReaderFactory(table);
+//			factory.setUpdated(since);				
+//		}
+//		else {
+//			factory = new RestTableReaderFactory(table);
+//		}
 //		factory.setParentName(config.getName());
-		factory.setFilter(new EncodedQuery(table, config.getFilter()));
-		factory.setCreated(config.getCreated());
-		factory.setFields(config.getColumns());
-		factory.setPageSize(config.getPageSize());
+		TableReaderFactory factory = new TableReaderFactory(table, db, config);
+//		factory.setFilter(new EncodedQuery(table, config.getFilter()));
+//		factory.setCreated(config.getCreated());
+//		factory.setUpdated(since);
+//		factory.setFields(config.getColumns());
+//		factory.setPageSize(config.getPageSize());
 		factory.setWriter(writer);
 		ProgressLogger progressLogger;
 		WriterMetrics writerMetrics;
@@ -258,7 +256,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 			writerMetrics = multiReader.call();
 		}
 		writer.close();
-		writerMetrics.setName(config.getName());
+//		writerMetrics.setName(config.getName());
 		return writerMetrics;
 	}
 

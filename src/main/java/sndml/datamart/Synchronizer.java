@@ -31,8 +31,8 @@ public class Synchronizer extends TableReader {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;
-		this.writerMetrics = new WriterMetrics();
 		this.writerName = writerName;
+		this.writerMetrics = new WriterMetrics(writerName);
 	}
 		
 	@Override
@@ -153,6 +153,19 @@ public class Synchronizer extends TableReader {
 	public TableReader setQuery(EncodedQuery value) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void logStart() {
+		writerMetrics.start();
+		super.logStart();		
+	}
+	
+	@Override
+	public void logComplete() {
+		writerMetrics.finish();
+		super.logComplete();
+	}
+	
 	
 	@Override
 	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
@@ -160,13 +173,12 @@ public class Synchronizer extends TableReader {
 		assert progressLogger != null;
 		// Process the Inserts
 		logStart();
-		writerMetrics.start();
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		assert writerName != null;
 		if (insertSet.size() > 0) {
-			DatabaseInsertWriter insertWriter =	new DatabaseInsertWriter(db, table, sqlTableName);		
+			DatabaseInsertWriter insertWriter =	
+					new DatabaseInsertWriter(db, table, sqlTableName, writerName + ".INSERT");		
 			insertWriter.getWriterMetrics().setParent(this.writerMetrics);
-			insertWriter.getWriterMetrics().setName(writerName + ".INSERT");
 			KeySetTableReader insertReader = new KeySetTableReader(table);
 			insertReader.setParent(this);
 			insertReader.setFields(this.fieldNames);
@@ -187,9 +199,9 @@ public class Synchronizer extends TableReader {
 		// Process the Updates
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
-			DatabaseUpdateWriter updateWriter = new DatabaseUpdateWriter(db, table, sqlTableName);
+			DatabaseUpdateWriter updateWriter = 
+					new DatabaseUpdateWriter(db, table, sqlTableName, writerName + ".UPDATE");
 			updateWriter.getWriterMetrics().setParent(this.writerMetrics);
-			updateWriter.getWriterMetrics().setName(writerName + ".UPDATE");
 			KeySetTableReader updateReader = new KeySetTableReader(table);
 			updateReader.setParent(this);
 			updateReader.setFields(this.fieldNames);
@@ -210,9 +222,9 @@ public class Synchronizer extends TableReader {
 		// Process the Deletes
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
-			DatabaseDeleteWriter deleteWriter = new DatabaseDeleteWriter(db, table, sqlTableName);
+			DatabaseDeleteWriter deleteWriter = 
+					new DatabaseDeleteWriter(db, table, sqlTableName, writerName + ".DELETE");
 			deleteWriter.getWriterMetrics().setParent(this.writerMetrics);
-			deleteWriter.getWriterMetrics().setName(writerName + ".DELETE");
 			deleteWriter.open();
 			setLogContext();
 			deleteWriter.deleteRecords(deleteSet, progressLogger);
@@ -223,7 +235,7 @@ public class Synchronizer extends TableReader {
 					rowsDeleted, deleteSet.size()));
 		}
 		writerMetrics.addSkipped(skipSet.size());
-		writerMetrics.finish();
+		logComplete();
 		// Release memory
 		insertSet = null;
 		updateSet = null;

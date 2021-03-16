@@ -1,31 +1,90 @@
 package sndml.datamart;
 
-import sndml.servicenow.DateTime;
-import sndml.servicenow.DateTimeRange;
-import sndml.servicenow.EncodedQuery;
-import sndml.servicenow.FieldNames;
-import sndml.servicenow.NullWriter;
-import sndml.servicenow.RecordWriter;
-import sndml.servicenow.Table;
-import sndml.servicenow.TableReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class TableReaderFactory {
+import sndml.servicenow.*;
+
+public class TableReaderFactory {
 
 	protected final Table table;
+	protected final Database db;
+	protected final JobConfig config;
+	protected final String sqlTableName;
+	protected final DateTimeRange createdRange;
+	protected final DateTimeRange updatedRange;
+	protected final EncodedQuery filter;
+	protected final FieldNames fieldNames;
+	protected Integer pageSize;
+	
 	protected RecordWriter writer;
 	protected TableReader parentReader;
 	protected String parentName;
-	protected EncodedQuery filter;
-	protected DateTimeRange createdRange;
-	protected DateTimeRange updatedRange;
-	protected FieldNames fieldNames;
-	protected Integer pageSize;
+	
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	public TableReaderFactory(Table table) {
+	public TableReaderFactory(Table table, Database db, JobConfig config) {
 		this.table = table;
-		this.writer = new NullWriter();
+		this.db = db;		
+		this.config = config;
+		sqlTableName = config.getTarget();
+		createdRange = config.getCreated();
+		updatedRange = new DateTimeRange(config.getSince(), null);
+		filter = new EncodedQuery(table, config.getFilter());
+		fieldNames = config.getColumns();
+		pageSize = config.getPageSize();
 	}
+	
+	public TableReader createReader() {
+		return createReader(null);
+	}
+	
+	public TableReader createReader(DatePart datePart) {
+		TableReader reader;
+		String partName = (datePart == null) ? null : datePart.getName();
+		String readerName = (datePart != null) ? 
+				config.getName() + "." + partName : config.getName();
+				
+		if (config.action == Action.SYNC) {
+			reader = new Synchronizer(table, db, sqlTableName, readerName);
+		}
+		else {
+			reader = new RestTableReader(table, readerName);
+		}
 		
+		if (parentReader != null) reader.setParent(parentReader);
+		if (readerName != null) reader.setReaderName(readerName);
+		if (partName != null) reader.setPartName(partName);
+		
+		if (config.getFilter() != null) {
+			EncodedQuery query = new EncodedQuery(table, config.getFilter());
+			reader.setQuery(query);
+		}
+		
+		DateTimeRange readerCreatedRange =
+				datePart != null ? datePart.intersect(createdRange) : createdRange;
+		reader.setCreatedRange(readerCreatedRange);
+		
+		reader.setUpdatedRange(updatedRange);
+		reader.setQuery(filter);
+		reader.setFields(fieldNames);
+		reader.setPageSize(pageSize);
+		
+		if (writer != null) reader.setWriter(writer);
+		if (partName != null) reader.setPartName(partName);
+		if (parentName != null && partName != null)	{
+			String newReaderName = parentName + "." + partName;
+			reader.setReaderName(newReaderName);
+		}
+		
+		logger.debug(Log.INIT, String.format(
+			"createReader part=%s name=%s created=%s", 
+			partName, readerName, createdRange.toString()));
+
+		return reader;
+		
+	}
+	
 	public Table getTable() { return table; } 	
 	public EncodedQuery getFilter() { return filter; }
 	public DateTimeRange getCreatedRange() { return createdRange; }
@@ -34,17 +93,24 @@ public abstract class TableReaderFactory {
 	public Integer getPageSize() { return pageSize; }
 	public RecordWriter getWriter() { return writer; }
 		
-	public abstract TableReader createReader();
-	
+	@Deprecated
 	public void configure(TableReader reader) {
+		configure(reader, null);
+	}
+	
+	private void configure(TableReader reader, String partName) {
 		if (getFilter() != null) reader.setQuery(getFilter());
 		if (getCreatedRange() != null) reader.setCreatedRange(getCreatedRange());
 		if (getUpdatedRange() != null) reader.setUpdatedRange(getUpdatedRange());
 		if (getFieldNames() != null) reader.setFields(getFieldNames());
 		if (getPageSize() != null) reader.setPageSize(getPageSize());
 		if (writer != null) reader.setWriter(writer);
-		if (parentName != null) reader.setReaderName(parentName);
 		if (parentReader != null) reader.setParent(parentReader);
+		if (partName != null) reader.setPartName(partName);
+		if (parentName != null && partName != null)	{
+			String newReaderName = parentName + "." + partName;
+			reader.setReaderName(newReaderName);
+		}
 	}
 
 	public void setWriter(RecordWriter writer) {
@@ -61,27 +127,35 @@ public abstract class TableReaderFactory {
 		return parentReader;
 	}
 	
+	/*
 	public void setFilter(EncodedQuery query) {
 		this.filter = query;
 	}
 
+	@Deprecated
 	public void setUpdated(DateTime since) {
-		assert since != null;
-		this.setUpdated(new DateTimeRange(since, null));
+		if (since == null) 
+			this.updatedRange = null;
+		else
+			this.updatedRange = new DateTimeRange(since, null);
 	}
 	
+	@Deprecated
 	public void setUpdated(DateTimeRange updated) {
 		this.updatedRange = updated;
 	}
 
+	@Deprecated
 	public void setCreated(DateTimeRange created) {
 		this.createdRange = created;
 	}
 	
+	@Deprecated
 	public void setFields(FieldNames names) {
 		this.fieldNames = names;
 	}
 
+	@Deprecated
 	public void setPageSize(Integer size) {
 		this.pageSize = size;
 	}
@@ -96,5 +170,6 @@ public abstract class TableReaderFactory {
 		assert parentName != null;
 		return parentName;
 	}
+	*/
 	
 }

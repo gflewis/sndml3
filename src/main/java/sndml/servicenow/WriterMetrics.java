@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 public final class WriterMetrics {
 
-	private String name = null;
+	private String name;
 	private WriterMetrics parent = null;
 	private int inserted = 0;
 	private int updated = 0;
@@ -19,6 +19,15 @@ public final class WriterMetrics {
 
 	private static Logger logger = LoggerFactory.getLogger(WriterMetrics.class);
 	
+	@Deprecated
+	public WriterMetrics() {		
+	}
+	
+	public WriterMetrics(String name) {
+		this.name = name;
+	}
+	
+	@Deprecated
 	public void setName(String newName) {
 		// name cannot be changed being set; old value must be null		
 		assert this.name == null;

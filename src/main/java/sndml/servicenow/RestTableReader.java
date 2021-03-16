@@ -11,6 +11,11 @@ public class RestTableReader extends TableReader {
 	
 	private final int DEFAULT_PAGE_SIZE = 200;
 	
+	public RestTableReader(Table table, String readerName) {
+		this(table);
+		this.setReaderName(readerName);
+	}
+	
 	public RestTableReader(Table table) {
 		super(table);
 		this.restAPI = table.rest();

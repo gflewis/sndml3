@@ -110,7 +110,7 @@ public class Loader {
 		ArrayList<String> allJobNames = new ArrayList<String>();
 		ArrayList<WriterMetrics> allJobMetrics = new ArrayList<WriterMetrics>();
 		Log.setGlobalContext();
-		WriterMetrics loaderMetrics = new WriterMetrics();			
+		WriterMetrics loaderMetrics = new WriterMetrics(null);			
 		loaderMetrics.start();		
 		for (JobRunner job : jobs) {
 			assert job.getName() != null;
@@ -143,7 +143,7 @@ public class Loader {
 			throws SQLException, IOException, InterruptedException, ExecutionException {
 		ArrayList<Future<WriterMetrics>> futures = new ArrayList<Future<WriterMetrics>>();
 		Log.setGlobalContext();
-		WriterMetrics loaderMetrics = new WriterMetrics();			
+		WriterMetrics loaderMetrics = new WriterMetrics(null);			
 		loaderMetrics.start();
 		logger.info(Log.INIT, String.format("starting %d threads", threads));
 		ExecutorService executor = Executors.newFixedThreadPool(threads);

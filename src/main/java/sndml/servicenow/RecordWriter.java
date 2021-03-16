@@ -14,10 +14,10 @@ public abstract class RecordWriter {
 
 	protected final WriterMetrics writerMetrics;
 
-	public RecordWriter(RecordWriter parent) {
-		this.writerMetrics = new WriterMetrics();
+	public RecordWriter(String name) {
+		this.writerMetrics = new WriterMetrics(name);
 	}
-	
+			
 	public abstract void processRecords(RecordList recs, ProgressLogger progressLogger) 
 		throws IOException, SQLException;	
 

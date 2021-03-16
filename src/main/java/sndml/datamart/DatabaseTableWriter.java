@@ -27,9 +27,9 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	final Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseTableWriter(Database db, Table table, String sqlTableName) 
+	public DatabaseTableWriter(Database db, Table table, String sqlTableName, String writerName) 
 			throws IOException, SQLException {
-		super(null);
+		super(writerName);
 		assert db != null;
 		assert table != null;
 		this.db = db;
