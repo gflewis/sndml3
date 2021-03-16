@@ -136,7 +136,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 		DatabaseDeleteWriter deleteWriter = 
 			new DatabaseDeleteWriter(db, table, sqlTableName, config.getName());
 		ProgressLogger progressLogger = newProgressLogger(auditReader);
-//		deleteWriter.setProgressLogger(progressLogger);
 		deleteWriter.open();
 		auditReader.setWriter(deleteWriter);
 		auditReader.setProgressLogger(progressLogger);
@@ -150,7 +149,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 	WriterMetrics runSync() throws SQLException, IOException, InterruptedException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
-//		DateTimeRange createdRange = config.getCreated();
 		if (config.getAutoCreate()) 
 			db.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
@@ -167,12 +165,9 @@ public class JobRunner implements Callable<WriterMetrics> {
 			writerMetrics = reader.call();
 		}
 		else {
-//			factory.setFields(config.getColumns());
-//			factory.setPageSize(config.getPageSize());
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(
 					factory, config.getName(), partitionInterval, config.getThreads());
-//			factory.setParentReader(multiReader);				
 			ProgressLogger progressLogger = newProgressLogger(multiReader);
 			multiReader.setProgressLogger(progressLogger);
 			multiReader.initialize();
@@ -181,7 +176,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 			Log.setTableContext(table, config.getName());
 			writerMetrics = multiReader.call();
 		}
-//		writerMetrics.setName(config.getName());
 		return writerMetrics;
 	}
 	
@@ -201,24 +195,10 @@ public class JobRunner implements Callable<WriterMetrics> {
 			writer = new DatabaseUpdateWriter(db, table, sqlTableName, config.getName());
 		}
 		assert writer.getWriterMetrics() != null;
-//		writer.getWriterMetrics().setName(config.getName());
 		Interval partitionInterval = config.getPartitionInterval();
 		DateTime since = config.getSince();	
 		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
-//		if (since != null) {
-//			factory = new KeySetTableReaderFactory(table);
-//			factory.setUpdated(since);				
-//		}
-//		else {
-//			factory = new RestTableReaderFactory(table);
-//		}
-//		factory.setParentName(config.getName());
 		TableReaderFactory factory = new TableReaderFactory(table, db, config);
-//		factory.setFilter(new EncodedQuery(table, config.getFilter()));
-//		factory.setCreated(config.getCreated());
-//		factory.setUpdated(since);
-//		factory.setFields(config.getColumns());
-//		factory.setPageSize(config.getPageSize());
 		factory.setWriter(writer);
 		ProgressLogger progressLogger;
 		WriterMetrics writerMetrics;
@@ -228,7 +208,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 			assert reader.getReaderName() != null;
 			assert reader.getWriterMetrics().getName() != null;
 			progressLogger = newProgressLogger(reader);
-//			writer.setProgressLogger(progressLogger);
 			writer.open();
 			Log.setTableContext(table, config.getName());					
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
@@ -244,10 +223,8 @@ public class JobRunner implements Callable<WriterMetrics> {
 			factory.setParentReader(multiReader);
 			progressLogger = newProgressLogger(multiReader);
 			multiReader.setProgressLogger(progressLogger);
-//			multiReader.getWriterMetrics().setName(config.getName());
 			assert multiReader.getReaderName() != null;
 			assert multiReader.getWriter().getWriterMetrics().getName() != null;
-//			writer.setProgressLogger(progressLogger);
 			writer.open();
 			multiReader.initialize();
 			DatePartition partition = multiReader.getPartition();
@@ -256,7 +233,6 @@ public class JobRunner implements Callable<WriterMetrics> {
 			writerMetrics = multiReader.call();
 		}
 		writer.close();
-//		writerMetrics.setName(config.getName());
 		return writerMetrics;
 	}
 
