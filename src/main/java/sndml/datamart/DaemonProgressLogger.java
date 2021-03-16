@@ -75,8 +75,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		if (hasPart()) {
 			assert readerMetrics.hasParent();
 			assert writerMetrics.hasParent();
-			String partName = getPart().toString();
-			body.put("part_name", partName);
+			body.put("part_name", datePart.getName());
 			body.put("expected", readerMetrics.getParent().getExpected());
 			body.put("inserted",  writerMetrics.getParent().getInserted());
 			body.put("updated",  writerMetrics.getParent().getUpdated());
