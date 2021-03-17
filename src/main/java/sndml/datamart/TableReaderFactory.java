@@ -58,7 +58,7 @@ public class TableReaderFactory {
 		
 		if (config.getFilter() != null) {
 			EncodedQuery query = new EncodedQuery(table, config.getFilter());
-			reader.setQuery(query);
+			reader.setFilter(query);
 		}
 		
 		DateTimeRange readerCreatedRange =
@@ -66,7 +66,7 @@ public class TableReaderFactory {
 		reader.setCreatedRange(readerCreatedRange);
 		
 		reader.setUpdatedRange(updatedRange);
-		reader.setQuery(filter);
+		reader.setFilter(filter);
 		reader.setFields(fieldNames);
 		reader.setPageSize(pageSize);
 		
@@ -79,7 +79,7 @@ public class TableReaderFactory {
 		
 		logger.debug(Log.INIT, String.format(
 			"createReader part=%s name=%s created=%s", 
-			partName, readerName, createdRange.toString()));
+			partName, readerName, readerCreatedRange));
 
 		return reader;
 		
@@ -99,7 +99,7 @@ public class TableReaderFactory {
 	}
 	
 	private void configure(TableReader reader, String partName) {
-		if (getFilter() != null) reader.setQuery(getFilter());
+		if (getFilter() != null) reader.setFilter(getFilter());
 		if (getCreatedRange() != null) reader.setCreatedRange(getCreatedRange());
 		if (getUpdatedRange() != null) reader.setUpdatedRange(getUpdatedRange());
 		if (getFieldNames() != null) reader.setFields(getFieldNames());

@@ -23,6 +23,7 @@ public class Scanner extends TimerTask {
 	final ExecutorService workerPool;
 	final URI getRunList;
 	final URI putRunStatus;
+	final DaemonStatusLogger statusLogger;
 	
 	Scanner(ConnectionProfile profile, ExecutorService workerPool) {
 		this.profile = profile;
@@ -37,6 +38,7 @@ public class Scanner extends TimerTask {
 			"api/x_108443_sndml/putrunstatus");
 		this.getRunList = session.getURI(getRunListPath + agentName);
 		this.putRunStatus = session.getURI(putRunStatusPath);
+		this.statusLogger = new DaemonStatusLogger(profile, session);
 	}
 		
 	@Override
@@ -62,18 +64,17 @@ public class Scanner extends TimerTask {
 					String number = node.get("number").asText();
 					assert runKey != null;
 					assert number != null;
-					DaemonProgressLogger statusLogger = new DaemonProgressLogger(profile, session, null, number, runKey);
 					ObjectNode obj = (ObjectNode) node;
 					try {
 						JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 						logger.info(Log.DAEMON, jobConfig.toString());
-						statusLogger.setStatus("prepare");
+						setStatus(runKey, "prepare");
 						DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
 						workerPool.execute(runner);
 					}
 					catch (ConfigParseException e) {
 						logger.error(Log.RESPONSE, e.toString(), e);
-						statusLogger.logError(e);
+						logError(runKey, e);
 					}
 				}
 			}
@@ -85,8 +86,16 @@ public class Scanner extends TimerTask {
 			Daemon.getThread().interrupt();
 		}
 	}
+
+	private void setStatus(Key runKey, String status) throws IOException {
+		statusLogger.setStatus(runKey, status);
+	}	
+
+	private void logError(Key runKey, Exception e) {
+		statusLogger.logError(runKey, e);
+	}
 	
-	private String getNumbers(ArrayNode runlist) {
+	private String getNumbers(ArrayNode runlist) {		
 		ArrayList<String> numbers = new ArrayList<String>();
 		for (JsonNode node : runlist) {
 			assert node.isObject();

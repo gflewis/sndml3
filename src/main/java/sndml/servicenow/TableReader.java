@@ -14,9 +14,10 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	protected TableReader parentReader;
 	protected String readerName;
 	protected String partName;
-	private EncodedQuery query;
+	private EncodedQuery filter; // base query to which createdRange and updatedRange are appended
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
+	// keyExclusion is use for pagination; only values greater than the current key will be returned
 	private Key keyExclusion = null;
 	
 	protected static enum OrderBy {NONE, FIELDS, KEYS};
@@ -72,7 +73,7 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	}
 	
 	protected void logComplete() {
-		if (progressLogger != null)	progressLogger.logFinish();
+		if (progressLogger != null)	progressLogger.logComplete();
 	}
 	
 	public abstract int getDefaultPageSize();
@@ -155,19 +156,22 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 		return result;
 	}
 	
-	public TableReader setQuery(EncodedQuery value) {
+	/**
+	 * Set a base filter to which created range, updated range and key exclusion will be appended
+	 */
+	public TableReader setFilter(EncodedQuery value) {
 		if (initialized) throw new IllegalStateException();
 		// argument may be null to clear
-		this.query = value;
+		this.filter = value;
 		return this;
 	}
 
 	public EncodedQuery getFilter() {
-		if (query == null) {
+		if (filter == null) {
 			return EncodedQuery.all(table);
 		}
 		else {
-			return query;
+			return filter;
 		}
 	}
 	
@@ -245,8 +249,8 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	 * plus created range, updated range and key exclusion
 	 */
 	public EncodedQuery getStatsQuery() {
-		EncodedQuery result = (query == null) ? 
-				new EncodedQuery(table) : new EncodedQuery(query);
+		EncodedQuery result = (filter == null) ? 
+				new EncodedQuery(table) : new EncodedQuery(filter);
 		if (createdRange != null) result.addCreated(createdRange);
 		if (updatedRange != null) result.addUpdated(updatedRange);
 		if (keyExclusion != null) result.excludeKeys(keyExclusion);

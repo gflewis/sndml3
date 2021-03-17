@@ -46,6 +46,6 @@ public abstract class ProgressLogger {
 	/**
 	 * We have completed all processing of record.
 	 */
-	public abstract void logFinish();
+	public abstract void logComplete();
 	
 }

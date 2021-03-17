@@ -20,7 +20,7 @@ public class KeyedTableReaderTest {
 	public void test() throws Exception {
 		Table table = session.table("change_request");
 		SoapKeySetTableReader reader = new SoapKeySetTableReader(table);
-		reader.setQuery(table.getQuery(null));
+		reader.setFilter(table.getQuery(null));
 		reader.setWriter(new NullWriter());
 		reader.setPageSize(20).initialize();
 		reader.call();

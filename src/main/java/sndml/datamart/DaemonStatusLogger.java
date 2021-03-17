@@ -30,7 +30,7 @@ public class DaemonStatusLogger {
 
 	public void setStatus(Key runKey, String status) throws IOException {
 		assert runKey != null;
-		logger.info(Log.REQUEST, String.format("setStatus %s %s", runKey, status));
+		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
 		body.put("status", status);
@@ -42,6 +42,7 @@ public class DaemonStatusLogger {
 
 	public void logError(Key runKey, Exception e) {
 		assert runKey != null;
+		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
 		body.put("status", "failed");

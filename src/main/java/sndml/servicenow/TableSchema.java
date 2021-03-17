@@ -57,7 +57,7 @@ public class TableSchema {
 		
 		RestTableReader reader = new RestPetitTableReader(dictionary);
 		reader.setReaderName(myname);
-		reader.setQuery(query);
+		reader.setFilter(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(5000);
 		reader.initialize();

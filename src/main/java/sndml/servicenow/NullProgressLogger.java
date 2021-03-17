@@ -38,7 +38,7 @@ public class NullProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logFinish() {
+	public void logComplete() {
 		return;
 	}
 

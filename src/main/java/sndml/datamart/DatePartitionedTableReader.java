@@ -45,7 +45,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		super(factory.getTable());
 		this.factory = factory;
 		this.setReaderName(readerName);
-		setQuery(factory.getFilter());
+		setFilter(factory.getFilter());
 		setCreatedRange(factory.getCreatedRange());
 		setUpdatedRange(factory.getUpdatedRange());
 		setFields(factory.getFieldNames());

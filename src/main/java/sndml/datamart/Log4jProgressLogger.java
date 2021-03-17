@@ -27,19 +27,19 @@ public class Log4jProgressLogger extends ProgressLogger {
 		return new Log4jProgressLogger(newReader, action, newPart);
 	}
 	
-	Action getAction() {
-		return this.action;
+	public Action getAction() {
+		return action;
 	}
 	
-	String getOperation() {
+	private String getOperation() {
 		if (action == Action.PRUNE) return "Deleted";
-		if (reader instanceof Synchronizer) return "Synced";
+		if (reader instanceof Synchronizer) return "Synchronized";
 		return "Processed";
 	}
 	
 	@Override
 	public void logPrepare() {
-		// TODO Auto-generated method stub		
+		logger.debug(Log.INIT, "Preparing");
 	}
 	
 	@Override
@@ -48,16 +48,16 @@ public class Log4jProgressLogger extends ProgressLogger {
 		if (hasPart()) {
 			ReaderMetrics parentReaderMetrics = reader.getParent().getReaderMetrics();
 			logger.info(Log.INIT, String.format(
-				"Begin (%d / %d rows)", 
+				"Starting (%d / %d rows)", 
 				readerMetrics.getExpected(), parentReaderMetrics.getExpected()));			
 		}
 		else {
 			logger.info(Log.INIT, String.format(
-				"Begin (%d rows)",  
+				"Starting (%d rows)",  
 				readerMetrics.getExpected()));
 		}		
 }
-	
+	@Override
 	public void logProgress() {
 		assert reader != null;
 		ReaderMetrics readerMetrics = reader.getReaderMetrics();
@@ -76,11 +76,10 @@ public class Log4jProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logFinish() {
+	public void logComplete() {
 		int processed = reader.getWriterMetrics().getProcessed();		
 		logger.info(Log.FINISH, String.format(
-				"Completed (%d rows)", processed));
-		
+				"Completed (%d rows)", processed));		
 	}
 
 

@@ -17,8 +17,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 	final URI putRunStatusURI;
 	final String number;
 	final Key runKey;
-	final DaemonStatusLogger statusLogger;
-	final Logger logger = LoggerFactory.getLogger(DaemonProgressLogger.class);	
+	final static Logger logger = LoggerFactory.getLogger(DaemonProgressLogger.class);	
 
 	DaemonProgressLogger(
 			ConnectionProfile profile, 
@@ -37,11 +36,11 @@ public class DaemonProgressLogger extends ProgressLogger {
 			Key runKey,
 			DatePart part) {
 		super(reader, part);
+		assert runKey != null;
 		this.profile = profile;
 		this.session = session;
 		this.number = number;
 		this.runKey = runKey;
-		this.statusLogger = new DaemonStatusLogger(profile, session);
 		String putRunStatusPath = profile.getProperty(
 			"loader.api.putrunstatus", 
 			"api/x_108443_sndml/putrunstatus");
@@ -59,14 +58,15 @@ public class DaemonProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logStart(Integer expected) {
-		putRunStatus(messageBody("running"));
+	public void logStart(Integer expected) {	
+		ObjectNode body = messageBody("running");
+		String fieldname = hasPart() ? "part_expected" : "expected";
+		body.put(fieldname,  expected);
+		putRunStatus(body);
 	}
 		
 	@Override
 	public void logProgress() {
-		assert reader != null;
-		assert runKey != null;
 		ReaderMetrics readerMetrics = reader.getReaderMetrics();
 		WriterMetrics writerMetrics = reader.getWriterMetrics();
 		assert readerMetrics != null;
@@ -75,7 +75,6 @@ public class DaemonProgressLogger extends ProgressLogger {
 		if (hasPart()) {
 			assert readerMetrics.hasParent();
 			assert writerMetrics.hasParent();
-			body.put("part_name", datePart.getName());
 			body.put("expected", readerMetrics.getParent().getExpected());
 			body.put("inserted",  writerMetrics.getParent().getInserted());
 			body.put("updated",  writerMetrics.getParent().getUpdated());
@@ -92,41 +91,33 @@ public class DaemonProgressLogger extends ProgressLogger {
 			body.put("deleted",  writerMetrics.getDeleted());			
 		}
 		putRunStatus(body);
-		/*
-		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
-		ObjectNode response;
-		try {
-			response = request.getObject();
-		} catch (IOException e) {
-			throw new ResourceException(e);
-		}
-		if (logger.isDebugEnabled())
-			logger.debug(Log.RESPONSE, "logProgress " + runKey + " " + response.toString());
-		*/
 	}
 
 	@Override
-	public void logFinish() {
-		// TODO Auto-generated method stub		
-	}
-
-	public void setStatus(String status) throws IOException {
-		statusLogger.setStatus(runKey, status);
-	}	
-	
-	public void logError(Exception e) {
-		statusLogger.logError(runKey, e);
+	public void logComplete() {
+		ObjectNode body = messageBody("complete");
+		putRunStatus(body);
 	}
 
 	ObjectNode messageBody(String status) {
+		assert status != null;
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
-		body.put("status", status);
+		if (hasPart()) {
+			body.put("part_name", datePart.getName());
+			body.put("part_status", status);	
+		}
+		else {
+			body.put("status", status);	
+		}
 		return body;
 	}
 	
 	void putRunStatus(ObjectNode body) {
-		JsonRequest request = new JsonRequest(session, putRunStatusURI, HttpMethod.PUT, body);
+		if (logger.isDebugEnabled())
+			logger.debug(Log.REQUEST, String.format(
+				"putRunStatus %s %s", runKey, body.toString()));
+		JsonRequest request = new JsonRequest(session, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
 		try {
 			response = request.getObject();
@@ -134,7 +125,8 @@ public class DaemonProgressLogger extends ProgressLogger {
 			throw new ResourceException(e);
 		}
 		if (logger.isDebugEnabled())
-			logger.debug(Log.RESPONSE, "logProgress " + runKey + " " + response.toString());		
+			logger.debug(Log.RESPONSE, String.format(
+				"putRunStatus %s %s", runKey, response.toString()));		
 	}
 	
 }

@@ -75,7 +75,8 @@ public class Synchronizer extends TableReader {
 		TimestampHash dbTimestamps;
 		RecordList snTimestamps;
 		beginInitialize();
-		logger.info(Log.INIT, "Begin compare");
+		logger.info(Log.INIT, String.format(
+				"Begin compare sn=%s db=%s", table.getName(), sqlTableName));
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
 		if (createdRange == null) 
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName);
@@ -150,8 +151,10 @@ public class Synchronizer extends TableReader {
 	}
 
 	@Override
-	public TableReader setQuery(EncodedQuery value) {
-		throw new UnsupportedOperationException();
+	public TableReader setFilter(EncodedQuery value) {
+		if (!(value==null || value.isEmpty()))
+			throw new UnsupportedOperationException();
+		return this;
 	}
 
 	@Override
@@ -207,7 +210,7 @@ public class Synchronizer extends TableReader {
 			updateReader.setFields(this.fieldNames);
 			updateReader.setPageSize(this.getPageSize());
 			updateReader.setWriter(updateWriter);
-			updateReader.setProgressLogger(progressLogger);;
+			updateReader.setProgressLogger(progressLogger);
 			updateWriter.open();
 			setLogContext();
 			updateReader.initialize(updateSet);

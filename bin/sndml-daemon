@@ -3,5 +3,8 @@
 # Run the Datapump Daemon
 #
 source sndml-setup $1
+sndml_set_log daemon
+# export SNDML_LOG4J=$SNDML_HOME/src/test/resources/log4j2-debug.xml
+# debug="-Dlog4j.configurationFile=$SNDML_LOG4J -DlogFileName=$SNDML_LOG"
 env | grep SNDML | sort
 java -ea -jar $SNDML_JAR -d -p $SNDML_PROFILE --daemon

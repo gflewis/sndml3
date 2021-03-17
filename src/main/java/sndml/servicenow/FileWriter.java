@@ -52,7 +52,7 @@ public class FileWriter extends RecordWriter {
 		reader.setWriter(writer);
 		EncodedQuery query = querystring == null ? new EncodedQuery(table) :
 			new EncodedQuery(table, querystring);
-		reader.setQuery(query);
+		reader.setFilter(query);
 		reader.initialize();
 		writer.open();
 		reader.call();

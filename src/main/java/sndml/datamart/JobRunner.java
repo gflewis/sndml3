@@ -47,11 +47,13 @@ public class JobRunner implements Callable<WriterMetrics> {
 		action = config.getAction();
 		assert action != null;
 		if (Action.EXECUTE_ONLY.contains(action)) {
+			// Action with no table
 			table = null;
 			Log.setJobContext(config.getName());
 		}
 		else {
-			table = session.table(config.getTarget());
+			// Action with a source table
+			table = session.table(config.getSource());
 			Log.setTableContext(table, config.getName());		
 			logger.debug(Log.INIT, String.format(
 				"call table=%s action=%s", 
@@ -129,7 +131,7 @@ public class JobRunner implements Callable<WriterMetrics> {
 		RestTableReader auditReader = new RestTableReader(audit);
 		auditReader.enableStats(true);
 		auditReader.orderByKeys(true);
-		auditReader.setQuery(auditQuery);			
+		auditReader.setFilter(auditQuery);			
 		DateTime since = config.getSince();
 		auditReader.setCreatedRange(new DateTimeRange(since, null));
 		auditReader.setMaxRows(config.getMaxRows());

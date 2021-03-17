@@ -32,7 +32,6 @@ public class JsonTableAPI extends TableAPI {
 		ObjectNode requestObj = params.toJSON();
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);		
 		ObjectNode responseObj = request.getObject();
-		// TODO: Is this correct?
 		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
 		KeySet keys = new KeySet(recordsObj);
 		return keys;
