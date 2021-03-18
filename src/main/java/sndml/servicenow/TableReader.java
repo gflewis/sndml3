@@ -7,14 +7,15 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class TableReader implements Callable<WriterMetrics> {
+public abstract class TableReader implements Callable<Metrics> {
  
 	public final Table table;
 	
 	protected TableReader parentReader;
 	protected String readerName;
 	protected String partName;
-	private EncodedQuery filter; // base query to which createdRange and updatedRange are appended
+	// filter is a base query to which createdRange, updatedRange and keyExclusion are appended
+	private EncodedQuery filter; 
 	private DateTimeRange createdRange;
 	private DateTimeRange updatedRange;
 	// keyExclusion is use for pagination; only values greater than the current key will be returned
@@ -23,20 +24,20 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	protected static enum OrderBy {NONE, FIELDS, KEYS};
 	// Note: RestTableReader sets this value to KEYS
 	protected OrderBy orderBy = OrderBy.NONE;
-	protected RecordWriter writer;
 	protected int pageSize;
 	protected boolean displayValue = false;
 	protected String viewName = null;
 	protected FieldNames fieldNames = null;	
-	protected final ReaderMetrics readerMetrics;
+	protected RecordWriter writer;
+	protected Metrics metrics;
 	protected ProgressLogger progressLogger;
+	@Deprecated	protected final ReaderMetrics readerMetrics;
 
 	protected Integer maxRows;
 	protected boolean initialized = false;
 	protected final Logger logger;
 
-	@Deprecated
-	private EncodedQuery orderByQuery;
+	@Deprecated	private EncodedQuery orderByQuery;
 	
 	public TableReader(Table table) {
 		this.table = table;
@@ -52,7 +53,9 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	}
 	
 	protected void endInitialize(Integer expected) {
-		readerMetrics.setExpected(expected);
+		// TODO: Remove readerMetrics
+		readerMetrics.setExpected(expected); 
+		metrics.setExpected(expected);
 		initialized = true;		
 	}
 
@@ -73,12 +76,13 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	}
 	
 	protected void logComplete() {
-		if (progressLogger != null)	progressLogger.logComplete();
+		if (progressLogger != null)	
+			progressLogger.logComplete(getMetrics());
 	}
 	
 	public abstract int getDefaultPageSize();
 	
-	public abstract WriterMetrics call() 
+	public abstract Metrics call() 
 		throws IOException, SQLException, InterruptedException;
 				
 	public void setReaderName(String name) {
@@ -124,23 +128,33 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 	public String getPartName() {
 		return partName;
 	}
-		
+	
+	@Deprecated
 	public ReaderMetrics getReaderMetrics() {
 		return this.readerMetrics;
 	}
 	
 	@Deprecated
-	protected void setExpected(Integer value) {
+	protected void setExpected(Integer value) {		
 		readerMetrics.setExpected(value);
+		metrics.setExpected(value);
 	}
 	
 	/**
 	 * Return number of expected rows, if available. 
 	 */
 	public Integer getExpected() {
-		if (readerMetrics.getExpected() == null)
+		if (!metrics.hasExpected())
 			throw new IllegalStateException(this.getClass().getName() + " not initialized");
-		return readerMetrics.getExpected();
+		return metrics.getExpected();
+	}
+	
+	/**
+	 * Increment number of records read.
+	 */
+	protected void incrementInput(int count) {
+		readerMetrics.increment(count);
+		metrics.addInput(count);
 	}
 		
 	public TableReader setPageSize(Integer size) {
@@ -318,9 +332,10 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 		return this.maxRows;
 	}
 
-	public TableReader setWriter(RecordWriter value) {
+	public TableReader setWriter(RecordWriter writer, Metrics writerMetrics) {
 		if (initialized) throw new IllegalStateException();
-		this.writer = value;
+		this.writer = writer;
+		this.metrics = writerMetrics;		
 		return this;
 	}
 	
@@ -329,15 +344,17 @@ public abstract class TableReader implements Callable<WriterMetrics> {
 		return this.writer;
 	}
 	
-	public WriterMetrics getWriterMetrics() {
-		return this.writer.getWriterMetrics();
+	public Metrics getMetrics() {
+		return this.metrics;
 	}
-		
+
 	public RecordList getAllRecords() throws IOException, InterruptedException {
-		if (!initialized) throw new IllegalStateException("Not initialized");
+		assert !initialized;
+		Metrics writerMetrics = new Metrics(readerName);
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);
-		this.writer = accumulator;
+		setWriter(accumulator, writerMetrics);
 		try {
+			this.initialize();
 			this.call();
 		} catch (SQLException e) {
 			// this should be impossible

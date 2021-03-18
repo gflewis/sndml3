@@ -95,61 +95,43 @@ public class Loader {
 			jobs.add(runner);
 		}
 	}
-	
-//	@Deprecated
-//	Session getSession() {
-//		return session;
-//	}
-//	
-//	@Deprecated
-//	Database getDatabase() {
-//		return database;
-//	}
-		
-	public WriterMetrics loadTables() throws SQLException, IOException, InterruptedException {
-		ArrayList<String> allJobNames = new ArrayList<String>();
-		ArrayList<WriterMetrics> allJobMetrics = new ArrayList<WriterMetrics>();
+			
+	public Metrics loadTables() throws SQLException, IOException, InterruptedException {
+		ArrayList<Metrics> allJobMetrics = new ArrayList<Metrics>();
 		Log.setGlobalContext();
-		WriterMetrics loaderMetrics = new WriterMetrics(null);			
+		Metrics loaderMetrics = new Metrics(null);
 		loaderMetrics.start();		
 		for (JobRunner job : jobs) {
 			assert job.getName() != null;
-			WriterMetrics jobMetrics = job.call();
+			Metrics jobMetrics = job.call();
 			assert jobMetrics != null;
 			loaderMetrics.add(jobMetrics);
-			allJobNames.add(job.getName());
 			allJobMetrics.add(jobMetrics);				
 		}
-		assert allJobNames.size() == allJobMetrics.size();
 		if (metricsFile != null) {
 			logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
 			statsWriter = new PrintWriter(metricsFile);
 			loaderMetrics.write(statsWriter);
-			for (WriterMetrics jobMetrics : allJobMetrics) {
+			for (Metrics jobMetrics : allJobMetrics) {
 				assert jobMetrics.getName() != null;
 				jobMetrics.write(statsWriter);				
 			}
-//			for (int i = 0; i < allJobNames.size(); ++i) {			
-//				String jobName = allJobNames.get(i);
-//				WriterMetrics jobMetrics = allJobMetrics.get(i);
-//				jobMetrics.write(statsWriter, jobName);
-//			}
 			statsWriter.close();					
 		}
 		return loaderMetrics;
 	}
 	
-	public WriterMetrics loadTablesConcurrent() 
+	public Metrics loadTablesConcurrent() 
 			throws SQLException, IOException, InterruptedException, ExecutionException {
-		ArrayList<Future<WriterMetrics>> futures = new ArrayList<Future<WriterMetrics>>();
+		ArrayList<Future<Metrics>> futures = new ArrayList<Future<Metrics>>();
 		Log.setGlobalContext();
-		WriterMetrics loaderMetrics = new WriterMetrics(null);			
+		Metrics loaderMetrics = new Metrics(null);			
 		loaderMetrics.start();
 		logger.info(Log.INIT, String.format("starting %d threads", threads));
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		for (JobRunner job : jobs) {
 			logger.info(Log.INIT, "submitting " + job.getName());
-			Future<WriterMetrics> future = executor.submit(job);
+			Future<Metrics> future = executor.submit(job);
 			futures.add(future);
 		}
         executor.shutdown();
@@ -157,14 +139,14 @@ public class Loader {
         		logger.debug(Log.FINISH, "awaiting job completion");
         }	 			
 		Log.setGlobalContext();
-		for (Future<WriterMetrics> future : futures) {
-			WriterMetrics jobMetrics = future.get();
+		for (Future<Metrics> future : futures) {
+			Metrics jobMetrics = future.get();
 			loaderMetrics.add(jobMetrics);
 		}
 		loaderMetrics.finish();
 		statsWriter = new PrintWriter(metricsFile);
-		for (Future<WriterMetrics> future : futures) {
-			WriterMetrics jobMetrics = future.get();
+		for (Future<Metrics> future : futures) {
+			Metrics jobMetrics = future.get();
 			jobMetrics.write(statsWriter);
 			
 		}

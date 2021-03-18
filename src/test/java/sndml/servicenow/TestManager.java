@@ -243,10 +243,12 @@ public class TestManager {
 		return randomName(10);
 	}
 	
-	public static void sleep(int sleepSeconds) throws InterruptedException {
-		String msg = "Sleeping " + sleepSeconds + " sec...";
+	public static void sleep(double seconds) throws InterruptedException {
+		assert seconds < 60;
+		long millisec = Math.round(1000 * seconds);
+		String msg = "Sleeping " + seconds + " sec...";
 		logger.info(Log.TEST, msg);
-		Thread.sleep(1000 * sleepSeconds);
+		Thread.sleep(millisec);
 	}
 	
 	

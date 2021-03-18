@@ -18,6 +18,7 @@ public class TableReaderFactory {
 	protected Integer pageSize;
 	
 	protected RecordWriter writer;
+	protected Metrics parentWriterMetrics;
 	protected TableReader parentReader;
 	protected String parentName;
 	
@@ -34,12 +35,10 @@ public class TableReaderFactory {
 		fieldNames = config.getColumns();
 		pageSize = config.getPageSize();
 	}
-	
-	public TableReader createReader() {
-		return createReader(null);
-	}
-	
+		
 	public TableReader createReader(DatePart datePart) {
+		assert writer != null;
+		assert parentWriterMetrics != null;
 		TableReader reader;
 		String partName = (datePart == null) ? null : datePart.getName();
 		String readerName = (datePart != null) ? 
@@ -69,8 +68,9 @@ public class TableReaderFactory {
 		reader.setFilter(filter);
 		reader.setFields(fieldNames);
 		reader.setPageSize(pageSize);
-		
-		if (writer != null) reader.setWriter(writer);
+
+		Metrics writerMetrics = new Metrics(readerName, parentWriterMetrics);
+		reader.setWriter(writer, writerMetrics);
 		if (partName != null) reader.setPartName(partName);
 		if (parentName != null && partName != null)	{
 			String newReaderName = parentName + "." + partName;
@@ -85,7 +85,7 @@ public class TableReaderFactory {
 		
 	}
 	
-	public Table getTable() { return table; } 	
+	public Table getTable() { return table; }
 	public EncodedQuery getFilter() { return filter; }
 	public DateTimeRange getCreatedRange() { return createdRange; }
 	public DateTimeRange getUpdatedRange() { return updatedRange; }
@@ -93,35 +93,37 @@ public class TableReaderFactory {
 	public Integer getPageSize() { return pageSize; }
 	public RecordWriter getWriter() { return writer; }
 		
-	@Deprecated
-	public void configure(TableReader reader) {
-		configure(reader, null);
-	}
-	
-	private void configure(TableReader reader, String partName) {
-		if (getFilter() != null) reader.setFilter(getFilter());
-		if (getCreatedRange() != null) reader.setCreatedRange(getCreatedRange());
-		if (getUpdatedRange() != null) reader.setUpdatedRange(getUpdatedRange());
-		if (getFieldNames() != null) reader.setFields(getFieldNames());
-		if (getPageSize() != null) reader.setPageSize(getPageSize());
-		if (writer != null) reader.setWriter(writer);
-		if (parentReader != null) reader.setParent(parentReader);
-		if (partName != null) reader.setPartName(partName);
-		if (parentName != null && partName != null)	{
-			String newReaderName = parentName + "." + partName;
-			reader.setReaderName(newReaderName);
-		}
-	}
+//	@Deprecated
+//	public void configure(TableReader reader) {
+//		configure(reader, null);
+//	}
+//	
+//	@Deprecated
+//	private void configure(TableReader reader, String partName) {
+//		if (getFilter() != null) reader.setFilter(getFilter());
+//		if (getCreatedRange() != null) reader.setCreatedRange(getCreatedRange());
+//		if (getUpdatedRange() != null) reader.setUpdatedRange(getUpdatedRange());
+//		if (getFieldNames() != null) reader.setFields(getFieldNames());
+//		if (getPageSize() != null) reader.setPageSize(getPageSize());
+//		if (parentReader != null) reader.setParent(parentReader);
+//		if (partName != null) reader.setPartName(partName);
+//		if (parentName != null && partName != null)	{
+//			String newReaderName = parentName + "." + partName;
+//			reader.setReaderName(newReaderName);
+//		}
+//	}
 
-	public void setWriter(RecordWriter writer) {
+	public void setWriter(RecordWriter writer, Metrics writerMetrics) {
 		assert writer != null;
 		this.writer = writer;
+		this.parentWriterMetrics = writerMetrics;
 	}
 	
 	public void setParentReader(TableReader parent) {
 		this.parentReader = parent;
 	}
 
+	// TODO: Remove this. It is only used for asserts.
 	public TableReader getParentReader() {
 		assert parentReader != null;
 		return parentReader;

@@ -48,15 +48,16 @@ public class FileWriter extends RecordWriter {
 		Session session = new Session(props);
 		Table table = session.table(tablename);
 		FileWriter writer = new FileWriter(outfile);
+		Metrics writerMetrics = new Metrics(outfile.getName());
 		TableReader reader = new RestTableReader(table);
-		reader.setWriter(writer);
+		reader.setWriter(writer, writerMetrics);
 		EncodedQuery query = querystring == null ? new EncodedQuery(table) :
 			new EncodedQuery(table, querystring);
 		reader.setFilter(query);
 		reader.initialize();
-		writer.open();
+		writer.open(writerMetrics);
 		reader.call();
-		writer.close();
+		writer.close(writerMetrics);
 	}
 
 	public FileWriter(File file) {
@@ -70,7 +71,7 @@ public class FileWriter extends RecordWriter {
 	}
 	
 	@Override
-	public FileWriter open() throws IOException {
+	public FileWriter open(Metrics writerMetrics) throws IOException {
 		writerMetrics.start();
 		if (file == null)
 			writer = new PrintWriter(System.out);
@@ -84,15 +85,16 @@ public class FileWriter extends RecordWriter {
 	}
 
 	@Override
-	public synchronized void processRecords(RecordList recs, ProgressLogger progressLogger) {
+	public synchronized void processRecords(
+			RecordList recs, Metrics writerMetrics, ProgressLogger progressLogger) {
 		assert writer != null;
 		assert recs != null;
 		for (Record rec : recs) {
-			processRecord(rec);
+			processRecord(rec, writerMetrics);
 		}
 	}
 
-	public void processRecord(Record rec) {	
+	public void processRecord(Record rec, Metrics writerMetrics) {	
 		assert writer != null;
 		assert rec != null;
 		assert rec instanceof JsonRecord;
@@ -108,7 +110,7 @@ public class FileWriter extends RecordWriter {
 	}
 
 	@Override
-	public void close() {
+	public void close(Metrics writerMetrics) {
 		if (format == Format.List) writer.println("]");
 		writer.close();
 		writerMetrics.finish();

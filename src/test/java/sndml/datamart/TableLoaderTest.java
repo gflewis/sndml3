@@ -12,7 +12,7 @@ import sndml.datamart.Loader;
 import sndml.datamart.YamlFile;
 import sndml.servicenow.TestManager;
 import sndml.servicenow.TestingProfile;
-import sndml.servicenow.WriterMetrics;
+import sndml.servicenow.Metrics;
 
 @RunWith(Parameterized.class)
 public class TableLoaderTest {
@@ -63,7 +63,7 @@ public class TableLoaderTest {
 	@Test
 	public void test() throws Exception {
 		Loader loader = yamlFile.getLoader(profile);
-		WriterMetrics metrics = loader.loadTables();
+		Metrics metrics = loader.loadTables();
 		int processed = metrics.getProcessed();
 		assertTrue(processed > 0);
 	}

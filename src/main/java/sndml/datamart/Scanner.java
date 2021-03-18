@@ -47,7 +47,7 @@ public class Scanner extends TimerTask {
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
-			ObjectNode response = request.getObject();
+			ObjectNode response = request.execute();
 			logger.debug(Log.RESPONSE, response.toPrettyString());
 			ObjectNode objResult = (ObjectNode) response.get("result");
 			if (objResult.has("runs")) {

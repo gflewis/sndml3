@@ -21,7 +21,7 @@ public class KeyedTableReaderTest {
 		Table table = session.table("change_request");
 		SoapKeySetTableReader reader = new SoapKeySetTableReader(table);
 		reader.setFilter(table.getQuery(null));
-		reader.setWriter(new NullWriter());
+		reader.setWriter(new NullWriter(), new Metrics(this.getClass().getSimpleName()));
 		reader.setPageSize(20).initialize();
 		reader.call();
 	}

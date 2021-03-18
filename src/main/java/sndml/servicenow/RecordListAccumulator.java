@@ -16,7 +16,7 @@ public class RecordListAccumulator extends RecordWriter {
 		allRecords = new RecordList(table);
 	}
 	
-	public void processRecords(RecordList recs, ProgressLogger progressLogger) {
+	public void processRecords(RecordList recs, Metrics writerMetrics, ProgressLogger progressLogger) {
 		allRecords.addAll(recs);
 		writerMetrics.addInserted(recs.size());
 	}

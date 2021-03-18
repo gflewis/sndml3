@@ -57,7 +57,7 @@ public class InsertTest {
 		assertTrue(job.getTruncate());
 		assertEquals(Action.INSERT, job.getAction());
 		JobRunner loader = new TestJobRunner(profile, job);
-		WriterMetrics metrics = loader.call();
+		Metrics metrics = loader.call();
 		int processed = metrics.getProcessed();
 		assertTrue(processed > 0);
 		assertEquals(processed, metrics.getInserted());

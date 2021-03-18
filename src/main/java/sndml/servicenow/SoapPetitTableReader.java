@@ -62,7 +62,7 @@ public class SoapPetitTableReader extends TableReader {
 		throw new UnsupportedOperationException();
 	}		
 	
-	public WriterMetrics call() throws IOException, SQLException {
+	public Metrics call() throws IOException, SQLException {
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert pageSize > 1;
@@ -77,14 +77,14 @@ public class SoapPetitTableReader extends TableReader {
 			params.add("__last_row", Integer.toString(lastRow));
 			if (this.viewName != null) params.add("__use_view", viewName);
 			RecordList recs = soapAPI.getRecords(params, this.displayValue);
-			getReaderMetrics().increment(recs.size());			
-			writer.processRecords(recs, progressLogger);
+			incrementInput(recs.size());			
+			writer.processRecords(recs, metrics, progressLogger);
 			rowCount += recs.size();
 			finished = (recs.size() < pageSize);
 			firstRow = lastRow;
 			logger.info(String.format("processed %d rows", rowCount));			
 		}
-		return writer.getWriterMetrics();
+		return metrics;
 	}
 
 }

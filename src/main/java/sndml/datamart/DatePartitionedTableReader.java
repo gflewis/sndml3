@@ -12,28 +12,17 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.DateTimeRange;
-import sndml.servicenow.EncodedQuery;
-import sndml.servicenow.Log;
-import sndml.servicenow.ProgressLogger;
-import sndml.servicenow.ReaderMetrics;
-import sndml.servicenow.TableReader;
-import sndml.servicenow.TableStats;
-import sndml.servicenow.WriterMetrics;
+import sndml.servicenow.*;
 
 public final class DatePartitionedTableReader extends TableReader {
 
 	final TableReaderFactory factory;	
 	final int threads;
 	final Interval interval;
-	// A normal TableReader does not have WriterMetrics
-	// but a DatePartitionedTable reader does
-	// because it needs to accumulate the metrics of its children
-	final WriterMetrics writerMetrics;
 	
 	private DateTimeRange range;
 	private DatePartition partition;
-	private List<Future<WriterMetrics>> futures;
+	private List<Future<Metrics>> futures;
 
 	final int REST_DEFAULT_PAGE_SIZE = 200;
 	
@@ -49,13 +38,13 @@ public final class DatePartitionedTableReader extends TableReader {
 		setCreatedRange(factory.getCreatedRange());
 		setUpdatedRange(factory.getUpdatedRange());
 		setFields(factory.getFieldNames());
-		setPageSize(factory.getPageSize());
+//		setPageSize(factory.getPageSize());
 		this.interval = interval;
 		this.threads = (threads == null ? 0 : threads.intValue());
-		this.writerMetrics = new WriterMetrics(readerName);
-		setWriter(factory.getWriter());
+		this.metrics = factory.parentWriterMetrics;
+		setWriter(factory.getWriter(), metrics);
 	}
-
+	
 	public int getDefaultPageSize() {
 		return REST_DEFAULT_PAGE_SIZE;
 	}
@@ -71,8 +60,8 @@ public final class DatePartitionedTableReader extends TableReader {
 	}
 
 	@Override
-	public WriterMetrics getWriterMetrics() {
-		return this.writerMetrics;
+	public Metrics getMetrics() {
+		return this.metrics;
 	}
 
 	private int numPartsTotal() {
@@ -84,7 +73,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	private int numPartsComplete() {
 		assert futures != null;
 		int count = 0;
-		for (Future<WriterMetrics> part : futures) {
+		for (Future<Metrics> part : futures) {
 			count += (part.isDone() ? 1 : 0);
 		}
 		return count;
@@ -93,7 +82,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	private int numPartsIncomplete() {
 		assert futures != null;
 		int count = 0;
-		for (Future<WriterMetrics> part : futures) {
+		for (Future<Metrics> part : futures) {
 			count += (part.isDone() ? 0 : 1);
 		}
 		return count;
@@ -124,58 +113,55 @@ public final class DatePartitionedTableReader extends TableReader {
 	
 	private TableReader createReader(DatePart partRange) {
 		assert this.readerName != null;
-//		String newPartName = DatePart.getName(interval, partRange.getStart());
 		assert factory.getParentReader() == this;
 		TableReader partReader = factory.createReader(partRange);
 		assert partReader.hasParent();
 		assert partReader.getParent() == this;
 		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
-//		partReader.setPartName(newPartName);
-//		partReader.setReaderName(this.readerName + "." + newPartName);
-		ReaderMetrics partReaderMetrics = partReader.getReaderMetrics();
-		WriterMetrics partWriterMetrics = partReader.getWriterMetrics();
-		assert partWriterMetrics.getName() != null;
-		assert partReaderMetrics != this.getReaderMetrics();
-		assert partWriterMetrics != this.getWriterMetrics();
-		partReaderMetrics.setParent(this.readerMetrics);		
-		partWriterMetrics.setParent(this.writerMetrics);
-		assert partWriterMetrics.hasParent();
-		assert partWriterMetrics.getParent() == this.writerMetrics;
+		Metrics partWriterMetrics = partReader.getMetrics();
 		ProgressLogger partLogger = progressLogger.newPartLogger(partReader, partRange);
+		partReader.setProgressLogger(partLogger);
+//		ReaderMetrics partReaderMetrics = partReader.getReaderMetrics();
+//		partReaderMetrics.setParent(this.readerMetrics);		
+		assert partWriterMetrics.getName() != null;
+//		assert partReaderMetrics != this.getReaderMetrics();
+		assert partWriterMetrics != this.getMetrics();
+		assert partWriterMetrics.hasParent();
+		assert partWriterMetrics.getParent() == this.metrics;
 		assert partLogger.getReader() == partReader;
 		assert partLogger.hasPart();
-		partReader.setProgressLogger(partLogger);
+		assert partWriterMetrics.getName() != metrics.getName();
 		return partReader;		
 	}
 
 	@Override
 	public void logStart() {
-		writerMetrics.start();
+		metrics.start();
 		super.logStart();		
 	}
 	
 	@Override
 	public void logComplete() {
-		writerMetrics.finish();
+		metrics.finish();
 		super.logComplete();
 	}
 	
 	@Override
-	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, InterruptedException {
 		logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
-			return writerMetrics;
+			return metrics;
 		}
 		if (threads > 1) {			
-			futures = new ArrayList<Future<WriterMetrics>>();
+			futures = new ArrayList<Future<Metrics>>();
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
 			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
 				logger.debug("Submit " + reader.getReaderName());
 				reader.initialize();
-				Future<WriterMetrics> future = executor.submit(reader);
+				Future<Metrics> future = executor.submit(reader);
 				futures.add(future);				
 			}
 			executor.shutdown();
@@ -185,17 +171,21 @@ public final class DatePartitionedTableReader extends TableReader {
 			}
 		}
 		else {
+			int processed = 0;
 			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
 				reader.initialize();
-				reader.call();
+				Metrics metrics = reader.call();
+				assert metrics == reader.getMetrics();
+				processed += reader.getMetrics().getProcessed();
 			}
+			assert metrics.getProcessed() == processed;
 		}
 		logComplete();
 		// Free resources
 		futures = null;
 		partition = null;
-		return writerMetrics;
+		return metrics;
 	}
 
 }

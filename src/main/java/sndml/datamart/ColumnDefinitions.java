@@ -32,7 +32,10 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 	 */
 	public ColumnDefinitions(Database db, Table table, String sqlTableName) 
 			throws SQLException, IOException {
-		super();		
+		super();
+		assert db != null;
+		assert table != null;
+		assert sqlTableName != null;
 		String dbschema = db.getSchema();
 		String saveJob = Log.getJobContext();
 		Log.setJobContext(sqlTableName + ".schema");

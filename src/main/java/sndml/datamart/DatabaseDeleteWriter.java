@@ -15,29 +15,30 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	}
 
 	@Override
-	public DatabaseDeleteWriter open() throws SQLException, IOException {
-		super.open();
+	public DatabaseDeleteWriter open(Metrics writerMetrics) throws SQLException, IOException {
+		super.open(writerMetrics);
 		deleteStmt = new DatabaseDeleteStatement(this.db, this.sqlTableName);
 //		progressLogger.setOperation("Deleted");
 		return this;
 	}
 	
 	@Override
-	void writeRecord(Record rec) throws SQLException {
+	void writeRecord(Record rec, Metrics writerMetrics) throws SQLException {
 		assert rec.getTable().getName().equals("sys_audit_delete");
 		Key key = rec.getKey("documentkey");
 		assert key != null;
-		deleteRecord(key);
+		deleteRecord(key, writerMetrics);
 	}
 	
-	void deleteRecords(KeySet keys, ProgressLogger progressLogger) throws SQLException {
+	void  deleteRecords(KeySet keys, Metrics writerMetrics, ProgressLogger progressLogger) 
+			throws SQLException {
 		for (Key key : keys) {
-			deleteRecord(key);
+			deleteRecord(key, writerMetrics);
 		}
-		db.commit();
+		db.commit();		
 	}
 	
-	private void deleteRecord(Key key) throws SQLException {
+	private void deleteRecord(Key key, Metrics writerMetrics) throws SQLException {
 		logger.info(Log.PROCESS, "Delete " + key);		
 		if (deleteStmt.deleteRecord(key)) {
 			writerMetrics.incrementDeleted();			

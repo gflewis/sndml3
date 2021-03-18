@@ -17,8 +17,9 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 	}
 
 	@Override
-	public DatabaseInsertWriter open() throws SQLException, IOException {
-		super.open();
+	public DatabaseInsertWriter open(Metrics writerMetrics) 
+			throws SQLException, IOException {
+		super.open(writerMetrics);
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
 		return this;
 	}
@@ -27,7 +28,7 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 			Pattern.compile("\\b(primary key|unique constraint)\\b", Pattern.CASE_INSENSITIVE);
 		
 	@Override
-	void writeRecord(Record rec) throws SQLException {
+	void writeRecord(Record rec, Metrics writerMetrics) throws SQLException {
 		Key key = rec.getKey();
 		logger.trace(Log.PROCESS, "Insert " + key);
 		try {

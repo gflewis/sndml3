@@ -34,7 +34,7 @@ public class ColumnsTest {
 	public void test() throws Exception {
 		TestFolder folder = new TestFolder("YAML");
 		Loader loader1 = folder.getYaml("incident_include_columns").getLoader(profile);
-		WriterMetrics metrics1 = loader1.loadTables();
+		Metrics metrics1 = loader1.loadTables();
 		int processed = metrics1.getProcessed();
 		assertTrue(processed > 0);
 		assertEquals(processed, util.sqlCount("select count(*) from incident"));

@@ -53,14 +53,14 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	}
 	
 	@Override
-	public WriterMetrics call() {
+	public Metrics call() {
 		try {
 			assert session != null;
 			assert db != null;
 			assert config.getNumber() != null;
 			Thread.currentThread().setName(config.number);			
 			statusLogger.setStatus(runKey, "running");
-			WriterMetrics metrics = super.call();
+			Metrics metrics = super.call();
 			statusLogger.setStatus(runKey, "complete");
 			Daemon.rescan();
 			return metrics;

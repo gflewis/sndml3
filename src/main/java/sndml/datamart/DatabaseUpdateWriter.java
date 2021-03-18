@@ -16,15 +16,15 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 	}
 
 	@Override
-	public DatabaseUpdateWriter open() throws SQLException, IOException {
-		super.open();
+	public DatabaseUpdateWriter open(Metrics writerMetrics) throws SQLException, IOException {
+		super.open(writerMetrics);
 		insertStmt = new DatabaseInsertStatement(this.db, this.sqlTableName, columns);
 		updateStmt = new DatabaseUpdateStatement(this.db, this.sqlTableName, columns);
 		return this;
 	}
 		
 	@Override
-	void writeRecord(Record rec) throws SQLException {
+	void writeRecord(Record rec, Metrics writerMetrics) throws SQLException {
 		Key key = rec.getKey();
 		logger.trace(Log.PROCESS, "Update " + key);
 		if (updateStmt.update(rec)) {

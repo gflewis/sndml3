@@ -35,7 +35,7 @@ public class DaemonStatusLogger {
 		body.put("sys_id", runKey.toString());		
 		body.put("status", status);
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
-		ObjectNode response = request.getObject();
+		ObjectNode response = request.execute();
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 	}	
@@ -49,7 +49,7 @@ public class DaemonStatusLogger {
 		body.put("message", e.getMessage());
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		try {
-			request.getObject();
+			request.execute();
 		} catch (IOException e1) {
 			logger.error(Log.FINISH, "Unable to log Error: " + e.getMessage());
 			logger.error(Log.FINISH, "Critical failure. Halting JVM.");

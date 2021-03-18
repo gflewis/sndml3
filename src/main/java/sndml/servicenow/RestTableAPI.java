@@ -41,7 +41,7 @@ public class RestTableAPI extends TableAPI {
 		}
 		URI uri = getURI("stats", null, params);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.GET, null);
-		ObjectNode root = request.getObject();
+		ObjectNode root = request.execute();
 		if (logger.isDebugEnabled()) logger.debug(Log.PROCESS, request.dumpResponseText());
 		request.checkForInsufficientRights();
 		// ObjectNode result = (ObjectNode) root.get("result");
@@ -72,7 +72,7 @@ public class RestTableAPI extends TableAPI {
 		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.GET, null);
-		ObjectNode responseObj = request.getObject();
+		ObjectNode responseObj = request.execute();
 		request.checkForInsufficientRights();		
 		if (responseObj.has("error")) {
 			JsonNode errorObj = responseObj.get("error");
@@ -110,7 +110,7 @@ public class RestTableAPI extends TableAPI {
 		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", null, params);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.GET, null);
-		ObjectNode root = request.getObject();
+		ObjectNode root = request.execute();
 		request.checkForInsufficientRights();
 		ArrayNode resultObj = (ArrayNode) root.get("result");
 		RecordList list = new RecordList(table, resultObj);
@@ -122,7 +122,7 @@ public class RestTableAPI extends TableAPI {
 		URI uri = getURI("table", null, null);
 		ObjectNode requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);
-		ObjectNode root = request.getObject();
+		ObjectNode root = request.execute();
 		request.checkForInsufficientRights();
 		ObjectNode resultObj = (ObjectNode) root.get("result");
 		assert root.has("result");
@@ -135,7 +135,7 @@ public class RestTableAPI extends TableAPI {
 		URI uri = getURI("table", key, null);
 		ObjectNode requestObj = fields.toJSON();
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.PUT, requestObj);
-		ObjectNode root = request.getObject();
+		ObjectNode root = request.execute();
 		request.checkForInsufficientRights();
 		request.checkForNoSuchRecord();
 		ObjectNode resultObj = (ObjectNode) root.get("result");
@@ -147,7 +147,7 @@ public class RestTableAPI extends TableAPI {
 		Log.setMethodContext(table, "DELETE");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.DELETE, null);
-		ObjectNode root = request.getObject();
+		ObjectNode root = request.execute();
 		if (root == null) return true;
 		if (request.recordNotFound()) return false;
 		throw new JsonResponseException(request);

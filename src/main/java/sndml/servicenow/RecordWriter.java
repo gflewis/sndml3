@@ -12,27 +12,22 @@ import java.sql.SQLException;
  */
 public abstract class RecordWriter {
 
-	protected final WriterMetrics writerMetrics;
-
+	// TODO: Why does this constructor have a name parameter?
 	public RecordWriter(String name) {
-		this.writerMetrics = new WriterMetrics(name);
 	}
 			
-	public abstract void processRecords(RecordList recs, ProgressLogger progressLogger) 
+	public abstract void processRecords(
+			RecordList recs, Metrics metrics, ProgressLogger progressLogger) 
 		throws IOException, SQLException;	
 
-	public RecordWriter open() throws IOException, SQLException {
-		writerMetrics.start();
+	public RecordWriter open(Metrics metrics) throws IOException, SQLException {
+		metrics.start();
 		return this;
 	}
 	
-	public void close() throws IOException, SQLException {
-		writerMetrics.finish();
+	public void close(Metrics metrics) throws IOException, SQLException {
+		metrics.finish();
 	}
 			
-	public WriterMetrics getWriterMetrics() {
-		if (writerMetrics.getFinished() == null) writerMetrics.finish();
-		return writerMetrics;
-	}
 	
 }

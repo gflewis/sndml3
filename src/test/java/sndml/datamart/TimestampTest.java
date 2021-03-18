@@ -1,6 +1,7 @@
 package sndml.datamart;
 
 import static org.junit.Assert.*;
+
 import org.junit.*;
 
 import org.junit.runner.RunWith;
@@ -46,13 +47,13 @@ public class TimestampTest {
 		profile.close();
 	}
 	
-	void loadTable() throws Exception {
-		Table table = session.table(tablename);
-		database.truncateTable(table.getName());		
-		SimpleTableLoader runner = new SimpleTableLoader(profile, table, database);
-		WriterMetrics metrics = runner.call();
-		assertTrue(metrics.getProcessed() > 0);		
-	}
+//	private void loadTable() throws Exception {
+//		Table table = session.table(tablename);
+//		database.truncateTable(table.getName());		
+//		SimpleTableLoader runner = new SimpleTableLoader(profile, table, database);
+//		Metrics metrics = runner.call();
+//		assertTrue(metrics.getProcessed() > 0);		
+//	}
 	
 	@Test
 	public void testIncidentTimestamp() throws Exception {
@@ -68,10 +69,10 @@ public class TimestampTest {
 		JobConfig config = factory.tableLoader(profile, tbl);
 		config.filter = "sys_id=" + sys_id;
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
-		config.setCreated(emptyRange);
-		
+		config.setCreated(emptyRange);		
 		JobRunner runner = new TestJobRunner(profile, config);
-		runner.call();
+		Metrics loadMetrics = runner.call();
+		assertTrue(loadMetrics.getProcessed() > 0);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new Key(sys_id));
 		logger.info(Log.TEST, "created=" + created + " dbcreated=" + dbcreated);
@@ -80,11 +81,15 @@ public class TimestampTest {
 	}
 	
 	@Test
-	public void testGetTimestamps() throws Exception {
+	public void testGetTimestamps() throws Exception {		
 		TestManager.bannerStart("testGetTimestamps");
+		TestFolder folder = new TestFolder(this.getClass().getSimpleName());				
 		Session session = profile.getSession();
 		Database database = profile.getDatabase();
-		loadTable();
+		YamlFile yaml = folder.getYaml("incident_load");
+		JobRunner loader = yaml.getJobRunner(profile);
+		Metrics loaderMetrics = loader.call();
+		assertTrue(loaderMetrics.getProcessed() > 10000);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		TimestampHash timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));

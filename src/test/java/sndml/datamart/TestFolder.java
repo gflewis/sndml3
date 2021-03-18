@@ -21,8 +21,8 @@ public class TestFolder extends File {
 	/**
 	 * Get a file from this folder
 	 */
-	public File getFile(String name) {
-		return new File(this, name);
+	public File getFile(String filename) {
+		return new File(this, filename);
 	}
 	
 	public YamlFile getYaml(String name) {

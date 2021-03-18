@@ -40,7 +40,7 @@ public class RefreshTest1 {
 	public void testRefresh() throws Exception {
 		String tableName = "incident";
 		DBUtil db = new DBUtil(profile);
-		JobFactory jf = new JobFactory(profile, db.getDatabase());
+		JobFactory jf = new JobFactory(profile, db.getDatabase(), DateTime.now());
 		TableAPI api = profile.getSession().table(tableName).api();
 	    TestManager.banner(logger, "Load");
 		db.dropTable(tableName);
@@ -48,7 +48,7 @@ public class RefreshTest1 {
 		create.call();
 		assertTrue(db.tableExists(tableName));
 		JobRunner load = jf.yamlJob("{source: incident, action: load, created: 2020-01-01}");
-		WriterMetrics loadMetrics = load.call();
+		Metrics loadMetrics = load.call();
 		int count1 = db.sqlCount(tableName, null);
 		assertTrue(count1 > 0);
 		assertEquals(count1, loadMetrics.getInserted());
@@ -68,7 +68,7 @@ public class RefreshTest1 {
 	    	loadMetrics.getStarted().toString());
 	    logger.info(Log.TEST, yaml);
 	    JobRunner refresh = jf.yamlJob(yaml);
-	    WriterMetrics refreshMetrics = refresh.call();
+	    Metrics refreshMetrics = refresh.call();
 	    assertEquals(1, refreshMetrics.getInserted());
 	    assertEquals(0, refreshMetrics.getUpdated());
 	    int count2 = db.sqlCount(tableName, null);

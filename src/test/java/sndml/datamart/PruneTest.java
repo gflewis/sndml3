@@ -45,7 +45,6 @@ public class PruneTest {
 		Session session = TestManager.getProfile().getSession();
 		Table tbl = session.table(tableName);
 		DBUtil db = new DBUtil(profile);
-		JobFactory jf = new JobFactory(profile, db.getDatabase());
 		
 		TableAPI api = tbl.api();
 		TestManager.banner(logger, "Insert");		
@@ -57,23 +56,37 @@ public class PruneTest {
 	    values.put("cmdb_ci",  TestManager.getProperty("some_ci"));
 	    Key key = api.insertRecord(values).getKey();
 	    assertNotNull(api.getRecord(key));
-		TestManager.banner(logger, "Load");
-		assertTrue(db.tableExists(tableName));
-		JobRunner load = jf.yamlJob("{source: incident, action: update, created: 2020-01-01}");
-		WriterMetrics loadMetrics = load.call();
+	    logger.info(Log.TEST, "Inserted Incident " + key);
+	    TestManager.sleep(1.5);
 	    
-	    TestManager.sleep(2);
+		TestManager.banner(logger, "Load");
+		DateTime testStarted = DateTime.now();
+		JobFactory jf = new JobFactory(profile, db.getDatabase(), testStarted);
+		assertTrue(db.tableExists(tableName));
+		JobRunner load = jf.yamlJob("{source: incident, action: load, truncate: true, created: 2020-01-01}");
+		Metrics loadMetrics = load.call();
+		DateTime loadStarted = loadMetrics.getStarted();
+		int countBefore = db.sqlCount("incident", null);
+		logger.info(Log.TEST, String.format("database rows=%d", countBefore));
+		assertEquals(loadMetrics.getInserted(), countBefore);
+		assertEquals(1, db.sqlCount("incident", String.format("sys_id='%s'", key)));
+			    
 	    TestManager.banner(logger,  "Delete");
 	    api.deleteRecord(key);
 		assertNull(api.getRecord(key));
-	    TestManager.sleep(2);
+		logger.info(Log.TEST, "Deleted Incident " + key);
+	    TestManager.sleep(1.5);
+	    
 	    TestManager.banner(logger,  "Prune");
+	    DateTime pruneStart = loadStarted.subtractSeconds(1);
 	    String yaml = String.format(
-	    	"{source: incident, action: prune, since: %s}", 
-	    	loadMetrics.getStarted().toString());
-	    JobRunner jr = jf.yamlJob(yaml);
+	    	"{source: incident, action: prune, since: %s}",	pruneStart);
+	    JobRunner pruneJob = jf.yamlJob(yaml);
 	    logger.info(Log.TEST, yaml);	    
-	    WriterMetrics pruneMetrics = jr.call();
+	    Metrics pruneMetrics = pruneJob.call();
+		int countAfter = db.sqlCount("incident", null);
+		logger.info(Log.TEST, String.format("database rows=%d", countAfter));
+		assertTrue(countAfter < countBefore);
 	    assertEquals(0, pruneMetrics.getInserted());
 	    assertEquals(0, pruneMetrics.getUpdated());
 	    assertEquals(1, pruneMetrics.getDeleted());

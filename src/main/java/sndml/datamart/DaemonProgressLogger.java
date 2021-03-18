@@ -67,34 +67,31 @@ public class DaemonProgressLogger extends ProgressLogger {
 		
 	@Override
 	public void logProgress() {
-		ReaderMetrics readerMetrics = reader.getReaderMetrics();
-		WriterMetrics writerMetrics = reader.getWriterMetrics();
-		assert readerMetrics != null;
-		assert writerMetrics != null;
+		Metrics metrics = reader.getMetrics();
+		assert metrics != null;
 		ObjectNode body = messageBody("running");
 		if (hasPart()) {
-			assert readerMetrics.hasParent();
-			assert writerMetrics.hasParent();
-			body.put("expected", readerMetrics.getParent().getExpected());
-			body.put("inserted",  writerMetrics.getParent().getInserted());
-			body.put("updated",  writerMetrics.getParent().getUpdated());
-			body.put("deleted",  writerMetrics.getParent().getDeleted());			
-			body.put("part_expected", readerMetrics.getExpected());
-			body.put("part_inserted",  writerMetrics.getInserted());
-			body.put("part_updated",  writerMetrics.getUpdated());
-			body.put("part_deleted",  writerMetrics.getDeleted());						
+			assert metrics.hasParent();
+			body.put("expected", metrics.getParent().getExpected());
+			body.put("inserted",  metrics.getParent().getInserted());
+			body.put("updated",  metrics.getParent().getUpdated());
+			body.put("deleted",  metrics.getParent().getDeleted());			
+			body.put("part_expected", metrics.getExpected());
+			body.put("part_inserted",  metrics.getInserted());
+			body.put("part_updated",  metrics.getUpdated());
+			body.put("part_deleted",  metrics.getDeleted());						
 		}
 		else {
-			body.put("expected", readerMetrics.getExpected());
-			body.put("inserted",  writerMetrics.getInserted());
-			body.put("updated",  writerMetrics.getUpdated());
-			body.put("deleted",  writerMetrics.getDeleted());			
+			body.put("expected", metrics.getExpected());
+			body.put("inserted",  metrics.getInserted());
+			body.put("updated",  metrics.getUpdated());
+			body.put("deleted",  metrics.getDeleted());			
 		}
 		putRunStatus(body);
 	}
 
 	@Override
-	public void logComplete() {
+	public void logComplete(Metrics writerMetrics) {
 		ObjectNode body = messageBody("complete");
 		putRunStatus(body);
 	}
@@ -120,7 +117,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		JsonRequest request = new JsonRequest(session, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
 		try {
-			response = request.getObject();
+			response = request.execute();
 		} catch (IOException e) {
 			throw new ResourceException(e);
 		}

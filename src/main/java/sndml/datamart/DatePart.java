@@ -45,4 +45,9 @@ public class DatePart extends DateTimeRange {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return getName();
+	}
+	
 }

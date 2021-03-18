@@ -24,7 +24,8 @@ public class SetFieldsTest {
 		Table incident = session.table("change_request");
 		RecordListAccumulator accumulator = new RecordListAccumulator(incident);
 		TableReader reader = incident.rest().getDefaultReader();
-		reader.setWriter(accumulator);
+		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
+		reader.setWriter(accumulator, writerMetrics);		
 		reader.setFields(new FieldNames("number,state,short_description"));
 		reader.initialize();
 		reader.call();

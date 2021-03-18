@@ -1,5 +1,6 @@
 package sndml.servicenow;
 
+@Deprecated
 public class RowCountMismatchException extends ServiceNowException {
 
 	private static final long serialVersionUID = 1L;

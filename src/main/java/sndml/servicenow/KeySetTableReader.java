@@ -49,7 +49,7 @@ public class KeySetTableReader extends TableReader {
 	}
 		
 	@Override
-	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, InterruptedException {
 		logStart();
 		RecordWriter writer = this.getWriter();
 		int pageSize = this.getPageSize();
@@ -69,15 +69,15 @@ public class KeySetTableReader extends TableReader {
 			if (this.displayValue) params.add("displayvalue", "all");
 			params.add("sysparm_query", sliceQuery.toString());
 			RecordList recs = jsonAPI.getRecords(params);
-			getReaderMetrics().increment(recs.size());			
-			writer.processRecords(recs, progressLogger);
+			incrementInput(recs.size());			
+			writer.processRecords(recs, metrics, progressLogger);
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
 			if (maxRows != null && rowCount > maxRows)
 				throw new TooManyRowsException(table, maxRows, rowCount);
 			fromIndex += pageSize;
 		}
-		return writer.getWriterMetrics();
+		return metrics;
 	}
 
 }

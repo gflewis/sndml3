@@ -1,0 +1,5 @@
+ source: incident
+ target: incident
+ columns: number assignment_group
+ pagesize: 2000
+ minrows: 40000

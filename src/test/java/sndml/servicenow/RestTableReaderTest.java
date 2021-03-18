@@ -28,7 +28,8 @@ public class RestTableReaderTest {
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
-		reader.setWriter(accumulator);
+		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
+		reader.setWriter(accumulator, writerMetrics);		
 		reader.initialize();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
@@ -48,7 +49,8 @@ public class RestTableReaderTest {
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
-		reader.setWriter(accumulator);
+		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
+		reader.setWriter(accumulator, writerMetrics);		
 		reader.setDisplayValue(true);
 		reader.initialize();
 		reader.call();
@@ -68,7 +70,8 @@ public class RestTableReaderTest {
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
-		reader.setWriter(accumulator);
+		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
+		reader.setWriter(accumulator, writerMetrics);		
 		reader.setDisplayValue(false);
 		reader.initialize();
 		reader.call();

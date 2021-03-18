@@ -43,9 +43,9 @@ public class CompositeProgressLogger extends ProgressLogger {
 
 
 	@Override
-	public void logComplete() {
-		if (appLogger != null) appLogger.logComplete();
-		if (textLogger != null) textLogger.logComplete();
+	public void logComplete(Metrics writerMetrics) {
+		if (appLogger != null) appLogger.logComplete(writerMetrics);
+		if (textLogger != null) textLogger.logComplete(writerMetrics);
 		
 	}
 

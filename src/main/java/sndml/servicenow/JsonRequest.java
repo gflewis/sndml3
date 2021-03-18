@@ -35,7 +35,7 @@ public class JsonRequest extends ServiceNowRequest {
 		this.requestObj = body;
 	}
 	
-	public void execute() throws IOException {
+	private void executeRequest() throws IOException {
 		assert client != null;
 		assert uri != null;
 		assert method != null;
@@ -125,14 +125,10 @@ public class JsonRequest extends ServiceNowRequest {
 		}
 		executed = true;
 	}
-	
-	public String getResponseText() throws IOException {
-		if (!executed) execute();
-		return responseText;
-	}
-	
-	public ObjectNode getObject() throws IOException {
-		if (!executed) execute();		
+		
+	public ObjectNode execute() throws IOException {
+		assert executed == false;
+		executeRequest();		
 		if (responseText == null) return null;
 		responseObj = (ObjectNode) mapper.readTree(responseText);
 		if (responseObj.has("error")) {

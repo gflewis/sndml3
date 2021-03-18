@@ -49,6 +49,7 @@ public final class ReaderMetrics {
 		return expected;
 	}
 	
+	@Deprecated
 	public synchronized String getProgress() {
 		if (hasExpected())
 			return String.format("%d / %d",  getCount(), getExpected());

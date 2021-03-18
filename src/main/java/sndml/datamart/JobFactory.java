@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+import sndml.servicenow.DateTime;
 import sndml.servicenow.Session;
 
 public class JobFactory {
@@ -13,23 +14,24 @@ public class JobFactory {
 	final ConnectionProfile profile;
 	final Session session;
 	final Database database;	
+	final DateCalculator dateCalculator;
 	ConfigFactory configFactory = new ConfigFactory();
-	DateCalculator dateFactory = new DateCalculator();
 	
-	public JobFactory(ConnectionProfile profile) {
-		this(profile, profile.getDatabase());
+	public JobFactory(ConnectionProfile profile, DateTime start) {
+		this(profile, profile.getDatabase(),start);
 	}
 	
-	public JobFactory(ConnectionProfile profile, Database database) {
+	public JobFactory(ConnectionProfile profile, Database database, DateTime start) {
 		this.profile = profile;
 		this.session = profile.getSession();
 		this.database = database;		
+		dateCalculator = new DateCalculator(start);
 	}
 	
 	public JobRunner yamlJob(Reader yamlReader) 
 			throws ConfigParseException, IOException {
 		JobConfig config = configFactory.yamlJob(profile, yamlReader);
-		config.initialize(profile, dateFactory);
+		config.initialize(profile, dateCalculator);
 		config.validate();
 		return new JobRunner(session, database, config);
 	}

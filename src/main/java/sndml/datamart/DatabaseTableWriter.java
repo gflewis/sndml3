@@ -32,37 +32,39 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		super(writerName);
 		assert db != null;
 		assert table != null;
+		assert sqlTableName != null;
 		this.db = db;
 		this.table = table;
-		this.sqlTableName = sqlTableName == null ? table.getName() : sqlTableName;
+		this.sqlTableName = sqlTableName;
 		Log.setTableContext(this.table);
 	}
 		
 	@Override
-	public DatabaseTableWriter open() throws SQLException, IOException {
+	public DatabaseTableWriter open(Metrics metrics) throws SQLException, IOException {
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
-		writerMetrics.start();
+		metrics.start();
 		return this;
 	}
 	
 	@Override
-	public void close() throws SQLException {
+	public void close(Metrics metrics) throws SQLException {
 		db.commit();
-		writerMetrics.finish();
+		metrics.finish();
 	}
 
 	@Override
-	public synchronized void processRecords(RecordList recs, ProgressLogger progressLogger) 
+	public synchronized void processRecords(
+			RecordList recs, Metrics metrics, ProgressLogger progressLogger) 
 			throws IOException, SQLException {
 		for (Record rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
 				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));
-			writeRecord(rec);
+			writeRecord(rec, metrics);
 		}
 		db.commit();
 		progressLogger.logProgress();
 	}
 	
-	abstract void writeRecord(Record rec) throws SQLException;
+	abstract void writeRecord(Record rec, Metrics writerMetrics) throws SQLException;
 	
 }

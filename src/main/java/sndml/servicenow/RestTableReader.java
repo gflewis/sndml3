@@ -47,10 +47,10 @@ public class RestTableReader extends TableReader {
 		}
 	}
 	
-	public WriterMetrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, InterruptedException {
 		logStart();
-		RecordWriter writer = getWriter();
 		assert writer != null;
+		assert metrics != null;
 		int rowCount = 0;
 		Key maxKey = null;
 		boolean finished = false;
@@ -78,9 +78,9 @@ public class RestTableReader extends TableReader {
 			if (!query.isEmpty()) params.add("sysparm_query", query.toString());
 			RecordList recs = restAPI.getRecords(params);
 			logger.debug(Log.RESPONSE, String.format("retrieved %d rows", recs.size()));
-			getReaderMetrics().increment(recs.size());
+			incrementInput(recs.size());
 			maxKey = recs.maxKey();
-			writer.processRecords(recs, progressLogger);	
+			writer.processRecords(recs, metrics, progressLogger);	
 			rowCount += recs.size();
 			offset += recs.size();
 			if (isFinished(recs.size(), rowCount)) finished = true;
@@ -95,7 +95,7 @@ public class RestTableReader extends TableReader {
 			}
 		}
 		logComplete();
-		return writer.getWriterMetrics();
+		return metrics;
 	}
 	
 	protected boolean isFinished(int pageRows, int totalRows) {

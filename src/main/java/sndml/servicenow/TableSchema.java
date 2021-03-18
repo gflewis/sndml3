@@ -41,8 +41,6 @@ public class TableSchema {
 		if (parentname != null) {
 			// recursive call for parent definition
 			TableSchema parentDefinition = session.getSchema(parentname);
-//			Table parentTable = session.table(parentname);
-//			TableSchema parentDefinition = new TableSchema(parentTable);
 			Iterator<FieldDefinition> parentIter = parentDefinition.iterator();
 			while (parentIter.hasNext()) {
 				FieldDefinition parentField = parentIter.next();
@@ -60,7 +58,6 @@ public class TableSchema {
 		reader.setFilter(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(5000);
-		reader.initialize();
 		RecordList recs = reader.getAllRecords();
 		processRecords(recs);
 				

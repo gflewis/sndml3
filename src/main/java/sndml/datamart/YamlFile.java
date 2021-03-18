@@ -3,28 +3,39 @@ package sndml.datamart;
 import java.io.File;
 import java.io.IOException;
 
+import sndml.servicenow.DateTime;
+
 /**
  * A file with YAML Loader Config instructions. 
  * This class is used primarily for JUnit tests.
- *
  */
 @SuppressWarnings("serial")
 public class YamlFile extends File {
 		
 	public YamlFile(File file) {		
 		super(file.getPath());
+		assert this.exists() : file.getPath() + " does not exist";
+		assert this.canRead() : file.getPath() + " is not readable";
+		assert hasYamlExt(this) : file.getPath() + " does not have .yaml extension";
 	}
-		
-	public LoaderConfig getConfig() 
+	
+	public JobConfig getJobConfig(ConnectionProfile profile) 
 			throws ConfigParseException, IOException {
 		ConfigFactory factory = new ConfigFactory();
-		LoaderConfig config = factory.loaderConfig(null, this);
-		return config;
+		JobConfig config = factory.yamlJob(profile, this);
+		return config;		
+	}
+	
+	public JobRunner getJobRunner(ConnectionProfile profile) 
+			throws ConfigParseException, IOException {
+		JobFactory jf = new JobFactory(profile, DateTime.now());
+		return jf.yamlJob(this);
 	}
 	
 	public Loader getLoader(ConnectionProfile profile) 
 			throws ConfigParseException, IOException {
-		LoaderConfig config = getConfig();
+		ConfigFactory factory = new ConfigFactory();
+		LoaderConfig config = factory.loaderConfig(null, this);
 		return new Loader(profile, config);
 	}
 	

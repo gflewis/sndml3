@@ -31,7 +31,7 @@ public class JsonTableAPI extends TableAPI {
 		if (!EncodedQuery.isEmpty(query)) params.put("sysparm_query", query.toString());
 		ObjectNode requestObj = params.toJSON();
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);		
-		ObjectNode responseObj = request.getObject();
+		ObjectNode responseObj = request.execute();
 		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
 		KeySet keys = new KeySet(recordsObj);
 		return keys;
@@ -44,7 +44,7 @@ public class JsonTableAPI extends TableAPI {
 		params.add("sysparm_sys_id",  sys_id.toString());
 		ObjectNode requestObj = params.toJSON();
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);
-		ObjectNode responseObj = request.getObject();
+		ObjectNode responseObj = request.execute();
 		assert responseObj.has("records");
 		assert responseObj.get("records").isArray();
 		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
@@ -72,7 +72,7 @@ public class JsonTableAPI extends TableAPI {
 		ObjectNode requestObj = params.toJSON();
 		requestObj.put("sysparm_action", "getRecords");
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);
-		ObjectNode responseObj = request.getObject();
+		ObjectNode responseObj = request.execute();
 		assert responseObj.has("records");
 		assert responseObj.get("records").isArray();
 		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");

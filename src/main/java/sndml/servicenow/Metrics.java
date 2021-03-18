@@ -6,10 +6,12 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class WriterMetrics {
+public final class Metrics {
 
-	private String name;
-	private WriterMetrics parent = null;
+	private String name; // name as it appears in properties file; null if global
+	private Metrics parent = null;
+	private Integer expected = null;
+	private int input = 0;
 	private int inserted = 0;
 	private int updated = 0;
 	private int deleted = 0;
@@ -17,14 +19,19 @@ public final class WriterMetrics {
 	private Date started = null;
 	private Date finished = null;
 
-	private static Logger logger = LoggerFactory.getLogger(WriterMetrics.class);
+	private static Logger logger = LoggerFactory.getLogger(Metrics.class);
 	
 	@Deprecated
-	public WriterMetrics() {		
+	public Metrics() {		
 	}
 	
-	public WriterMetrics(String name) {
+	public Metrics(String name) {
 		this.name = name;
+	}
+	
+	public Metrics(String name, Metrics parent) {
+		this.name = name;
+		this.parent = parent;
 	}
 	
 	@Deprecated
@@ -40,7 +47,8 @@ public final class WriterMetrics {
 		return this.name;
 	}
 	
-	public void setParent(WriterMetrics parent) {
+	@Deprecated
+	public void setParent(Metrics parent) {
 		assert parent != null;
 		assert parent != this;
 		assert parent.parent == null || parent.parent.parent == null;
@@ -48,20 +56,22 @@ public final class WriterMetrics {
 	}
 	
 	public boolean hasParent() {
-		return this.parent != null;
+		assert parent == null || parent != this; // object cannot be its own parent
+		return parent != null;
 	}
 	
-	public WriterMetrics getParent() {
-		return this.parent;
+	public Metrics getParent() {
+		assert parent == null || parent != this; // object cannot be its own parent
+		return parent;
 	}
 	
-	public synchronized WriterMetrics start() {
+	public synchronized Metrics start() {
 		if (parent != null) parent.start();
 		if (started == null) started = new Date();
 		return this;
 	}
 	
-	public synchronized WriterMetrics finish() {
+	public synchronized Metrics finish() {
 		finished = new Date();
 		if (parent != null) parent.finish();
 		return this;
@@ -83,7 +93,32 @@ public final class WriterMetrics {
 			return result;
 		}
 	}
+
+	/**
+	 * Set the number of rows that the reader is expected to return (expected input)
+	 */
+	public synchronized void setExpected(Integer value) {
+		expected = value;
+	}
+	
+	public synchronized boolean hasExpected() {
+		return expected != null;
+	}
+			
+	/**
+	 * Return the number of rows that the reader is expected to return (expected input)
+	 */
+	public synchronized Integer getExpected() {
+		return expected;
+	}
 		
+	/**
+	 * Return the number of rows read from the reader
+	 */
+	public int getInput() {
+		return this.input;
+	}
+	
 	public int getProcessed() {
 		return getInserted() + getUpdated() + getDeleted() + getSkipped();
 	}
@@ -104,6 +139,10 @@ public final class WriterMetrics {
 		return this.skipped;
 	}
 	
+	public void incrementInput() {
+		addInput(1);
+	}
+	
 	public void incrementInserted() {
 		addInserted(1);
 	}
@@ -120,15 +159,21 @@ public final class WriterMetrics {
 		addSkipped(1);
 	}
 
+	public synchronized void addInput(int count) {
+		input += count;
+		if (parent != null) parent.addInput(count);;
+		
+	}
 	public synchronized void addInserted(int count) {
 		inserted += count;
-		if (parent != null) {
+		// TODO: Remove this debugging code
+		if (parent != null && logger.isDebugEnabled()) {
 			logger.debug(Log.PROCESS, String.format(
 				"addInserted name=%s count=%d parent=%s", getName(), count, parent.getName()));
 			assert parent != this;
 			assert parent == null || parent.parent == null;  // avoid recursive calls
-			parent.addInserted(count);
 		}
+		if (parent != null) parent.addInserted(count);		
 	}
 	
 	public synchronized void addUpdated(int count) {
@@ -146,7 +191,7 @@ public final class WriterMetrics {
 		if (parent != null) parent.addSkipped(count);
 	}
 	
-	public synchronized void add(WriterMetrics stats) {
+	public synchronized void add(Metrics stats) {
 		assert stats != null;
 		assert stats.started != null;
 		assert stats.finished != null;
@@ -168,6 +213,14 @@ public final class WriterMetrics {
 		writer.println(prefix + "deleted="   + String.valueOf(getDeleted()));
 		writer.println(prefix + "skipped="   + String.valueOf(getSkipped()));
 		writer.println(prefix + "processed=" + String.valueOf(getProcessed()));		
+	}
+	
+	// Used for debugging
+	public String toString() {
+		return String.format(
+			"%s[expected=%d input=%d inserted=%d updated=%d deleted=%d]",
+			name == null ? "GLOBAL" : name,
+			getExpected(), getInput(), getInserted(), getUpdated(), getDeleted());
 	}
 	
 }
