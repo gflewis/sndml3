@@ -25,7 +25,7 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 
 	@Override
-	public void initialize() throws IOException, InterruptedException, SQLException {
+	public void prepare() throws IOException, InterruptedException, SQLException {
 		beginInitialize();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, "initialize query=" + query);

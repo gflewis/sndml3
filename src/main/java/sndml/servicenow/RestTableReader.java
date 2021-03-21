@@ -11,6 +11,7 @@ public class RestTableReader extends TableReader {
 	
 	private final int DEFAULT_PAGE_SIZE = 200;
 	
+	@Deprecated
 	public RestTableReader(Table table, String readerName) {
 		this(table);
 		this.setReaderName(readerName);
@@ -32,7 +33,7 @@ public class RestTableReader extends TableReader {
 		return this;
 	}
 	
-	public void initialize() throws IOException, InterruptedException  {
+	public void prepare() throws IOException, InterruptedException  {
 		beginInitialize();
 		EncodedQuery statsQuery = getStatsQuery();
 		logger.debug(Log.INIT, String.format(

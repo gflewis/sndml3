@@ -9,21 +9,45 @@ public class Log4jProgressLogger extends ProgressLogger {
 	
 	protected final Logger logger;
 	protected final Action action;
-	private Integer expected; // used for debugging
 	
+	@Deprecated
 	public Log4jProgressLogger(TableReader reader, Action action)	{
 		this(reader, action, null);
 	}
 	
+	@Deprecated
 	public Log4jProgressLogger(TableReader reader, Action action, DatePart part) {
-		super(reader, part);
-		this.action = action;
-		this.logger = LoggerFactory.getLogger(reader.getClass());
+		this(reader.getClass(), action, null, null);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public Log4jProgressLogger(Class clazz, Action action, Metrics metrics) {
+		this(clazz, action, metrics, null);
 	}
 	
+	@SuppressWarnings("rawtypes")
+	public Log4jProgressLogger(Class clazz, Action action, Metrics metrics, DatePart part) {
+		super(metrics, part);
+		this.action = action;
+		this.logger = LoggerFactory.getLogger(clazz);
+	}
+	
+	protected Log4jProgressLogger(Logger logger, Action action, Metrics metrics, DatePart part) {
+		super(metrics, part);
+		this.logger = logger;
+		this.action = action;
+	}
+		
+			
 	public Log4jProgressLogger newPartLogger(TableReader newReader, DatePart newPart) {
 		return new Log4jProgressLogger(newReader, action, newPart);
 	}
+
+	@Override
+	public ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
+		return new Log4jProgressLogger(logger, action, newMetrics, newPart);
+	}
+
 	
 	public Action getAction() {
 		return action;
@@ -31,7 +55,7 @@ public class Log4jProgressLogger extends ProgressLogger {
 	
 	private String getOperation() {
 		if (action == Action.PRUNE) return "Deleted";
-		if (reader instanceof Synchronizer) return "Synchronized";
+		if (action == Action.SYNC) return "Synchronized";
 		return "Processed";
 	}
 	
@@ -42,12 +66,10 @@ public class Log4jProgressLogger extends ProgressLogger {
 	
 	@Override
 	public void logStart(Integer expected) {
-		this.expected = expected; // used for debugging only
-		//TODO: Cleanup
-//		ReaderMetrics readerMetrics = reader.getReaderMetrics();
+		assert metrics.hasExpected();
 		if (hasPart()) {
-			Integer parentExpected = reader.getParent().getExpected();
-//			ReaderMetrics parentReaderMetrics = reader.getParent().getReaderMetrics();
+			assert metrics.hasParent();			
+			Integer parentExpected = metrics.getParent().getExpected();
 			logger.info(Log.INIT, String.format(
 				"Starting %s (%d / %d rows)", datePart,	expected, parentExpected));			
 		}
@@ -58,31 +80,25 @@ public class Log4jProgressLogger extends ProgressLogger {
 }
 	@Override
 	public void logProgress() {
-		assert reader != null;
-//		ReaderMetrics readerMetrics = reader.getReaderMetrics();
-		Metrics metrics = reader.getMetrics();
 		if (hasPart()) {
-//			ReaderMetrics parentReaderMetrics = reader.getParent().getReaderMetrics();
 			Metrics parentMetrics = metrics.getParent();
 			logger.info(Log.PROCESS, String.format(
 				"%s %s (%s)", getOperation(), getProgress(metrics), getProgress(parentMetrics)));
-//				readerMetrics.getProgress(), 
-//				parentReaderMetrics.getProgress())); 					
 		}
 		else {
 			logger.info(Log.PROCESS, String.format(
 				"%s %s", getOperation(), getProgress(metrics)));
-//				readerMetrics.getProgress()));			
 		}
 	}
 
 	@Override
-	public void logComplete(Metrics writerMetrics) {
-		if (logger.isDebugEnabled()) 
-			logger.debug(Log.FINISH, String.format(
-				"expected=%d %s", expected, writerMetrics.toString()));
-		int processed = writerMetrics.getProcessed();
-		assert processed == this.expected;
+	public void logComplete() {
+		int processed = metrics.getProcessed();
+		int expected = metrics.getExpected();
+		if (processed != expected) {
+			logger.warn(Log.FINISH, String.format(
+				"Expected %d rows but only processed %d rows", expected, processed));
+		}
 		if (hasPart()) {
 			logger.info(Log.FINISH, String.format(
 					"Completed %s (%d rows)", datePart, processed));					

@@ -29,7 +29,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	public DatabaseTableWriter(Database db, Table table, String sqlTableName, String writerName) 
 			throws IOException, SQLException {
-		super(writerName);
+		super();
 		assert db != null;
 		assert table != null;
 		assert sqlTableName != null;
@@ -41,21 +41,29 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		
 	@Override
 	public DatabaseTableWriter open(Metrics metrics) throws SQLException, IOException {
+		super.open(metrics);
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
 		metrics.start();
 		return this;
 	}
 	
 	@Override
-	public void close(Metrics metrics) throws SQLException {
-		db.commit();
+	public void close(Metrics metrics) {
+		try {
+			db.commit();
+		} catch (SQLException e) {
+			throw new ResourceException(e);
+		}
 		metrics.finish();
+		super.close(metrics);
 	}
 
 	@Override
 	public synchronized void processRecords(
 			RecordList recs, Metrics metrics, ProgressLogger progressLogger) 
 			throws IOException, SQLException {
+		assert metrics != null;
+		assert progressLogger != null;
 		for (Record rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
 				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));

@@ -11,16 +11,27 @@ public class CompositeProgressLogger extends ProgressLogger {
 		this(reader, action, appLogger, null);
 	}
 	
-	public CompositeProgressLogger(TableReader reader, Action action, DaemonProgressLogger appLogger, DatePart part) {
-		super(reader, part);
+	@Deprecated
+	public CompositeProgressLogger(TableReader reader, Action action, 
+			DaemonProgressLogger appLogger, DatePart part) {
+		super(appLogger.getMetrics(), part);
 		this.textLogger = new Log4jProgressLogger(reader, action);
 		this.appLogger = appLogger; 		
 	}
 
+	public CompositeProgressLogger(Log4jProgressLogger textLogger, DaemonProgressLogger appLogger) {
+		super(textLogger.getMetrics(), textLogger.getPart());
+		this.textLogger = textLogger;
+		this.appLogger = appLogger;
+	}
+	
 	@Override
-	public CompositeProgressLogger newPartLogger(TableReader newReader, DatePart newPart) {
-		DaemonProgressLogger newAppLogger = appLogger.newPartLogger(newReader, newPart);
-		return new CompositeProgressLogger(newReader, textLogger.getAction(), newAppLogger, newPart);
+	public CompositeProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
+		Log4jProgressLogger newTextLogger =
+				(Log4jProgressLogger) textLogger.newPartLogger(newMetrics,  newPart);
+		DaemonProgressLogger newAppLogger = 
+			(DaemonProgressLogger) appLogger.newPartLogger(newMetrics, newPart);
+		return new CompositeProgressLogger(newTextLogger, newAppLogger);
 	}
 	
 	@Override
@@ -43,9 +54,9 @@ public class CompositeProgressLogger extends ProgressLogger {
 
 
 	@Override
-	public void logComplete(Metrics writerMetrics) {
-		if (appLogger != null) appLogger.logComplete(writerMetrics);
-		if (textLogger != null) textLogger.logComplete(writerMetrics);
+	public void logComplete() {
+		if (appLogger != null) appLogger.logComplete();
+		if (textLogger != null) textLogger.logComplete();
 		
 	}
 

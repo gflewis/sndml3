@@ -21,21 +21,21 @@ public class DaemonProgressLogger extends ProgressLogger {
 
 	DaemonProgressLogger(
 			ConnectionProfile profile, 
-			Session session, 
-			TableReader reader, 
+			Session session,
+			Metrics metrics,
 			String number, 
 			Key runKey) {
-		this(profile, session, reader, number, runKey, null);
+		this(profile, session, metrics, number, runKey, null);
 	}
 	
 	DaemonProgressLogger(
 			ConnectionProfile profile, 
-			Session session, 
-			TableReader reader, 
+			Session session,
+			Metrics metrics,
 			String number, 
 			Key runKey,
 			DatePart part) {
-		super(reader, part);
+		super(metrics, part);
 		assert runKey != null;
 		this.profile = profile;
 		this.session = session;
@@ -45,13 +45,16 @@ public class DaemonProgressLogger extends ProgressLogger {
 			"loader.api.putrunstatus", 
 			"api/x_108443_sndml/putrunstatus");
 		this.putRunStatusURI = session.getURI(putRunStatusPath);		
+		// logger.info(Log.INIT, "DaemonProgressLogger " + number);
 	}
 
 	@Override
-	public DaemonProgressLogger newPartLogger(TableReader newReader, DatePart newPart) {
-		return new DaemonProgressLogger(profile, session, newReader, number, runKey, newPart); 
+	public ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
+		// logger.info(Log.INIT, "newPartLogger");
+		return new DaemonProgressLogger(
+			this.profile, this.session, newMetrics, this.number, this.runKey, newPart);
 	}
-
+	
 	@Override
 	public void logPrepare() {
 		putRunStatus(messageBody("prepare"));
@@ -59,6 +62,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 
 	@Override
 	public void logStart(Integer expected) {	
+		// logger.info(Log.INIT, String.format("logProgress %d", expected));
 		ObjectNode body = messageBody("running");
 		String fieldname = hasPart() ? "part_expected" : "expected";
 		body.put(fieldname,  expected);
@@ -67,7 +71,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		
 	@Override
 	public void logProgress() {
-		Metrics metrics = reader.getMetrics();
+		// logger.info(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
 		if (hasPart()) {
@@ -91,7 +95,8 @@ public class DaemonProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logComplete(Metrics writerMetrics) {
+	public void logComplete() {
+		// logger.info(Log.FINISH, "logComplete");
 		ObjectNode body = messageBody("complete");
 		putRunStatus(body);
 	}
@@ -125,5 +130,6 @@ public class DaemonProgressLogger extends ProgressLogger {
 			logger.debug(Log.RESPONSE, String.format(
 				"putRunStatus %s %s", runKey, response.toString()));		
 	}
+
 	
 }

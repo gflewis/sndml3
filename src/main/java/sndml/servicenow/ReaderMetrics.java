@@ -1,5 +1,6 @@
 package sndml.servicenow;
 
+@Deprecated
 public final class ReaderMetrics {
 
 	private int count = 0;

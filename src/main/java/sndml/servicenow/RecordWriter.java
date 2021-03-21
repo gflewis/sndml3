@@ -12,8 +12,7 @@ import java.sql.SQLException;
  */
 public abstract class RecordWriter {
 
-	// TODO: Why does this constructor have a name parameter?
-	public RecordWriter(String name) {
+	public RecordWriter() {
 	}
 			
 	public abstract void processRecords(
@@ -25,7 +24,7 @@ public abstract class RecordWriter {
 		return this;
 	}
 	
-	public void close(Metrics metrics) throws IOException, SQLException {
+	public void close(Metrics metrics) {
 		metrics.finish();
 	}
 			

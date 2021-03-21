@@ -53,8 +53,8 @@ public class LoaderConfigTest {
 		assertEquals(8, config.getJobs().size());
 		assertEquals("sys_user", config.getJobByName("sys_user").getTarget());
 		assertEquals("rm_story", config.getJobByName("rm_story").getTarget());		
-		assertEquals(new DateTime("2017-01-01"), config.getJobByName("rm_story").getCreated().getStart());
-		assertEquals(start, config.getJobByName("rm_story").getCreated().getEnd());
+		assertEquals(new DateTime("2017-01-01"), config.getJobByName("rm_story").getCreatedRange(null).getStart());
+		assertEquals(start, config.getJobByName("rm_story").getCreatedRange(null).getEnd());
 		assertEquals(today, config.getJobByName("cmdb_ci_service").getSince());
 	}
 	

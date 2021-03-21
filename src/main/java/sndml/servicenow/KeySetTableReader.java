@@ -20,7 +20,7 @@ public class KeySetTableReader extends TableReader {
 		return 200;
 	}
 
-	public void initialize() throws IOException, InterruptedException {
+	public void prepare() throws IOException, InterruptedException {
 		beginInitialize();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));

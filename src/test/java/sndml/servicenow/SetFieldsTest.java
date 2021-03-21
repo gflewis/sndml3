@@ -27,7 +27,7 @@ public class SetFieldsTest {
 		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
 		reader.setWriter(accumulator, writerMetrics);		
 		reader.setFields(new FieldNames("number,state,short_description"));
-		reader.initialize();
+		reader.prepare();
 		reader.call();
 		int rows = accumulator.getRecords().size();
 		assertTrue(rows > 0);

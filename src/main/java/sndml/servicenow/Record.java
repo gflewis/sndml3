@@ -154,6 +154,4 @@ public abstract class Record implements InsertResponse {
 		return new Integer((int) (millis / 1000));
 	}
 		
-	// public abstract String toJSON();
-		
 }

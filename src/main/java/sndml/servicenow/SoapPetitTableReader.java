@@ -32,6 +32,7 @@ import java.sql.SQLException;
  * if there is any possibility of access controls which could cause this behavior.</p>
  * 
  */
+@Deprecated
 public class SoapPetitTableReader extends TableReader {
 
 	protected final SoapTableAPI soapAPI;
@@ -42,14 +43,9 @@ public class SoapPetitTableReader extends TableReader {
 	}
 	
 	@Override
-	public void initialize() {
+	public void prepare() {
 		assert writer != null : "Writer not initialized";
-		Log.setTableContext(table, getReaderName());
-	}
-
-	@Override
-	public int getDefaultPageSize() {
-		return 200;
+//		Log.setTableContext(table, getReaderName());
 	}
 		
 	@Override

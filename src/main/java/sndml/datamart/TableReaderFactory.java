@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.*;
 
+@Deprecated
 public class TableReaderFactory {
 
 	protected final Table table;
@@ -29,9 +30,10 @@ public class TableReaderFactory {
 		this.db = db;		
 		this.config = config;
 		sqlTableName = config.getTarget();
-		createdRange = config.getCreated();
-		updatedRange = new DateTimeRange(config.getSince(), null);
-		filter = new EncodedQuery(table, config.getFilter());
+		createdRange = config.getCreatedRange(null);
+		updatedRange = new DateTimeRange(config.getSince(), null);		
+//		filter = new EncodedQuery(table, config.getFilter());
+		filter = config.getFilter(table);
 		fieldNames = config.getColumns();
 		pageSize = config.getPageSize();
 	}
@@ -55,13 +57,11 @@ public class TableReaderFactory {
 		if (readerName != null) reader.setReaderName(readerName);
 		if (partName != null) reader.setPartName(partName);
 		
-		if (config.getFilter() != null) {
-			EncodedQuery query = new EncodedQuery(table, config.getFilter());
-			reader.setFilter(query);
-		}
+		reader.setFilter(config.getFilter(table));
 		
-		DateTimeRange readerCreatedRange =
-				datePart != null ? datePart.intersect(createdRange) : createdRange;
+//		DateTimeRange readerCreatedRange =
+//				datePart != null ? datePart.intersect(createdRange) : createdRange;
+		DateTimeRange readerCreatedRange = config.getCreatedRange(datePart);
 		reader.setCreatedRange(readerCreatedRange);
 		
 		reader.setUpdatedRange(updatedRange);

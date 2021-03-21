@@ -22,7 +22,7 @@ public class KeyedTableReaderTest {
 		SoapKeySetTableReader reader = new SoapKeySetTableReader(table);
 		reader.setFilter(table.getQuery(null));
 		reader.setWriter(new NullWriter(), new Metrics(this.getClass().getSimpleName()));
-		reader.setPageSize(20).initialize();
+		reader.setPageSize(20).prepare();
 		reader.call();
 	}
 

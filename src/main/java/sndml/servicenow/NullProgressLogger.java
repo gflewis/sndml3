@@ -6,23 +6,16 @@ import sndml.datamart.DatePart;
  * {@link ProgressLogger} that discards metrics.
  */
 public class NullProgressLogger extends ProgressLogger {
-	
-	final protected DatePart part;
-	
-	public NullProgressLogger(TableReader reader) {
-		this(reader, null);
-	}
-	
-	public NullProgressLogger(TableReader reader, DatePart part) {
-		super(reader);
-		this.part = part;		
+			
+	public NullProgressLogger(Metrics metrics, DatePart datePart) {
+		super(metrics, datePart);
 	}
 		
 	@Override
-	public NullProgressLogger newPartLogger(TableReader newReader, DatePart newPart) {
-		return new NullProgressLogger(newReader, newPart);
+	public NullProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
+		return new NullProgressLogger(null, newPart);
 	}
-		
+	
 	@Override
 	public void logPrepare() {	
 	}
@@ -38,13 +31,8 @@ public class NullProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logComplete(Metrics writerMetrics) {
+	public void logComplete() {
 		return;
-	}
-
-	@Override
-	public DatePart getPart() {
-		return part;
 	}
 
 

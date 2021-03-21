@@ -91,6 +91,22 @@ public class Session {
 	private boolean getPropertyBoolean(String propname) {
 		return getPropertyBoolean(propname, false);
 	}
+	
+	public int getPropertyInt(String name, int defaultValue) {
+		String stringValue = getProperty(name);
+		if (stringValue == null) return defaultValue;
+		return new Integer(stringValue);
+	}
+	
+	public int defaultPageSize() {
+		int pageSize = getPropertyInt("pagesize", 200);
+		assert pageSize > 0;
+		return pageSize;
+	}
+	
+	public int defaultPageSize(Table table) {
+		return defaultPageSize();
+	}
 		
 	public void close() throws IOException {
 		client.close();

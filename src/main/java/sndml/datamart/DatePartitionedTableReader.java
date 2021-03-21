@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -16,39 +17,29 @@ import sndml.servicenow.*;
 
 public final class DatePartitionedTableReader extends TableReader {
 
-	final TableReaderFactory factory;	
+	final JobConfig config;
+	final Database db;
 	final int threads;
 	final Interval interval;
 	
 	private DateTimeRange range;
 	private DatePartition partition;
 	private List<Future<Metrics>> futures;
-
-	final int REST_DEFAULT_PAGE_SIZE = 200;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	public DatePartitionedTableReader(
-			TableReaderFactory factory, String readerName, 
-			Interval interval, Integer threads) {
-		super(factory.getTable());
-		this.factory = factory;
-		this.setReaderName(readerName);
-		setFilter(factory.getFilter());
-		setCreatedRange(factory.getCreatedRange());
-		setUpdatedRange(factory.getUpdatedRange());
-		setFields(factory.getFieldNames());
-//		setPageSize(factory.getPageSize());
-		this.interval = interval;
-		this.threads = (threads == null ? 0 : threads.intValue());
-		this.metrics = factory.parentWriterMetrics;
-		setWriter(factory.getWriter(), metrics);
+		
+	public DatePartitionedTableReader(Table table, JobConfig config, Database db) {
+		super(table);
+		this.config = config;
+		this.db = db;
+		assert config != null;
+		if (config.getAction() == Action.SYNC) assert db != null;
+		setCreatedRange(config.getCreatedRange(null));
+		setUpdatedRange(config.getUpdatedRange());
+		this.interval = config.getPartitionInterval();
+		this.threads = (config.getThreads()==null) ? 1 : config.getThreads();
 	}
-	
-	public int getDefaultPageSize() {
-		return REST_DEFAULT_PAGE_SIZE;
-	}
-	
+		
 	public DatePartition getPartition() {
 		assert partition != null : "Not initialized";
 		return partition;
@@ -89,8 +80,10 @@ public final class DatePartitionedTableReader extends TableReader {
 	}
 	
 	@Override
-	public void initialize() throws IOException, InterruptedException {
+	public void prepare() throws IOException, InterruptedException {
 		super.beginInitialize();
+		assert metrics != null;
+		assert progressLogger != null;
 		// Use Stats API to determine min and max dates
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
@@ -111,29 +104,19 @@ public final class DatePartitionedTableReader extends TableReader {
 		super.endInitialize(expected);
 	}
 	
-	private TableReader createReader(DatePart partRange) {
-		assert this.readerName != null;
-		assert factory.getParentReader() == this;
-		TableReader partReader = factory.createReader(partRange);
-		assert partReader.hasParent();
-		assert partReader.getParent() == this;
-		partReader.setCreatedRange(partRange.intersect(partReader.getCreatedRange()));
-		Metrics partWriterMetrics = partReader.getMetrics();
-		ProgressLogger partLogger = progressLogger.newPartLogger(partReader, partRange);
+	private TableReader createReader(DatePart datePart) {
+		String partName = datePart.getName();
+		TableReader partReader = config.createReader(table, db, datePart);
+		String jobName = config.getName();
+		String partReaderName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
+		assert partReaderName != null;
+		Metrics partMetrics = new Metrics(partReaderName, this.metrics);
+		partReader.setWriter(writer, partMetrics);		
+		ProgressLogger partLogger = progressLogger.newPartLogger(partMetrics, datePart);
 		partReader.setProgressLogger(partLogger);
-//		ReaderMetrics partReaderMetrics = partReader.getReaderMetrics();
-//		partReaderMetrics.setParent(this.readerMetrics);		
-		assert partWriterMetrics.getName() != null;
-//		assert partReaderMetrics != this.getReaderMetrics();
-		assert partWriterMetrics != this.getMetrics();
-		assert partWriterMetrics.hasParent();
-		assert partWriterMetrics.getParent() == this.metrics;
-		assert partLogger.getReader() == partReader;
-		assert partLogger.hasPart();
-		assert partWriterMetrics.getName() != metrics.getName();
 		return partReader;		
 	}
-
+	
 	@Override
 	public void logStart() {
 		metrics.start();
@@ -159,8 +142,8 @@ public final class DatePartitionedTableReader extends TableReader {
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
 			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
-				logger.debug("Submit " + reader.getReaderName());
-				reader.initialize();
+				logger.debug("Submit " + metrics.getName());
+				reader.prepare();
 				Future<Metrics> future = executor.submit(reader);
 				futures.add(future);				
 			}
@@ -174,8 +157,11 @@ public final class DatePartitionedTableReader extends TableReader {
 			int processed = 0;
 			for (DatePart partRange : partition) {
 				TableReader reader = createReader(partRange);
-				reader.initialize();
+				reader.prepare();
+				assert reader.getProgressLogger() != null;
 				Metrics metrics = reader.call();
+				// TODOL This is clunky
+				reader.getProgressLogger().logComplete();
 				assert metrics == reader.getMetrics();
 				processed += reader.getMetrics().getProcessed();
 			}

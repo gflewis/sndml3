@@ -11,7 +11,7 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	final Key runKey;
 	final String number;
 	final DaemonStatusLogger statusLogger;
-//	DaemonProgressLogger progressLogger;
+	DaemonProgressLogger appLogger;
 		
 	public DaemonJobRunner(ConnectionProfile profile, JobConfig config) {
 		super(profile.getSession(), profile.getDatabase(), config);
@@ -24,15 +24,16 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 		assert number.length() > 0;
 		this.table = session.table(config.getSource());
 		this.statusLogger = new DaemonStatusLogger(profile, session);
+		this.appLogger = new DaemonProgressLogger(profile, session, jobMetrics, number, runKey);
 		
 	}
 
 	@Override
 	protected ProgressLogger newProgressLogger(TableReader reader) {
-		assert reader != null;
-		DaemonProgressLogger appLogger = 
-			new DaemonProgressLogger(profile, session, reader, number, runKey);
-		ProgressLogger compositeLogger = new CompositeProgressLogger(reader, action, appLogger);
+		Log4jProgressLogger textLogger = 
+			new Log4jProgressLogger(reader.getClass(), action, jobMetrics);		
+		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
+		reader.setMetrics(jobMetrics);;
 		reader.setProgressLogger(compositeLogger);
 		return compositeLogger;
 	}
@@ -59,9 +60,9 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 			assert db != null;
 			assert config.getNumber() != null;
 			Thread.currentThread().setName(config.number);			
-			statusLogger.setStatus(runKey, "running");
+//			statusLogger.setStatus(runKey, "running");
 			Metrics metrics = super.call();
-			statusLogger.setStatus(runKey, "complete");
+//			statusLogger.setStatus(runKey, "complete");
 			Daemon.rescan();
 			return metrics;
 		} catch (SQLException | IOException | InterruptedException e) {

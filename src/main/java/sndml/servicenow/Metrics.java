@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 public final class Metrics {
 
-	private String name; // name as it appears in properties file; null if global
+	private final String name; // name as it appears in properties file; null if global
 	private Metrics parent = null;
 	private Integer expected = null;
 	private int input = 0;
@@ -20,11 +20,7 @@ public final class Metrics {
 	private Date finished = null;
 
 	private static Logger logger = LoggerFactory.getLogger(Metrics.class);
-	
-	@Deprecated
-	public Metrics() {		
-	}
-	
+			
 	public Metrics(String name) {
 		this.name = name;
 	}
@@ -33,16 +29,7 @@ public final class Metrics {
 		this.name = name;
 		this.parent = parent;
 	}
-	
-	@Deprecated
-	public void setName(String newName) {
-		// name cannot be changed being set; old value must be null		
-		assert this.name == null;
-		// new value cannot be null
-		assert newName != null;
-		this.name = newName;
-	}
-	
+		
 	public String getName() {
 		return this.name;
 	}

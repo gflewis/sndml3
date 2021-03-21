@@ -1,6 +1,7 @@
 package sndml.datamart;
 
 import java.util.EnumSet;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +69,22 @@ public class JobConfig {
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }
-	DateTimeRange getCreated() { return this.createdRange; }
-	String getFilter() { return this.filter; }
+	
+	DateTimeRange getCreatedRange(DatePart datePart) { 
+		DateTimeRange range = 
+			datePart == null ? createdRange : datePart.intersect(createdRange);
+		return range;
+	}
+	
+	DateTimeRange getUpdatedRange() {
+		if (sinceExpr == null) return null;
+		return new DateTimeRange(getSince(), null);	
+	}
+	
+	EncodedQuery getFilter(Table table) {
+		if (filter == null) return null;
+		return new EncodedQuery(table, filter);		
+	}
 		
 	Interval getPartitionInterval() { return this.partition; }
 	
@@ -125,17 +140,28 @@ public class JobConfig {
 				Action.INSERT : Action.UPDATE;
 		if (action == Action.LOAD)    action = Action.INSERT;
 		if (action == Action.REFRESH) action = Action.UPDATE;
-		
-		// Determine Source, Target and Name
-		if (source == null)  source = (jobName != null) ? jobName : target;
-		if (jobName == null) jobName = (target != null) ? target : source;
-		if (target == null)	 target = (source != null) ? source : jobName;		
+
+		if (action == Action.EXECUTE) {
+			if (jobName == null) jobName = "execute";
+		}
+		else {			
+			// Determine Source, Target and Name
+			if (source == null)  source = (jobName != null) ? jobName : target;
+			if (jobName == null) jobName = (target != null) ? target : source;
+			if (target == null)	 target = (source != null) ? source : jobName;		
+		}
 	}
 	
 	private void updateDateFields(DateCalculator calculator) {
 		if (calculator == null) calculator = new DateCalculator();
-		if (start != null) calculator.setStart(start);
+		
+		if (Objects.isNull(start))
+			start = calculator.getStart();
+		else
+			calculator.setStart(start);		
+		
 		if (last != null) calculator.setLast(last);
+		
 		if (sinceExpr == null) {
 			sinceDate = null;
 		}
@@ -189,11 +215,12 @@ public class JobConfig {
 	}
 		
 	void validate() {
+		if (action == null) configError("Action not specified");
 		if (action == Action.EXECUTE) {
 			if (sql == null) configError("Missing SQL");
+			if (jobName == null) configError("Name not specified");
 		}
 		else {
-			if (action == null) configError("Action not specified");
 			if (source == null) configError("Source not specified");
 			if (target == null) configError("Target not specified");
 			if (jobName == null) configError("Name not specified");
@@ -206,13 +233,11 @@ public class JobConfig {
 		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
 		validForActions("SQL", sql, Action.EXECUTE_ONLY);
 		
-		if (sinceDate == null && sinceExpr != null)
+		if (sinceExpr != null && sinceDate == null)
 			configError("Missing Since Date");
-		if (createdRange == null & createdExpr != null)
+		if (createdExpr != null && createdRange == null)
 			configError("Missing Created Range");
 		
-//		if (getIncludeColumns() != null && getExcludeColumns() != null) 
-//			configError("Cannot specify both Columns and Exclude");
 		if (threads != null && partition == null)
 			configError("Threads only valid with Partition");
 		
@@ -243,23 +268,60 @@ public class JobConfig {
 	static void configError(String msg) {
 		throw new ConfigParseException(msg);
 	}	
-		
+	
+	public TableReader createReader(Table table, Database db, DatePart datePart) {
+
+		assert table != null;
+		String sqlTableName = getTarget();
+		String jobName = getName();
+		validate();
+		assert jobName != null;
+		String partName = Objects.isNull(datePart) ? null : datePart.getName();
+		String readerName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
+				
+		TableReader reader;
+		if (action == Action.SYNC) {
+			// Database connection is required for Synchronizer only
+			assert db != null;
+			reader = new Synchronizer(table, db, sqlTableName, readerName);
+		}
+		else {
+			reader = new RestTableReader(table);
+		}
+//		reader.setReaderName(readerName);
+//		reader.setPartName(partName);
+		reader.setFilter(getFilter(table));		
+		reader.setCreatedRange(getCreatedRange(datePart));		
+		reader.setUpdatedRange(getUpdatedRange());
+		reader.setFilter(getFilter(table));
+		reader.setFields(getColumns());
+		reader.setPageSize(getPageSize());
+
+		return reader;
+
+	}
+	
 	public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
 		if (sys_id != null) node.put("sys_id",  sys_id.toString());
 		if (number != null) node.put("number",  getNumber());
-		node.put("name", getName());
-		node.put("source", getSource());
-		node.put("target", getTarget());
-		node.put("action", action.toString());
+		node.put("start",  this.start.toString());
+		if (this.last != null) node.put("last", this.last.toString());
+		node.put("name", this.jobName);
+		node.put("source", this.source);
+		node.put("target", this.target);
+		node.put("action", this.action.toString());
 		if (getTruncate()) node.put("truncate", true);
 		if (getDropTable()) node.put("drop", true);
 		if (getAutoCreate()) node.put("autocreate", getAutoCreate());
-		if (getSince() != null) node.put("since", getSince().toString());
-		if (getCreated() != null) node.set("created", getCreated().toJsonNode());
-		if (getPartitionInterval() != null) node.put("partition",  getPartitionInterval().toString());
-		if (getFilter() != null) node.put("filter", getFilter());
+		if (sinceExpr != null) 
+			node.put("since", getSince().toString());
+		if (createdRange != null) 
+			node.set("created", getCreatedRange(null).toJsonNode());
+		if (getPartitionInterval() != null) 
+			node.put("partition",  getPartitionInterval().toString());
+		if (this.filter != null) node.put("filter",this.filter);
 		if (includeColumns != null) node.put("columns", includeColumns.toString());
 		String yaml;
 		try {

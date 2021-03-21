@@ -12,18 +12,19 @@ public abstract class TableReader implements Callable<Metrics> {
 	public final Table table;
 	
 	protected TableReader parentReader;
-	protected String readerName;
-	protected String partName;
+	@Deprecated protected String readerName;
+	@Deprecated protected String partName;
+	
 	// filter is a base query to which createdRange, updatedRange and keyExclusion are appended
-	private EncodedQuery filter; 
-	private DateTimeRange createdRange;
-	private DateTimeRange updatedRange;
+	protected EncodedQuery filter; 
+	protected DateTimeRange createdRange;
+	protected DateTimeRange updatedRange;
 	// keyExclusion is use for pagination; only values greater than the current key will be returned
 	private Key keyExclusion = null;
 	
-	protected static enum OrderBy {NONE, FIELDS, KEYS};
-	// Note: RestTableReader sets this value to KEYS
-	protected OrderBy orderBy = OrderBy.NONE;
+	protected static enum OrderBy {NONE, KEYS, FIELDS};
+	// Note: RestTableReader sets orderBy to KEYS
+	protected OrderBy orderBy = OrderBy.KEYS;
 	protected int pageSize;
 	protected boolean displayValue = false;
 	protected String viewName = null;
@@ -31,7 +32,6 @@ public abstract class TableReader implements Callable<Metrics> {
 	protected RecordWriter writer;
 	protected Metrics metrics;
 	protected ProgressLogger progressLogger;
-	@Deprecated	protected final ReaderMetrics readerMetrics;
 
 	protected Integer maxRows;
 	protected boolean initialized = false;
@@ -42,8 +42,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	public TableReader(Table table) {
 		this.table = table;
 		this.logger = LoggerFactory.getLogger(this.getClass());
-		this.pageSize = getDefaultPageSize();
-		this.readerMetrics = new ReaderMetrics();
+		this.pageSize = table.session.defaultPageSize(table);
 	}
 	
 	protected void beginInitialize() {
@@ -53,14 +52,12 @@ public abstract class TableReader implements Callable<Metrics> {
 	}
 	
 	protected void endInitialize(Integer expected) {
-		// TODO: Remove readerMetrics
-		readerMetrics.setExpected(expected); 
 		metrics.setExpected(expected);
 		initialized = true;		
 	}
 
 	// Note: Only Synchronizer can throw SQLException during initialization	
-	public abstract void initialize() 
+	public abstract void prepare() 
 		throws IOException, SQLException, InterruptedException;
 
 	protected void setLogContext() {
@@ -70,27 +67,25 @@ public abstract class TableReader implements Callable<Metrics> {
 
 	protected void logStart() {
 		assert initialized;
-		if (progressLogger != null) 
-			progressLogger.logStart(readerMetrics.getExpected());		
+		if (progressLogger != null) progressLogger.logStart(getExpected());
 		Log.setTableContext(table, getReaderName());
 	}
 	
 	protected void logComplete() {
-		if (progressLogger != null)	
-			progressLogger.logComplete(getMetrics());
+		if (progressLogger != null)	progressLogger.logComplete();
 	}
 	
-	public abstract int getDefaultPageSize();
+//	public abstract int getDefaultPageSize();
 	
 	public abstract Metrics call() 
 		throws IOException, SQLException, InterruptedException;
 				
-	public void setReaderName(String name) {
+	@Deprecated public void setReaderName(String name) {
 		if (initialized) throw new IllegalStateException();		
 		this.readerName = name;
 	}
 	
-	public String getReaderName() {
+	@Deprecated public String getReaderName() {
 		return readerName == null ? table.getName() : readerName;
 	}
 	
@@ -103,43 +98,31 @@ public abstract class TableReader implements Callable<Metrics> {
 		return progressLogger;
 	}
 	
+	@Deprecated
 	public void setParent(TableReader parent) {
 		if (initialized) throw new IllegalStateException();
 		assert parent != null;
-		assert readerMetrics != null;
-		this.parentReader = parent;
-		this.readerMetrics.setParent(parent.readerMetrics);
+		this.parentReader = parent;		
 	}
 	
+	@Deprecated
 	public TableReader getParent() {
 		return this.parentReader;
 	}
 	
+	@Deprecated
 	public boolean hasParent() {
 		return this.parentReader != null;
 	}
 	
-	public void setPartName(String partName) {
-		assert parentReader != null;
-		assert partName != null;
+	@Deprecated public void setPartName(String partName) {
 		this.partName = partName;		
 	}
 	
-	public String getPartName() {
+	@Deprecated public String getPartName() {
 		return partName;
 	}
-	
-	@Deprecated
-	public ReaderMetrics getReaderMetrics() {
-		return this.readerMetrics;
-	}
-	
-	@Deprecated
-	protected void setExpected(Integer value) {		
-		readerMetrics.setExpected(value);
-		metrics.setExpected(value);
-	}
-	
+		
 	/**
 	 * Return number of expected rows, if available. 
 	 */
@@ -153,7 +136,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	 * Increment number of records read.
 	 */
 	protected void incrementInput(int count) {
-		readerMetrics.increment(count);
+//		readerMetrics.increment(count);
 		metrics.addInput(count);
 	}
 		
@@ -164,8 +147,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	}
 	
 	public int getPageSize() {
-		if (this.pageSize > 0) return this.pageSize;
-		int result = getDefaultPageSize();
+		int result = this.pageSize;
 		assert result > 0;
 		return result;
 	}
@@ -332,11 +314,10 @@ public abstract class TableReader implements Callable<Metrics> {
 		return this.maxRows;
 	}
 
-	public TableReader setWriter(RecordWriter writer, Metrics writerMetrics) {
+	public void setWriter(RecordWriter writer, Metrics metrics) {
 		if (initialized) throw new IllegalStateException();
 		this.writer = writer;
-		this.metrics = writerMetrics;		
-		return this;
+		this.metrics = metrics;		
 	}
 	
 	public RecordWriter getWriter() {
@@ -347,14 +328,18 @@ public abstract class TableReader implements Callable<Metrics> {
 	public Metrics getMetrics() {
 		return this.metrics;
 	}
+	
+	public void setMetrics(Metrics metrics) {
+		this.metrics = metrics;
+	}
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		assert !initialized;
-		Metrics writerMetrics = new Metrics(readerName);
+		Metrics accumulatorMetrics = new Metrics("accumulator");
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);
-		setWriter(accumulator, writerMetrics);
+		setWriter(accumulator, accumulatorMetrics);
 		try {
-			this.initialize();
+			this.prepare();
 			this.call();
 		} catch (SQLException e) {
 			// this should be impossible

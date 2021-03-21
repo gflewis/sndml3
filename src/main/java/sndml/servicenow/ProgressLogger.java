@@ -4,20 +4,12 @@ import sndml.datamart.DatePart;
 
 public abstract class ProgressLogger {
 
-	protected final TableReader reader;
-	protected final DatePart datePart;	
-								
-	public ProgressLogger(TableReader reader) {
-		this(reader, null);
-	}
+	protected final DatePart datePart;
+	protected final Metrics metrics;
 
-	public ProgressLogger(TableReader reader, DatePart part) {
-		this.reader = reader;
-		this.datePart = part;
-	}
-
-	public TableReader getReader() {
-		return this.reader;
+	public ProgressLogger(Metrics metrics, DatePart datePart) {
+		this.datePart = datePart;
+		this.metrics = metrics;
 	}
 	
 	public DatePart getPart() {
@@ -27,8 +19,12 @@ public abstract class ProgressLogger {
 	public boolean hasPart() {
 		return datePart != null;
 	}
-		
-	public abstract ProgressLogger newPartLogger(TableReader newReader, DatePart newPart);	
+	
+	public Metrics getMetrics() {
+		return metrics;
+	}
+	
+	public abstract ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart);	
 
 	/**
 	 * We are starting the initialization process, which includes
@@ -46,6 +42,6 @@ public abstract class ProgressLogger {
 	/**
 	 * We have completed all processing of record.
 	 */
-	public abstract void logComplete(Metrics writerMetrics);
+	public abstract void logComplete();
 	
 }

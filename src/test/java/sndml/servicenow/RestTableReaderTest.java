@@ -30,7 +30,7 @@ public class RestTableReaderTest {
 		TableReader reader = dept.rest().getDefaultReader();
 		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
 		reader.setWriter(accumulator, writerMetrics);		
-		reader.initialize();
+		reader.prepare();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
@@ -52,7 +52,7 @@ public class RestTableReaderTest {
 		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
 		reader.setWriter(accumulator, writerMetrics);		
 		reader.setDisplayValue(true);
-		reader.initialize();
+		reader.prepare();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
@@ -73,7 +73,7 @@ public class RestTableReaderTest {
 		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
 		reader.setWriter(accumulator, writerMetrics);		
 		reader.setDisplayValue(false);
-		reader.initialize();
+		reader.prepare();
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");

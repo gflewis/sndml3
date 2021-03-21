@@ -32,13 +32,7 @@ public class RecordList extends ArrayList<Record> {
 			this.add(rec);
 		}
 	}
-	
-	/*
-	public RecordList(Table table, JSONObject obj, String fieldname) {
-		this(table, (JSONArray) obj.get(fieldname));
-	}
-	*/
-	
+		
 	public RecordIterator iterator() {
 		return new RecordIterator(this);
 	}

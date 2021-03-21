@@ -54,14 +54,14 @@ public class FileWriter extends RecordWriter {
 		EncodedQuery query = querystring == null ? new EncodedQuery(table) :
 			new EncodedQuery(table, querystring);
 		reader.setFilter(query);
-		reader.initialize();
+		reader.prepare();
 		writer.open(writerMetrics);
 		reader.call();
 		writer.close(writerMetrics);
 	}
 
 	public FileWriter(File file) {
-		super(null);
+		super();
 		this.file = file;
 	}
 

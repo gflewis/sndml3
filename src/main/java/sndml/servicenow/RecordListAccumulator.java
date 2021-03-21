@@ -12,13 +12,13 @@ public class RecordListAccumulator extends RecordWriter {
 	}
 	
 	public RecordListAccumulator(Table table) {
-		super(null);
+		super();
 		allRecords = new RecordList(table);
 	}
 	
-	public void processRecords(RecordList recs, Metrics writerMetrics, ProgressLogger progressLogger) {
+	public void processRecords(RecordList recs, Metrics metrics, ProgressLogger progressLogger) {
 		allRecords.addAll(recs);
-		writerMetrics.addInserted(recs.size());
+		metrics.addInserted(recs.size());
 	}
 	
 	public RecordList getRecords() {
