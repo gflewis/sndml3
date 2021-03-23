@@ -90,7 +90,7 @@ public class Database {
 		commit();		
 	}
 		
-	void close() throws SQLException {
+	public void close() throws SQLException {
 		logger.info(Log.FINISH, "Database connection closed");
 		this.dbc.close();
 		this.dbc = null;

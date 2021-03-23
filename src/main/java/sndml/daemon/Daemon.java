@@ -1,5 +1,6 @@
-package sndml.datamart;
+package sndml.daemon;
 
+import java.net.URI;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,18 +11,20 @@ import org.apache.commons.daemon.DaemonInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.Log;
+import sndml.servicenow.Session;
 
 
 public class Daemon implements org.apache.commons.daemon.Daemon {
 
 	static Logger logger = LoggerFactory.getLogger(Daemon.class);
 		
-	private final ConnectionProfile profile;
 	private final ExecutorService workerPool;
 	private final int intervalSeconds;
 	private final int threadCount;
 	
+	private static ConnectionProfile daemonProfile;
 	private static Thread daemonThread; 
 	private static Scanner scanner;
 	private static String agentName;
@@ -29,8 +32,9 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private Timer timer;
 	
 	public Daemon(ConnectionProfile profile) {
+		if (daemonProfile != null) throw new AssertionError("Daemon already instantiated");
+		daemonProfile = profile;
 		daemonThread = Thread.currentThread();
-		this.profile = profile;
 		agentName = profile.getProperty("daemon.agent", "main");
 		Log.setJobContext(agentName);
 		threadCount = profile.getPropertyInt("daemon.threads", 3);
@@ -50,6 +54,29 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	
 	public static String agentName() {
 		return agentName;
+	}
+	
+	public static ConnectionProfile getConnectionProfile() {
+		return daemonProfile;
+	}
+	
+	/**
+	 * Return the URI of an API
+	 */
+	static URI getAPI(Session session, String apiName) {
+		return getAPI(session, apiName, null);
+	}
+	
+	static URI getAPI(Session session, String apiName, String parameter) {
+		ConnectionProfile profile = Daemon.getConnectionProfile();
+		assert profile != null;
+		String defaultScope = "x_108443_sndml";
+		String propName = "loader.api." + apiName;
+		String apiPath = profile.getProperty(propName);
+		if (apiPath == null) apiPath = "api/" + defaultScope + "/" + apiName;
+		if (!apiPath.endsWith("/")) apiPath += "/";
+		if (parameter != null) apiPath += parameter;
+		return session.getURI(apiPath);		
 	}
 	
 	public void run() throws Exception {
@@ -78,7 +105,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		Log.setJobContext(agentName);
 		logger.info(Log.INIT, String.format("agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer("scanner", true);
-		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
+		ShutdownHook shutdownHook = new ShutdownHook(daemonProfile, scanner, workerPool);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);
 		logger.debug(Log.INIT,"end start");		
@@ -88,7 +115,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	public void stop() {
 		Log.setJobContext(agentName);
 		logger.info(Log.FINISH, "begin stop");
-		int waitSec = profile.getPropertyInt("shutdown_seconds", 30);
+		int waitSec = daemonProfile.getPropertyInt("shutdown_seconds", 30);
 		boolean terminated = false;
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdownNow();

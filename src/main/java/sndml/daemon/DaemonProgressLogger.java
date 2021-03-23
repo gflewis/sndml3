@@ -1,4 +1,4 @@
-package sndml.datamart;
+package sndml.daemon;
 
 import java.io.IOException;
 import java.net.URI;
@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.datamart.ConnectionProfile;
+import sndml.datamart.DatePart;
+import sndml.datamart.ResourceException;
 import sndml.servicenow.*;
 
 public class DaemonProgressLogger extends ProgressLogger {
@@ -41,10 +44,11 @@ public class DaemonProgressLogger extends ProgressLogger {
 		this.session = session;
 		this.number = number;
 		this.runKey = runKey;
-		String putRunStatusPath = profile.getProperty(
-			"loader.api.putrunstatus", 
-			"api/x_108443_sndml/putrunstatus");
-		this.putRunStatusURI = session.getURI(putRunStatusPath);		
+//		String putRunStatusPath = profile.getProperty(
+//			"loader.api.putrunstatus", 
+//			"api/x_108443_sndml/putrunstatus");
+//		this.putRunStatusURI = session.getURI(putRunStatusPath);
+		this.putRunStatusURI = Daemon.getAPI(session, "putrunstatus");
 		// logger.info(Log.INIT, "DaemonProgressLogger " + number);
 	}
 

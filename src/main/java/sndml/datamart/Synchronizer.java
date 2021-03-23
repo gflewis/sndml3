@@ -263,7 +263,7 @@ public class Synchronizer extends TableReader {
 			insertReader.setProgressLogger(progressLogger);
 			insertWriter.open(insertWriterMetrics);
 			setLogContext();
-			insertReader.initialize(insertSet);
+			insertReader.parepare(insertSet);
 			insertReader.call();
 			insertWriter.close(insertWriterMetrics);
 			int rowsInserted = insertWriterMetrics.getInserted();
@@ -287,7 +287,7 @@ public class Synchronizer extends TableReader {
 			updateReader.setProgressLogger(progressLogger);
 			updateWriter.open(updateWriterMetrics);
 			setLogContext();
-			updateReader.initialize(updateSet);
+			updateReader.parepare(updateSet);
 			updateReader.call();
 			updateWriter.close(updateWriterMetrics);
 			int rowsUpdated = updateWriterMetrics.getUpdated();

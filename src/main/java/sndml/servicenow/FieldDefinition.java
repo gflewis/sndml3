@@ -21,19 +21,26 @@ public class FieldDefinition {
 	 * @param dictrec - The sys_dictionary record that describes this field.
 	 */
 	protected FieldDefinition(Table table, Record dictrec) {
-		this.table = table;
-		this.name = dictrec.getValue("element");
-		this.type = dictrec.getValue("internal_type");
-		this.max_length = dictrec.getInteger("max_length");
-		this.ref_table = dictrec.getValue("reference");
-		if (name == null)
-			throw new AssertionError(String.format(
-				"Missing name for field in \"%s\". Check sys_dictionary read permissions.", table.getName()));
-		if (type == null) 
-			throw new AssertionError(String.format(
-				"Field \"%s.%s\" has no type. Check sys_dictionary read permissions.", table.getName(), name));  
+		this(table, dictrec.getValue("element"), dictrec.getValue("internal_type"), 
+				dictrec.getInteger("max_length"), dictrec.getValue("reference"));
 	}
 
+	public FieldDefinition(Table table, String name, String type, Integer len, String ref) {
+		if (name == null)
+			throw new AssertionError(String.format(
+				"Missing name for field in \"%s\". Check sys_dictionary read permissions.", 
+				table.getName()));
+		if (type == null) 
+			throw new AssertionError(String.format(
+				"Field \"%s.%s\" has no type. Check sys_dictionary read permissions.", 
+				table.getName(), name));  
+		this.table = table;
+		this.name = name;
+		this.type = type;
+		this.max_length = len;
+		this.ref_table = ref;		
+	}
+	
 	/**
 	 * Return the table
 	 */

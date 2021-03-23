@@ -168,6 +168,13 @@ public class EncodedQuery implements Cloneable {
 	}
 	
 	/**
+	 * Add not null query
+	 */
+	public EncodedQuery addNotNull(String field) {
+		return addQuery(field + IS_NOT_EMPTY);
+	}
+	
+	/**
 	 * Adds a datetime range to a filter for sys_updated_on.
 	 * 
 	 * @param starting Select records updated on or after this datetime

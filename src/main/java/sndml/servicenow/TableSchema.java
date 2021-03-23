@@ -1,113 +1,30 @@
 package sndml.servicenow;
 
-import java.io.*;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.PrintStream;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.TreeMap;
 
-/**
- * This class holds the the schema or definition for a ServiceNow table.
- * The definition is read from <b>sys_dictionary</b> by the {@link Table} constructor.
- * 
- */
 public class TableSchema {
 
-	private final Table table;
-	private final Session session;
-	private final String tablename;
-	private final String parentname;
-	private final Table dictionary;
-	private final Table hierarchy;
+	final protected Table table;
+	final protected TreeMap<String,FieldDefinition> fields;
 	
-	private boolean empty = true;
-	private TreeMap<String,FieldDefinition> fields;
-	final private Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	protected TableSchema(Table table) 
-			throws IOException, InvalidTableNameException, InterruptedException {
-		super();
+	public TableSchema(Table table) {
 		this.table = table;
-		this.session = table.session;
-		this.tablename = table.getName();
-		dictionary = session.table("sys_dictionary");
-		hierarchy = session.table("sys_db_object");
-		String saveJob = Log.getJobContext();
-		String myname = dictionary.getName() + "." + this.tablename;
-		Log.setTableContext(dictionary,  myname);
-		logger.debug(Log.SCHEMA, "get definition for table " + tablename);
-		fields = new TreeMap<String,FieldDefinition>();
-		parentname = determineParentName();
-		logger.debug(Log.SCHEMA, tablename + " parent is " + parentname);
-		if (parentname != null) {
-			// recursive call for parent definition
-			TableSchema parentDefinition = session.getSchema(parentname);
-			Iterator<FieldDefinition> parentIter = parentDefinition.iterator();
-			while (parentIter.hasNext()) {
-				FieldDefinition parentField = parentIter.next();
-				String fieldname = parentField.getName();
-				fields.put(fieldname, parentField);
-			}
-		}
-		
-		EncodedQuery query = new EncodedQuery(dictionary).
-			addEquals("name",  tablename).
-			addEquals("active", "true");
-		
-		RestTableReader reader = new RestPetitTableReader(dictionary);
-		reader.setFilter(query);
-		reader.setFields(FieldDefinition.DICT_FIELDS);
-		reader.setPageSize(5000);
-		RecordList recs = reader.getAllRecords();
-		processRecords(recs);
-				
-		if (this.empty) {
-			logger.error(Log.SCHEMA, "Unable to read schema for: " + tablename +
-				" (check access controls for sys_dictionary and sys_db_object)");
-			if (tablename.equals("sys_db_object") || tablename.equals("sys_dictionary"))
-				throw new InsufficientRightsException("Unable to generate schema for " + tablename);
-			else
-				throw new InvalidTableNameException(tablename);
-		}
-		Log.setJobContext(saveJob);
-	}
-
-	public void processRecords(RecordList recs) throws IOException {
-		for (Record rec : recs) {
-			String fieldname = rec.getValue("element");
-			if (fieldname != null) {
-				FieldDefinition fieldDef = new FieldDefinition(table, rec);
-				fields.put(fieldname, fieldDef);
-				logger.debug(Log.BIND, String.format("%s.%s %s(%d)", 
-						tablename, fieldname, fieldDef.getType(), fieldDef.getLength()));
-				this.empty = false;
-			}
-		}
+		this.fields = new TreeMap<String,FieldDefinition>();
 	}
 	
-	private String determineParentName() throws IOException {
-		// if (tablename.startsWith("sys_")) return null;
-		Log.setTableContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
-		Record myRec = hierarchy.api().getRecord("name", this.tablename);
-		if (myRec == null) {
-			logger.error(Log.SCHEMA, "Unable to read schema for: " + tablename +
-					" (check access controls for sys_dictionary and sys_db_object)");
-			throw new InvalidTableNameException(tablename);			
-		}
-		Key parentKey = myRec.getKey("super_class");
-		if (parentKey == null) return null;
-		Record parentRec = hierarchy.getRecord(parentKey);
-		String parentName = parentRec.getValue("name");
-		logger.debug(Log.SCHEMA, "parent of " + tablename + " is " + parentKey + "/" + parentName);
-		return parentName;
+	public boolean isEmpty() {
+		return fields.isEmpty();
 	}
 	
-	/**
-	 * Return the name of the table from which this table was extended.
-	 * 
-	 * @return The name of the parent table or null if this table has no parent.
-	 */
-	public String getParentName() {
-		return parentname;
+	public void addField(String name, String type, Integer len, String ref) {
+		this.addField(new FieldDefinition(table, name, type, len, ref));
+	}
+	
+	public void addField(FieldDefinition field) {
+		fields.put(field.getName(), field);
 	}
 	
 	/**
@@ -128,6 +45,10 @@ public class TableSchema {
 		return result;
 	}
 
+	public boolean contains(String fieldname) {
+		return fields.containsKey(fieldname);
+	}
+	
 	/**
 	 * Return the type definition for a field.
 	 */
@@ -189,5 +110,5 @@ public class TableSchema {
 		}
 		out.println("End");
 	}
-
+	
 }

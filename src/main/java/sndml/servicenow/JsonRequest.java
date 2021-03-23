@@ -30,9 +30,25 @@ public class JsonRequest extends ServiceNowRequest {
 	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	public JsonRequest(Session session, URI uri) {
+		this(session, uri, HttpMethod.GET, null);
+	}
+	
 	public JsonRequest(Session session, URI uri, HttpMethod method, ObjectNode body) {
 		super(session.getClient(), uri, method);
 		this.requestObj = body;
+	}
+
+	public ObjectNode execute() throws IOException {
+		assert executed == false;
+		executeRequest();		
+		if (responseText == null) return null;
+		responseObj = (ObjectNode) mapper.readTree(responseText);
+		if (responseObj.has("error")) {
+			logger.warn(Log.RESPONSE, method.toString() + " " + uri.toString());
+			logger.warn(Log.RESPONSE, responseText);
+		}
+		return responseObj;
 	}
 	
 	private void executeRequest() throws IOException {
@@ -126,18 +142,6 @@ public class JsonRequest extends ServiceNowRequest {
 		executed = true;
 	}
 		
-	public ObjectNode execute() throws IOException {
-		assert executed == false;
-		executeRequest();		
-		if (responseText == null) return null;
-		responseObj = (ObjectNode) mapper.readTree(responseText);
-		if (responseObj.has("error")) {
-			logger.warn(Log.RESPONSE, method.toString() + " " + uri.toString());
-			logger.warn(Log.RESPONSE, responseText);
-		}
-		return responseObj;
-	}
-
 	protected String errorMessageLowerCase() {
 		assert responseObj != null;
 		if (!responseObj.has("error")) return null;

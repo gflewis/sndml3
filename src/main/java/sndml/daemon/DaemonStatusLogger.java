@@ -1,4 +1,4 @@
-package sndml.datamart;
+package sndml.daemon;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.*;
 
 public class DaemonStatusLogger {
@@ -21,10 +22,11 @@ public class DaemonStatusLogger {
 	public DaemonStatusLogger(ConnectionProfile profile, Session session) {
 		this.profile = profile;
 		this.session = session;
-		String putRunStatusPath = profile.getProperty(
-			"loader.api.putrunstatus", 
-			"api/x_108443_sndml/putrunstatus");
-		this.putRunStatus = session.getURI(putRunStatusPath);
+//		String putRunStatusPath = profile.getProperty(
+//			"loader.api.putrunstatus", 
+//			"api/x_108443_sndml/putrunstatus");
+//		this.putRunStatus = session.getURI(putRunStatusPath);
+		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 

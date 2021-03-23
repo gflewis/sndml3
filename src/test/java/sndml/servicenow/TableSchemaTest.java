@@ -1,15 +1,10 @@
 package sndml.servicenow;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import sndml.servicenow.InvalidTableNameException;
-import sndml.servicenow.Session;
-import sndml.servicenow.Table;
-import sndml.servicenow.TableSchema;
 
 public class TableSchemaTest {
 
@@ -22,18 +17,34 @@ public class TableSchemaTest {
 	@Test
 	public void testReport() throws Exception {
 		Session session = TestManager.getProfile().getSession();
-		Table incident = session.table("incident");		
-		TableSchema schema = new TableSchema(incident);
+		TableSchemaFactory factory = new TableSchemaFactory(session);
+		TableSchema schema = factory.getSchema("incident");
+		assertFalse(schema.isEmpty());
+		assertTrue(schema.contains("sys_id"));
+		assertTrue(schema.contains("short_description"));
+		assertTrue(schema.contains("assignment_group"));
+		assertTrue(schema.contains("parent_incident"));
+		assertFalse(schema.contains("georgia"));
 		schema.report(System.out);
 	}
+
+	@Test
+	public void testSysTemplate() throws Exception {
+		Session session = TestManager.getProfile().getSession();
+		TableSchemaFactory factory = new TableSchemaFactory(session);
+		TableSchema schema = factory.getSchema("sys_template");
+		assertFalse(schema.isEmpty());
+		assertTrue(schema.contains("table"));
+		assertTrue(schema.contains("show_on_template_bar"));
+	}
 	
-	@SuppressWarnings("unused")
 	@Test(expected = InvalidTableNameException.class)
 	public void testBadTable() throws Exception {
 		Session session = TestManager.getProfile().getSession();
-		Table badtable = session.table("incidentxx");
-		TableSchema schema = new TableSchema(badtable);
-		fail();
+		TableSchemaFactory factory = new TableSchemaFactory(session);
+		TableSchema schema = factory.getSchema("incidentxx");
+		assertTrue(schema.isEmpty());
 	}
+		
 
 }

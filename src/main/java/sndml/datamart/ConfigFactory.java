@@ -30,7 +30,7 @@ public class ConfigFactory {
 		this(DateTime.now());
 	}
 	
-	ConfigFactory(DateTime start) {
+	public ConfigFactory(DateTime start) {
 		jsonMapper = new ObjectMapper();
 		jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 		jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
@@ -76,8 +76,7 @@ public class ConfigFactory {
 		}
 		return loader;
 	}
-	
-	
+		
 	JobConfig yamlJob(ConnectionProfile profile, File yamlFile) 
 			throws IOException, ConfigParseException {
 		return yamlJob(profile, new FileReader(yamlFile));
@@ -100,7 +99,7 @@ public class ConfigFactory {
 		return job;
 	}
 		
-	JobConfig jobConfig(ConnectionProfile profile, JsonNode node) throws ConfigParseException {
+	public JobConfig jobConfig(ConnectionProfile profile, JsonNode node) throws ConfigParseException {
 		DateCalculator dateFactory = new DateCalculator();
 		JobConfig job;
 		try {

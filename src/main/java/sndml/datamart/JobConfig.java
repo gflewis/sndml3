@@ -48,24 +48,13 @@ public class JobConfig {
 	static EnumSet<Action> anyLoadAction =
 			EnumSet.of(Action.INSERT, Action.UPDATE, Action.SYNC);
 	
-	String getName() {
-		assert jobName != null;
-		return jobName; 
-	}
+	public String getName() { return jobName; }
+	public String getSource() {	return source;	}
+	public String getTarget() {	return this.target;	}
 	
-	String getSource() {
-		assert source != null;
-		return source; 		
-	}
-	
-	String getTarget() {
-		assert target != null;
-		return this.target; 
-	}
-	
-	Key getSysId() { return this.sys_id; }
-	String getNumber() { return this.number; }
-	Action getAction() { return action; }
+	public Key getSysId() { return this.sys_id; }
+	public String getNumber() { return this.number; }
+	public Action getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }

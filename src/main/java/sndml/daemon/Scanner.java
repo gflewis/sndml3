@@ -1,4 +1,4 @@
-package sndml.datamart;
+package sndml.daemon;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,6 +12,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.datamart.ConfigFactory;
+import sndml.datamart.ConfigParseException;
+import sndml.datamart.ConnectionProfile;
+import sndml.datamart.JobConfig;
 import sndml.servicenow.*;
 
 public class Scanner extends TimerTask {
@@ -30,14 +34,16 @@ public class Scanner extends TimerTask {
 		this.workerPool = workerPool;
 		this.session = profile.getSession();
 		String agentName = Daemon.agentName();
-		String getRunListPath = profile.getProperty(
-			"loader.api.getrunlist", 
-			"api/x_108443_sndml/getrunlist/");
-		String putRunStatusPath = profile.getProperty(
-			"loader.api.putrunstatus",
-			"api/x_108443_sndml/putrunstatus");
-		this.getRunList = session.getURI(getRunListPath + agentName);
-		this.putRunStatus = session.getURI(putRunStatusPath);
+//		String getRunListPath = profile.getProperty(
+//			"loader.api.getrunlist", 
+//			"api/x_108443_sndml/getrunlist/");
+//		String putRunStatusPath = profile.getProperty(
+//			"loader.api.putrunstatus",
+//			"api/x_108443_sndml/putrunstatus");
+//		this.getRunList = session.getURI(getRunListPath + agentName);
+//		this.putRunStatus = session.getURI(putRunStatusPath);
+		this.getRunList = Daemon.getAPI(session,  "getrunlist", agentName);
+		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
 		this.statusLogger = new DaemonStatusLogger(profile, session);
 	}
 		

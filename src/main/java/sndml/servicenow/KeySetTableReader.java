@@ -16,10 +16,8 @@ public class KeySetTableReader extends TableReader {
 		jsonAPI = table.json();
 	}
 
-	public int getDefaultPageSize() {
-		return 200;
-	}
 
+	@Override
 	public void prepare() throws IOException, InterruptedException {
 		beginInitialize();
 		EncodedQuery query = getQuery();
@@ -36,7 +34,7 @@ public class KeySetTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
-	public void initialize(KeySet keys) throws IOException {
+	public void parepare(KeySet keys) throws IOException {
 		beginInitialize();
 		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;

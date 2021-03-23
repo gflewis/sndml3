@@ -1,5 +1,6 @@
 package sndml.datamart;
 
+import sndml.daemon.DaemonProgressLogger;
 import sndml.servicenow.*;
 
 public class CompositeProgressLogger extends ProgressLogger {

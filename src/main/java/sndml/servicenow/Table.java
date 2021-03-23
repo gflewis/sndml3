@@ -24,11 +24,12 @@ public class Table {
 	Table(Session session, String tablename) {
 		this.session = session;
 		this.tablename = tablename;
+		this.instance = session.getInstance();		
 		Domain sessionDomain = session.getDomain();
-		this.domain = 
-			(sessionDomain == null || DOMAIN_EXCLUDED_TABLES.contains(tablename)) ? 
-				null : sessionDomain;			
-		this.instance = session.getInstance();
+		if (sessionDomain == null || DOMAIN_EXCLUDED_TABLES.contains(tablename)) 
+			this.domain = null;
+		else
+			this.domain = sessionDomain;
 		String apiName = session.getProperty("api");
 		if (apiName == null)
 			this.api = rest();

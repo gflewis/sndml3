@@ -141,16 +141,18 @@ public class Session {
 	}
 	
 	/**
-	 * Generate {@link TableSchema} or retrieve from cache.
+	 * Generate {@link LegacyTableSchema} or retrieve from cache.
 	 */
 	public TableSchema getSchema(String tablename) 
 			throws InvalidTableNameException, IOException, InterruptedException {
 		if (schemaCache.containsKey(tablename)) 
 			return schemaCache.get(tablename);
+		TableSchemaFactory factory = new TableSchemaFactory(this);
 		String saveJob = Log.getJobContext();
 		Log.setJobContext(tablename + ".schema");		
 		Table table = table(tablename);
-		TableSchema schema = new TableSchema(table);
+		TableSchema schema = factory.getSchema(table);
+		if (schema.isEmpty()) throw new InvalidTableNameException(tablename);
 		schemaCache.put(tablename, schema);
 		Log.setJobContext(saveJob);
 		return schema;
