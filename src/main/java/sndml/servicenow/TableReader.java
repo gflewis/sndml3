@@ -45,13 +45,15 @@ public abstract class TableReader implements Callable<Metrics> {
 		this.pageSize = table.session.defaultPageSize(table);
 	}
 	
-	protected void beginInitialize() {
+	protected void beginPrepare() {		
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
 		setLogContext();
+		// TODO: should not be conditional
+		assert progressLogger != null;
 		if (progressLogger != null) progressLogger.logPrepare();		
 	}
 	
-	protected void endInitialize(Integer expected) {
+	protected void endPrepare(Integer expected) {
 		metrics.setExpected(expected);
 		initialized = true;		
 	}
@@ -60,6 +62,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	public abstract void prepare() 
 		throws IOException, SQLException, InterruptedException;
 
+	@Deprecated
 	protected void setLogContext() {
 		//TODO Would like to deprecate but still used by Synchronizer
 		Log.setTableContext(table, getReaderName());
@@ -74,9 +77,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	protected void logComplete() {
 		if (progressLogger != null)	progressLogger.logComplete();
 	}
-	
-//	public abstract int getDefaultPageSize();
-	
+		
 	public abstract Metrics call() 
 		throws IOException, SQLException, InterruptedException;
 				

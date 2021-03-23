@@ -25,6 +25,7 @@ public class Scanner extends TimerTask {
 	final ConnectionProfile profile;
 	final Session session;
 	final ExecutorService workerPool;
+	final String agentName;
 	final URI getRunList;
 	final URI putRunStatus;
 	final DaemonStatusLogger statusLogger;
@@ -32,16 +33,9 @@ public class Scanner extends TimerTask {
 	Scanner(ConnectionProfile profile, ExecutorService workerPool) {
 		this.profile = profile;
 		this.workerPool = workerPool;
-		this.session = profile.getSession();
-		String agentName = Daemon.agentName();
-//		String getRunListPath = profile.getProperty(
-//			"loader.api.getrunlist", 
-//			"api/x_108443_sndml/getrunlist/");
-//		String putRunStatusPath = profile.getProperty(
-//			"loader.api.putrunstatus",
-//			"api/x_108443_sndml/putrunstatus");
-//		this.getRunList = session.getURI(getRunListPath + agentName);
-//		this.putRunStatus = session.getURI(putRunStatusPath);
+		this.session = profile.getSession();		
+		this.agentName = Daemon.agentName();
+		assert agentName != null;
 		this.getRunList = Daemon.getAPI(session,  "getrunlist", agentName);
 		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
 		this.statusLogger = new DaemonStatusLogger(profile, session);
@@ -49,7 +43,7 @@ public class Scanner extends TimerTask {
 		
 	@Override
 	public synchronized void run() {
-		Log.setJobContext(Daemon.agentName());
+		Log.setJobContext(agentName);
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
@@ -87,9 +81,15 @@ public class Scanner extends TimerTask {
 			else
 				logger.info(Log.DAEMON, "No Runs");
 		} 
+		catch (NoContentException e) {
+			logger.error(Log.RESPONSE, String.format(
+				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
+				getRunList.toString(), e.getClass().getName(), agentName));
+			Daemon.abort();
+		}
 		catch (IOException e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
-			Daemon.getThread().interrupt();
+			Daemon.abort();
 		}
 	}
 

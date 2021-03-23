@@ -66,7 +66,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 
 	@Override
 	public void logStart(Integer expected) {	
-		// logger.info(Log.INIT, String.format("logProgress %d", expected));
+		logger.info(Log.INIT, String.format("logStart %d", expected));
 		ObjectNode body = messageBody("running");
 		String fieldname = hasPart() ? "part_expected" : "expected";
 		body.put(fieldname,  expected);
@@ -75,7 +75,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		
 	@Override
 	public void logProgress() {
-		// logger.info(Log.PROCESS, "logProgress");
+		logger.info(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
 		if (hasPart()) {
@@ -100,7 +100,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 
 	@Override
 	public void logComplete() {
-		// logger.info(Log.FINISH, "logComplete");
+		logger.info(Log.FINISH, "logComplete");
 		ObjectNode body = messageBody("complete");
 		putRunStatus(body);
 	}

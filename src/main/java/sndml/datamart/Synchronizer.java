@@ -31,12 +31,7 @@ public class Synchronizer extends TableReader {
 		this.writerName = writerName;
 		this.metrics = new Metrics(writerName);
 	}
-		
-//	@Override
-//	public Metrics getMetrics() {
-//		return this.metrics;
-//	}
-	
+			
 	/**
 	 * <p>This method will do the following.</p>
 	 * <ol>
@@ -59,7 +54,7 @@ public class Synchronizer extends TableReader {
 	@Override
 	public void prepare() 
 			throws IOException, SQLException, InterruptedException {
-		beginInitialize();
+		beginPrepare();
 		logger.info(Log.INIT, String.format(
 				"Begin compare sn=%s db=%s", table.getName(), sqlTableName));
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
@@ -85,7 +80,7 @@ public class Synchronizer extends TableReader {
 		RecordList snTimestamps = sntsr.getAllRecords();
 		Key snMinKey = snTimestamps.minKey(); // for debug
 		Key snMaxKey = snTimestamps.maxKey(); // for debug
-		setLogContext();
+		Log.setTableContext(table, writerName);
 		if (logger.isDebugEnabled() && snTimestamps.size() > 0) {
 			logger.debug(Log.INIT, String.format("SN keys min=%s max=%s", snMinKey, snMaxKey));
 		}
@@ -130,17 +125,17 @@ public class Synchronizer extends TableReader {
 			"Compare identified %d inserts, %d updates, %d deletes, %d skips", 
 			insertSet.size(), updateSet.size(), deleteSet.size(), skipSet.size()));
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
-		endInitialize(expected);
+		endPrepare(expected);
 	}
 	
 	public void prepare_new() 
 			throws IOException, SQLException, InterruptedException {
-		beginInitialize();
+		beginPrepare();
 		getDatabaseTimestamps();
 		RecordList snTimestamps = getServiceNowTimestamps();
 		compareTimestamps(snTimestamps);
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
-		endInitialize(expected);		
+		endPrepare(expected);		
 	}
 
 	private TimestampHash getDatabaseTimestamps() throws SQLException {
@@ -172,7 +167,7 @@ public class Synchronizer extends TableReader {
 		RecordList snTimestamps = sntsr.getAllRecords();
 		Key snMinKey = snTimestamps.minKey(); // for debug
 		Key snMaxKey = snTimestamps.maxKey(); // for debug
-		setLogContext();
+		Log.setTableContext(table, writerName);
 		if (logger.isDebugEnabled() && snTimestamps.size() > 0) {
 			logger.debug(Log.INIT, String.format("SN keys min=%s max=%s", snMinKey, snMaxKey));
 		}
@@ -256,13 +251,12 @@ public class Synchronizer extends TableReader {
 					new DatabaseInsertWriter(db, table, sqlTableName, insertWriterName);
 			Metrics insertWriterMetrics = new Metrics(insertWriterName, this.metrics);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
-//			insertReader.setParent(this);
 			insertReader.setFields(this.fieldNames);
 			insertReader.setPageSize(this.getPageSize());
 			insertReader.setWriter(insertWriter, insertWriterMetrics);
 			insertReader.setProgressLogger(progressLogger);
 			insertWriter.open(insertWriterMetrics);
-			setLogContext();
+			Log.setTableContext(table, insertWriterName);
 			insertReader.parepare(insertSet);
 			insertReader.call();
 			insertWriter.close(insertWriterMetrics);
@@ -280,13 +274,12 @@ public class Synchronizer extends TableReader {
 					new DatabaseUpdateWriter(db, table, sqlTableName, updateWriterName);
 			Metrics updateWriterMetrics = new Metrics(updateWriterName, this.metrics);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
-//			updateReader.setParent(this);
 			updateReader.setFields(this.fieldNames);
 			updateReader.setPageSize(this.getPageSize());
 			updateReader.setWriter(updateWriter, updateWriterMetrics);
 			updateReader.setProgressLogger(progressLogger);
 			updateWriter.open(updateWriterMetrics);
-			setLogContext();
+			Log.setTableContext(table, updateWriterName);
 			updateReader.parepare(updateSet);
 			updateReader.call();
 			updateWriter.close(updateWriterMetrics);
@@ -304,7 +297,7 @@ public class Synchronizer extends TableReader {
 					new DatabaseDeleteWriter(db, table, sqlTableName, deleteWriterName);
 			Metrics deleteWriterMetrics = new Metrics(deleteWriterName, this.metrics);
 			deleteWriter.open(deleteWriterMetrics);
-			setLogContext();
+			Log.setTableContext(table, deleteWriterName);
 			deleteWriter.deleteRecords(deleteSet, deleteWriterMetrics, progressLogger);
 			deleteWriter.close(deleteWriterMetrics);
 			int rowsDeleted = deleteWriterMetrics.getDeleted();

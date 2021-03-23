@@ -33,12 +33,12 @@ public class JobRunner implements Callable<Metrics> {
 		return config;
 	}
 	
-	protected ProgressLogger newProgressLogger(TableReader reader) {
+	protected void createJobProgressLogger(TableReader reader) {
 		ProgressLogger progressLogger = 
 			new Log4jProgressLogger(reader.getClass(), action, jobMetrics);
 		reader.setMetrics(jobMetrics);
 		reader.setProgressLogger(progressLogger);
-		return progressLogger;
+//		return progressLogger;
 	}
 			
 	protected void close() throws ResourceException {
@@ -129,7 +129,7 @@ public class JobRunner implements Callable<Metrics> {
 		auditReader.setMaxRows(config.getMaxRows());
 		DatabaseDeleteWriter deleteWriter = 
 			new DatabaseDeleteWriter(db, table, sqlTableName, config.getName());
-		newProgressLogger(auditReader);
+		createJobProgressLogger(auditReader);
 		deleteWriter.open(jobMetrics);
 		auditReader.setWriter(deleteWriter, jobMetrics);
 		auditReader.prepare();
@@ -147,7 +147,7 @@ public class JobRunner implements Callable<Metrics> {
 		TableReader reader;
 		if (partitionInterval == null) {
 			reader = config.createReader(table, db, null);			
-			newProgressLogger(reader);
+			createJobProgressLogger(reader);
 			reader.setFields(config.getColumns());
 			reader.setPageSize(config.getPageSize());
 			reader.prepare();
@@ -156,7 +156,7 @@ public class JobRunner implements Callable<Metrics> {
 		else {
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(table, config, db);
-			newProgressLogger(multiReader);	
+			createJobProgressLogger(multiReader);	
 			multiReader.setMetrics(jobMetrics);;
 			assert multiReader.getMetrics() == jobMetrics;
 			multiReader.prepare();
@@ -185,25 +185,22 @@ public class JobRunner implements Callable<Metrics> {
 		Interval partitionInterval = config.getPartitionInterval();
 		DateTime since = config.getSince();	
 		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
-		ProgressLogger progressLogger;
 		if (partitionInterval == null) {
 			TableReader reader = config.createReader(table, db, null);
-			progressLogger = newProgressLogger(reader);
+			createJobProgressLogger(reader);
 			reader.setWriter(writer, jobMetrics);
 			writer.open(jobMetrics);
 			assert reader.getMetrics().getName() == config.getName();
 			Log.setTableContext(table, config.getName());					
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
-			reader.setProgressLogger(progressLogger);
 			reader.prepare();
 			reader.call();
 		}
 		else {
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(table, config, db);
-			progressLogger = newProgressLogger(multiReader);
+			createJobProgressLogger(multiReader);
 			multiReader.setWriter(writer, jobMetrics);
-			multiReader.setProgressLogger(progressLogger);
 			writer.open(jobMetrics);
 			multiReader.prepare();
 			DatePartition partition = multiReader.getPartition();
@@ -211,7 +208,6 @@ public class JobRunner implements Callable<Metrics> {
 			Log.setTableContext(table, config.getName());
 			multiReader.call();
 		}
-		progressLogger.logComplete();
 		writer.close(jobMetrics);
 	}
 

@@ -34,17 +34,17 @@ public class RestTableReader extends TableReader {
 	}
 	
 	public void prepare() throws IOException, InterruptedException  {
-		beginInitialize();
+		beginPrepare();
 		EncodedQuery statsQuery = getStatsQuery();
 		logger.debug(Log.INIT, String.format(
 			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, statsQuery));
 		if (statsEnabled) {
 			stats = restAPI.getStats(statsQuery, false);
-			endInitialize(stats.getCount());
+			endPrepare(stats.getCount());
 			logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 		}
 		else {
-			endInitialize(null);
+			endPrepare(null);
 		}
 	}
 	

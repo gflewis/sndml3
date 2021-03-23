@@ -19,7 +19,7 @@ public class KeySetTableReader extends TableReader {
 
 	@Override
 	public void prepare() throws IOException, InterruptedException {
-		beginInitialize();
+		beginPrepare();
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, false);
@@ -30,15 +30,15 @@ public class KeySetTableReader extends TableReader {
 			logger.warn(Log.PROCESS,
 					String.format("Expected %d keys but SOAP only returned %d; Please check ACLs",
 						expected, allKeys.size()));				
-		endInitialize(allKeys.size());
+		endPrepare(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
 	public void parepare(KeySet keys) throws IOException {
-		beginInitialize();
+		beginPrepare();						
 		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;
-		endInitialize(allKeys.size());
+		endPrepare(allKeys.size());
 	}
 	
 	public Integer getExpected() {

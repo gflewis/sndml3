@@ -130,11 +130,12 @@ public class JsonRequest extends ServiceNowRequest {
 		}
 		if (responseText == null || responseContentType == null) {
 			// should have gotten an HTTP 204 for No Content
-			logger.error(Log.RESPONSE, this.dump());
+			// this.logResponseError(logger);
 			throw new NoContentException(this);
 		}		
-		if ("text/html".equals(responseContentType))
-			throw new InstanceUnavailableException(this);
+		if ("text/html".equals(responseContentType)) {
+			throw new InstanceUnavailableException(this);			
+		}
 		if (statusCode == 400) {
 			this.logResponseError(logger);
 			throw new NoContentException(this);

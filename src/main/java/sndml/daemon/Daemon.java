@@ -28,6 +28,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private static Thread daemonThread; 
 	private static Scanner scanner;
 	private static String agentName;
+	private static boolean isAborted = false;
 	
 	private Timer timer;
 	
@@ -52,6 +53,15 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		return daemonThread;
 	}
 	
+	/**
+	 * This function can be called by any thread to abort the daemon.
+	 */
+	public static void abort() {
+		logger.error(Log.FINISH, "Aborting the daemon");
+		isAborted = true;
+		daemonThread.interrupt();
+	}
+	
 	public static String agentName() {
 		return agentName;
 	}
@@ -74,19 +84,22 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		String propName = "loader.api." + apiName;
 		String apiPath = profile.getProperty(propName);
 		if (apiPath == null) apiPath = "api/" + defaultScope + "/" + apiName;
-		if (!apiPath.endsWith("/")) apiPath += "/";
-		if (parameter != null) apiPath += parameter;
+		if (parameter != null) apiPath += "/" + parameter;
 		return session.getURI(apiPath);		
 	}
 	
-	public void run() throws Exception {
+	public void run() {
 		Log.setJobContext(agentName);
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		start();
 		// Daemon now goes into an endless loop
-		while (!workerPool.isTerminated()) {
+		while (!isAborted && !workerPool.isTerminated()) {
 			logger.info(Log.DAEMON, "main awaiting threadpool termination");
-			workerPool.awaitTermination(300, TimeUnit.SECONDS);
+			try {
+				workerPool.awaitTermination(300, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				if (!isAborted) e.printStackTrace();
+			}
 		}
 		stop();
 	}
@@ -101,7 +114,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	}
 	
 	@Override
-	public void start() throws Exception {
+	public void start() {
 		Log.setJobContext(agentName);
 		logger.info(Log.INIT, String.format("agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer("scanner", true);
@@ -114,7 +127,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	@Override
 	public void stop() {
 		Log.setJobContext(agentName);
-		logger.info(Log.FINISH, "begin stop");
+		// logger.info(Log.FINISH, "begin stop");
 		int waitSec = daemonProfile.getPropertyInt("shutdown_seconds", 30);
 		boolean terminated = false;
 		// shutdownNow will send an interrupt to all threads
@@ -131,7 +144,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		else {
 			logger.warn("Some threads failed to terminate");
 		}
-		logger.info(Log.FINISH, "end stop");		
+		// logger.info(Log.FINISH, "end stop");		
 	}
 	
 	@Override

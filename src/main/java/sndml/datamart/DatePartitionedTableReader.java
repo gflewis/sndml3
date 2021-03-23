@@ -81,7 +81,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	
 	@Override
 	public void prepare() throws IOException, InterruptedException {
-		super.beginInitialize();
+		super.beginPrepare();
 		assert metrics != null;
 		assert progressLogger != null;
 		// Use Stats API to determine min and max dates
@@ -101,7 +101,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format(
 				"range=%s partition=%s expected=%d", 
 				range.toString(), partition.toString(), expected));
-		super.endInitialize(expected);
+		super.endPrepare(expected);
 	}
 	
 	private TableReader createReader(DatePart datePart) {
