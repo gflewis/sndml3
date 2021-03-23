@@ -6,7 +6,7 @@ public abstract class ProgressLogger {
 
 	protected final DatePart datePart;
 	protected final Metrics metrics;
-
+	
 	public ProgressLogger(Metrics metrics, DatePart datePart) {
 		this.datePart = datePart;
 		this.metrics = metrics;

@@ -44,12 +44,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		this.session = session;
 		this.number = number;
 		this.runKey = runKey;
-//		String putRunStatusPath = profile.getProperty(
-//			"loader.api.putrunstatus", 
-//			"api/x_108443_sndml/putrunstatus");
-//		this.putRunStatusURI = session.getURI(putRunStatusPath);
 		this.putRunStatusURI = Daemon.getAPI(session, "putrunstatus");
-		// logger.info(Log.INIT, "DaemonProgressLogger " + number);
 	}
 
 	@Override
@@ -78,23 +73,30 @@ public class DaemonProgressLogger extends ProgressLogger {
 		logger.info(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
+		addMetricsToBody(body, metrics);
+		/*
 		if (hasPart()) {
 			assert metrics.hasParent();
-			body.put("expected", metrics.getParent().getExpected());
-			body.put("inserted",  metrics.getParent().getInserted());
-			body.put("updated",  metrics.getParent().getUpdated());
-			body.put("deleted",  metrics.getParent().getDeleted());			
+			Metrics parentMetrics = metrics.getParent();
+			body.put("expected", parentMetrics.getExpected());
+			body.put("inserted", parentMetrics.getInserted());
+			body.put("updated",  parentMetrics.getUpdated());
+			body.put("deleted",  parentMetrics.getDeleted());
+			body.put("skipped",  parentMetrics.getSkipped());
 			body.put("part_expected", metrics.getExpected());
-			body.put("part_inserted",  metrics.getInserted());
+			body.put("part_inserted", metrics.getInserted());
 			body.put("part_updated",  metrics.getUpdated());
-			body.put("part_deleted",  metrics.getDeleted());						
+			body.put("part_deleted",  metrics.getDeleted());		
+			body.put("part_skipped",  metrics.getSkipped());
 		}
 		else {
 			body.put("expected", metrics.getExpected());
-			body.put("inserted",  metrics.getInserted());
+			body.put("inserted", metrics.getInserted());
 			body.put("updated",  metrics.getUpdated());
-			body.put("deleted",  metrics.getDeleted());			
+			body.put("deleted",  metrics.getDeleted());
+			body.put("skipped",  metrics.getSkipped());
 		}
+		*/
 		putRunStatus(body);
 	}
 
@@ -102,10 +104,11 @@ public class DaemonProgressLogger extends ProgressLogger {
 	public void logComplete() {
 		logger.info(Log.FINISH, "logComplete");
 		ObjectNode body = messageBody("complete");
+		addMetricsToBody(body, metrics);
 		putRunStatus(body);
 	}
-
-	ObjectNode messageBody(String status) {
+	
+	private ObjectNode messageBody(String status) {
 		assert status != null;
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
@@ -117,6 +120,30 @@ public class DaemonProgressLogger extends ProgressLogger {
 			body.put("status", status);	
 		}
 		return body;
+	}
+	
+	private void addMetricsToBody(ObjectNode body, Metrics metrics) {
+		if (hasPart()) {
+			assert metrics.hasParent();
+			Metrics parentMetrics = metrics.getParent();
+			body.put("expected", parentMetrics.getExpected());
+			body.put("inserted", parentMetrics.getInserted());
+			body.put("updated",  parentMetrics.getUpdated());
+			body.put("deleted",  parentMetrics.getDeleted());
+			body.put("skipped",  parentMetrics.getSkipped());
+			body.put("part_expected", metrics.getExpected());
+			body.put("part_inserted", metrics.getInserted());
+			body.put("part_updated",  metrics.getUpdated());
+			body.put("part_deleted",  metrics.getDeleted());		
+			body.put("part_skipped",  metrics.getSkipped());
+		}
+		else {
+			body.put("expected", metrics.getExpected());
+			body.put("inserted", metrics.getInserted());
+			body.put("updated",  metrics.getUpdated());
+			body.put("deleted",  metrics.getDeleted());
+			body.put("skipped",  metrics.getSkipped());
+		}		
 	}
 	
 	void putRunStatus(ObjectNode body) {

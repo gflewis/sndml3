@@ -337,6 +337,10 @@ public abstract class TableReader implements Callable<Metrics> {
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		assert !initialized;
 		Metrics accumulatorMetrics = new Metrics("accumulator");
+		if (this.metrics == null) 
+			this.metrics = accumulatorMetrics;
+		if (this.progressLogger == null) 
+			this.progressLogger = new NullProgressLogger();
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);
 		setWriter(accumulator, accumulatorMetrics);
 		try {

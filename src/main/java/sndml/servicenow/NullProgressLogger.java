@@ -6,7 +6,11 @@ import sndml.datamart.DatePart;
  * {@link ProgressLogger} that discards metrics.
  */
 public class NullProgressLogger extends ProgressLogger {
-			
+
+	public NullProgressLogger() {
+		super(null, null);
+	}
+	
 	public NullProgressLogger(Metrics metrics, DatePart datePart) {
 		super(metrics, datePart);
 	}
