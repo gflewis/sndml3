@@ -153,13 +153,6 @@ public final class Metrics {
 	}
 	public synchronized void addInserted(int count) {
 		inserted += count;
-		// TODO: Remove this debugging code
-		if (parent != null && logger.isDebugEnabled()) {
-			logger.debug(Log.PROCESS, String.format(
-				"addInserted name=%s count=%d parent=%s", getName(), count, parent.getName()));
-			assert parent != this;
-			assert parent == null || parent.parent == null;  // avoid recursive calls
-		}
 		if (parent != null) parent.addInserted(count);		
 	}
 	

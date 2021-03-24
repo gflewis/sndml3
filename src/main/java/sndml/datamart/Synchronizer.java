@@ -33,9 +33,9 @@ public class Synchronizer extends TableReader {
 		this.metrics = new Metrics(writerName);
 	}
 
-	public void prepare(Metrics metrics, ProgressLogger progressLogger) 
+	public void prepare(Metrics metrics, ProgressLogger progress) 
 			throws IOException, SQLException, InterruptedException {
-		prepare(null, metrics, progressLogger);
+		prepare(null, metrics, progress);
 	}
 	
 	/**
@@ -58,104 +58,17 @@ public class Synchronizer extends TableReader {
 	 * @throws InterruptedException
 	 */	
 	@Override
-	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) 
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
 			throws IOException, SQLException, InterruptedException {
 		assert writer == null;
-		beginPrepare(writer, metrics, progressLogger);
+		beginPrepare(writer, metrics, progress);
 		dbTimestamps = getDatabaseTimestamps();
 		snTimestamps = getServiceNowTimestamps();
 		compareTimestamps();
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
-		endPrepare(expected);
-		
-		/*
-		beginPrepare(writer, metrics, progressLogger);
-		logger.info(Log.INIT, String.format(
-				"Begin compare sn=%s db=%s", table.getName(), sqlTableName));
-		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
-		if (createdRange == null) 
-			dbTimestamps = dbtsr.getTimestamps(sqlTableName);
-		else
-			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);		
-		KeySet dbKeys = dbTimestamps.getKeys(); // for debug
-		Key dbMinKey = dbKeys.minValue(); // for debug
-		Key dbMaxKey = dbKeys.maxValue(); // for debug
-		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
-		if (logger.isDebugEnabled() && dbTimestamps.size() > 0) {
-			logger.debug(Log.INIT, String.format("database min key=%s updated %s", 
-					dbMinKey, dbTimestamps.get(dbMinKey)));
-			logger.debug(Log.INIT, String.format("database max key=%s updated %s", 
-					dbMaxKey, dbTimestamps.get(dbMaxKey)));
-		}
-		RestTableReader sntsr = new RestTableReader(this.table);
-		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
-		sntsr.setCreatedRange(createdRange);
-		sntsr.setPageSize(10000);
-		sntsr.enableStats(true);
-		RecordList snTimestamps = sntsr.getAllRecords();
-		Key snMinKey = snTimestamps.minKey(); // for debug
-		Key snMaxKey = snTimestamps.maxKey(); // for debug
-		Log.setTableContext(table, writerName);
-		if (logger.isDebugEnabled() && snTimestamps.size() > 0) {
-			logger.debug(Log.INIT, String.format("SN keys min=%s max=%s", snMinKey, snMaxKey));
-		}
-		TimestampHash examined = new TimestampHash();
-		insertSet = new KeySet();
-		updateSet = new KeySet();
-		deleteSet = new KeySet();
-		skipSet = new KeySet();
-		for (Record rec : snTimestamps) {
-			Key key = rec.getKey();
-			assert key != null;
-			assert !examined.containsKey(key) :
-				String.format("duplicate key: %s", key.toString());				
-			DateTime snts = rec.getUpdatedTimestamp();
-			DateTime dbts = dbTimestamps.get(key);
-			if (key.equals(snMinKey)) {			
-				logger.debug(Log.INIT, String.format(
-						"ServiceNow min key=%s snts=%s dbts=%s", key, snts, dbts));
-			}
-			if (key.equals(snMaxKey)) {			
-				logger.debug(Log.INIT, String.format(
-						"ServiceNow max key=%s snts=%s dbts=%s", key, snts, dbts));
-			}
-			if (dbts == null)
-				insertSet.add(key);
-			else if (dbts.equals(snts))
-				skipSet.add(key);
-			else
-				updateSet.add(key);
-			examined.put(key, snts);
-		}
-		logger.debug(Log.INIT, String.format("inserts=%d updated=%d skips=%d", 
-				insertSet.size(), updateSet.size(), skipSet.size()));
-		assert examined.size() == (insertSet.size() + updateSet.size() + skipSet.size()) :
-			String.format("examined=%d inserts=%d updated=%d skips=%d", 
-					examined.size(), insertSet.size(), updateSet.size(), skipSet.size());
-		for (Key key : dbTimestamps.keySet()) {
-			if (examined.get(key) == null) 
-				deleteSet.add(key);
-		}
-		logger.info(Log.INIT, String.format(
-			"Compare identified %d inserts, %d updates, %d deletes, %d skips", 
-			insertSet.size(), updateSet.size(), deleteSet.size(), skipSet.size()));
-		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
-		endPrepare(expected);
-		*/
+		endPrepare(expected);		
 	}
 		
-	//TODO Delete me
-//	@Deprecated
-//	public void new_prepare(Metrics metrics, ProgressLogger progressLogger) 
-//			throws IOException, SQLException, InterruptedException {
-//		RecordWriter syncWriter = null;
-//		beginPrepare(syncWriter, metrics, progressLogger);
-//		getDatabaseTimestamps();
-//		RecordList snTimestamps = getServiceNowTimestamps();
-//		compareAndProcess(snTimestamps);
-//		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
-//		endPrepare(expected);		
-//	}
 
 	private TimestampHash getDatabaseTimestamps() throws SQLException {
 		TimestampHash dbTimestamps;
@@ -180,7 +93,8 @@ public class Synchronizer extends TableReader {
 	private RecordList getServiceNowTimestamps() throws IOException, InterruptedException {
 		RestTableReader sntsr = new RestTableReader(this.table);
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
-		sntsr.setCreatedRange(createdRange);
+		sntsr.setCreatedRange(this.createdRange);
+		sntsr.setFilter(this.filter);
 		sntsr.setPageSize(10000);
 		sntsr.enableStats(true);
 		RecordList snTimestamps = sntsr.getAllRecords();
@@ -236,23 +150,11 @@ public class Synchronizer extends TableReader {
 		
 	}
 	
-	@Override
-	public TableReader setFilter(EncodedQuery value) {
-		if (!(value==null || value.isEmpty()))
-			throw new UnsupportedOperationException();
-		return this;
-	}
-
 //	@Override
-//	public void logStart() {
-//		metrics.start();
-//		super.logStart();		
-//	}
-//	
-//	@Override
-//	public void logComplete() {
-//		metrics.finish();
-//		super.logComplete();
+//	public TableReader setFilter(EncodedQuery value) {
+//		if (!(value==null || value.isEmpty()))
+//			throw new UnsupportedOperationException();
+//		return this;
 //	}
 	
 	private void processInserts() throws IOException, SQLException, InterruptedException {
@@ -266,8 +168,6 @@ public class Synchronizer extends TableReader {
 			insertReader.setReaderName(insertPartName);
 			insertReader.setFields(this.fieldNames);
 			insertReader.setPageSize(this.getPageSize());
-//			insertReader.setWriter(insertWriter, insertWriterMetrics);
-//			insertReader.setProgressLogger(progressLogger);
 			insertWriter.open(insertWriterMetrics);
 			Log.setTableContext(table, insertPartName);
 			insertReader.prepare(insertSet, insertWriter, insertWriterMetrics, progress);
@@ -291,8 +191,6 @@ public class Synchronizer extends TableReader {
 			updateReader.setReaderName(udpatePartName);
 			updateReader.setFields(this.fieldNames);
 			updateReader.setPageSize(this.getPageSize());
-//			updateReader.setWriter(updateWriter, updateWriterMetrics);
-//			updateReader.setProgressLogger(progressLogger);
 			updateWriter.open(updateWriterMetrics);
 			Log.setTableContext(table, udpatePartName);
 			updateReader.prepare(updateSet, updateWriter, updateWriterMetrics, progress);

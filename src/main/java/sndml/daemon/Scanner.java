@@ -29,6 +29,7 @@ public class Scanner extends TimerTask {
 	final URI getRunList;
 	final URI putRunStatus;
 	final DaemonStatusLogger statusLogger;
+	final boolean abortOnException;
 	
 	Scanner(ConnectionProfile profile, ExecutorService workerPool) {
 		this.profile = profile;
@@ -39,6 +40,7 @@ public class Scanner extends TimerTask {
 		this.getRunList = Daemon.getAPI(session,  "getrunlist", agentName);
 		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
 		this.statusLogger = new DaemonStatusLogger(profile, session);
+		this.abortOnException = profile.getPropertyBoolean("daemon.abort_on_exception", true);
 	}
 		
 	@Override
@@ -85,12 +87,11 @@ public class Scanner extends TimerTask {
 			logger.error(Log.RESPONSE, String.format(
 				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
 				getRunList.toString(), e.getClass().getName(), agentName));
-			Daemon.abort();
+			if (abortOnException) Daemon.abort();
 		}
 		catch (IOException e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
-			if (profile.getPropertyBoolean("daemon.abort_on_io_exception", true))
-				Daemon.abort();
+			if (abortOnException) Daemon.abort();
 		}
 	}
 

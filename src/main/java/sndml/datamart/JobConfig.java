@@ -218,7 +218,7 @@ public class JobConfig {
 		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
 		validForActions("Created", createdRange, Action.INSERT_UPDATE_SYNC);
 		validForActions("Partition", partition, Action.INSERT_UPDATE_SYNC);
-		validForActions("Filter", filter, Action.INSERT_UPDATE);
+		validForActions("Filter", filter, Action.INSERT_UPDATE_SYNC);
 		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
 		validForActions("SQL", sql, Action.EXECUTE_ONLY);
 		
