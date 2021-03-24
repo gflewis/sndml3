@@ -11,11 +11,11 @@ public class RestTableReader extends TableReader {
 	
 	private final int DEFAULT_PAGE_SIZE = 200;
 	
-	@Deprecated
-	public RestTableReader(Table table, String readerName) {
-		this(table);
-		this.setReaderName(readerName);
-	}
+//	@Deprecated
+//	public RestTableReader(Table table, String readerName) {
+//		this(table);
+//		this.setReaderName(readerName);
+//	}
 	
 	public RestTableReader(Table table) {
 		super(table);
@@ -50,7 +50,7 @@ public class RestTableReader extends TableReader {
 	}
 	
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		logStart();
+		progressLogger.logStart(getExpected());
 		assert writer != null;
 		assert metrics != null;
 		int rowCount = 0;
@@ -96,7 +96,7 @@ public class RestTableReader extends TableReader {
 					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
 			}
 		}
-		logComplete();
+		progressLogger.logComplete();
 		return metrics;
 	}
 	

@@ -71,23 +71,23 @@ public abstract class TableReader implements Callable<Metrics> {
 //		Log.setTableContext(table, getReaderName());
 //	}
 
-	protected void logStart() {
-		assert initialized;
-		if (progressLogger != null) progressLogger.logStart(getExpected());
-		Log.setTableContext(table, getReaderName());
-	}
-	
-	protected void logComplete() {
-		if (progressLogger != null)	progressLogger.logComplete();
-	}
+//	protected void logStart() {
+//		assert initialized;
+//		if (progressLogger != null) progressLogger.logStart(getExpected());
+//		Log.setTableContext(table, getReaderName());
+//	}
+//	
+//	protected void logComplete() {
+//		if (progressLogger != null)	progressLogger.logComplete();
+//	}
 		
 	public abstract Metrics call() 
 		throws IOException, SQLException, InterruptedException;
 				
-	@Deprecated public void setReaderName(String name) {
-		if (initialized) throw new IllegalStateException();		
-		this.readerName = name;
-	}
+//	@Deprecated public void setReaderName(String name) {
+//		if (initialized) throw new IllegalStateException();		
+//		this.readerName = name;
+//	}
 	
 	@Deprecated public String getReaderName() {
 		return readerName == null ? table.getName() : readerName;
@@ -131,6 +131,7 @@ public abstract class TableReader implements Callable<Metrics> {
 		
 	/**
 	 * Return number of expected rows, if available. 
+	 * Otherwise return null.
 	 */
 	public Integer getExpected() {
 		return metrics.getExpected();

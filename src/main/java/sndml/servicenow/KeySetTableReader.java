@@ -50,7 +50,7 @@ public class KeySetTableReader extends TableReader {
 		
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		logStart();
+		progressLogger.logStart(getExpected());
 		RecordWriter writer = this.getWriter();
 		int pageSize = this.getPageSize();
 		if (writer == null) throw new IllegalStateException("writer not defined");

@@ -118,21 +118,21 @@ public final class DatePartitionedTableReader extends TableReader {
 		return partReader;		
 	}
 	
-	@Override
-	public void logStart() {
-		metrics.start();
-		super.logStart();		
-	}
-	
-	@Override
-	public void logComplete() {
-		metrics.finish();
-		super.logComplete();
-	}
+//	@Override
+//	public void logStart() {
+//		metrics.start();
+//		super.logStart();		
+//	}
+//	
+//	@Override
+//	public void logComplete() {
+//		metrics.finish();
+//		super.logComplete();
+//	}
 	
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		this.logStart();
+		progressLogger.logStart(getExpected());
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
 			return metrics;
@@ -159,11 +159,10 @@ public final class DatePartitionedTableReader extends TableReader {
 				TableReader partReader = createReader(partRange);
 				partReader.prepare(writer, metrics, progressLogger);
 				assert partReader.getProgressLogger() != null;
-//				Metrics metrics = partReader.call();				
-//				assert metrics == partReader.getMetrics();
+				partReader.call();				
 			}
 		}
-		this.logComplete();
+		progressLogger.logComplete();
 		// Free resources
 		futures = null;
 		partition = null;

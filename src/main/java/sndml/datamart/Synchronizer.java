@@ -19,6 +19,7 @@ public class Synchronizer extends TableReader {
 	final String writerName;
 	
 	TimestampHash dbTimestamps;
+	RecordList snTimestamps;	
 	KeySet insertSet;
 	KeySet updateSet;
 	KeySet deleteSet;
@@ -61,9 +62,9 @@ public class Synchronizer extends TableReader {
 			throws IOException, SQLException, InterruptedException {
 		assert writer == null;
 		beginPrepare(writer, metrics, progressLogger);
-		getDatabaseTimestamps();
-		RecordList snTimestamps = getServiceNowTimestamps();
-		compareTimestamps(snTimestamps);
+		dbTimestamps = getDatabaseTimestamps();
+		snTimestamps = getServiceNowTimestamps();
+		compareTimestamps();
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
 		endPrepare(expected);
 		
@@ -144,17 +145,17 @@ public class Synchronizer extends TableReader {
 	}
 		
 	//TODO Delete me
-	@Deprecated
-	public void new_prepare(Metrics metrics, ProgressLogger progressLogger) 
-			throws IOException, SQLException, InterruptedException {
-		RecordWriter syncWriter = null;
-		beginPrepare(syncWriter, metrics, progressLogger);
-		getDatabaseTimestamps();
-		RecordList snTimestamps = getServiceNowTimestamps();
-		compareTimestamps(snTimestamps);
-		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
-		endPrepare(expected);		
-	}
+//	@Deprecated
+//	public void new_prepare(Metrics metrics, ProgressLogger progressLogger) 
+//			throws IOException, SQLException, InterruptedException {
+//		RecordWriter syncWriter = null;
+//		beginPrepare(syncWriter, metrics, progressLogger);
+//		getDatabaseTimestamps();
+//		RecordList snTimestamps = getServiceNowTimestamps();
+//		compareAndProcess(snTimestamps);
+//		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
+//		endPrepare(expected);		
+//	}
 
 	private TimestampHash getDatabaseTimestamps() throws SQLException {
 		TimestampHash dbTimestamps;
@@ -192,7 +193,7 @@ public class Synchronizer extends TableReader {
 		return snTimestamps;		
 	}
 	
-	private void compareTimestamps(RecordList snTimestamps) throws IOException, InterruptedException {
+	private void compareTimestamps() throws IOException, InterruptedException {
 		Key snMinKey = snTimestamps.minKey(); // for debug
 		Key snMaxKey = snTimestamps.maxKey(); // for debug
 		TimestampHash examined = new TimestampHash();
@@ -242,27 +243,20 @@ public class Synchronizer extends TableReader {
 		return this;
 	}
 
-	@Override
-	public void logStart() {
-		metrics.start();
-		super.logStart();		
-	}
+//	@Override
+//	public void logStart() {
+//		metrics.start();
+//		super.logStart();		
+//	}
+//	
+//	@Override
+//	public void logComplete() {
+//		metrics.finish();
+//		super.logComplete();
+//	}
 	
-	@Override
-	public void logComplete() {
-		metrics.finish();
-		super.logComplete();
-	}
-	
-	
-	@Override
-	public Metrics call() throws IOException, SQLException, InterruptedException {
-		assert initialized;
-		assert progressLogger != null;
-		// Process the Inserts
-		logStart();
+	private void processInserts() throws IOException, SQLException, InterruptedException {
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
-		assert writerName != null;
 		if (insertSet.size() > 0) {
 			String insertWriterName = writerName + ".INSERT";
 			DatabaseInsertWriter insertWriter =	
@@ -282,9 +276,10 @@ public class Synchronizer extends TableReader {
 			if (rowsInserted != insertSet.size())
 				logger.error(Log.PROCESS, String.format("inserted %d, expected to insert %d", 
 					rowsInserted, insertSet.size()));
-		}
-		
-		// Process the Updates
+		}		
+	}
+
+	private void processUpdates() throws IOException, SQLException, InterruptedException {
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
 			String updateWriterName = writerName + ".UPDATE";
@@ -305,9 +300,10 @@ public class Synchronizer extends TableReader {
 			if (rowsUpdated != updateSet.size())
 				logger.error(Log.PROCESS, String.format("updated %d, expected to update %d", 
 					rowsUpdated, updateSet.size()));
-		}
-					
-		// Process the Deletes
+		}		
+	}
+	
+	private void processDeletes() throws IOException, SQLException {
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
 			String deleteWriterName = writerName + ".DELETE";
@@ -322,9 +318,19 @@ public class Synchronizer extends TableReader {
 			if (rowsDeleted != deleteSet.size())
 				logger.error(Log.PROCESS, String.format("deleted %d, expected to delete %d", 
 					rowsDeleted, deleteSet.size()));
-		}
+		}		
+	}
+	
+	@Override
+	public Metrics call() throws IOException, SQLException, InterruptedException {
+		assert initialized;
+		assert progressLogger != null;
+		progressLogger.logStart(getExpected());
+		processInserts();
+		processUpdates();
+		processDeletes();
 		metrics.addSkipped(skipSet.size());
-		logComplete();
+		progressLogger.logComplete();
 		// Release memory
 		insertSet = null;
 		updateSet = null;

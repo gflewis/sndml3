@@ -42,7 +42,7 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 		
 	public Metrics call() throws IOException, InterruptedException, SQLException {
-		logStart();
+		progressLogger.logStart(getExpected());
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null;
@@ -65,7 +65,7 @@ public class SoapKeySetTableReader extends TableReader {
 			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));
 			fromIndex += pageSize;
 		}
-		logComplete();
+		progressLogger.logComplete();
 		return metrics;
 	}
 
