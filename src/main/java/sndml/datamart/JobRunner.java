@@ -131,7 +131,7 @@ public class JobRunner implements Callable<Metrics> {
 			new DatabaseDeleteWriter(db, table, sqlTableName, config.getName());
 		ProgressLogger progressLogger = createJobProgressLogger(auditReader);
 		deleteWriter.open(jobMetrics);
-		auditReader.setWriter(deleteWriter, jobMetrics);
+//		auditReader.setWriter(deleteWriter, jobMetrics);
 		auditReader.prepare(deleteWriter, jobMetrics, progressLogger);
 		Log.setTableContext(table, config.getName());
 		auditReader.call();
@@ -188,7 +188,7 @@ public class JobRunner implements Callable<Metrics> {
 		if (partitionInterval == null) {
 			TableReader reader = config.createReader(table, db, null);
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
-			reader.setWriter(writer, jobMetrics);
+//			reader.setWriter(writer, jobMetrics);
 			writer.open(jobMetrics);
 			assert reader.getMetrics().getName() == config.getName();
 			Log.setTableContext(table, config.getName());					
@@ -200,7 +200,7 @@ public class JobRunner implements Callable<Metrics> {
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(table, config, db);
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);
-			multiReader.setWriter(writer, jobMetrics);
+//			multiReader.setWriter(writer, jobMetrics);
 			writer.open(jobMetrics);
 			multiReader.prepare(writer, jobMetrics, progressLogger);
 			DatePartition partition = multiReader.getPartition();

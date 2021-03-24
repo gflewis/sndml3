@@ -89,7 +89,8 @@ public class Scanner extends TimerTask {
 		}
 		catch (IOException e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
-			Daemon.abort();
+			if (profile.getPropertyBoolean("daemon.abort_on_io_exception", true))
+				Daemon.abort();
 		}
 	}
 
