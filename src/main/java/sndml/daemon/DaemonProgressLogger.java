@@ -64,7 +64,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		logger.info(Log.INIT, String.format("logStart %d", expected));
 		ObjectNode body = messageBody("running");
 		String fieldname = hasPart() ? "part_expected" : "expected";
-		body.put(fieldname,  expected);
+		body.put(fieldname, expected);
 		putRunStatus(body);
 	}
 		
@@ -73,30 +73,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		logger.info(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
-		addMetricsToBody(body, metrics);
-		/*
-		if (hasPart()) {
-			assert metrics.hasParent();
-			Metrics parentMetrics = metrics.getParent();
-			body.put("expected", parentMetrics.getExpected());
-			body.put("inserted", parentMetrics.getInserted());
-			body.put("updated",  parentMetrics.getUpdated());
-			body.put("deleted",  parentMetrics.getDeleted());
-			body.put("skipped",  parentMetrics.getSkipped());
-			body.put("part_expected", metrics.getExpected());
-			body.put("part_inserted", metrics.getInserted());
-			body.put("part_updated",  metrics.getUpdated());
-			body.put("part_deleted",  metrics.getDeleted());		
-			body.put("part_skipped",  metrics.getSkipped());
-		}
-		else {
-			body.put("expected", metrics.getExpected());
-			body.put("inserted", metrics.getInserted());
-			body.put("updated",  metrics.getUpdated());
-			body.put("deleted",  metrics.getDeleted());
-			body.put("skipped",  metrics.getSkipped());
-		}
-		*/
+		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
 
@@ -104,10 +81,13 @@ public class DaemonProgressLogger extends ProgressLogger {
 	public void logComplete() {
 		logger.info(Log.FINISH, "logComplete");
 		ObjectNode body = messageBody("complete");
-		addMetricsToBody(body, metrics);
+		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
-	
+
+	/**
+	 * Create a new message body
+	 */
 	private ObjectNode messageBody(String status) {
 		assert status != null;
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
@@ -122,7 +102,10 @@ public class DaemonProgressLogger extends ProgressLogger {
 		return body;
 	}
 	
-	private void addMetricsToBody(ObjectNode body, Metrics metrics) {
+	/**
+	 * Append metrics to the message body
+	 */
+	private void appendMetrics(ObjectNode body, Metrics metrics) {
 		if (hasPart()) {
 			assert metrics.hasParent();
 			Metrics parentMetrics = metrics.getParent();

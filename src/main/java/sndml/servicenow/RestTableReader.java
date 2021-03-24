@@ -33,8 +33,9 @@ public class RestTableReader extends TableReader {
 		return this;
 	}
 	
-	public void prepare() throws IOException, InterruptedException  {
-		beginPrepare();
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) 
+			throws IOException, InterruptedException  {
+		beginPrepare(writer, metrics, progressLogger);
 		EncodedQuery statsQuery = getStatsQuery();
 		logger.debug(Log.INIT, String.format(
 			"initialize statsEnabled=%b query=\"%s\"", statsEnabled, statsQuery));

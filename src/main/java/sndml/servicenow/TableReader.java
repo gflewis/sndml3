@@ -45,9 +45,12 @@ public abstract class TableReader implements Callable<Metrics> {
 		this.pageSize = table.session.defaultPageSize(table);
 	}
 	
-	protected void beginPrepare() {		
+	protected void beginPrepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) {	
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
-		setLogContext();
+		this.writer = writer;
+		this.metrics = metrics;
+		this.progressLogger = progressLogger;
+//		setLogContext();
 		// TODO: should not be conditional
 		assert progressLogger != null;
 		if (progressLogger != null) progressLogger.logPrepare();		
@@ -59,14 +62,14 @@ public abstract class TableReader implements Callable<Metrics> {
 	}
 
 	// Note: Only Synchronizer can throw SQLException during initialization	
-	public abstract void prepare() 
+	public abstract void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) 
 		throws IOException, SQLException, InterruptedException;
 
-	@Deprecated
-	protected void setLogContext() {
-		//TODO Would like to deprecate but still used by Synchronizer
-		Log.setTableContext(table, getReaderName());
-	}
+//	@Deprecated
+//	private void setLogContext() {
+//		//TODO Would like to deprecate but still used by Synchronizer
+//		Log.setTableContext(table, getReaderName());
+//	}
 
 	protected void logStart() {
 		assert initialized;
@@ -116,11 +119,13 @@ public abstract class TableReader implements Callable<Metrics> {
 		return this.parentReader != null;
 	}
 	
-	@Deprecated public void setPartName(String partName) {
+	@Deprecated 
+	public void setPartName(String partName) {
 		this.partName = partName;		
 	}
 	
-	@Deprecated public String getPartName() {
+	@Deprecated 
+	public String getPartName() {
 		return partName;
 	}
 		
@@ -128,8 +133,6 @@ public abstract class TableReader implements Callable<Metrics> {
 	 * Return number of expected rows, if available. 
 	 */
 	public Integer getExpected() {
-		if (!metrics.hasExpected())
-			throw new IllegalStateException(this.getClass().getName() + " not initialized");
 		return metrics.getExpected();
 	}
 	
@@ -137,7 +140,6 @@ public abstract class TableReader implements Callable<Metrics> {
 	 * Increment number of records read.
 	 */
 	protected void incrementInput(int count) {
-//		readerMetrics.increment(count);
 		metrics.addInput(count);
 	}
 		
@@ -336,6 +338,7 @@ public abstract class TableReader implements Callable<Metrics> {
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		assert !initialized;
+		// TODO Clean up
 		Metrics accumulatorMetrics = new Metrics("accumulator");
 		if (this.metrics == null) 
 			this.metrics = accumulatorMetrics;
@@ -344,7 +347,7 @@ public abstract class TableReader implements Callable<Metrics> {
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);
 		setWriter(accumulator, accumulatorMetrics);
 		try {
-			this.prepare();
+			this.prepare(accumulator, metrics, progressLogger);
 			this.call();
 		} catch (SQLException e) {
 			// this should be impossible

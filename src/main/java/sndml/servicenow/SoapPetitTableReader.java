@@ -43,9 +43,11 @@ public class SoapPetitTableReader extends TableReader {
 	}
 	
 	@Override
-	public void prepare() {
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) {
 		assert writer != null : "Writer not initialized";
-//		Log.setTableContext(table, getReaderName());
+		beginPrepare(writer, metrics, progressLogger);
+		Integer expected = null;
+		endPrepare(expected);
 	}
 		
 	@Override

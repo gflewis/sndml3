@@ -10,12 +10,10 @@ public class Log4jProgressLogger extends ProgressLogger {
 	protected final Logger logger;
 	protected final Action action;
 	
-	@Deprecated
 	public Log4jProgressLogger(TableReader reader, Action action)	{
 		this(reader, action, null);
 	}
 	
-	@Deprecated
 	public Log4jProgressLogger(TableReader reader, Action action, DatePart part) {
 		this(reader.getClass(), action, null, null);
 	}

@@ -28,9 +28,9 @@ public class RestTableReaderTest {
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
-		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
-		reader.setWriter(accumulator, writerMetrics);		
-		reader.prepare();
+		Metrics metrics = new Metrics(this.getClass().getSimpleName());
+//		reader.setWriter(accumulator, metrics);		
+		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
@@ -49,10 +49,10 @@ public class RestTableReaderTest {
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
-		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
-		reader.setWriter(accumulator, writerMetrics);		
+		Metrics metrics = new Metrics(this.getClass().getSimpleName());
+//		reader.setWriter(accumulator, metrics);		
 		reader.setDisplayValue(true);
-		reader.prepare();
+		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
@@ -70,10 +70,10 @@ public class RestTableReaderTest {
 		Table dept = session.table("cmn_department");
 		RecordListAccumulator accumulator = new RecordListAccumulator(dept);
 		TableReader reader = dept.rest().getDefaultReader();
-		Metrics writerMetrics = new Metrics(this.getClass().getSimpleName());
-		reader.setWriter(accumulator, writerMetrics);		
+		Metrics metrics = new Metrics(this.getClass().getSimpleName());
+//		reader.setWriter(accumulator, metrics);		
 		reader.setDisplayValue(false);
-		reader.prepare();
+		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();
 		for (Record rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");

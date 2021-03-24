@@ -22,10 +22,6 @@ public class DaemonStatusLogger {
 	public DaemonStatusLogger(ConnectionProfile profile, Session session) {
 		this.profile = profile;
 		this.session = session;
-//		String putRunStatusPath = profile.getProperty(
-//			"loader.api.putrunstatus", 
-//			"api/x_108443_sndml/putrunstatus");
-//		this.putRunStatus = session.getURI(putRunStatusPath);
 		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}

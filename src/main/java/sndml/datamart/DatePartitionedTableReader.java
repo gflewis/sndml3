@@ -80,8 +80,9 @@ public final class DatePartitionedTableReader extends TableReader {
 	}
 	
 	@Override
-	public void prepare() throws IOException, InterruptedException {
-		super.beginPrepare();
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
+			throws IOException, InterruptedException {
+		super.beginPrepare(writer, metrics, progress);
 		assert metrics != null;
 		assert progressLogger != null;
 		// Use Stats API to determine min and max dates
@@ -131,7 +132,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		logStart();
+		this.logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
 			return metrics;
@@ -141,10 +142,10 @@ public final class DatePartitionedTableReader extends TableReader {
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
 			for (DatePart partRange : partition) {
-				TableReader reader = createReader(partRange);
+				TableReader partReader = createReader(partRange);
 				logger.debug("Submit " + metrics.getName());
-				reader.prepare();
-				Future<Metrics> future = executor.submit(reader);
+				partReader.prepare(writer, metrics, progressLogger);
+				Future<Metrics> future = executor.submit(partReader);
 				futures.add(future);				
 			}
 			executor.shutdown();
@@ -154,20 +155,15 @@ public final class DatePartitionedTableReader extends TableReader {
 			}
 		}
 		else {
-			int processed = 0;
 			for (DatePart partRange : partition) {
-				TableReader reader = createReader(partRange);
-				reader.prepare();
-				assert reader.getProgressLogger() != null;
-				Metrics metrics = reader.call();
-				// TODOL This is clunky
-				reader.getProgressLogger().logComplete();
-				assert metrics == reader.getMetrics();
-				processed += reader.getMetrics().getProcessed();
+				TableReader partReader = createReader(partRange);
+				partReader.prepare(writer, metrics, progressLogger);
+				assert partReader.getProgressLogger() != null;
+//				Metrics metrics = partReader.call();				
+//				assert metrics == partReader.getMetrics();
 			}
-			assert metrics.getProcessed() == processed;
 		}
-		logComplete();
+		this.logComplete();
 		// Free resources
 		futures = null;
 		partition = null;

@@ -8,6 +8,7 @@ import java.sql.SQLException;
  * by first getting a list of all the keys.
  */
 
+@Deprecated
 public class SoapKeySetTableReader extends TableReader {
 
 	protected final SoapTableAPI soapAPI;
@@ -25,12 +26,12 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 
 	@Override
-	public void prepare() throws IOException, InterruptedException, SQLException {
-		beginPrepare();
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
+			throws IOException, InterruptedException, SQLException {
+		beginPrepare(writer, metrics, progress);
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, "initialize query=" + query);
 		allKeys = soapAPI.getKeys(query);
-//		setExpected(allKeys.size());
 		endPrepare(allKeys.size());
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));	
 	}

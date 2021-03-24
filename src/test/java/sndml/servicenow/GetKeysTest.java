@@ -26,7 +26,8 @@ public class GetKeysTest {
 //		assertTrue(numRecs > 20000);		
 		KeySetTableReader reader = new KeySetTableReader(table);
 		logger.info(Log.TEST, "Calling initialize");
-		reader.prepare();
+		Metrics metrics = new Metrics(null, null);
+		reader.prepare(new NullWriter(), metrics, new NullProgressLogger());
 		Integer numKeys = reader.getExpected();
 		logger.info(Log.TEST, String.format("Count=%d Keys=%d",  numRecs, numKeys));
 		assertEquals(numRecs, numKeys);

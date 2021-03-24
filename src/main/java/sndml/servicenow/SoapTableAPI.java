@@ -168,6 +168,7 @@ public class SoapTableAPI extends TableAPI {
 				"element \"count\" not found", responseElement);
 	}
 
+	@Deprecated
 	public TableReader getDefaultReader() throws IOException {
 		return new SoapKeySetTableReader(this.table);
 	}

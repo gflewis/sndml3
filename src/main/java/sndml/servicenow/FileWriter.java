@@ -13,6 +13,9 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.datamart.Action;
+import sndml.datamart.Log4jProgressLogger;
+
 public class FileWriter extends RecordWriter {
 
 	public enum Format {Import, List};
@@ -47,17 +50,18 @@ public class FileWriter extends RecordWriter {
 		File outfile = (outfilename == null) ? null : new File(outfilename);
 		Session session = new Session(props);
 		Table table = session.table(tablename);
-		FileWriter writer = new FileWriter(outfile);
-		Metrics writerMetrics = new Metrics(outfile.getName());
 		TableReader reader = new RestTableReader(table);
-		reader.setWriter(writer, writerMetrics);
 		EncodedQuery query = querystring == null ? new EncodedQuery(table) :
 			new EncodedQuery(table, querystring);
 		reader.setFilter(query);
-		reader.prepare();
-		writer.open(writerMetrics);
+		FileWriter writer = new FileWriter(outfile);
+		Metrics metrics = new Metrics(outfile.getName());
+		ProgressLogger progress = new Log4jProgressLogger(reader, Action.INSERT);
+//		reader.setWriter(writer, metrics);
+		reader.prepare(writer, metrics, progress);
+		writer.open(metrics);
 		reader.call();
-		writer.close(writerMetrics);
+		writer.close(metrics);
 	}
 
 	public FileWriter(File file) {

@@ -31,7 +31,12 @@ public class Synchronizer extends TableReader {
 		this.writerName = writerName;
 		this.metrics = new Metrics(writerName);
 	}
-			
+
+	public void prepare(Metrics metrics, ProgressLogger progressLogger) 
+			throws IOException, SQLException, InterruptedException {
+		prepare(null, metrics, progressLogger);
+	}
+	
 	/**
 	 * <p>This method will do the following.</p>
 	 * <ol>
@@ -52,9 +57,18 @@ public class Synchronizer extends TableReader {
 	 * @throws InterruptedException
 	 */	
 	@Override
-	public void prepare() 
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) 
 			throws IOException, SQLException, InterruptedException {
-		beginPrepare();
+		assert writer == null;
+		beginPrepare(writer, metrics, progressLogger);
+		getDatabaseTimestamps();
+		RecordList snTimestamps = getServiceNowTimestamps();
+		compareTimestamps(snTimestamps);
+		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
+		endPrepare(expected);
+		
+		/*
+		beginPrepare(writer, metrics, progressLogger);
 		logger.info(Log.INIT, String.format(
 				"Begin compare sn=%s db=%s", table.getName(), sqlTableName));
 		DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);
@@ -126,11 +140,15 @@ public class Synchronizer extends TableReader {
 			insertSet.size(), updateSet.size(), deleteSet.size(), skipSet.size()));
 		int expected = insertSet.size() + updateSet.size() + deleteSet.size() + skipSet.size();
 		endPrepare(expected);
+		*/
 	}
-	
-	public void prepare_new() 
+		
+	//TODO Delete me
+	@Deprecated
+	public void new_prepare(Metrics metrics, ProgressLogger progressLogger) 
 			throws IOException, SQLException, InterruptedException {
-		beginPrepare();
+		RecordWriter syncWriter = null;
+		beginPrepare(syncWriter, metrics, progressLogger);
 		getDatabaseTimestamps();
 		RecordList snTimestamps = getServiceNowTimestamps();
 		compareTimestamps(snTimestamps);
@@ -257,7 +275,7 @@ public class Synchronizer extends TableReader {
 			insertReader.setProgressLogger(progressLogger);
 			insertWriter.open(insertWriterMetrics);
 			Log.setTableContext(table, insertWriterName);
-			insertReader.parepare(insertSet);
+			insertReader.prepare(insertSet, insertWriter, insertWriterMetrics, progressLogger);
 			insertReader.call();
 			insertWriter.close(insertWriterMetrics);
 			int rowsInserted = insertWriterMetrics.getInserted();
@@ -280,7 +298,7 @@ public class Synchronizer extends TableReader {
 			updateReader.setProgressLogger(progressLogger);
 			updateWriter.open(updateWriterMetrics);
 			Log.setTableContext(table, updateWriterName);
-			updateReader.parepare(updateSet);
+			updateReader.prepare(updateSet, updateWriter, updateWriterMetrics, progressLogger);
 			updateReader.call();
 			updateWriter.close(updateWriterMetrics);
 			int rowsUpdated = updateWriterMetrics.getUpdated();

@@ -17,7 +17,6 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	final Key runKey;
 	final String number;
 	final DaemonStatusLogger statusLogger;
-//	DaemonProgressLogger appLogger;
 		
 	public DaemonJobRunner(ConnectionProfile profile, JobConfig config) {
 		super(profile.getSession(), profile.getDatabase(), config);
@@ -34,7 +33,7 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 	}
 
 	@Override
-	protected void createJobProgressLogger(TableReader reader) {
+	protected ProgressLogger createJobProgressLogger(TableReader reader) {
 		Log4jProgressLogger textLogger = 
 			new Log4jProgressLogger(reader.getClass(), action, jobMetrics);		
 		DaemonProgressLogger appLogger =
@@ -43,6 +42,7 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 		reader.setMetrics(jobMetrics);
 		reader.setProgressLogger(compositeLogger);
 		assert appLogger.getMetrics() != null;
+		return compositeLogger;
 	}
 		
 	@Override

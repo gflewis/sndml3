@@ -18,8 +18,9 @@ public class KeySetTableReader extends TableReader {
 
 
 	@Override
-	public void prepare() throws IOException, InterruptedException {
-		beginPrepare();
+	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
+			throws IOException, InterruptedException {
+		beginPrepare(writer, metrics, progress);
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, false);
@@ -34,8 +35,9 @@ public class KeySetTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
-	public void parepare(KeySet keys) throws IOException {
-		beginPrepare();						
+	public void prepare(KeySet keys, RecordWriter writer, Metrics metrics, ProgressLogger progress) 
+			throws IOException {
+		beginPrepare(writer, metrics, progress);					
 		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
 		allKeys = keys;
 		endPrepare(allKeys.size());
