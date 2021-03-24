@@ -12,8 +12,8 @@ public abstract class TableReader implements Callable<Metrics> {
 	public final Table table;
 	
 	protected TableReader parentReader;
-	@Deprecated protected String readerName;
-	@Deprecated protected String partName;
+	protected String readerName;
+	protected String partName;
 	
 	// filter is a base query to which createdRange, updatedRange and keyExclusion are appended
 	protected EncodedQuery filter; 
@@ -31,7 +31,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	protected FieldNames fieldNames = null;	
 	protected RecordWriter writer;
 	protected Metrics metrics;
-	protected ProgressLogger progressLogger;
+	protected ProgressLogger progress;
 
 	protected Integer maxRows;
 	protected boolean initialized = false;
@@ -45,15 +45,15 @@ public abstract class TableReader implements Callable<Metrics> {
 		this.pageSize = table.session.defaultPageSize(table);
 	}
 	
-	protected void beginPrepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) {	
+	protected void beginPrepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) {	
 		if (initialized) throw new IllegalStateException("initialize() called more than once");
 		this.writer = writer;
 		this.metrics = metrics;
-		this.progressLogger = progressLogger;
+		this.progress = progress;
 //		setLogContext();
 		// TODO: should not be conditional
-		assert progressLogger != null;
-		if (progressLogger != null) progressLogger.logPrepare();		
+		assert progress != null;
+		if (progress != null) progress.logPrepare();		
 	}
 	
 	protected void endPrepare(Integer expected) {
@@ -83,23 +83,32 @@ public abstract class TableReader implements Callable<Metrics> {
 		
 	public abstract Metrics call() 
 		throws IOException, SQLException, InterruptedException;
-				
-//	@Deprecated public void setReaderName(String name) {
-//		if (initialized) throw new IllegalStateException();		
-//		this.readerName = name;
-//	}
 	
-	@Deprecated public String getReaderName() {
-		return readerName == null ? table.getName() : readerName;
+	public void setReaderName(String name) {
+		if (initialized) throw new IllegalStateException();		
+		this.readerName = name;
 	}
 	
+	public String getReaderName() {
+		return readerName == null ? table.getName() : readerName;
+	}
+
+	public void setPartName(String partName) {
+		this.partName = partName;		
+	}
+	
+	public String getPartName() {
+		return partName;
+	}
+		
+	
 	public void setProgressLogger(ProgressLogger progressLogger) {
-		this.progressLogger = progressLogger;
+		this.progress = progressLogger;
 	}
 	
 	public ProgressLogger getProgressLogger() {
-		assert progressLogger != null;
-		return progressLogger;
+		assert progress != null;
+		return progress;
 	}
 	
 	@Deprecated
@@ -119,16 +128,6 @@ public abstract class TableReader implements Callable<Metrics> {
 		return this.parentReader != null;
 	}
 	
-	@Deprecated 
-	public void setPartName(String partName) {
-		this.partName = partName;		
-	}
-	
-	@Deprecated 
-	public String getPartName() {
-		return partName;
-	}
-		
 	/**
 	 * Return number of expected rows, if available. 
 	 * Otherwise return null.
@@ -318,12 +317,14 @@ public abstract class TableReader implements Callable<Metrics> {
 		return this.maxRows;
 	}
 
+	@Deprecated
 	public void setWriter(RecordWriter writer, Metrics metrics) {
 		if (initialized) throw new IllegalStateException();
 		this.writer = writer;
 		this.metrics = metrics;		
 	}
 	
+	@Deprecated
 	public RecordWriter getWriter() {
 		assert this.writer != null;
 		return this.writer;
@@ -343,12 +344,12 @@ public abstract class TableReader implements Callable<Metrics> {
 		Metrics accumulatorMetrics = new Metrics("accumulator");
 		if (this.metrics == null) 
 			this.metrics = accumulatorMetrics;
-		if (this.progressLogger == null) 
-			this.progressLogger = new NullProgressLogger();
+		if (this.progress == null) 
+			this.progress = new NullProgressLogger();
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);
 		setWriter(accumulator, accumulatorMetrics);
 		try {
-			this.prepare(accumulator, metrics, progressLogger);
+			this.prepare(accumulator, metrics, progress);
 			this.call();
 		} catch (SQLException e) {
 			// this should be impossible

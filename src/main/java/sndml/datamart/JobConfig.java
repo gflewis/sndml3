@@ -277,8 +277,8 @@ public class JobConfig {
 		else {
 			reader = new RestTableReader(table);
 		}
-//		reader.setReaderName(readerName);
-//		reader.setPartName(partName);
+		reader.setReaderName(readerName);
+		reader.setPartName(partName);
 		reader.setFilter(getFilter(table));		
 		reader.setCreatedRange(getCreatedRange(datePart));		
 		reader.setUpdatedRange(getUpdatedRange());

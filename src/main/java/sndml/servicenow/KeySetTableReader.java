@@ -20,6 +20,7 @@ public class KeySetTableReader extends TableReader {
 	@Override
 	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
 			throws IOException, InterruptedException {
+		logger.error(Log.INIT, "Deprecated function. Missing keys argument.");
 		beginPrepare(writer, metrics, progress);
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
@@ -38,7 +39,7 @@ public class KeySetTableReader extends TableReader {
 	public void prepare(KeySet keys, RecordWriter writer, Metrics metrics, ProgressLogger progress) 
 			throws IOException {
 		beginPrepare(writer, metrics, progress);					
-		logger.debug(Log.INIT, String.format("initialize numkeys=%d", keys.size()));
+		logger.debug(Log.INIT, String.format("prepare numkeys=%d", keys.size()));
 		allKeys = keys;
 		endPrepare(allKeys.size());
 	}
@@ -50,8 +51,7 @@ public class KeySetTableReader extends TableReader {
 		
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		progressLogger.logStart(getExpected());
-		RecordWriter writer = this.getWriter();
+		progress.logStart(getExpected());
 		int pageSize = this.getPageSize();
 		if (writer == null) throw new IllegalStateException("writer not defined");
 		if (allKeys == null) throw new IllegalStateException("not initialized");
@@ -70,7 +70,7 @@ public class KeySetTableReader extends TableReader {
 			params.add("sysparm_query", sliceQuery.toString());
 			RecordList recs = jsonAPI.getRecords(params);
 			incrementInput(recs.size());			
-			writer.processRecords(recs, metrics, progressLogger);
+			writer.processRecords(recs, metrics, progress);
 			rowCount += recs.size();
 			logger.debug(String.format("processed %d / %d rows", rowCount, totalRows));
 			if (maxRows != null && rowCount > maxRows)

@@ -130,9 +130,8 @@ public class DaemonProgressLogger extends ProgressLogger {
 	}
 	
 	void putRunStatus(ObjectNode body) {
-		if (logger.isDebugEnabled())
-			logger.debug(Log.REQUEST, String.format(
-				"putRunStatus %s %s", runKey, body.toString()));
+		logger.debug(Log.REQUEST, String.format(
+			"putRunStatus %s %s", runKey, body.toString()));
 		JsonRequest request = new JsonRequest(session, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
 		try {

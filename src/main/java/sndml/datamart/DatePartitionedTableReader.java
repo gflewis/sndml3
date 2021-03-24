@@ -83,8 +83,9 @@ public final class DatePartitionedTableReader extends TableReader {
 	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
 			throws IOException, InterruptedException {
 		super.beginPrepare(writer, metrics, progress);
+		assert writer != null;
 		assert metrics != null;
-		assert progressLogger != null;
+		assert progress != null;
 		// Use Stats API to determine min and max dates
 		EncodedQuery query = getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
@@ -105,34 +106,22 @@ public final class DatePartitionedTableReader extends TableReader {
 		super.endPrepare(expected);
 	}
 	
-	private TableReader createReader(DatePart datePart) {
-		String partName = datePart.getName();
+	private TableReader createReader(DatePart datePart) 
+			throws IOException, SQLException, InterruptedException {
+		String partName = datePart.getName();		
 		TableReader partReader = config.createReader(table, db, datePart);
 		String jobName = config.getName();
 		String partReaderName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
 		assert partReaderName != null;
 		Metrics partMetrics = new Metrics(partReaderName, this.metrics);
-		partReader.setWriter(writer, partMetrics);		
-		ProgressLogger partLogger = progressLogger.newPartLogger(partMetrics, datePart);
-		partReader.setProgressLogger(partLogger);
+		ProgressLogger partLogger = progress.newPartLogger(partMetrics, datePart);
+		partReader.prepare(writer, partMetrics, partLogger);
 		return partReader;		
 	}
-	
-//	@Override
-//	public void logStart() {
-//		metrics.start();
-//		super.logStart();		
-//	}
-//	
-//	@Override
-//	public void logComplete() {
-//		metrics.finish();
-//		super.logComplete();
-//	}
-	
+		
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		progressLogger.logStart(getExpected());
+		progress.logStart(getExpected());
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
 			return metrics;
@@ -144,7 +133,6 @@ public final class DatePartitionedTableReader extends TableReader {
 			for (DatePart partRange : partition) {
 				TableReader partReader = createReader(partRange);
 				logger.debug("Submit " + metrics.getName());
-				partReader.prepare(writer, metrics, progressLogger);
 				Future<Metrics> future = executor.submit(partReader);
 				futures.add(future);				
 			}
@@ -157,12 +145,11 @@ public final class DatePartitionedTableReader extends TableReader {
 		else {
 			for (DatePart partRange : partition) {
 				TableReader partReader = createReader(partRange);
-				partReader.prepare(writer, metrics, progressLogger);
 				assert partReader.getProgressLogger() != null;
 				partReader.call();				
 			}
 		}
-		progressLogger.logComplete();
+		progress.logComplete();
 		// Free resources
 		futures = null;
 		partition = null;

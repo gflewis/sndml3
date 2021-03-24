@@ -50,7 +50,8 @@ public class RestTableReader extends TableReader {
 	}
 	
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		progressLogger.logStart(getExpected());
+		Log.setTableContext(table, this.getReaderName());
+		progress.logStart(getExpected());
 		assert writer != null;
 		assert metrics != null;
 		int rowCount = 0;
@@ -82,7 +83,7 @@ public class RestTableReader extends TableReader {
 			logger.debug(Log.RESPONSE, String.format("retrieved %d rows", recs.size()));
 			incrementInput(recs.size());
 			maxKey = recs.maxKey();
-			writer.processRecords(recs, metrics, progressLogger);	
+			writer.processRecords(recs, metrics, progress);	
 			rowCount += recs.size();
 			offset += recs.size();
 			if (isFinished(recs.size(), rowCount)) finished = true;
@@ -96,7 +97,7 @@ public class RestTableReader extends TableReader {
 					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
 			}
 		}
-		progressLogger.logComplete();
+		progress.logComplete();
 		return metrics;
 	}
 	

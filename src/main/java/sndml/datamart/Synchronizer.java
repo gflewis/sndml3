@@ -258,18 +258,19 @@ public class Synchronizer extends TableReader {
 	private void processInserts() throws IOException, SQLException, InterruptedException {
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		if (insertSet.size() > 0) {
-			String insertWriterName = writerName + ".INSERT";
+			String insertPartName = writerName + ".INSERT";
 			DatabaseInsertWriter insertWriter =	
-					new DatabaseInsertWriter(db, table, sqlTableName, insertWriterName);
-			Metrics insertWriterMetrics = new Metrics(insertWriterName, this.metrics);
+					new DatabaseInsertWriter(db, table, sqlTableName, insertPartName);
+			Metrics insertWriterMetrics = new Metrics(insertPartName, this.metrics);
 			KeySetTableReader insertReader = new KeySetTableReader(table);
+			insertReader.setReaderName(insertPartName);
 			insertReader.setFields(this.fieldNames);
 			insertReader.setPageSize(this.getPageSize());
-			insertReader.setWriter(insertWriter, insertWriterMetrics);
-			insertReader.setProgressLogger(progressLogger);
+//			insertReader.setWriter(insertWriter, insertWriterMetrics);
+//			insertReader.setProgressLogger(progressLogger);
 			insertWriter.open(insertWriterMetrics);
-			Log.setTableContext(table, insertWriterName);
-			insertReader.prepare(insertSet, insertWriter, insertWriterMetrics, progressLogger);
+			Log.setTableContext(table, insertPartName);
+			insertReader.prepare(insertSet, insertWriter, insertWriterMetrics, progress);
 			insertReader.call();
 			insertWriter.close(insertWriterMetrics);
 			int rowsInserted = insertWriterMetrics.getInserted();
@@ -282,18 +283,19 @@ public class Synchronizer extends TableReader {
 	private void processUpdates() throws IOException, SQLException, InterruptedException {
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
-			String updateWriterName = writerName + ".UPDATE";
+			String udpatePartName = writerName + ".UPDATE";
 			DatabaseUpdateWriter updateWriter = 
-					new DatabaseUpdateWriter(db, table, sqlTableName, updateWriterName);
-			Metrics updateWriterMetrics = new Metrics(updateWriterName, this.metrics);
+					new DatabaseUpdateWriter(db, table, sqlTableName, udpatePartName);
+			Metrics updateWriterMetrics = new Metrics(udpatePartName, this.metrics);
 			KeySetTableReader updateReader = new KeySetTableReader(table);
+			updateReader.setReaderName(udpatePartName);
 			updateReader.setFields(this.fieldNames);
 			updateReader.setPageSize(this.getPageSize());
-			updateReader.setWriter(updateWriter, updateWriterMetrics);
-			updateReader.setProgressLogger(progressLogger);
+//			updateReader.setWriter(updateWriter, updateWriterMetrics);
+//			updateReader.setProgressLogger(progressLogger);
 			updateWriter.open(updateWriterMetrics);
-			Log.setTableContext(table, updateWriterName);
-			updateReader.prepare(updateSet, updateWriter, updateWriterMetrics, progressLogger);
+			Log.setTableContext(table, udpatePartName);
+			updateReader.prepare(updateSet, updateWriter, updateWriterMetrics, progress);
 			updateReader.call();
 			updateWriter.close(updateWriterMetrics);
 			int rowsUpdated = updateWriterMetrics.getUpdated();
@@ -306,13 +308,13 @@ public class Synchronizer extends TableReader {
 	private void processDeletes() throws IOException, SQLException {
 		logger.info(Log.PROCESS, String.format("Deleting %d rows", deleteSet.size()));
 		if (deleteSet.size() > 0) {
-			String deleteWriterName = writerName + ".DELETE";
+			String deletePartName = writerName + ".DELETE";
 			DatabaseDeleteWriter deleteWriter = 
-					new DatabaseDeleteWriter(db, table, sqlTableName, deleteWriterName);
-			Metrics deleteWriterMetrics = new Metrics(deleteWriterName, this.metrics);
+					new DatabaseDeleteWriter(db, table, sqlTableName, deletePartName);
+			Metrics deleteWriterMetrics = new Metrics(deletePartName, this.metrics);
 			deleteWriter.open(deleteWriterMetrics);
-			Log.setTableContext(table, deleteWriterName);
-			deleteWriter.deleteRecords(deleteSet, deleteWriterMetrics, progressLogger);
+			Log.setTableContext(table, deletePartName);
+			deleteWriter.deleteRecords(deleteSet, deleteWriterMetrics, progress);
 			deleteWriter.close(deleteWriterMetrics);
 			int rowsDeleted = deleteWriterMetrics.getDeleted();
 			if (rowsDeleted != deleteSet.size())
@@ -324,13 +326,13 @@ public class Synchronizer extends TableReader {
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
 		assert initialized;
-		assert progressLogger != null;
-		progressLogger.logStart(getExpected());
+		assert progress != null;
+		metrics.addSkipped(skipSet.size());
+		progress.logStart(getExpected());
 		processInserts();
 		processUpdates();
 		processDeletes();
-		metrics.addSkipped(skipSet.size());
-		progressLogger.logComplete();
+		progress.logComplete();
 		// Release memory
 		insertSet = null;
 		updateSet = null;

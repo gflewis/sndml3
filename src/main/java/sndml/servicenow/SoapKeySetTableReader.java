@@ -42,7 +42,7 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 		
 	public Metrics call() throws IOException, InterruptedException, SQLException {
-		progressLogger.logStart(getExpected());
+		progress.logStart(getExpected());
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null;
@@ -60,12 +60,12 @@ public class SoapKeySetTableReader extends TableReader {
 			if (viewName != null) params.add("__use_view", viewName);
 			RecordList recs = soapAPI.getRecords(params, this.displayValue);
 			incrementInput(recs.size());						
-			writer.processRecords(recs, metrics, progressLogger);
+			writer.processRecords(recs, metrics, progress);
 			rowCount += recs.size();
 			logger.info(String.format("processed %d / %d rows", rowCount, totalRows));
 			fromIndex += pageSize;
 		}
-		progressLogger.logComplete();
+		progress.logComplete();
 		return metrics;
 	}
 
