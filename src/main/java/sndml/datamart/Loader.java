@@ -20,7 +20,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.Daemon;
+import sndml.daemon.AgentRunner;
 import sndml.servicenow.*;
 
 public class Loader {
@@ -59,8 +59,8 @@ public class Loader {
 				throw new CommandOptionsException("Cannot specify both --daemon and --yaml");
 			if (tableName != null)
 				throw new CommandOptionsException("Cannot specify both --daemon and --table");
-			Daemon daemon = new Daemon(profile);
-			daemon.run();			
+			AgentRunner daemon = new AgentRunner(profile);
+			daemon.run();
 		}
 		else {
 			if (yamlFileName != null && tableName != null)

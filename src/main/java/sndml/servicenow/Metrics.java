@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 public final class Metrics {
 
 	private final String name; // name as it appears in properties file; null if global
-	private Metrics parent = null;
+	private final Metrics parent;
 	private Integer expected = null;
 	private int input = 0;
 	private int inserted = 0;
@@ -19,10 +19,12 @@ public final class Metrics {
 	private Date started = null;
 	private Date finished = null;
 
+	@SuppressWarnings("unused")
 	private static Logger logger = LoggerFactory.getLogger(Metrics.class);
 			
 	public Metrics(String name) {
 		this.name = name;
+		this.parent = null;
 	}
 	
 	public Metrics(String name, Metrics parent) {
@@ -34,13 +36,13 @@ public final class Metrics {
 		return this.name;
 	}
 	
-	@Deprecated
-	public void setParent(Metrics parent) {
-		assert parent != null;
-		assert parent != this;
-		assert parent.parent == null || parent.parent.parent == null;
-		this.parent = parent;
-	}
+//	@Deprecated
+//	public void setParent(Metrics parent) {
+//		assert parent != null;
+//		assert parent != this;
+//		assert parent.parent == null || parent.parent.parent == null;
+//		this.parent = parent;
+//	}
 	
 	public boolean hasParent() {
 		assert parent == null || parent != this; // object cannot be its own parent

@@ -68,7 +68,7 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 			assert config.getNumber() != null;
 			Thread.currentThread().setName(config.number);			
 			Metrics metrics = super.call();
-			Daemon.rescan();
+			AgentRunner.rescan();
 			return metrics;
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());

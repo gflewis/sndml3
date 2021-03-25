@@ -44,7 +44,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		this.session = session;
 		this.number = number;
 		this.runKey = runKey;
-		this.putRunStatusURI = Daemon.getAPI(session, "putrunstatus");
+		this.putRunStatusURI = AgentRunner.getAPI(session, "putrunstatus");
 	}
 
 	@Override

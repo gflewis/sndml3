@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableSchemaFactory {
+public class TableSchemaFactory extends SchemaFactory{
 
 	private final Session session;
 	private final Table dictionary;
@@ -19,7 +19,8 @@ public class TableSchemaFactory {
 		this.hierarchy = session.table("sys_db_object");		
 	}
 	
-	TableSchema getSchema(String tablename) throws IOException, InterruptedException {
+	@Override
+	public TableSchema getSchema(String tablename) throws IOException, InterruptedException {
 		return getSchema(session.table(tablename));
 	}
 	

@@ -17,6 +17,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 
+import sndml.daemon.AgentRunner;
+import sndml.daemon.DaemonSchemaFactory;
+
 public class Session {
 
 	private final Instance instance;
@@ -32,7 +35,8 @@ public class Session {
 			new ConcurrentHashMap<String,TableSchema>();
 	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
-	private final CloseableHttpClient client;	
+	private final CloseableHttpClient client;
+	private SchemaFactory schemaFactory;
 
 	final private Logger logger = Log.logger(this.getClass());
 
@@ -145,13 +149,16 @@ public class Session {
 	 */
 	public TableSchema getSchema(String tablename) 
 			throws InvalidTableNameException, IOException, InterruptedException {
+		if (schemaFactory == null) {
+			schemaFactory =	AgentRunner.isRunning() ?
+				new DaemonSchemaFactory(this) : 
+				new TableSchemaFactory(this);
+		}
 		if (schemaCache.containsKey(tablename)) 
 			return schemaCache.get(tablename);
-		TableSchemaFactory factory = new TableSchemaFactory(this);
 		String saveJob = Log.getJobContext();
 		Log.setJobContext(tablename + ".schema");		
-		Table table = table(tablename);
-		TableSchema schema = factory.getSchema(table);
+		TableSchema schema = schemaFactory.getSchema(tablename);
 		if (schema.isEmpty()) throw new InvalidTableNameException(tablename);
 		schemaCache.put(tablename, schema);
 		Log.setJobContext(saveJob);

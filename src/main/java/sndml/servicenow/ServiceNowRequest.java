@@ -32,9 +32,9 @@ public abstract class ServiceNowRequest {
 	
 	public String dump() {
 		StringBuilder text = new StringBuilder();
-		text.append(uri.toString());
-		text.append(" ");
 		text.append(method.toString());
+		text.append(" ");
+		text.append(uri.toString());
 		if (statusLine != null) {
 			text.append("\n");
 			text.append(statusLine);

@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
 import org.slf4j.Logger;
@@ -16,9 +17,9 @@ import sndml.servicenow.Log;
 import sndml.servicenow.Session;
 
 
-public class Daemon implements org.apache.commons.daemon.Daemon {
+public class AgentRunner implements Daemon {
 
-	static Logger logger = LoggerFactory.getLogger(Daemon.class);
+	static Logger logger = LoggerFactory.getLogger(AgentRunner.class);
 		
 	private final ExecutorService workerPool;
 	private final int intervalSeconds;
@@ -28,11 +29,12 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	private static Thread daemonThread; 
 	private static Scanner scanner;
 	private static String agentName;
+	private static boolean isRunning = false;
 	private static boolean isAborted = false;
 	
 	private Timer timer;
 	
-	public Daemon(ConnectionProfile profile) {
+	public AgentRunner(ConnectionProfile profile) {
 		if (daemonProfile != null) throw new AssertionError("Daemon already instantiated");
 		daemonProfile = profile;
 		daemonThread = Thread.currentThread();
@@ -66,6 +68,10 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 		return agentName;
 	}
 	
+	public static boolean isRunning() {
+		return isRunning;
+	}
+	
 	public static ConnectionProfile getConnectionProfile() {
 		return daemonProfile;
 	}
@@ -78,7 +84,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	}
 	
 	static URI getAPI(Session session, String apiName, String parameter) {
-		ConnectionProfile profile = Daemon.getConnectionProfile();
+		ConnectionProfile profile = AgentRunner.getConnectionProfile();
 		assert profile != null;
 		String defaultScope = "x_108443_sndml";
 		String propName = "loader.api." + apiName;
@@ -89,9 +95,10 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 	}
 	
 	public void run() {
+		isRunning = true;
 		Log.setJobContext(agentName);
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
-		start();
+		this.start();
 		// Daemon now goes into an endless loop
 		while (!isAborted && !workerPool.isTerminated()) {
 			logger.info(Log.DAEMON, "main awaiting threadpool termination");
@@ -101,7 +108,7 @@ public class Daemon implements org.apache.commons.daemon.Daemon {
 				if (!isAborted) e.printStackTrace();
 			}
 		}
-		stop();
+		this.stop();
 	}
 
 	@Override

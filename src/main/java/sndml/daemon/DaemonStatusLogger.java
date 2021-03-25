@@ -22,7 +22,7 @@ public class DaemonStatusLogger {
 	public DaemonStatusLogger(ConnectionProfile profile, Session session) {
 		this.profile = profile;
 		this.session = session;
-		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
+		this.putRunStatus = AgentRunner.getAPI(session, "putrunstatus");
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 

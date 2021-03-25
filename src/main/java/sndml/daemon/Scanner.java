@@ -35,10 +35,10 @@ public class Scanner extends TimerTask {
 		this.profile = profile;
 		this.workerPool = workerPool;
 		this.session = profile.getSession();		
-		this.agentName = Daemon.agentName();
+		this.agentName = AgentRunner.agentName();
 		assert agentName != null;
-		this.getRunList = Daemon.getAPI(session,  "getrunlist", agentName);
-		this.putRunStatus = Daemon.getAPI(session, "putrunstatus");
+		this.getRunList = AgentRunner.getAPI(session,  "getrunlist", agentName);
+		this.putRunStatus = AgentRunner.getAPI(session, "putrunstatus");
 		this.statusLogger = new DaemonStatusLogger(profile, session);
 		this.abortOnException = profile.getPropertyBoolean("daemon.abort_on_exception", true);
 	}
@@ -87,11 +87,11 @@ public class Scanner extends TimerTask {
 			logger.error(Log.RESPONSE, String.format(
 				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
 				getRunList.toString(), e.getClass().getName(), agentName));
-			if (abortOnException) Daemon.abort();
+			if (abortOnException) AgentRunner.abort();
 		}
 		catch (IOException e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
-			if (abortOnException) Daemon.abort();
+			if (abortOnException) AgentRunner.abort();
 		}
 	}
 

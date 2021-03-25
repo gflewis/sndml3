@@ -35,7 +35,7 @@ public class ShutdownHook extends Thread {
 		if (workerPool == null) {
 			// must be single threaded
 			// interrupt the main thread
-			Daemon.getThread().interrupt();
+			AgentRunner.getThread().interrupt();
 			terminated = true;
 		}
 		else {
