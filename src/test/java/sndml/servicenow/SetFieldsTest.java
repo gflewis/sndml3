@@ -25,7 +25,6 @@ public class SetFieldsTest {
 		RecordListAccumulator accumulator = new RecordListAccumulator(incident);
 		TableReader reader = incident.rest().getDefaultReader();
 		Metrics metrics = new Metrics(this.getClass().getSimpleName());
-		reader.setWriter(accumulator, metrics);		
 		reader.setFields(new FieldNames("number,state,short_description"));
 		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();

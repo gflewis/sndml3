@@ -19,7 +19,6 @@ public class AppDaemon implements Daemon {
 
 	static Logger logger = LoggerFactory.getLogger(AppDaemon.class);
 		
-//	private static ExecutorService workerPool;
 	private static ThreadPoolExecutor workerPool;
 	private static int intervalSeconds;
 	private static int threadCount;
@@ -31,7 +30,6 @@ public class AppDaemon implements Daemon {
 	private static Scanner scanner;
 	
 	private static volatile boolean isRunning = false;
-	private static volatile boolean isAborted = false;
 	
 	private Timer timer;
 	
@@ -74,10 +72,8 @@ public class AppDaemon implements Daemon {
 	 * This function can be called by any thread to abort the daemon.
 	 */
 	public static void abort() {
-		Thread myThread = Thread.currentThread();
 		logger.error(Log.FINISH, "Aborting the daemon");
-		isAborted = true;
-		if (myThread != daemonThread) myThread.interrupt();
+		Runtime.getRuntime().exit(-1);
 	}
 	
 	public static boolean isRunning() {
@@ -100,20 +96,17 @@ public class AppDaemon implements Daemon {
 		}
 		if (jobCount > 0) {
 			logger.info(Log.INIT, String.format("scanOnce: %d jobs initiated", jobCount));		
-			while (!isAborted && workerPool.getActiveCount() > 0) {
+			while (workerPool.getActiveCount() > 0) {
 				logger.debug(Log.PROCESS, 
 					String.format("scanOnce: %d threads running", workerPool.getActiveCount()));
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					isAborted = true;
 					logger.error(Log.PROCESS, e.getMessage());
+					throw e;
 				}
 			}
-			if (isAborted)
-				logger.info(Log.FINISH, "scanOnce: aborting");
-			else
-				logger.info(Log.FINISH, "scanOnce: all threads complete");			
+			logger.info(Log.FINISH, "scanOnce: all threads complete");			
 		}
 		return 0;
 	}
@@ -128,13 +121,14 @@ public class AppDaemon implements Daemon {
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		this.start();
 		// Daemon now goes into an endless loop
-		while (!isAborted && !workerPool.isTerminated()) {
+		boolean isInterrupted = false;
+		while (!isInterrupted && !workerPool.isTerminated()) {
 			logger.info(Log.DAEMON, "awaiting threadpool termination");
 			try {
 				workerPool.awaitTermination(300, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e) {			
 				logger.info(Log.DAEMON, "Interrupt detected");
-				isAborted = true;
+				isInterrupted = true;
 			}
 		}
 		logger.info(Log.DAEMON, "Calling stop");
@@ -166,8 +160,7 @@ public class AppDaemon implements Daemon {
 	@Override
 	public void stop() {
 		Log.setGlobalContext();
-		int exitStatus = isAborted ? -1 : 0;
-		int waitSec = daemonProfile.getPropertyInt("shutdown_seconds", 30);
+		int waitSec = daemonProfile.getPropertyInt("daemon.shutdown_seconds", 30);
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdown();
 		try { 
@@ -175,13 +168,11 @@ public class AppDaemon implements Daemon {
 		}
 		catch (InterruptedException e) { 
 			logger.warn("Shutdown interrupted");
-			exitStatus = -1;
 		};
 		if (!workerPool.isTerminated()) {
 			logger.warn("Some threads failed to terminate");
 		}
-		logger.info(Log.FINISH, String.format("Exit status=%d", exitStatus));
-		Runtime.getRuntime().exit(exitStatus);
+		logger.info(Log.FINISH, "End stop");
 	}
 	
 	@Override
