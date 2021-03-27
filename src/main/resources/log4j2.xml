@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Default Log4j configuration writes INFO Messages to the cosole -->
 <Configuration>
   <Appenders>
     <Console name="Console">

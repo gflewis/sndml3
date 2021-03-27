@@ -1,11 +1,9 @@
 #!/bin/bash
 #
-# Run the Datapump Daemon
+# Run the DataPump Daemon
 #
 source sndml-setup $1
-sndml_set_log daemon
-debug=
-# export SNDML_LOG4J=$SNDML_HOME/src/test/resources/log4j2-debug.xml
-# debug="-Dlog4j.configurationFile=$SNDML_LOG4J -DlogFileName=$SNDML_LOG"
+export SNDML_LOG4J=$SNDML_HOME/src/main/resources/log4j2-daemon.xml
+export SNDML_LOG_DIR=$SNDML_CONFIG/log
 env | grep SNDML | sort
-java -ea $debug -jar $SNDML_JAR -d -p $SNDML_PROFILE --daemon
+java -ea -Dlog4j2.configurationFile=$SNDML_LOG4J -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Log4j configuration that only writes errors or warnings -->
 <Configuration>
   <Appenders>
     <Console name="Console">

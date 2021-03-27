@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Daemon Log4j configuration uses writes to $SNDML_LOG_DIR directory with Rolling File Appender -->
+<Configuration>
+  <Appenders>
+    <RollingFile name="RollingFile"
+    	fileName="${env:SNDML_LOG_DIR}/daemon-${date:yyyyMMdd}.log"
+    	filePattern="${env:SNDML_LOG_DIR}/daemon-%d{yyyyMMdd}-%i.log.gz">
+      <ThresholdFilter level="info" />
+      <PatternLayout>
+        <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
+      </PatternLayout>
+      <Policies>
+        <TimeBasedTriggeringPolicy />
+        <SizeBasedTriggeringPolicy size="20MB"/>
+      </Policies> 
+    </RollingFile>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="RollingFile" />
+    </Root>
+    <Logger name="sndml" level="info" />>
+  </Loggers>
+</Configuration>
