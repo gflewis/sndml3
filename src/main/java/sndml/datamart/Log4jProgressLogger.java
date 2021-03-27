@@ -26,12 +26,16 @@ public class Log4jProgressLogger extends ProgressLogger {
 	@SuppressWarnings("rawtypes")
 	public Log4jProgressLogger(Class clazz, Action action, Metrics metrics, DatePart part) {
 		super(metrics, part);
+		assert action != null;
+		assert metrics != null;
 		this.action = action;
 		this.logger = LoggerFactory.getLogger(clazz);
 	}
 	
 	protected Log4jProgressLogger(Logger logger, Action action, Metrics metrics, DatePart part) {
 		super(metrics, part);
+		assert action != null;
+		assert metrics != null;
 		this.logger = logger;
 		this.action = action;
 	}
@@ -63,8 +67,8 @@ public class Log4jProgressLogger extends ProgressLogger {
 	}
 	
 	@Override
-	public void logStart(Integer expected) {
-		assert metrics.hasExpected();
+	public void logStart() {
+		int expected = metrics.getExpected();
 		if (hasPart()) {
 			assert metrics.hasParent();			
 			Integer parentExpected = metrics.getParent().getExpected();

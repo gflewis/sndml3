@@ -51,7 +51,7 @@ public class RestTableReader extends TableReader {
 	
 	public Metrics call() throws IOException, SQLException, InterruptedException {
 		Log.setTableContext(table, this.getReaderName());
-		progress.logStart(getExpected());
+		progress.logStart();
 		assert writer != null;
 		assert metrics != null;
 		int rowCount = 0;

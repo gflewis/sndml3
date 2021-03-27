@@ -11,14 +11,14 @@ import sndml.datamart.Log4jProgressLogger;
 import sndml.datamart.ResourceException;
 import sndml.servicenow.*;
 
-public class DaemonJobRunner extends JobRunner implements Runnable {
+public class AppJobRunner extends JobRunner implements Runnable {
 	
 	final ConnectionProfile profile;
 	final Key runKey;
 	final String number;
-	final DaemonStatusLogger statusLogger;
+	final AppStatusLogger statusLogger;
 		
-	public DaemonJobRunner(ConnectionProfile profile, JobConfig config) {
+	public AppJobRunner(ConnectionProfile profile, JobConfig config) {
 		super(profile.getSession(), profile.getDatabase(), config);
 		this.profile = profile;
 		this.runKey = config.getSysId();
@@ -28,20 +28,31 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 		assert number != null;
 		assert number.length() > 0;
 		this.table = session.table(config.getSource());
-		this.statusLogger = new DaemonStatusLogger(profile, session);
+		this.statusLogger = new AppStatusLogger(profile, session);
 		
 	}
 
 	@Override
 	protected ProgressLogger createJobProgressLogger(TableReader reader) {
-		Log4jProgressLogger textLogger = 
-			new Log4jProgressLogger(reader.getClass(), action, jobMetrics);		
-		DaemonProgressLogger appLogger =
-			new DaemonProgressLogger(profile, session, jobMetrics, number, runKey);
+		assert action != null;
+		assert jobMetrics != null;
+		Log4jProgressLogger textLogger;
+		AppProgressLogger appLogger;
+		if (reader != null) {
+			textLogger = new Log4jProgressLogger(reader.getClass(), action, jobMetrics);					
+		}
+		else {
+			textLogger =  new Log4jProgressLogger(this.getClass(), action, jobMetrics);
+		}
+		appLogger =	new AppProgressLogger(profile, session, jobMetrics, number, runKey);
+		assert appLogger.getMetrics() == jobMetrics;
 		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
-		reader.setMetrics(jobMetrics);
-		reader.setProgressLogger(compositeLogger);
-		assert appLogger.getMetrics() != null;
+		// TODO Remove
+		if (reader != null) {
+			// this is now handled by prepare()
+//			reader.setMetrics(jobMetrics);			
+//			reader.setProgressLogger(compositeLogger);
+		}
 		return compositeLogger;
 	}
 		
@@ -68,7 +79,7 @@ public class DaemonJobRunner extends JobRunner implements Runnable {
 			assert config.getNumber() != null;
 			Thread.currentThread().setName(config.number);			
 			Metrics metrics = super.call();
-			AgentRunner.rescan();
+			AppDaemon.rescan();
 			return metrics;
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());

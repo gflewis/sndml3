@@ -39,8 +39,8 @@ public class JobConfig {
 	public Integer minRows;
 	public Integer maxRows;
 	public String sql; // Action EXECUTE only
-	public String sqlBefore;
-	public String sqlAfter;
+	@Deprecated public String sqlBefore;
+	@Deprecated public String sqlAfter;
 	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
 	public Integer threads;

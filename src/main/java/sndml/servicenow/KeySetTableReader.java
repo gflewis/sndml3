@@ -51,7 +51,7 @@ public class KeySetTableReader extends TableReader {
 		
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		progress.logStart(getExpected());
+		progress.logStart();
 		int pageSize = this.getPageSize();
 		if (writer == null) throw new IllegalStateException("writer not defined");
 		if (allKeys == null) throw new IllegalStateException("not initialized");

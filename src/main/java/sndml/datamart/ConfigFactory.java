@@ -26,7 +26,7 @@ public class ConfigFactory {
 	ObjectMapper yamlMapper;
 	Logger logger = LoggerFactory.getLogger(ConfigFactory.class);	
 	
-	ConfigFactory() {
+	public ConfigFactory() {
 		this(DateTime.now());
 	}
 	

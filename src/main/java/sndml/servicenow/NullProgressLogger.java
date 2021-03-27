@@ -25,7 +25,7 @@ public class NullProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logStart(Integer expected) {
+	public void logStart() {
 		return;		
 	}
 

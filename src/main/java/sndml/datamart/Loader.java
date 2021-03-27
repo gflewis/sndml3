@@ -20,7 +20,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.AgentRunner;
+import sndml.daemon.AppDaemon;
 import sndml.servicenow.*;
 
 public class Loader {
@@ -28,10 +28,8 @@ public class Loader {
 	final Session session;
 	final Database database;
 	LoaderConfig config;
-	int threads;
 	File metricsFile = null;
 	PrintWriter statsWriter;
-//	WriterMetrics loaderMetrics = new WriterMetrics();	
 	
 	ArrayList<JobRunner> jobs = new ArrayList<JobRunner>();
 	
@@ -48,48 +46,57 @@ public class Loader {
 				desc("YAML config file (required)").build());
 		options.addOption(Option.builder("d").longOpt("daemon").required(false).hasArg(false).
 				desc("Run as daemon/service").build());
+		options.addOption(Option.builder("s").longOpt("scan").required(false).hasArg(false).
+				desc("Run the deamon scanner once").build());
 		CommandLine cmd = new DefaultParser().parse(options,  args);
 		String profileName = cmd.getOptionValue("p");
-		String yamlFileName = cmd.getOptionValue("y");
-		String tableName = cmd.getOptionValue("t");
-		boolean isDaemon = cmd.hasOption("d");
 		ConnectionProfile profile = new ConnectionProfile(new File(profileName));
-		if (isDaemon) {
-			if (yamlFileName != null)
-				throw new CommandOptionsException("Cannot specify both --daemon and --yaml");
-			if (tableName != null)
-				throw new CommandOptionsException("Cannot specify both --daemon and --table");
-			AgentRunner daemon = new AgentRunner(profile);
+		int cmdCount = 0;
+		if (cmd.hasOption("y")) cmdCount += 1;
+		if (cmd.hasOption("t")) cmdCount += 1;
+		if (cmd.hasOption("d")) cmdCount += 1;
+		if (cmd.hasOption("s")) cmdCount += 1;		
+		if (cmdCount != 1) 
+			throw new CommandOptionsException(
+				"Must specify exactly one of: --yaml, --table, --daemon or --scan");
+		int exitCode = 0;
+		if (cmd.hasOption("t")) {
+			// Simple Table Loader
+			String tableName = cmd.getOptionValue("t");
+			SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName);
+			tableLoader.call();
+		}
+		else if (cmd.hasOption("y")) {
+			// YAML file
+			String yamlFileName = cmd.getOptionValue("y");
+			File yamlFile = new File(yamlFileName);
+			String yamlText = readFully(yamlFile);
+			logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
+			FileReader reader = new FileReader(new File(yamlFileName));
+			ConfigFactory factory = new ConfigFactory();
+			LoaderConfig config = factory.loaderConfig(profile, reader);
+			Loader loader = new Loader(profile, config);			
+			loader.loadTables();
+		}
+		else if (cmd.hasOption("d")) {
+			// Daemon
+			AppDaemon daemon = new AppDaemon(profile);
+			logger.info(Log.INIT, "Starting daemon: " + AppDaemon.getAgentName());
 			daemon.run();
 		}
-		else {
-			if (yamlFileName != null && tableName != null)
-				throw new CommandOptionsException("Cannot specify both --table and --yaml");
-			if (yamlFileName == null && tableName == null)
-				throw new CommandOptionsException("Must specify --daemon or --yaml or --table");			
-			ConfigFactory factory = new ConfigFactory();
-			if (tableName != null) {
-				SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName);
-				tableLoader.call();
-			}
-			else {
-				File yamlFile = new File(yamlFileName);
-				String yamlText = readFully(yamlFile);
-				logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
-				FileReader reader = new FileReader(new File(yamlFileName));
-				LoaderConfig config = factory.loaderConfig(profile, reader);
-				Loader loader = new Loader(profile, config);			
-				loader.loadTables();			
-			}
-		}			
+		else if (cmd.hasOption("s")) {
+			// Scan once
+			AppDaemon daemon = new AppDaemon(profile);
+			logger.info(Log.INIT, "Scanning agent: " + AppDaemon.getAgentName());
+			exitCode = daemon.scanOnce();
+		}
+		Runtime.getRuntime().exit(exitCode);
 	}
-			
+				
 	Loader(ConnectionProfile profile, LoaderConfig config) {
 		this.session = profile.getSession();
 		this.database = profile.getDatabase();
 		this.config = config;
-		this.threads = config.getThreads();
-		logger.debug(Log.INIT, String.format("starting loader threads=%d", this.threads));
 		this.metricsFile = config.getMetricsFile();
 		for (JobConfig jobConfig : config.getJobs()) {
 			JobRunner runner = new JobRunner(session, database, jobConfig);
@@ -121,9 +128,11 @@ public class Loader {
 		}
 		return loaderMetrics;
 	}
-	
+
+	@Deprecated
 	public Metrics loadTablesConcurrent() 
 			throws SQLException, IOException, InterruptedException, ExecutionException {
+		int threads = config.getThreads();
 		ArrayList<Future<Metrics>> futures = new ArrayList<Future<Metrics>>();
 		Log.setGlobalContext();
 		Metrics loaderMetrics = new Metrics(null);			
@@ -153,17 +162,6 @@ public class Loader {
 		}
 		return loaderMetrics;
 	}
-//	
-//	@Deprecated
-//	void writeAllMetrics() throws IOException {
-//		logger.info(Log.FINISH, "Writing " + metricsFile.getPath());
-//		statsWriter = new PrintWriter(metricsFile);
-//		loaderMetrics.write(statsWriter);
-//		for (JobRunner job : jobs) {			
-//			job.getWriterMetrics().write(statsWriter, job.getName());
-//		}
-//		statsWriter.close();		
-//	}
 
 	public static String readFully(File file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));

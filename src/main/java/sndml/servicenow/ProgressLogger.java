@@ -33,9 +33,9 @@ public abstract class ProgressLogger {
 	public abstract void logPrepare();
 
 	/**
-	 * We are starting the actuall processing of records.
+	 * We are starting the actual processing of records.
 	 */
-	public abstract void logStart(Integer expected);
+	public abstract void logStart();
 	
 	public abstract void logProgress();	
 

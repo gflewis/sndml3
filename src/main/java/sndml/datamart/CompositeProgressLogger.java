@@ -1,26 +1,26 @@
 package sndml.datamart;
 
-import sndml.daemon.DaemonProgressLogger;
+import sndml.daemon.AppProgressLogger;
 import sndml.servicenow.*;
 
 public class CompositeProgressLogger extends ProgressLogger {
 
 	public final Log4jProgressLogger textLogger;
-	public final DaemonProgressLogger appLogger;
+	public final AppProgressLogger appLogger;
 
-	public CompositeProgressLogger(TableReader reader, Action action, DaemonProgressLogger appLogger) {
+	public CompositeProgressLogger(TableReader reader, Action action, AppProgressLogger appLogger) {
 		this(reader, action, appLogger, null);
 	}
 	
 	@Deprecated
 	public CompositeProgressLogger(TableReader reader, Action action, 
-			DaemonProgressLogger appLogger, DatePart part) {
+			AppProgressLogger appLogger, DatePart part) {
 		super(appLogger.getMetrics(), part);
 		this.textLogger = new Log4jProgressLogger(reader, action);
 		this.appLogger = appLogger; 		
 	}
 
-	public CompositeProgressLogger(Log4jProgressLogger textLogger, DaemonProgressLogger appLogger) {
+	public CompositeProgressLogger(Log4jProgressLogger textLogger, AppProgressLogger appLogger) {
 		super(textLogger.getMetrics(), textLogger.getPart());
 		this.textLogger = textLogger;
 		this.appLogger = appLogger;
@@ -30,8 +30,8 @@ public class CompositeProgressLogger extends ProgressLogger {
 	public CompositeProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
 		Log4jProgressLogger newTextLogger =
 				(Log4jProgressLogger) textLogger.newPartLogger(newMetrics,  newPart);
-		DaemonProgressLogger newAppLogger = 
-			(DaemonProgressLogger) appLogger.newPartLogger(newMetrics, newPart);
+		AppProgressLogger newAppLogger = 
+			(AppProgressLogger) appLogger.newPartLogger(newMetrics, newPart);
 		return new CompositeProgressLogger(newTextLogger, newAppLogger);
 	}
 	
@@ -42,9 +42,9 @@ public class CompositeProgressLogger extends ProgressLogger {
 	}
 	
 	@Override
-	public void logStart(Integer expected) {
-		if (appLogger != null) appLogger.logStart(expected);
-		if (textLogger != null) textLogger.logStart(expected);		
+	public void logStart() {
+		if (appLogger != null) appLogger.logStart();
+		if (textLogger != null) textLogger.logStart();		
 	}
 	
 	@Override

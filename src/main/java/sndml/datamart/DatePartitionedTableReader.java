@@ -121,7 +121,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
-		progress.logStart(getExpected());
+		progress.logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
 			return metrics;

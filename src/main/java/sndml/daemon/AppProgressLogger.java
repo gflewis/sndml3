@@ -13,16 +13,16 @@ import sndml.datamart.DatePart;
 import sndml.datamart.ResourceException;
 import sndml.servicenow.*;
 
-public class DaemonProgressLogger extends ProgressLogger {
+public class AppProgressLogger extends ProgressLogger {
 
 	final ConnectionProfile profile;
 	final Session session;
 	final URI putRunStatusURI;
 	final String number;
 	final Key runKey;
-	final static Logger logger = LoggerFactory.getLogger(DaemonProgressLogger.class);	
+	final static Logger logger = LoggerFactory.getLogger(AppProgressLogger.class);	
 
-	DaemonProgressLogger(
+	AppProgressLogger(
 			ConnectionProfile profile, 
 			Session session,
 			Metrics metrics,
@@ -31,7 +31,7 @@ public class DaemonProgressLogger extends ProgressLogger {
 		this(profile, session, metrics, number, runKey, null);
 	}
 	
-	DaemonProgressLogger(
+	AppProgressLogger(
 			ConnectionProfile profile, 
 			Session session,
 			Metrics metrics,
@@ -44,13 +44,13 @@ public class DaemonProgressLogger extends ProgressLogger {
 		this.session = session;
 		this.number = number;
 		this.runKey = runKey;
-		this.putRunStatusURI = AgentRunner.getAPI(session, "putrunstatus");
+		this.putRunStatusURI = AppDaemon.getAPI(session, "putrunstatus");
 	}
 
 	@Override
 	public ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
 		// logger.info(Log.INIT, "newPartLogger");
-		return new DaemonProgressLogger(
+		return new AppProgressLogger(
 			this.profile, this.session, newMetrics, this.number, this.runKey, newPart);
 	}
 	
@@ -60,7 +60,8 @@ public class DaemonProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public void logStart(Integer expected) {	
+	public void logStart() {
+		int expected = metrics.getExpected();
 		logger.info(Log.INIT, String.format("logStart %d", expected));
 		ObjectNode body = messageBody("running");
 		String fieldname = hasPart() ? "part_expected" : "expected";
@@ -81,6 +82,13 @@ public class DaemonProgressLogger extends ProgressLogger {
 	public void logComplete() {
 		logger.info(Log.FINISH, "logComplete");
 		ObjectNode body = messageBody("complete");
+		if (metrics.hasParent()) {
+			Metrics parentMetrics = metrics.getParent();
+			body.put("part_elapsed", String.format("%.1f", parentMetrics.getElapsedSec()));			
+		}
+		else {
+			body.put("elapsed", String.format("%.1f", metrics.getElapsedSec()));			
+		}
 		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}

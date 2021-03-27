@@ -226,7 +226,7 @@ public class Synchronizer extends TableReader {
 		assert initialized;
 		assert progress != null;
 		metrics.addSkipped(skipSet.size());
-		progress.logStart(getExpected());
+		progress.logStart();
 		processInserts();
 		processUpdates();
 		processDeletes();

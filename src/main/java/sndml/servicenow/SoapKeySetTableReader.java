@@ -42,7 +42,7 @@ public class SoapKeySetTableReader extends TableReader {
 	}
 		
 	public Metrics call() throws IOException, InterruptedException, SQLException {
-		progress.logStart(getExpected());
+		progress.logStart();
 		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert allKeys != null;

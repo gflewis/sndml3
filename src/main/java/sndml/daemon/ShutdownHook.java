@@ -26,30 +26,24 @@ public class ShutdownHook extends Thread {
 			
 	@Override
 	public void run() {
-		Log.setGlobalContext();		
+		Log.setGlobalContext();
 		logger.info(Log.FINISH, "ShutdownHook invoked");
-		boolean terminated = false;
-		if (dispenser != null) {
-			dispenser.cancel();
-		}
-		if (workerPool == null) {
-			// must be single threaded
-			// interrupt the main thread
-			AgentRunner.getThread().interrupt();
-			terminated = true;
-		}
-		else {
+		if (dispenser != null) dispenser.cancel();
+		if (workerPool != null) {
+			logger.info(Log.FINISH, "Shutting down workerPool");
 			// send interrupt to all workers
-			workerPool.shutdownNow();
+			workerPool.shutdown();
 			int waitSec = profile.getPropertyInt("daemon.shutdown_seconds", 30);
 			logger.info(Log.FINISH, "Awaiting worker pool termination");
 			try {
-				terminated = workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
+				workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				logger.error(Log.FINISH, e.getMessage(), e);
 			}
+			if (!workerPool.isTerminated()) {
+				logger.warn(Log.FINISH, "Some threads failed to terminate");
+			}
 		}
-		if (!terminated) logger.warn(Log.FINISH, "Some threads failed to terminate");
 		logger.info(Log.FINISH, "ShutdownHook complete");
 	}
 	

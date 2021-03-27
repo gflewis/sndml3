@@ -34,10 +34,16 @@ public class JobRunner implements Callable<Metrics> {
 	}
 	
 	protected ProgressLogger createJobProgressLogger(TableReader reader) {
-		ProgressLogger progressLogger = 
-			new Log4jProgressLogger(reader.getClass(), action, jobMetrics);
-		reader.setMetrics(jobMetrics);
-		reader.setProgressLogger(progressLogger);
+		ProgressLogger progressLogger;
+		if (reader == null) {
+			progressLogger = new Log4jProgressLogger(this.getClass(), action, jobMetrics);			
+		}
+		else {
+			progressLogger = new Log4jProgressLogger(reader.getClass(), action, jobMetrics);
+			// TODO Remove
+//			reader.setMetrics(jobMetrics);
+//			reader.setProgressLogger(progressLogger);			
+		}
 		return progressLogger;
 	}
 			
@@ -95,17 +101,24 @@ public class JobRunner implements Callable<Metrics> {
 	}
 	
 	private void runSQL(String sqlCommand) throws SQLException {
+		jobMetrics.setExpected(0);
+		ProgressLogger progressLogger = createJobProgressLogger(null);
+		progressLogger.logStart();
 		db.executeStatement(sqlCommand);
 		db.commit();
+		progressLogger.logComplete();
 	}
 	
 	private void runCreateTable() throws SQLException, IOException, InterruptedException {
-		logger.debug(Log.INIT, "runCreateTable " + config.getTarget());
+		logger.debug(Log.INIT, "runCreateTable " + config.getTarget());		
 		String sqlTableName = config.getTarget();
 		assert table != null;
 		assert sqlTableName != null;
+		jobMetrics.setExpected(0);
+		ProgressLogger progressLogger = createJobProgressLogger(null);
 		if (config.getDropTable()) db.dropTable(sqlTableName, true);
-		db.createMissingTable(table, sqlTableName, config.getColumns());		
+		db.createMissingTable(table, sqlTableName, config.getColumns());
+		progressLogger.logComplete();
 	}
 	
 	private void runDropTable() throws SQLException {
@@ -131,7 +144,6 @@ public class JobRunner implements Callable<Metrics> {
 			new DatabaseDeleteWriter(db, table, sqlTableName, config.getName());
 		ProgressLogger progressLogger = createJobProgressLogger(auditReader);
 		deleteWriter.open(jobMetrics);
-//		auditReader.setWriter(deleteWriter, jobMetrics);
 		auditReader.prepare(deleteWriter, jobMetrics, progressLogger);
 		Log.setTableContext(table, config.getName());
 		auditReader.call();
@@ -182,32 +194,30 @@ public class JobRunner implements Callable<Metrics> {
 		else {
 			writer = new DatabaseUpdateWriter(db, table, sqlTableName, config.getName());
 		}
+		writer.open(jobMetrics);
 		Interval partitionInterval = config.getPartitionInterval();
 		DateTime since = config.getSince();	
 		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
+		TableReader reader;
+		Log.setTableContext(table, config.getName());					
 		if (partitionInterval == null) {
-			TableReader reader = config.createReader(table, db, null);
+			reader = config.createReader(table, db, null);
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
-//			reader.setWriter(writer, jobMetrics);
-			writer.open(jobMetrics);
-			assert reader.getMetrics().getName() == config.getName();
-			Log.setTableContext(table, config.getName());					
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 			reader.prepare(writer, jobMetrics, progressLogger);
-			reader.call();
 		}
 		else {
-			DatePartitionedTableReader multiReader = 
-				new DatePartitionedTableReader(table, config, db);
+			DatePartitionedTableReader multiReader = new DatePartitionedTableReader(table, config, db);
+			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);
-//			multiReader.setWriter(writer, jobMetrics);
-			writer.open(jobMetrics);
-			multiReader.prepare(writer, jobMetrics, progressLogger);
+			reader.prepare(writer, jobMetrics, progressLogger);
 			DatePartition partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
-			Log.setTableContext(table, config.getName());
-			multiReader.call();
 		}
+		assert reader.getMetrics() != null;
+		assert reader.getMetrics().getName() == config.getName();
+		Log.setTableContext(table, config.getName());
+		reader.call();
 		writer.close(jobMetrics);
 	}
 

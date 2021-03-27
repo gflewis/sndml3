@@ -35,15 +35,7 @@ public final class Metrics {
 	public String getName() {
 		return this.name;
 	}
-	
-//	@Deprecated
-//	public void setParent(Metrics parent) {
-//		assert parent != null;
-//		assert parent != this;
-//		assert parent.parent == null || parent.parent.parent == null;
-//		this.parent = parent;
-//	}
-	
+		
 	public boolean hasParent() {
 		assert parent == null || parent != this; // object cannot be its own parent
 		return parent != null;
@@ -67,20 +59,20 @@ public final class Metrics {
 	}
 	
 	public DateTime getStarted() {
-		return started == null ? null : new DateTime(started);
+		assert started != null;
+		return new DateTime(started);
 	}
 	
 	public DateTime getFinished() {
-		return finished == null ? null : new DateTime(finished);
+		assert finished != null;
+		return new DateTime(finished);
 	}
 	
 	public double getElapsedSec() {
-		if (started == null || finished == null)
-			return 0;
-		else {
-			double result = ((finished.getTime() - started.getTime()) / 1000.0);			
-			return result;
-		}
+		long startMillisec = started.getTime();
+		long finishMillisec = (finished == null) ? new Date().getTime() : finished.getTime();
+		double result = (finishMillisec - startMillisec) / 1000.0;
+		return result;
 	}
 
 	/**

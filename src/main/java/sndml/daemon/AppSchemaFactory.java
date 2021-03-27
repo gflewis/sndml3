@@ -9,11 +9,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.servicenow.*;
 
-public class DaemonSchemaFactory extends SchemaFactory {
+public class AppSchemaFactory extends SchemaFactory {
 
 	private final Session session;
 	
-	public DaemonSchemaFactory(Session session) {
+	public AppSchemaFactory(Session session) {
 		this.session = session;
 	}
 	
@@ -22,7 +22,7 @@ public class DaemonSchemaFactory extends SchemaFactory {
 		assert tablename != null;
 		Table table = session.table(tablename);
 		TableSchema schema = new TableSchema(table);
-		URI apiTableSchema = AgentRunner.getAPI(session, "gettableschema", tablename);
+		URI apiTableSchema = AppDaemon.getAPI(session, "gettableschema", tablename);
 		JsonRequest request = new JsonRequest(session, apiTableSchema);
 		ObjectNode response = request.execute();
 		JsonNode result = response.get("result");

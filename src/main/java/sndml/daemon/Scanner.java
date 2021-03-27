@@ -28,37 +28,58 @@ public class Scanner extends TimerTask {
 	final String agentName;
 	final URI getRunList;
 	final URI putRunStatus;
-	final DaemonStatusLogger statusLogger;
+	final AppStatusLogger statusLogger;
 	final boolean abortOnException;
 	
 	Scanner(ConnectionProfile profile, ExecutorService workerPool) {
 		this.profile = profile;
 		this.workerPool = workerPool;
-		this.session = profile.getSession();		
-		this.agentName = AgentRunner.agentName();
+		this.session = profile.getSession();
+		this.agentName = AppDaemon.getAgentName();
 		assert agentName != null;
-		this.getRunList = AgentRunner.getAPI(session,  "getrunlist", agentName);
-		this.putRunStatus = AgentRunner.getAPI(session, "putrunstatus");
-		this.statusLogger = new DaemonStatusLogger(profile, session);
+		this.getRunList = AppDaemon.getAPI(session,  "getrunlist", agentName);
+		this.putRunStatus = AppDaemon.getAPI(session, "putrunstatus");
+		this.statusLogger = new AppStatusLogger(profile, session);
 		this.abortOnException = profile.getPropertyBoolean("daemon.abort_on_exception", true);
 	}
 		
 	@Override
 	public synchronized void run() {
-		Log.setJobContext(agentName);
-		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
-		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 		try {
+			scan();
+		}
+		catch (NoContentException e) {
+			logger.error(Log.RESPONSE, String.format(
+				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
+				getRunList.toString(), e.getClass().getName(), agentName));
+			if (abortOnException) AppDaemon.abort();
+		}		
+		catch (IOException e) {
+			logger.error(Log.RESPONSE, e.toString(), e);
+			if (abortOnException) AppDaemon.abort();
+		}		
+		catch (Exception e) {
+			logger.error(Log.RESPONSE, e.toString(), e);
+			AppDaemon.abort();
+			throw e;
+		}
+	}
+
+	public int scan() throws IOException, ConfigParseException {
+		Log.setJobContext(agentName);
+		ConfigFactory configFactory = new ConfigFactory();
+		int jobCount = 0;
+		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 			ObjectNode response = request.execute();
 			logger.debug(Log.RESPONSE, response.toPrettyString());
 			ObjectNode objResult = (ObjectNode) response.get("result");
 			if (objResult.has("runs")) {
 				ArrayNode runlist = (ArrayNode) objResult.get("runs");
 				if (runlist.size() == 0) { 
-					logger.info(Log.DAEMON, "No Runs");
+					logger.info(Log.INIT, "Nothing ready");
 				}
 				else { 
-					logger.info(Log.DAEMON, "Runlist=" + getNumbers(runlist));
+					logger.info(Log.INIT, "Runlist=" + getNumbers(runlist));
 				}
 				for (JsonNode node : runlist) {
 					assert node.isObject();
@@ -67,41 +88,22 @@ public class Scanner extends TimerTask {
 					assert runKey != null;
 					assert number != null;
 					ObjectNode obj = (ObjectNode) node;
-					try {
-						JobConfig jobConfig = configFactory.jobConfig(profile, obj);
-						logger.info(Log.DAEMON, jobConfig.toString());
-						setStatus(runKey, "prepare");
-						DaemonJobRunner runner = new DaemonJobRunner(profile, jobConfig);
-						workerPool.execute(runner);
-					}
-					catch (ConfigParseException e) {
-						logger.error(Log.RESPONSE, e.toString(), e);
-						logError(runKey, e);
-					}
+					JobConfig jobConfig = configFactory.jobConfig(profile, obj);
+					logger.info(Log.INIT, jobConfig.toString());
+					setStatus(runKey, "prepare");
+					AppJobRunner runner = new AppJobRunner(profile, jobConfig);
+					workerPool.execute(runner);
+					jobCount += 1;
 				}
 			}
 			else
-				logger.info(Log.DAEMON, "No Runs");
-		} 
-		catch (NoContentException e) {
-			logger.error(Log.RESPONSE, String.format(
-				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
-				getRunList.toString(), e.getClass().getName(), agentName));
-			if (abortOnException) AgentRunner.abort();
-		}
-		catch (IOException e) {
-			logger.error(Log.RESPONSE, e.toString(), e);
-			if (abortOnException) AgentRunner.abort();
-		}
+				logger.info(Log.INIT, "No Runs");
+		return jobCount;
 	}
-
+	
 	private void setStatus(Key runKey, String status) throws IOException {
 		statusLogger.setStatus(runKey, status);
 	}	
-
-	private void logError(Key runKey, Exception e) {
-		statusLogger.logError(runKey, e);
-	}
 	
 	private String getNumbers(ArrayNode runlist) {		
 		ArrayList<String> numbers = new ArrayList<String>();
