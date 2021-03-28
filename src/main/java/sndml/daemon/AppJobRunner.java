@@ -47,12 +47,6 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		appLogger =	new AppProgressLogger(profile, session, jobMetrics, number, runKey);
 		assert appLogger.getMetrics() == jobMetrics;
 		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
-		// TODO Remove
-		if (reader != null) {
-			// this is now handled by prepare()
-//			reader.setMetrics(jobMetrics);			
-//			reader.setProgressLogger(compositeLogger);
-		}
 		return compositeLogger;
 	}
 		

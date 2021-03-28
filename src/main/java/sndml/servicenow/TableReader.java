@@ -50,10 +50,8 @@ public abstract class TableReader implements Callable<Metrics> {
 		this.writer = writer;
 		this.metrics = metrics;
 		this.progress = progress;
-//		setLogContext();
-		// TODO: should not be conditional
 		assert progress != null;
-		if (progress != null) progress.logPrepare();		
+		progress.logPrepare();		
 	}
 	
 	protected void endPrepare(Integer expected) {
@@ -64,22 +62,6 @@ public abstract class TableReader implements Callable<Metrics> {
 	// Note: Only Synchronizer can throw SQLException during initialization	
 	public abstract void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) 
 		throws IOException, SQLException, InterruptedException;
-
-//	@Deprecated
-//	private void setLogContext() {
-//		//TODO Would like to deprecate but still used by Synchronizer
-//		Log.setTableContext(table, getReaderName());
-//	}
-
-//	protected void logStart() {
-//		assert initialized;
-//		if (progressLogger != null) progressLogger.logStart(getExpected());
-//		Log.setTableContext(table, getReaderName());
-//	}
-//	
-//	protected void logComplete() {
-//		if (progressLogger != null)	progressLogger.logComplete();
-//	}
 		
 	public abstract Metrics call() 
 		throws IOException, SQLException, InterruptedException;
@@ -110,24 +92,7 @@ public abstract class TableReader implements Callable<Metrics> {
 		assert progress != null;
 		return progress;
 	}
-	
-	@Deprecated
-	public void setParent(TableReader parent) {
-		if (initialized) throw new IllegalStateException();
-		assert parent != null;
-		this.parentReader = parent;		
-	}
-	
-	@Deprecated
-	public TableReader getParent() {
-		return this.parentReader;
-	}
-	
-	@Deprecated
-	public boolean hasParent() {
-		return this.parentReader != null;
-	}
-	
+		
 	/**
 	 * Return number of expected rows, if available. 
 	 * Otherwise return null.

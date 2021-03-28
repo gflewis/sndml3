@@ -40,15 +40,12 @@ public class JobRunner implements Callable<Metrics> {
 		}
 		else {
 			progressLogger = new Log4jProgressLogger(reader.getClass(), action, jobMetrics);
-			// TODO Remove
-//			reader.setMetrics(jobMetrics);
-//			reader.setProgressLogger(progressLogger);			
 		}
 		return progressLogger;
 	}
 			
 	protected void close() throws ResourceException {
-		// DaemonJobRunner will override this method
+		// {@Link AppJobRunner} will override this method
 	}
 	
 	@Override
