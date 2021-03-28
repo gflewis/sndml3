@@ -112,7 +112,6 @@ public class AppDaemon implements Daemon {
 	}
 		
 	public void run() {
-		// TODO Implement me
 		assert !isRunning;
 		isRunning = true;
 		Log.setJobContext(agentName);
@@ -123,15 +122,15 @@ public class AppDaemon implements Daemon {
 		// Daemon now goes into an endless loop
 		boolean isInterrupted = false;
 		while (!isInterrupted && !workerPool.isTerminated()) {
-			logger.info(Log.DAEMON, "awaiting threadpool termination");
+			logger.debug(Log.PROCESS, "awaiting threadpool termination");
 			try {
 				workerPool.awaitTermination(300, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {			
-				logger.info(Log.DAEMON, "Interrupt detected");
+				logger.info(Log.FINISH, "Interrupt detected");
 				isInterrupted = true;
 			}
 		}
-		logger.info(Log.DAEMON, "Calling stop");
+		logger.info(Log.FINISH, "Calling stop");
 		this.stop();
 	}
 
@@ -145,10 +144,11 @@ public class AppDaemon implements Daemon {
 		scanner.run();
 	}
 	
+	// TODO Make this class work with JSCV and PROCRUN
 	@Override
 	public void start() {
 		Log.setJobContext(agentName);
-		logger.info(Log.INIT, String.format(
+		logger.debug(Log.INIT, String.format(
 			"start agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer("scanner", true);
 		ShutdownHook shutdownHook = new ShutdownHook(daemonProfile, scanner, workerPool);

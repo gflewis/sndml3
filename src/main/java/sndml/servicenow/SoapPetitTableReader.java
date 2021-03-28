@@ -61,7 +61,6 @@ public class SoapPetitTableReader extends TableReader {
 	}		
 	
 	public Metrics call() throws IOException, SQLException {
-		RecordWriter writer = this.getWriter();
 		assert writer != null;
 		assert pageSize > 1;
 		int firstRow = 0;

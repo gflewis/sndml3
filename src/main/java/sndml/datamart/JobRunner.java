@@ -160,23 +160,19 @@ public class JobRunner implements Callable<Metrics> {
 		if (partitionInterval == null) {
 			reader = config.createReader(table, db, null);			
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
-			reader.setFields(config.getColumns());
-			reader.setPageSize(config.getPageSize());
 			reader.prepare(null, jobMetrics, progressLogger);
-			jobMetrics = reader.call();
 		}
 		else {
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(table, config, db);
+			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);	
-			multiReader.setMetrics(jobMetrics);;
-			assert multiReader.getMetrics() == jobMetrics;
-			multiReader.prepare(null, jobMetrics, progressLogger);
+			reader.prepare(null, jobMetrics, progressLogger);
 			DatePartition partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
-			Log.setTableContext(table, config.getName());
-			multiReader.call();
 		}
+		Log.setTableContext(table, config.getName());
+		reader.call();
 	}
 	
 	private void runLoad() throws SQLException, IOException, InterruptedException {

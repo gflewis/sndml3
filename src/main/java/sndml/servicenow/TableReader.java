@@ -316,38 +316,26 @@ public abstract class TableReader implements Callable<Metrics> {
 	public Integer getMaxRows() {
 		return this.maxRows;
 	}
-
-	@Deprecated
-	public void setWriter(RecordWriter writer, Metrics metrics) {
-		if (initialized) throw new IllegalStateException();
-		this.writer = writer;
-		this.metrics = metrics;		
-	}
-	
-	@Deprecated
-	public RecordWriter getWriter() {
-		assert this.writer != null;
-		return this.writer;
-	}
 	
 	public Metrics getMetrics() {
 		return this.metrics;
 	}
 	
+	@Deprecated
 	public void setMetrics(Metrics metrics) {
 		this.metrics = metrics;
 	}
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		assert !initialized;
-		// TODO Clean up
-		Metrics accumulatorMetrics = new Metrics("accumulator");
-		if (this.metrics == null) 
-			this.metrics = accumulatorMetrics;
-		if (this.progress == null) 
-			this.progress = new NullProgressLogger();
+		if (this.metrics == null) {
+			Metrics accumulatorMetrics = new Metrics("accumulator");
+			this.metrics = accumulatorMetrics;			
+		}
+		if (this.progress == null)  {
+			this.progress = new NullProgressLogger();			
+		}
 		RecordListAccumulator accumulator = new RecordListAccumulator(this);
-		setWriter(accumulator, accumulatorMetrics);
 		try {
 			this.prepare(accumulator, metrics, progress);
 			this.call();
