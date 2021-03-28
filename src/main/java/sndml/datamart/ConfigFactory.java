@@ -109,7 +109,7 @@ public class ConfigFactory {
 		}
 		job.initialize(profile, dateFactory);
 		job.validate();
-		logger.info(Log.INIT, "jobConfig: " + job.toString());
+		logger.debug(Log.INIT, "jobConfig: " + job.toString());
 		return job;
 	}
 		
@@ -119,7 +119,7 @@ public class ConfigFactory {
 		job.source = table.getName();
 		job.initialize(profile, dateFactory);
 		job.validate();
-		logger.info(Log.INIT, "tableLoader: " + job.toString());
+		logger.debug(Log.INIT, "tableLoader: " + job.toString());
 		return job;
 	}
 

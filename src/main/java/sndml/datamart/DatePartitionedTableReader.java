@@ -36,6 +36,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		if (config.getAction() == Action.SYNC) assert db != null;
 		setCreatedRange(config.getCreatedRange(null));
 		setUpdatedRange(config.getUpdatedRange());
+		setFilter(config.getFilter(table));
 		this.interval = config.getPartitionInterval();
 		this.threads = (config.getThreads()==null) ? 1 : config.getThreads();
 	}
@@ -87,7 +88,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		assert metrics != null;
 		assert progress != null;
 		// Use Stats API to determine min and max dates
-		EncodedQuery query = getQuery();
+		EncodedQuery query = this.getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
 		TableStats stats = table.rest().getStats(query, true);
 		Integer expected = stats.getCount();
