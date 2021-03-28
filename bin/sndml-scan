@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Run the DataPump Daemon
+#
+source sndml-setup $1
+env | grep SNDML | sort
+java -ea -jar $SNDML_JAR --profile=$SNDML_PROFILE --scan
