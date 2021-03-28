@@ -71,7 +71,7 @@ public class Scanner extends TimerTask {
 		int jobCount = 0;
 		JsonRequest request = new JsonRequest(session, getRunList, HttpMethod.GET, null);
 			ObjectNode response = request.execute();
-			logger.info(Log.RESPONSE, response.toPrettyString());
+			logger.debug(Log.RESPONSE, response.toPrettyString());
 			ObjectNode objResult = (ObjectNode) response.get("result");
 			if (objResult.has("runs")) {
 				ArrayNode runlist = (ArrayNode) objResult.get("runs");
