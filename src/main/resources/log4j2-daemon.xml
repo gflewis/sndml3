@@ -3,8 +3,8 @@
 <Configuration>
   <Appenders>
     <RollingFile name="RollingFile"
-    	fileName="${env:SNDML_LOG_DIR}/daemon-${date:yyyyMMdd}.log"
-    	filePattern="${env:SNDML_LOG_DIR}/daemon-%d{yyyyMMdd}-%i.log.gz">
+    	fileName="${env:SNDML_LOG_DIR}/${env:SNDML_AGENT}-${date:yyyyMMdd}.log"
+    	filePattern="${env:SNDML_LOG_DIR}/${env:SNDML_AGENT}-%d{yyyyMMdd}-%i.log.gz">
       <ThresholdFilter level="info" />
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  

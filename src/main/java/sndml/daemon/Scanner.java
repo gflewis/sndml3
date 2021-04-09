@@ -55,13 +55,15 @@ public class Scanner extends TimerTask {
 			if (!onExceptionContinue) AppDaemon.abort();
 		}		
 		catch (IOException e) {
+			String msg = e.getMessage();
+			boolean connectionReset = msg.toLowerCase().contains("connnection reset");
 			logger.error(Log.RESPONSE, e.toString(), e);
 			if (!onExceptionContinue) AppDaemon.abort();
-		}		
+		}
 		catch (Exception e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
 			AppDaemon.abort();
-			throw e;
+			throw e; 
 		}
 	}
 
