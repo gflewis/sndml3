@@ -14,7 +14,7 @@ import sndml.servicenow.*;
 public class AppJobRunner extends JobRunner implements Runnable {
 	
 	final ConnectionProfile profile;
-	final Key runKey;
+	final RecordKey runKey;
 	final String number;
 	final AppStatusLogger statusLogger;
 		

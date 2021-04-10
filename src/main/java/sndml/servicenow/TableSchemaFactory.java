@@ -50,7 +50,7 @@ public class TableSchemaFactory extends SchemaFactory{
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(2000);
 		RecordList recs = reader.getAllRecords();
-		for (Record rec : recs) {
+		for (BaseRecord rec : recs) {
 			String fieldname = rec.getValue("element");
 			if (fieldname != null) {
 				FieldDefinition fieldDef = new FieldDefinition(table, rec);
@@ -75,15 +75,15 @@ public class TableSchemaFactory extends SchemaFactory{
 	
 	private String determineParentName(String tableName) throws IOException {
 		Log.setTableContext(hierarchy,  hierarchy.getName() + "." + tableName);
-		Record myRec = hierarchy.api().getRecord("name", tableName);
+		BaseRecord myRec = hierarchy.api().getRecord("name", tableName);
 		if (myRec == null) {
 			logger.error(Log.SCHEMA, "Unable to read schema for: " + tableName +
 					" (check access controls for sys_dictionary and sys_db_object)");
 			throw new InvalidTableNameException(tableName);			
 		}
-		Key parentKey = myRec.getKey("super_class");
+		RecordKey parentKey = myRec.getKey("super_class");
 		if (parentKey == null) return null;
-		Record parentRec = hierarchy.getRecord(parentKey);
+		BaseRecord parentRec = hierarchy.getRecord(parentKey);
 		String parentName = parentRec.getValue("name");
 		logger.debug(Log.SCHEMA, "parent of " + tableName + " is " + parentKey + "/" + parentName);
 		return parentName;

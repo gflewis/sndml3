@@ -4,9 +4,9 @@ import java.util.Iterator;
 
 import org.slf4j.Logger;
 
-public abstract class Record implements InsertResponse {
+public abstract class BaseRecord implements InsertResponse {
 
-	static final Logger logger = Log.logger(Record.class);
+	static final Logger logger = Log.logger(BaseRecord.class);
 	
 	protected Table table;
 
@@ -54,19 +54,19 @@ public abstract class Record implements InsertResponse {
 	/**
 	 * Get the sys_id (primary key) of a Record.  
 	 */
-	public Key getKey() {
+	public RecordKey getKey() {
 		String fieldvalue = getValue("sys_id");
 		assert fieldvalue != null;
-		return new Key(fieldvalue);
+		return new RecordKey(fieldvalue);
 	}
 
 	/**
 	 * Get the value of a reference field.
 	 */
-	public Key getKey(String fieldname) {
+	public RecordKey getKey(String fieldname) {
 		String fieldvalue = getValue(fieldname);
 		if (fieldvalue==null) return null;
-		return new Key(fieldvalue);
+		return new RecordKey(fieldvalue);
 	}
 
 	/**

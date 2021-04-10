@@ -10,8 +10,8 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.Key;
-import sndml.servicenow.Record;
+import sndml.servicenow.RecordKey;
+import sndml.servicenow.BaseRecord;
 import sndml.servicenow.RecordList;
 import sndml.servicenow.Session;
 import sndml.servicenow.Table;
@@ -41,9 +41,9 @@ public class GetRecordsTest {
 		Table tbl = session.table("cmn_department");
 		RecordList recs = tbl.api().getRecords("id", TestManager.getProperty("some_department_id"));
 		assertTrue(recs.size() == 1);
-		Key sysid = recs.get(0).getKey();
-		assertTrue(Key.isGUID(sysid.toString()));
-		Record rec0 = tbl.api().getRecord(sysid);
+		RecordKey sysid = recs.get(0).getKey();
+		assertTrue(RecordKey.isGUID(sysid.toString()));
+		BaseRecord rec0 = tbl.api().getRecord(sysid);
 		assertTrue(rec0.getKey().equals(sysid));
 	}
 	
@@ -61,7 +61,7 @@ public class GetRecordsTest {
 		TestManager.bannerStart("getGoodKey");
 		String goodKey = TestManager.getProperty("some_incident_sys_id");
 		Table tbl = session.table("incident");
-		Record rec = tbl.getRecord(new Key(goodKey));
+		BaseRecord rec = tbl.getRecord(new RecordKey(goodKey));
 		assertNotNull(rec);
 		assertEquals(goodKey, rec.getValue("sys_id"));
 	}
@@ -71,7 +71,7 @@ public class GetRecordsTest {
 		TestManager.bannerStart("testGetBadKey");
 		String badKey = "00000000000000000000000000000000";
 		Table tbl = session.table("incident");
-		Record rec = tbl.getRecord(new Key(badKey));
+		BaseRecord rec = tbl.getRecord(new RecordKey(badKey));
 		assertNull(rec);
 	}
 	

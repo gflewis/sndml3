@@ -20,7 +20,7 @@ public class FieldDefinition {
 	 * @param table - The table in which this field appears.
 	 * @param dictrec - The sys_dictionary record that describes this field.
 	 */
-	protected FieldDefinition(Table table, Record dictrec) {
+	protected FieldDefinition(Table table, BaseRecord dictrec) {
 		this(table, dictrec.getValue("element"), dictrec.getValue("internal_type"), 
 				dictrec.getInteger("max_length"), dictrec.getValue("reference"));
 	}
@@ -79,7 +79,7 @@ public class FieldDefinition {
 	
 	/**
 	 * Return true if the field is a reference field.
-	 * The value of a reference field is always a {@link Key} (sys_id).
+	 * The value of a reference field is always a {@link RecordKey} (sys_id).
 	 */
 	public boolean isReference() { 
 		return (ref_table != null && ref_table.length() > 0); 

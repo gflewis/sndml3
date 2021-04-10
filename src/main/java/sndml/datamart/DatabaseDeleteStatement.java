@@ -18,7 +18,7 @@ public class DatabaseDeleteStatement extends DatabaseStatement {
 		return generator.getTemplate(templateName, sqlTableName, map);	
 	}
 
-	public boolean deleteRecord(Key key) throws SQLException {
+	public boolean deleteRecord(RecordKey key) throws SQLException {
 		this.bindField(1, key.toString());
 		int count = stmt.executeUpdate();
 		return (count > 0);

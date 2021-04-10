@@ -37,7 +37,7 @@ public class JsonTableAPI extends TableAPI {
 		return keys;
 	}
 
-	public Record getRecord(Key sys_id) throws IOException {
+	public BaseRecord getRecord(RecordKey sys_id) throws IOException {
 		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");
@@ -95,7 +95,7 @@ public class JsonTableAPI extends TableAPI {
 		*/
 	}
 	
-	public void updateRecord(Key key, Parameters fields) throws IOException {
+	public void updateRecord(RecordKey key, Parameters fields) throws IOException {
 		throw new UnsupportedOperationException();
 		/*
 		Log.setMethodContext(table, "update");
@@ -110,7 +110,7 @@ public class JsonTableAPI extends TableAPI {
 		*/
 	}
 
-	public boolean deleteRecord(Key key) throws IOException {
+	public boolean deleteRecord(RecordKey key) throws IOException {
 		throw new UnsupportedOperationException();
 		/*
 		Log.setMethodContext(table, "deleteRecord");

@@ -78,8 +78,8 @@ public class Synchronizer extends TableReader {
 		else
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);		
 		KeySet dbKeys = dbTimestamps.getKeys(); // for debug
-		Key dbMinKey = dbKeys.minValue(); // for debug
-		Key dbMaxKey = dbKeys.maxValue(); // for debug
+		RecordKey dbMinKey = dbKeys.minValue(); // for debug
+		RecordKey dbMaxKey = dbKeys.maxValue(); // for debug
 		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
 		if (logger.isDebugEnabled() && dbTimestamps.size() > 0) {
 			logger.debug(Log.INIT, String.format("database min key=%s updated %s", 
@@ -98,8 +98,8 @@ public class Synchronizer extends TableReader {
 		sntsr.setPageSize(10000);
 		sntsr.enableStats(true);
 		RecordList snTimestamps = sntsr.getAllRecords();
-		Key snMinKey = snTimestamps.minKey(); // for debug
-		Key snMaxKey = snTimestamps.maxKey(); // for debug
+		RecordKey snMinKey = snTimestamps.minKey(); // for debug
+		RecordKey snMaxKey = snTimestamps.maxKey(); // for debug
 		Log.setTableContext(table, writerName);
 		if (logger.isDebugEnabled() && snTimestamps.size() > 0) {
 			logger.debug(Log.INIT, String.format("SN keys min=%s max=%s", snMinKey, snMaxKey));
@@ -108,15 +108,15 @@ public class Synchronizer extends TableReader {
 	}
 	
 	private void compareTimestamps() throws IOException, InterruptedException {
-		Key snMinKey = snTimestamps.minKey(); // for debug
-		Key snMaxKey = snTimestamps.maxKey(); // for debug
+		RecordKey snMinKey = snTimestamps.minKey(); // for debug
+		RecordKey snMaxKey = snTimestamps.maxKey(); // for debug
 		TimestampHash examined = new TimestampHash();
 		insertSet = new KeySet();
 		updateSet = new KeySet();
 		deleteSet = new KeySet();
 		skipSet = new KeySet();
-		for (Record rec : snTimestamps) {
-			Key key = rec.getKey();
+		for (BaseRecord rec : snTimestamps) {
+			RecordKey key = rec.getKey();
 			assert key != null;
 			assert !examined.containsKey(key) :
 				String.format("duplicate key: %s", key.toString());				
@@ -143,7 +143,7 @@ public class Synchronizer extends TableReader {
 		assert examined.size() == (insertSet.size() + updateSet.size() + skipSet.size()) :
 			String.format("examined=%d inserts=%d updated=%d skips=%d", 
 					examined.size(), insertSet.size(), updateSet.size(), skipSet.size());
-		for (Key key : dbTimestamps.keySet()) {
+		for (RecordKey key : dbTimestamps.keySet()) {
 			if (examined.get(key) == null) 
 				deleteSet.add(key);
 		}

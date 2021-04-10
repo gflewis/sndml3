@@ -3,10 +3,10 @@ package sndml.datamart;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.servicenow.Key;
+import sndml.servicenow.RecordKey;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
-import sndml.servicenow.Record;
+import sndml.servicenow.BaseRecord;
 import sndml.servicenow.Table;
 
 public class DatabaseUpdateWriter extends DatabaseTableWriter {
@@ -28,8 +28,8 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 	}
 		
 	@Override
-	void writeRecord(Record rec, Metrics writerMetrics) throws SQLException {
-		Key key = rec.getKey();
+	void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException {
+		RecordKey key = rec.getKey();
 		logger.trace(Log.PROCESS, "Update " + key);
 		if (updateStmt.update(rec)) {
 			writerMetrics.incrementUpdated();

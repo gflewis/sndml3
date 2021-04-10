@@ -5,9 +5,9 @@ import java.util.*;
 /**
  * An iterator used to loop through a {@link RecordList}.
  */
-public class RecordIterator implements Iterator<Record> {
+public class RecordIterator implements Iterator<BaseRecord> {
 
-	private ListIterator<Record> iter;
+	private ListIterator<BaseRecord> iter;
 	
 	RecordIterator(RecordList list) {
 		iter = list.listIterator();
@@ -17,7 +17,7 @@ public class RecordIterator implements Iterator<Record> {
 		return iter.hasNext();
 	}
 
-	public Record next() {
+	public BaseRecord next() {
 		return iter.next();
 	}
 

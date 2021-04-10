@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.FieldNames;
 import sndml.servicenow.Log;
-import sndml.servicenow.Record;
+import sndml.servicenow.BaseRecord;
 import sndml.servicenow.RecordListAccumulator;
 import sndml.servicenow.Session;
 import sndml.servicenow.Table;
@@ -30,7 +30,7 @@ public class SetFieldsTest {
 		reader.call();
 		int rows = accumulator.getRecords().size();
 		assertTrue(rows > 0);
-		for (Record rec : accumulator.getRecords()) {
+		for (BaseRecord rec : accumulator.getRecords()) {
 			assertNotNull(rec.getValue("sys_id"));
 			assertNotNull(rec.getValue("sys_created_on"));
 			assertNotNull(rec.getValue("sys_updated_on"));

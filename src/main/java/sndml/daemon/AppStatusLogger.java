@@ -26,7 +26,7 @@ public class AppStatusLogger {
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 
-	public void setStatus(Key runKey, String status) throws IOException {
+	public void setStatus(RecordKey runKey, String status) throws IOException {
 		assert runKey != null;
 		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
@@ -38,7 +38,7 @@ public class AppStatusLogger {
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 	}	
 
-	public void logError(Key runKey, Exception e) {
+	public void logError(RecordKey runKey, Exception e) {
 		assert runKey != null;
 		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();

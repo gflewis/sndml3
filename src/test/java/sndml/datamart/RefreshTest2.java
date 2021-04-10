@@ -60,7 +60,7 @@ public class RefreshTest2 {
     		loadMetrics.getStarted().toString());	    
 	    values.put("short_description", descr1);
 	    values.put("cmdb_ci",  TestManager.getProperty("some_ci"));
-	    Key key = api.insertRecord(values).getKey();
+	    RecordKey key = api.insertRecord(values).getKey();
 	    TestManager.sleep(2);
 	    TestManager.banner(logger,  "Refresh");
 	    String yaml = String.format(

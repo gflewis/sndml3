@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import sndml.servicenow.DateTime;
 import sndml.servicenow.InvalidDateTimeException;
 import sndml.servicenow.Log;
-import sndml.servicenow.Record;
+import sndml.servicenow.BaseRecord;
 
 public abstract class DatabaseStatement {
 
@@ -24,7 +24,7 @@ public abstract class DatabaseStatement {
 	final String templateName;
 	final String stmtText;
 	final PreparedStatement stmt;
-	Record lastRec;
+	BaseRecord lastRec;
 
     private final Pattern dateTimePattern = 
         	Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d");
@@ -61,7 +61,7 @@ public abstract class DatabaseStatement {
 	 * @param glideCol Index (starting with 0) of the variable in the columns array.
 	 * @throws SQLException
 	 */	
-	protected void bindField(int bindCol, Record rec, int glideCol) throws SQLException {
+	protected void bindField(int bindCol, BaseRecord rec, int glideCol) throws SQLException {
 		DatabaseFieldDefinition defn = columns.get(glideCol);
 		String glidename = defn.getGlideName();
 		String value = rec.getValue(glidename);
@@ -75,7 +75,7 @@ public abstract class DatabaseStatement {
 		}		
 	}
 	
-	protected void bindField(int bindCol, Record rec, DatabaseFieldDefinition d, String value) throws SQLException {
+	protected void bindField(int bindCol, BaseRecord rec, DatabaseFieldDefinition d, String value) throws SQLException {
 		String glidename = d.getGlideName();
 		int sqltype = d.sqltype;
 		// If value is null then bind to null and exit

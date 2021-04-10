@@ -21,7 +21,7 @@ public class JobConfig {
 	
 	public DateTime start;
 	public DateTime last;
-	public Key sys_id;
+	public RecordKey sys_id;
 	public String number;
 	@JsonProperty("name") public String jobName;
 	public String source;
@@ -52,7 +52,7 @@ public class JobConfig {
 	public String getSource() {	return source;	}
 	public String getTarget() {	return this.target;	}
 	
-	public Key getSysId() { return this.sys_id; }
+	public RecordKey getSysId() { return this.sys_id; }
 	public String getNumber() { return this.number; }
 	public Action getAction() { return action; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }

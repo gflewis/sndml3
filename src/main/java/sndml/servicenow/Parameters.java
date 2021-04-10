@@ -51,9 +51,9 @@ public class Parameters extends LinkedHashMap<String, String> {
 		return super.containsKey(name);
 	}
 	
-	public Key getSysId() {
+	public RecordKey getSysId() {
 		String sysid = get("sys_id");
-		return (sysid == null) ? null : new Key(sysid);
+		return (sysid == null) ? null : new RecordKey(sysid);
 	}
 	
 	public String getNumber() {

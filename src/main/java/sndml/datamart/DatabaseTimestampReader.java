@@ -25,7 +25,7 @@ public class DatabaseTimestampReader {
 		this.dbc = database.getConnection();
 	}
 	
-	DateTime getTimestampUpdated(String tableName, Key key) throws SQLException {
+	DateTime getTimestampUpdated(String tableName, RecordKey key) throws SQLException {
 		assert tableName != null;
 		assert key != null;
 		DateTime result = null;
@@ -46,7 +46,7 @@ public class DatabaseTimestampReader {
 		return result;
 	}
 
-	DateTime getTimestampCreated(String tableName, Key key) throws SQLException {
+	DateTime getTimestampCreated(String tableName, RecordKey key) throws SQLException {
 		assert tableName != null;
 		assert key != null;
 		DateTime result = null;
@@ -102,7 +102,7 @@ public class DatabaseTimestampReader {
 		while (rs.next() ) {
 			String sys_id = rs.getString(1);
 			Timestamp sys_updated_on = rs.getTimestamp(2, tzGMT);
-			Key key = new Key(sys_id);
+			RecordKey key = new RecordKey(sys_id);
 			DateTime value = new DateTime(sys_updated_on);
 			result.put(key, value);
 		}

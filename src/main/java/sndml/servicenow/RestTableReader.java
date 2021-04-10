@@ -55,7 +55,7 @@ public class RestTableReader extends TableReader {
 		assert writer != null;
 		assert metrics != null;
 		int rowCount = 0;
-		Key maxKey = null;
+		RecordKey maxKey = null;
 		boolean finished = false;
 		if (statsEnabled && stats.count == 0) {
 			finished = true;

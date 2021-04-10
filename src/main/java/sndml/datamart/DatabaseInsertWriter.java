@@ -5,10 +5,10 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.regex.Pattern;
 
-import sndml.servicenow.Key;
+import sndml.servicenow.RecordKey;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
-import sndml.servicenow.Record;
+import sndml.servicenow.BaseRecord;
 import sndml.servicenow.Table;
 
 public class DatabaseInsertWriter extends DatabaseTableWriter {
@@ -32,8 +32,8 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 			Pattern.compile("\\b(primary key|unique constraint)\\b", Pattern.CASE_INSENSITIVE);
 		
 	@Override
-	void writeRecord(Record rec, Metrics writerMetrics) throws SQLException {
-		Key key = rec.getKey();
+	void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException {
+		RecordKey key = rec.getKey();
 		logger.trace(Log.PROCESS, "Insert " + key);
 		try {
 			insertStmt.insert(rec);

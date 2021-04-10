@@ -12,7 +12,7 @@ import java.util.*;
  * 
  * @author Giles Lewis
  */
-public class XmlRecord extends Record {
+public class XmlRecord extends BaseRecord {
 	
 	final protected Element element;
 	final protected Namespace ns;

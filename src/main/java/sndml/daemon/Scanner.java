@@ -91,7 +91,7 @@ public class Scanner extends TimerTask {
 				// Run the first job in the list
 				JsonNode node = runlist.get(0);
 				assert node.isObject();
-				Key runKey = new Key(node.get("sys_id").asText());
+				RecordKey runKey = new RecordKey(node.get("sys_id").asText());
 				String number = node.get("number").asText();
 				assert runKey != null;
 				assert number != null;
@@ -120,7 +120,7 @@ public class Scanner extends TimerTask {
 		if (runlist != null && runlist.size() > 0) {
 			for (JsonNode node : runlist) {
 				assert node.isObject();
-				Key runKey = new Key(node.get("sys_id").asText());
+				RecordKey runKey = new RecordKey(node.get("sys_id").asText());
 				String number = node.get("number").asText();
 				assert runKey != null;
 				assert number != null;
@@ -156,7 +156,7 @@ public class Scanner extends TimerTask {
 			}
 			for (JsonNode node : runlist) {
 				assert node.isObject();
-				Key runKey = new Key(node.get("sys_id").asText());
+				RecordKey runKey = new RecordKey(node.get("sys_id").asText());
 				String number = node.get("number").asText();
 				assert runKey != null;
 				assert number != null;
@@ -192,7 +192,7 @@ public class Scanner extends TimerTask {
 		return runlist;		
 	}
 	
-	private void setStatus(Key runKey, String status) throws IOException {
+	private void setStatus(RecordKey runKey, String status) throws IOException {
 		statusLogger.setStatus(runKey, status);
 	}	
 	

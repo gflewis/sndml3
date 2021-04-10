@@ -73,7 +73,7 @@ public class LegacyTableSchema {
 	}
 
 	public void processRecords(RecordList recs) throws IOException {
-		for (Record rec : recs) {
+		for (BaseRecord rec : recs) {
 			String fieldname = rec.getValue("element");
 			if (fieldname != null) {
 				FieldDefinition fieldDef = new FieldDefinition(table, rec);
@@ -88,15 +88,15 @@ public class LegacyTableSchema {
 	private String determineParentName() throws IOException {
 		// if (tablename.startsWith("sys_")) return null;
 		Log.setTableContext(hierarchy,  hierarchy.getName() + "." + this.tablename);
-		Record myRec = hierarchy.api().getRecord("name", this.tablename);
+		BaseRecord myRec = hierarchy.api().getRecord("name", this.tablename);
 		if (myRec == null) {
 			logger.error(Log.SCHEMA, "Unable to read schema for: " + tablename +
 					" (check access controls for sys_dictionary and sys_db_object)");
 			throw new InvalidTableNameException(tablename);			
 		}
-		Key parentKey = myRec.getKey("super_class");
+		RecordKey parentKey = myRec.getKey("super_class");
 		if (parentKey == null) return null;
-		Record parentRec = hierarchy.getRecord(parentKey);
+		BaseRecord parentRec = hierarchy.getRecord(parentKey);
 		String parentName = parentRec.getValue("name");
 		logger.debug(Log.SCHEMA, "parent of " + tablename + " is " + parentKey + "/" + parentName);
 		return parentName;

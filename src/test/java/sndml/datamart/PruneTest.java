@@ -54,7 +54,7 @@ public class PruneTest {
     		DateTime.now().toString());	    	   
 	    values.put("short_description", descr1);
 	    values.put("cmdb_ci",  TestManager.getProperty("some_ci"));
-	    Key key = api.insertRecord(values).getKey();
+	    RecordKey key = api.insertRecord(values).getKey();
 	    assertNotNull(api.getRecord(key));
 	    logger.info(Log.TEST, "Inserted Incident " + key);
 	    TestManager.sleep(1.5);

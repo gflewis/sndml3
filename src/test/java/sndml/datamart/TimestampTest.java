@@ -64,7 +64,7 @@ public class TimestampTest {
 		database.createMissingTable(tbl, tablename);
 		util.truncateTable(tablename);
 		String sys_id = TestManager.getProperty("some_incident_sys_id");
-		Record rec = tbl.getRecord(new Key(sys_id));
+		BaseRecord rec = tbl.getRecord(new RecordKey(sys_id));
 		String created = rec.getValue("sys_created_on");
 		JobConfig config = factory.tableLoader(profile, tbl);
 		config.filter = "sys_id=" + sys_id;
@@ -74,7 +74,7 @@ public class TimestampTest {
 		Metrics loadMetrics = runner.call();
 		assertTrue(loadMetrics.getProcessed() > 0);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
-		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new Key(sys_id));
+		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new RecordKey(sys_id));
 		logger.info(Log.TEST, "created=" + created + " dbcreated=" + dbcreated);
 		assertNotNull(dbcreated);
 		assertEquals(created, dbcreated.toString());		
@@ -96,10 +96,10 @@ public class TimestampTest {
 		assertTrue(timestamps.size() > 0);
 		KeySet keys = timestamps.getKeys();
 		assertEquals(timestamps.size(), keys.size());
-		Key firstKey = keys.get(0);
+		RecordKey firstKey = keys.get(0);
 		DateTime firstTimestamp = timestamps.get(firstKey);
 		logger.info(Log.TEST, String.format("%s=%s", firstKey, firstTimestamp));
-		Record firstRec = session.table("incident").api().getRecord(firstKey);
+		BaseRecord firstRec = session.table("incident").api().getRecord(firstKey);
 		logger.info(Log.TEST, String.format(
 				"number=%s created=%s updated=%s", firstRec.getValue("number"), 
 				firstRec.getValue("sys_created_on"), firstRec.getValue("sys_updated_on")));

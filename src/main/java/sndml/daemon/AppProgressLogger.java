@@ -19,7 +19,7 @@ public class AppProgressLogger extends ProgressLogger {
 	final Session session;
 	final URI putRunStatusURI;
 	final String number;
-	final Key runKey;
+	final RecordKey runKey;
 	final static Logger logger = LoggerFactory.getLogger(AppProgressLogger.class);	
 
 	AppProgressLogger(
@@ -27,7 +27,7 @@ public class AppProgressLogger extends ProgressLogger {
 			Session session,
 			Metrics metrics,
 			String number, 
-			Key runKey) {
+			RecordKey runKey) {
 		this(profile, session, metrics, number, runKey, null);
 	}
 	
@@ -36,7 +36,7 @@ public class AppProgressLogger extends ProgressLogger {
 			Session session,
 			Metrics metrics,
 			String number, 
-			Key runKey,
+			RecordKey runKey,
 			DatePart part) {
 		super(metrics, part);
 		assert runKey != null;

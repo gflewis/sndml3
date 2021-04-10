@@ -37,15 +37,15 @@ public abstract class TableAPI {
 	 * @return
 	 * @throws IOException
 	 */
- 	public abstract Record getRecord(Key sys_id) throws IOException;
+ 	public abstract BaseRecord getRecord(RecordKey sys_id) throws IOException;
  	
  	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
  	
  	public abstract InsertResponse insertRecord(Parameters fields) throws IOException;
  	
- 	public abstract void updateRecord(Key key, Parameters fields) throws IOException;
+ 	public abstract void updateRecord(RecordKey key, Parameters fields) throws IOException;
  	
- 	public abstract boolean deleteRecord(Key key) throws IOException;
+ 	public abstract boolean deleteRecord(RecordKey key) throws IOException;
 
  	public abstract TableReader getDefaultReader() throws IOException;
 
@@ -79,17 +79,17 @@ public abstract class TableAPI {
 	 * If multiple qualifying records are found this method 
 	 * will throw an RowCountExceededException.
 	 * <pre>
-	 * {@link Record} grouprec = session.table("sys_user_group").get("name", "Network Support");
+	 * {@link BaseRecord} grouprec = session.table("sys_user_group").get("name", "Network Support");
 	 * </pre>
 	 * 
 	 * @param fieldname Field name, e.g. "number" or "name"
 	 * @param fieldvalue Field value
 	 */
-	public Record getRecord(String fieldname, String fieldvalue) throws IOException {
+	public BaseRecord getRecord(String fieldname, String fieldvalue) throws IOException {
 		return getRecord(fieldname, fieldvalue, false);
 	}
 	
-	public Record getRecord(String fieldname, String fieldvalue, boolean displayValues)
+	public BaseRecord getRecord(String fieldname, String fieldvalue, boolean displayValues)
 			throws IOException, SoapResponseException {
 		RecordList result = getRecords(fieldname, fieldvalue, displayValues);
 		int size = result.size();

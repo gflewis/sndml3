@@ -2,7 +2,7 @@ package sndml.servicenow;
 
 public interface InsertResponse {
 
-	public Key getKey();
+	public RecordKey getKey();
 	public String getNumber();
 
 }

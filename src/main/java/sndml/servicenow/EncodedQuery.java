@@ -223,7 +223,7 @@ public class EncodedQuery implements Cloneable {
 	 * @param value max sys_id from previous query
 	 * @return The modified original filter
 	 */
-	public EncodedQuery excludeKeys(Key value) {
+	public EncodedQuery excludeKeys(RecordKey value) {
 		if (value != null) {
 			this.addQuery("sys_id", GREATER_THAN, value.toString());			
 		}

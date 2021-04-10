@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * as returned from a <b>getKeys</b> Web Services call. 
  * 
  */
-public class KeySet extends ArrayList<Key> {
+public class KeySet extends ArrayList<RecordKey> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,13 +29,13 @@ public class KeySet extends ArrayList<Key> {
 		this(array.size());		
 		for (int i = 0; i < array.size(); ++i) {
 			JsonNode ele = array.get(i);
-			this.add(new Key(ele.asText()));
+			this.add(new RecordKey(ele.asText()));
 		}		
 	}
 		
-	public KeySet(Set<Key> set) {
+	public KeySet(Set<RecordKey> set) {
 		super(set.size());
-		for (Key key : set) {
+		for (RecordKey key : set) {
 			this.add(key);
 		}
 	}
@@ -71,17 +71,17 @@ public class KeySet extends ArrayList<Key> {
 		return result;
 	}
 		
-	public Key maxValue() {
-		Key result = null;
-		for (Key key : this) {
+	public RecordKey maxValue() {
+		RecordKey result = null;
+		for (RecordKey key : this) {
 			if (result == null || key.greaterThan(result)) result = key;
 		}
 		return result;		
 	}
 	
-	public Key minValue() {
-		Key result = null;
-		for (Key key : this) {
+	public RecordKey minValue() {
+		RecordKey result = null;
+		for (RecordKey key : this) {
 			if (result == null || key.lessThan(result)) result = key;
 		}
 		return result;
@@ -92,8 +92,8 @@ public class KeySet extends ArrayList<Key> {
 	 */
 	@Deprecated
 	int uniqueCount() {
-		Hashtable<Key,Boolean> hash = new Hashtable<Key,Boolean>(this.size());
-		for (Key key : this) {
+		Hashtable<RecordKey,Boolean> hash = new Hashtable<RecordKey,Boolean>(this.size());
+		for (RecordKey key : this) {
 			hash.put(key, true);
 		}
 		return hash.size();

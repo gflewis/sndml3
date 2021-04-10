@@ -20,7 +20,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	protected DateTimeRange createdRange;
 	protected DateTimeRange updatedRange;
 	// keyExclusion is use for pagination; only values greater than the current key will be returned
-	private Key keyExclusion = null;
+	private RecordKey keyExclusion = null;
 	
 	protected static enum OrderBy {NONE, KEYS, FIELDS};
 	// Note: RestTableReader sets orderBy to KEYS
@@ -169,7 +169,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	/**
 	 * Exclude all keys less than or equal to the value
 	 */
-	public TableReader setKeyExclusion(Key value) {
+	public TableReader setKeyExclusion(RecordKey value) {
 		assert this.orderBy == OrderBy.KEYS;
 		this.keyExclusion = value;
 		return this;

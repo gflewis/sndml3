@@ -61,18 +61,18 @@ public class SoapTableAPI extends TableAPI {
 					"expected: " + size + ", found=" + list.length, responseElement);
 			}
 			for (int i = 0; i < list.length; ++i) {
-				result.add(new Key(list[i]));
+				result.add(new RecordKey(list[i]));
 			}
 		}
 		return result;		
 	}
 	
-	public Record getRecord(Key key) throws IOException {
+	public BaseRecord getRecord(RecordKey key) throws IOException {
 		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters("sys_id", key.toString());
 		Element responseElement = client.executeRequest("get", params, null, "getResponse");
 		if (responseElement.getContentSize() == 0) return null;
-		Record rec = new XmlRecord(getTable(), responseElement);
+		BaseRecord rec = new XmlRecord(getTable(), responseElement);
 		return rec;		
 	}
 	
@@ -84,13 +84,13 @@ public class SoapTableAPI extends TableAPI {
 	 * If multiple qualifying records are found this method 
 	 * will throw an RowCountExceededException.
 	 * <pre>
-	 * {@link Record} grouprec = session.table("sys_user_group").get("name", "Network Support");
+	 * {@link BaseRecord} grouprec = session.table("sys_user_group").get("name", "Network Support");
 	 * </pre>
 	 * 
 	 * @param fieldname Field name, e.g. "number" or "name"
 	 * @param fieldvalue Field value
 	 */
-	public Record getRecord(String fieldname, String fieldvalue, boolean displayValues)
+	public BaseRecord getRecord(String fieldname, String fieldvalue, boolean displayValues)
 			throws IOException, SoapResponseException {
 		RecordList result = getRecords(fieldname, fieldvalue, displayValues);
 		int size = result.size();
@@ -140,11 +140,11 @@ public class SoapTableAPI extends TableAPI {
 		Log.setMethodContext(table, "insert");
 		Element responseElement = 
 			client.executeRequest("insert", docParams, null, "insertResponse");
-		Record rec = new XmlRecord(getTable(), responseElement);
+		BaseRecord rec = new XmlRecord(getTable(), responseElement);
 		return rec;
 	}
 
-	public void updateRecord(Key key, Parameters fields) throws IOException {
+	public void updateRecord(RecordKey key, Parameters fields) throws IOException {
 		Log.setMethodContext(table, "update");
 		Parameters docParams = new Parameters();
 		docParams.add(fields);
@@ -154,7 +154,7 @@ public class SoapTableAPI extends TableAPI {
 			client.executeRequest("update", docParams, null, "updateResponse");
 	}
 	
-	public boolean deleteRecord(Key key) throws IOException {
+	public boolean deleteRecord(RecordKey key) throws IOException {
 		Log.setMethodContext(table, "deleteRecord");
 		Parameters docParams = new Parameters("sys_id", key.toString());
 		Element responseElement =

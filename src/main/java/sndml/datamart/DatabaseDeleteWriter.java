@@ -3,12 +3,12 @@ package sndml.datamart;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.servicenow.Key;
+import sndml.servicenow.RecordKey;
 import sndml.servicenow.KeySet;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
-import sndml.servicenow.Record;
+import sndml.servicenow.BaseRecord;
 import sndml.servicenow.Table;
 
 public class DatabaseDeleteWriter extends DatabaseTableWriter {
@@ -29,22 +29,22 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	}
 	
 	@Override
-	void writeRecord(Record rec, Metrics writerMetrics) throws SQLException {
+	void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException {
 		assert rec.getTable().getName().equals("sys_audit_delete");
-		Key key = rec.getKey("documentkey");
+		RecordKey key = rec.getKey("documentkey");
 		assert key != null;
 		deleteRecord(key, writerMetrics);
 	}
 	
 	void  deleteRecords(KeySet keys, Metrics writerMetrics, ProgressLogger progressLogger) 
 			throws SQLException {
-		for (Key key : keys) {
+		for (RecordKey key : keys) {
 			deleteRecord(key, writerMetrics);
 		}
 		db.commit();		
 	}
 	
-	private void deleteRecord(Key key, Metrics writerMetrics) throws SQLException {
+	private void deleteRecord(RecordKey key, Metrics writerMetrics) throws SQLException {
 		logger.info(Log.PROCESS, "Delete " + key);		
 		if (deleteStmt.deleteRecord(key)) {
 			writerMetrics.incrementDeleted();			

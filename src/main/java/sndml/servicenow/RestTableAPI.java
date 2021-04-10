@@ -20,7 +20,7 @@ public class RestTableAPI extends TableAPI {
 		return getSession().getInstance();
 	}
 	
-	private URI getURI(String api, Key sys_id, Parameters params) {
+	private URI getURI(String api, RecordKey sys_id, Parameters params) {
 		assert api != null;
 		String path = "api/now/" + api + "/" + table.getName();
 		if (sys_id != null) path += "/" + sys_id.toString();
@@ -68,7 +68,7 @@ public class RestTableAPI extends TableAPI {
 		return tableStats;		
 	}
 	
-	public Record getRecord(Key key) throws IOException {
+	public BaseRecord getRecord(RecordKey key) throws IOException {
 		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.GET, null);
@@ -130,7 +130,7 @@ public class RestTableAPI extends TableAPI {
 		return rec;
 	}
 
-	public void updateRecord(Key key, Parameters fields) throws IOException {
+	public void updateRecord(RecordKey key, Parameters fields) throws IOException {
 		Log.setMethodContext(table, "PUT");
 		URI uri = getURI("table", key, null);
 		ObjectNode requestObj = fields.toJSON();
@@ -143,7 +143,7 @@ public class RestTableAPI extends TableAPI {
 		JsonRecord rec = new JsonRecord(this.table, resultObj);
 	}
 	
-	public boolean deleteRecord(Key key) throws IOException {
+	public boolean deleteRecord(RecordKey key) throws IOException {
 		Log.setMethodContext(table, "DELETE");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.DELETE, null);

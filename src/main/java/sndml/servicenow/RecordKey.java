@@ -8,14 +8,14 @@ import java.util.regex.Pattern;
  * This class is used to ensure proper parameter type resolution 
  * for various methods.
  */
-public class Key implements Comparable<Key>, Comparator<Key> {
+public class RecordKey implements Comparable<RecordKey>, Comparator<RecordKey> {
 
 	static final Pattern pattern = Pattern.compile("[0-9a-f]{32}");
 	static final int LENGTH = 32;
 	
 	final String value;	
 	
-	public Key(String value) {
+	public RecordKey(String value) {
 		assert value != null;
 		this.value = value;
 	}
@@ -25,12 +25,12 @@ public class Key implements Comparable<Key>, Comparator<Key> {
 	}
 	
 	@Override
-	public int compareTo(Key other) {
+	public int compareTo(RecordKey other) {
 		return this.value.compareTo(other.value);
 	}
 	
 	@Override
-	public int compare(Key key1, Key key2) {
+	public int compare(RecordKey key1, RecordKey key2) {
 		return key1.value.compareTo(key2.value);
 	}
 	
@@ -40,14 +40,14 @@ public class Key implements Comparable<Key>, Comparator<Key> {
 		return this.value.equals(other.toString());
 	}
 	
-	public boolean greaterThan(Key other) {
+	public boolean greaterThan(RecordKey other) {
 		// Note: Any value is greater than null
 		if (other == null) return true;
 		if (this.value.compareTo(other.value) > 0) return true;
 		return false;		
 	}
 	
-	public boolean lessThan(Key other) {
+	public boolean lessThan(RecordKey other) {
 		// Note: Any value is less than null
 		if (other == null) return true;
 		if (this.value.compareTo(other.value)< 0) return true;
