@@ -5,7 +5,13 @@ import java.sql.SQLException;
 
 import org.slf4j.Logger;
 
-import sndml.servicenow.*;
+import sndml.servicenow.Log;
+import sndml.servicenow.Metrics;
+import sndml.servicenow.ProgressLogger;
+import sndml.servicenow.Record;
+import sndml.servicenow.RecordList;
+import sndml.servicenow.RecordWriter;
+import sndml.servicenow.Table;
 
 /**
  * <p>A class which knows how to process records retrieved from ServiceNow.</p>

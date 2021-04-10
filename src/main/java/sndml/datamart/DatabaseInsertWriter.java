@@ -5,7 +5,11 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.regex.Pattern;
 
-import sndml.servicenow.*;
+import sndml.servicenow.Key;
+import sndml.servicenow.Log;
+import sndml.servicenow.Metrics;
+import sndml.servicenow.Record;
+import sndml.servicenow.Table;
 
 public class DatabaseInsertWriter extends DatabaseTableWriter {
 

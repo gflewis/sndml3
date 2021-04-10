@@ -3,7 +3,13 @@ package sndml.datamart;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.servicenow.*;
+import sndml.servicenow.Key;
+import sndml.servicenow.KeySet;
+import sndml.servicenow.Log;
+import sndml.servicenow.Metrics;
+import sndml.servicenow.ProgressLogger;
+import sndml.servicenow.Record;
+import sndml.servicenow.Table;
 
 public class DatabaseDeleteWriter extends DatabaseTableWriter {
 
