@@ -10,7 +10,10 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 
-import sndml.servicenow.*;
+import sndml.servicenow.DateTime;
+import sndml.servicenow.InvalidDateTimeException;
+import sndml.servicenow.Log;
+import sndml.servicenow.Record;
 
 public abstract class DatabaseStatement {
 
