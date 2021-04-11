@@ -103,7 +103,7 @@ public class Table {
 		throw new IllegalStateException();
 	}
 			
-	public BaseRecord getRecord(RecordKey key) throws IOException {
+	public TableRecord getRecord(RecordKey key) throws IOException {
 		return api.getRecord(key);
 	}
 			

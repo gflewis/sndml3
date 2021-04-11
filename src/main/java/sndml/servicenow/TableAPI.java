@@ -37,7 +37,7 @@ public abstract class TableAPI {
 	 * @return
 	 * @throws IOException
 	 */
- 	public abstract BaseRecord getRecord(RecordKey sys_id) throws IOException;
+ 	public abstract TableRecord getRecord(RecordKey sys_id) throws IOException;
  	
  	public abstract RecordList getRecords(EncodedQuery query, boolean displayValue) throws IOException;
  	
@@ -79,17 +79,17 @@ public abstract class TableAPI {
 	 * If multiple qualifying records are found this method 
 	 * will throw an RowCountExceededException.
 	 * <pre>
-	 * {@link BaseRecord} grouprec = session.table("sys_user_group").get("name", "Network Support");
+	 * {@link TableRecord} grouprec = session.table("sys_user_group").get("name", "Network Support");
 	 * </pre>
 	 * 
 	 * @param fieldname Field name, e.g. "number" or "name"
 	 * @param fieldvalue Field value
 	 */
-	public BaseRecord getRecord(String fieldname, String fieldvalue) throws IOException {
+	public TableRecord getRecord(String fieldname, String fieldvalue) throws IOException {
 		return getRecord(fieldname, fieldvalue, false);
 	}
 	
-	public BaseRecord getRecord(String fieldname, String fieldvalue, boolean displayValues)
+	public TableRecord getRecord(String fieldname, String fieldvalue, boolean displayValues)
 			throws IOException, SoapResponseException {
 		RecordList result = getRecords(fieldname, fieldvalue, displayValues);
 		int size = result.size();

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * An array of Records.
  */
-public class RecordList extends ArrayList<BaseRecord> {
+public class RecordList extends ArrayList<TableRecord> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -39,7 +39,7 @@ public class RecordList extends ArrayList<BaseRecord> {
 
 	public RecordKey maxKey() {
 		RecordKey result = null;
-		for (BaseRecord rec : this) {			
+		for (TableRecord rec : this) {			
 			RecordKey key = rec.getKey();
 			if (result == null || key.greaterThan(result)) result = key;
 		}
@@ -48,7 +48,7 @@ public class RecordList extends ArrayList<BaseRecord> {
 	
 	public RecordKey minKey() {
 		RecordKey result = null;
-		for (BaseRecord rec : this) {			
+		for (TableRecord rec : this) {			
 			RecordKey key = rec.getKey();
 			if (result == null || key.lessThan(result)) result = key;
 		}
@@ -64,7 +64,7 @@ public class RecordList extends ArrayList<BaseRecord> {
 	public KeySet extractKeys(String fieldname) {
 		KeySet result = new KeySet(this.size());
 		if (this.size() == 0) return result;
-		for (BaseRecord rec : this) {
+		for (TableRecord rec : this) {
 			String value = rec.getValue(fieldname);
 			if (value != null) {
 				assert RecordKey.isGUID(value);

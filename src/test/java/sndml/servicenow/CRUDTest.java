@@ -16,7 +16,7 @@ import sndml.servicenow.DateTime;
 import sndml.servicenow.FieldValues;
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.NoSuchRecordException;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.Session;
 import sndml.servicenow.Table;
 import sndml.servicenow.TableAPI;
@@ -62,7 +62,7 @@ public class CRUDTest {
 	    assertNotNull(key);
 	    logger.info("inserted " + key);
 	    TestManager.banner(logger,  "Update");
-	    BaseRecord rec = api.getRecord(key);
+	    TableRecord rec = api.getRecord(key);
 	    assertEquals(descr1, rec.getValue("short_description"));
 	    api.updateRecord(key, new sndml.servicenow.Parameters("short_description", descr2));
 	    TestManager.banner(logger, "Delete");

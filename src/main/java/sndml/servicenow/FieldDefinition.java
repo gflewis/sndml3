@@ -20,7 +20,7 @@ public class FieldDefinition {
 	 * @param table - The table in which this field appears.
 	 * @param dictrec - The sys_dictionary record that describes this field.
 	 */
-	protected FieldDefinition(Table table, BaseRecord dictrec) {
+	protected FieldDefinition(Table table, TableRecord dictrec) {
 		this(table, dictrec.getValue("element"), dictrec.getValue("internal_type"), 
 				dictrec.getInteger("max_length"), dictrec.getValue("reference"));
 	}

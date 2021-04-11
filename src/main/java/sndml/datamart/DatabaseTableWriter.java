@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.RecordList;
 import sndml.servicenow.RecordWriter;
 import sndml.servicenow.Table;
@@ -70,7 +70,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 			throws IOException, SQLException {
 		assert metrics != null;
 		assert progressLogger != null;
-		for (BaseRecord rec : recs) {
+		for (TableRecord rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
 				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));
 			writeRecord(rec, metrics);
@@ -79,6 +79,6 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		progressLogger.logProgress();
 	}
 	
-	abstract void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException;
+	abstract void writeRecord(TableRecord rec, Metrics writerMetrics) throws SQLException;
 	
 }

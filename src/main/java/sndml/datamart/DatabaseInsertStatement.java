@@ -3,7 +3,7 @@ package sndml.datamart;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 
 public class DatabaseInsertStatement extends DatabaseStatement {
 
@@ -30,7 +30,7 @@ public class DatabaseInsertStatement extends DatabaseStatement {
 		return generator.getTemplate(templateName, sqlTableName, map);
 	}
 	
-	public void insert(BaseRecord rec) throws SQLException {
+	public void insert(TableRecord rec) throws SQLException {
 		this.lastRec = rec;
 		int n = columns.size();
 		for (int i = 0; i < n; ++i) {

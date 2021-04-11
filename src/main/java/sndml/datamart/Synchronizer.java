@@ -115,7 +115,7 @@ public class Synchronizer extends TableReader {
 		updateSet = new KeySet();
 		deleteSet = new KeySet();
 		skipSet = new KeySet();
-		for (BaseRecord rec : snTimestamps) {
+		for (TableRecord rec : snTimestamps) {
 			RecordKey key = rec.getKey();
 			assert key != null;
 			assert !examined.containsKey(key) :

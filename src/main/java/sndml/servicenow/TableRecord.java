@@ -4,9 +4,9 @@ import java.util.Iterator;
 
 import org.slf4j.Logger;
 
-public abstract class BaseRecord implements InsertResponse {
+public abstract class TableRecord implements InsertResponse {
 
-	static final Logger logger = Log.logger(BaseRecord.class);
+	static final Logger logger = Log.logger(TableRecord.class);
 	
 	protected Table table;
 

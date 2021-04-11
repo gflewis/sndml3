@@ -34,6 +34,7 @@ public class ConnectionProfile {
 	private String pathname; // file used to initialize this object
 	private Session session = null; // initialized on request
 	private Database database = null; // initialized on request
+	private final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 	
 	public ConnectionProfile(File profile) throws IOException {
 		pathname = profile.getPath();
@@ -49,7 +50,6 @@ public class ConnectionProfile {
 	 */
 	void loadProperties(InputStream stream) throws IOException {
 		assert stream != null;
-		Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		Properties raw = new Properties();
 		raw.load(stream);
 		for (String name : raw.stringPropertyNames()) {

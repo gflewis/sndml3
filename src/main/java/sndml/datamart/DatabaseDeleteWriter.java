@@ -8,7 +8,7 @@ import sndml.servicenow.KeySet;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.Table;
 
 public class DatabaseDeleteWriter extends DatabaseTableWriter {
@@ -29,7 +29,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 	}
 	
 	@Override
-	void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException {
+	void writeRecord(TableRecord rec, Metrics writerMetrics) throws SQLException {
 		assert rec.getTable().getName().equals("sys_audit_delete");
 		RecordKey key = rec.getKey("documentkey");
 		assert key != null;

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.servicenow.Metrics;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.Table;
 
 @Deprecated
@@ -35,20 +35,20 @@ public class DatabaseSyncWriter extends DatabaseTableWriter {
 	}
 	
 	@Override
-	void writeRecord(BaseRecord rec, Metrics metrics) throws SQLException {
+	void writeRecord(TableRecord rec, Metrics metrics) throws SQLException {
 		throw new UnsupportedOperationException();
 
 	}
 	
-	void insertRecord(BaseRecord rec) throws SQLException {
+	void insertRecord(TableRecord rec) throws SQLException {
 		insertWriter.writeRecord(rec, metrics);
 	}
 	
-	void updateRecord(BaseRecord rec) throws SQLException {
+	void updateRecord(TableRecord rec) throws SQLException {
 		updateWriter.writeRecord(rec, metrics);;
 	}
 	
-	void deleteRecord(BaseRecord rec) throws SQLException {
+	void deleteRecord(TableRecord rec) throws SQLException {
 		deleteWriter.writeRecord(rec, metrics);
 	}
 	

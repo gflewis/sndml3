@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.Table;
 
 public class DatabaseUpdateWriter extends DatabaseTableWriter {
@@ -28,7 +28,7 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 	}
 		
 	@Override
-	void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException {
+	void writeRecord(TableRecord rec, Metrics writerMetrics) throws SQLException {
 		RecordKey key = rec.getKey();
 		logger.trace(Log.PROCESS, "Update " + key);
 		if (updateStmt.update(rec)) {

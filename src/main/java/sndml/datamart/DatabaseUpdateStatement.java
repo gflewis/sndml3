@@ -3,7 +3,7 @@ package sndml.datamart;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 
 public class DatabaseUpdateStatement extends DatabaseStatement {
 
@@ -26,7 +26,7 @@ public class DatabaseUpdateStatement extends DatabaseStatement {
 		return generator.getTemplate(templateName, sqlTableName, map);
 	}
 	
-	public boolean update(BaseRecord rec) throws SQLException {
+	public boolean update(TableRecord rec) throws SQLException {
 		this.lastRec = rec;
 		int n = columns.size();
 		// Skip column 0 which is the sys_id

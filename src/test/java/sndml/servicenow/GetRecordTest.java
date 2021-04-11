@@ -6,7 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import sndml.servicenow.RecordKey;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.Session;
 import sndml.servicenow.Table;
 
@@ -23,7 +23,7 @@ public class GetRecordTest {
 		String sys_id = TestManager.getProperty("some_incident_sys_id");
 		RecordKey key = new RecordKey(sys_id);
 		Table inc = session.table("incident");
-		BaseRecord rec = inc.getRecord(key);
+		TableRecord rec = inc.getRecord(key);
 		assertNotNull(rec);
 	}
 	
@@ -31,10 +31,10 @@ public class GetRecordTest {
 	public void testGetRecordByNumber() throws IOException {
 		Table inc = session.table("incident");
 		String number = TestManager.getProperty("some_incident_number");
-		BaseRecord rec1 = inc.api().getRecord("number", number);
+		TableRecord rec1 = inc.api().getRecord("number", number);
 		RecordKey key = rec1.getKey();
 		assertEquals(32, key.toString().length());
-		BaseRecord rec2 = inc.getRecord(key);
+		TableRecord rec2 = inc.getRecord(key);
 		assertEquals(number, rec2.getValue("number"));
 	}
 	
@@ -42,7 +42,7 @@ public class GetRecordTest {
 	public void testGetNullRecord() throws IOException {
 		RecordKey key = new RecordKey("00000000000000000000000000000000");
 		Table inc = session.table("incident");
-		BaseRecord rec = inc.getRecord(key);
+		TableRecord rec = inc.getRecord(key);
 		assertNull(rec);
 	}
 

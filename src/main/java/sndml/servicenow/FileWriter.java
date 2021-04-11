@@ -93,12 +93,12 @@ public class FileWriter extends RecordWriter {
 			RecordList recs, Metrics writerMetrics, ProgressLogger progressLogger) {
 		assert writer != null;
 		assert recs != null;
-		for (BaseRecord rec : recs) {
+		for (TableRecord rec : recs) {
 			processRecord(rec, writerMetrics);
 		}
 	}
 
-	public void processRecord(BaseRecord rec, Metrics writerMetrics) {	
+	public void processRecord(TableRecord rec, Metrics writerMetrics) {	
 		assert writer != null;
 		assert rec != null;
 		assert rec instanceof JsonRecord;

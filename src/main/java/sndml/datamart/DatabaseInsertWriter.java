@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.Table;
 
 public class DatabaseInsertWriter extends DatabaseTableWriter {
@@ -32,7 +32,7 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 			Pattern.compile("\\b(primary key|unique constraint)\\b", Pattern.CASE_INSENSITIVE);
 		
 	@Override
-	void writeRecord(BaseRecord rec, Metrics writerMetrics) throws SQLException {
+	void writeRecord(TableRecord rec, Metrics writerMetrics) throws SQLException {
 		RecordKey key = rec.getKey();
 		logger.trace(Log.PROCESS, "Insert " + key);
 		try {

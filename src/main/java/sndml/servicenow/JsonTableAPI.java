@@ -37,7 +37,7 @@ public class JsonTableAPI extends TableAPI {
 		return keys;
 	}
 
-	public BaseRecord getRecord(RecordKey sys_id) throws IOException {
+	public TableRecord getRecord(RecordKey sys_id) throws IOException {
 		Log.setMethodContext(table, "get");
 		Parameters params = new Parameters();
 		params.add("sysparm_action", "get");

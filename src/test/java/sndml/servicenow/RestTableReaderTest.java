@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import sndml.servicenow.BaseRecord;
+import sndml.servicenow.TableRecord;
 import sndml.servicenow.RecordListAccumulator;
 import sndml.servicenow.Session;
 import sndml.servicenow.Table;
@@ -32,7 +32,7 @@ public class RestTableReaderTest {
 //		reader.setWriter(accumulator, metrics);		
 		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();
-		for (BaseRecord rec : accumulator.getRecords()) {
+		for (TableRecord rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
 			String deptHead = rec.getValue("dept_head");
 			logger.debug(deptName + "|" + deptHead);;
@@ -54,7 +54,7 @@ public class RestTableReaderTest {
 		reader.setDisplayValue(true);
 		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();
-		for (BaseRecord rec : accumulator.getRecords()) {
+		for (TableRecord rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
 			String deptHead = rec.getDisplayValue("dept_head");
 			logger.debug(deptName + "|" + deptHead);;
@@ -75,7 +75,7 @@ public class RestTableReaderTest {
 		reader.setDisplayValue(false);
 		reader.prepare(accumulator, metrics, new NullProgressLogger());
 		reader.call();
-		for (BaseRecord rec : accumulator.getRecords()) {
+		for (TableRecord rec : accumulator.getRecords()) {
 			String deptName = rec.getValue("name");
 			String deptHead = rec.getDisplayValue("dept_head");
 			logger.debug(deptName + "|" + deptHead);

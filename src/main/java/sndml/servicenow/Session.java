@@ -187,7 +187,7 @@ public class Session {
 			throw new IOException(e);
 		}
 		assert this.username != null;
-		BaseRecord profile = user.api().getRecord("user_name", this.username);
+		TableRecord profile = user.api().getRecord("user_name", this.username);
 		String timezone = profile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;

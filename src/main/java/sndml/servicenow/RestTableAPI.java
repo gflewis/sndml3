@@ -68,7 +68,7 @@ public class RestTableAPI extends TableAPI {
 		return tableStats;		
 	}
 	
-	public BaseRecord getRecord(RecordKey key) throws IOException {
+	public TableRecord getRecord(RecordKey key) throws IOException {
 		Log.setMethodContext(table, "GET");
 		URI uri = getURI("table", key, null);
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.GET, null);
