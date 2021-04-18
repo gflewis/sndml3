@@ -22,7 +22,7 @@ public class AppStatusLogger {
 	public AppStatusLogger(ConnectionProfile profile, Session session) {
 		this.profile = profile;
 		this.session = session;
-		this.putRunStatus = AppDaemon.getAPI(session, "putrunstatus");
+		this.putRunStatus = profile.getAPI("putrunstatus");
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 

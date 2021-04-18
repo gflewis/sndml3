@@ -2,7 +2,6 @@ package sndml.datamart;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,12 +26,7 @@ public class PruneTest {
 	public static void clear() throws Exception {
 		TestManager.clearAll();
 	}
-	
-	@After
-	public void closeProfile() {
-		profile.close();
-	}
-		
+			
 	public PruneTest(TestingProfile profile) throws Exception {
 		this.profile = profile;
 		TestManager.setProfile(this.getClass(), profile);
@@ -61,7 +55,7 @@ public class PruneTest {
 	    
 		TestManager.banner(logger, "Load");
 		DateTime testStarted = DateTime.now();
-		JobFactory jf = new JobFactory(profile, db.getDatabase(), testStarted);
+		JobFactory jf = new JobFactory(profile, session, db.getDatabase(), testStarted);
 		assertTrue(db.tableExists(tableName));
 		JobRunner load = jf.yamlJob("{source: incident, action: load, truncate: true, created: 2020-01-01}");
 		Metrics loadMetrics = load.call();

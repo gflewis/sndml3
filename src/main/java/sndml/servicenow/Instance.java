@@ -4,18 +4,26 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Properties;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIBuilder;
 
+/**
+ * Represents the URL for a ServiceNow instance.
+ */
 public class Instance {
 
 	final HttpHost host;
 	final URL url;
-		
+
 	public Instance(URL url) {
 		this.url = url;
 		this.host = new HttpHost(url.getHost());
+	}
+
+	public Instance(Properties properties) {
+		this(properties.getProperty("servicenow.instance"));
 	}
 	
 	public Instance(String name) {

@@ -15,6 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	InsertTest.class,
 	RefreshTest1.class,
 	RefreshTest2.class,
+	RowCountExceptionTest.class,
 	PruneTest.class,
 	TimestampTest.class,
 	TableLoaderTest.class,

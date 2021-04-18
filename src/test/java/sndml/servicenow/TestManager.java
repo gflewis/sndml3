@@ -70,13 +70,11 @@ public class TestManager {
 	}
 	
 	public static void clearAll() {
-		if (currentProfile != null) {
-			currentProfile.close();
-		}
 		currentProfile = null;
 		classUnderTest = null;
+		defaultSession = null;
 	}
-	
+		
 	public static TestingProfile[] getProfiles(String names) {
 		FieldNames list = new FieldNames(names);
 		TestingProfile[] profiles = new TestingProfile[list.size()];

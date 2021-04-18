@@ -73,7 +73,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 			assert config.getNumber() != null;
 			Thread.currentThread().setName(config.number);			
 			Metrics metrics = super.call();
-			AppDaemon.rescan();
+			DaemonLauncher.rescan();
 			return metrics;
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());

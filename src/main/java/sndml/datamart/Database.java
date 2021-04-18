@@ -12,7 +12,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -32,6 +31,7 @@ import sndml.servicenow.*;
 public class Database {
 
 	private final Logger logger = Log.logger(this.getClass());
+	private final ConnectionProfile profile;
 	private final String dburl;
 	private final URI dbURI;
 	private final String protocol;
@@ -39,7 +39,6 @@ public class Database {
 	private final String dbpass;
 	private final boolean warnOnTruncate;
 	private final String schema;
-	private final Properties properties = new Properties();
 	private final File templates;
 	
 	private Connection dbc = null;
@@ -47,14 +46,14 @@ public class Database {
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
-	public Database(Properties props) throws SQLException, URISyntaxException {
-		this.properties.putAll(props);
-		this.dburl = props.getProperty("datamart.url");
+	public Database(ConnectionProfile profile) throws SQLException, URISyntaxException {
+		this.profile = profile;
+		this.dburl = profile.getProperty("datamart.url");
 		this.dbURI = new URI(dburl);
 		this.protocol = getProtocol(this.dbURI);
-		this.dbuser = props.getProperty("datamart.username");
-		this.dbpass = props.getProperty("datamart.password", "");
-		schema = props.getProperty("datamart.schema");
+		this.dbuser = profile.getProperty("datamart.username");
+		this.dbpass = profile.getProperty("datamart.password", "");
+		schema = profile.getProperty("datamart.schema");
 		
 		assert dbc == null;
 		assert dburl != null;
@@ -62,9 +61,9 @@ public class Database {
 		String logmsg = "database=" + dburl + " user=" + dbuser;
 		if (schema != null) logmsg += " schema=" + getSchema();
 		logger.info(Log.INIT, logmsg);
-		String templateName = props.getProperty("datamart.templates", "");
+		String templateName = profile.getProperty("datamart.templates", "");
 		this.templates = (templateName.length() > 0) ? new File(templateName) : null;
-		this.warnOnTruncate = new Boolean(props.getProperty("loader.warn_on_truncate", "true"));		
+		this.warnOnTruncate = profile.getPropertyBoolean("loader.warn_on_truncate", true);
 				
 		this.open();
 		assert dbc != null;
@@ -77,7 +76,7 @@ public class Database {
 	 */
 	void open() throws SQLException {		
 		dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		generator = new Generator(this, this.properties, this.templates);
+		generator = new Generator(this, this.profile, this.templates);
 		dbc.setAutoCommit(generator.getAutoCommit());
 		Statement stmt = dbc.createStatement();
 		Iterator<String> iter = generator.getInitializations().listIterator();
@@ -101,10 +100,6 @@ public class Database {
 		return (this.dbc == null);
 	}
 	
-	Properties getProperties() {
-		return this.properties;
-	}
-
 	Generator getGenerator() {
 		return this.generator;
 	}

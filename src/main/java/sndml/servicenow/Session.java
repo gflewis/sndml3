@@ -17,9 +17,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 
-import sndml.daemon.AppDaemon;
+import sndml.daemon.DaemonLauncher;
 import sndml.daemon.AppSchemaFactory;
 
+/**
+ * Holds a ServiceNow URL, connection credentials, a cookie store with a session ID
+ * and a cache of {@link TableSchema} definitions.
+ */
 public class Session {
 
 	private final Instance instance;
@@ -115,7 +119,7 @@ public class Session {
 	public void close() throws IOException {
 		client.close();
 	}
-	
+		
 	public URI getURI(String path) {
 		return instance.getURI(path);
 	}
@@ -145,12 +149,12 @@ public class Session {
 	}
 	
 	/**
-	 * Generate {@link LegacyTableSchema} or retrieve from cache.
+	 * Generate {@link TableSchema} or retrieve from cache.
 	 */
 	public TableSchema getSchema(String tablename) 
 			throws InvalidTableNameException, IOException, InterruptedException {
 		if (schemaFactory == null) {
-			schemaFactory =	AppDaemon.isRunning() ?
+			schemaFactory =	DaemonLauncher.isRunning() ?
 				new AppSchemaFactory(this) : 
 				new TableSchemaFactory(this);
 		}

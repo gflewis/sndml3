@@ -41,19 +41,6 @@ public class TimestampTest {
 	public static void clear() throws Exception {
 		TestManager.clearAll();
 	}
-
-	@After
-	public void closeProfile() {
-		profile.close();
-	}
-	
-//	private void loadTable() throws Exception {
-//		Table table = session.table(tablename);
-//		database.truncateTable(table.getName());		
-//		SimpleTableLoader runner = new SimpleTableLoader(profile, table, database);
-//		Metrics metrics = runner.call();
-//		assertTrue(metrics.getProcessed() > 0);		
-//	}
 	
 	@Test
 	public void testIncidentTimestamp() throws Exception {

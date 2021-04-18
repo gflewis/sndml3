@@ -1,0 +1,2 @@
+tables:
+- {name: user_load, source: sys_user, action: insert, filter: "name=bozo_the_clown", minrows: 1}

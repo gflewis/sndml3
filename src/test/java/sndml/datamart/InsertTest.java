@@ -43,11 +43,6 @@ public class InsertTest {
 		TestManager.clearAll();
 	}
 
-	@After
-	public void closeProfile() {
-		profile.close();
-	}
-
 	@Test
 	public void testInsert() throws Exception {
 		YamlFile yaml = folder.getYaml("load_truncate");

@@ -20,7 +20,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.AppDaemon;
+import sndml.daemon.DaemonLauncher;
 import sndml.servicenow.*;
 
 public class Loader {
@@ -80,14 +80,14 @@ public class Loader {
 		}
 		else if (cmd.hasOption("d")) {
 			// Daemon
-			AppDaemon daemon = new AppDaemon(profile);
-			logger.info(Log.INIT, "Starting daemon: " + AppDaemon.getAgentName());
+			DaemonLauncher daemon = new DaemonLauncher(profile);
+			logger.info(Log.INIT, "Starting daemon: " + DaemonLauncher.getAgentName());
 			daemon.run();
 		}
 		else if (cmd.hasOption("s")) {
 			// Scan once
-			AppDaemon daemon = new AppDaemon(profile);
-			logger.info(Log.INIT, "Scanning agent: " + AppDaemon.getAgentName());
+			DaemonLauncher daemon = new DaemonLauncher(profile);
+			logger.info(Log.INIT, "Scanning agent: " + DaemonLauncher.getAgentName());
 			exitCode = daemon.scanOnce();
 		}
 		Runtime.getRuntime().exit(exitCode);
@@ -103,7 +103,19 @@ public class Loader {
 			jobs.add(runner);
 		}
 	}
-			
+	
+	JobRunner getJob(int index) {
+		return jobs.get(index);
+	}
+	
+	JobRunner getJob(String name) {
+		for (JobRunner job : jobs) {
+			if (name.equals(job.getConfig().getName()))
+				return job;
+		}
+		return null;
+	}
+	
 	public Metrics loadTables() throws SQLException, IOException, InterruptedException {
 		ArrayList<Metrics> allJobMetrics = new ArrayList<Metrics>();
 		Log.setGlobalContext();

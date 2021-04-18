@@ -2,7 +2,6 @@ package sndml.datamart;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -53,11 +52,6 @@ public class TableLoaderTest {
 			}
 		}
 		return result;
-	}
-		
-	@After
-	public void closeProfile() {
-		profile.close();
 	}
 
 	@Test

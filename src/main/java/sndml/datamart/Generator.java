@@ -63,18 +63,17 @@ public class Generator {
 	}
 
 	public Generator(ConnectionProfile profile) {
-		this(profile.getDatabase(), profile.getProperties(), null);
+		this(profile.getDatabase(), profile, null);
 	}
 	
-	public Generator(Database database, Properties properties, File templatesFile) {
+	public Generator(Database database, ConnectionProfile profile, File templatesFile) {
 		assert database != null;
-		assert properties != null;
-		String schemaName = properties.getProperty("datamart.schema");
-		String dialectName = properties.getProperty("datamart.dialect");
+		String schemaName = profile.getProperty("datamart.schema");
+		String dialectName = profile.getProperty("datamart.dialect");
 		// only check properties if file was not passed in as an argument
 		if (templatesFile == null) {
-			// TODO Redundant. Same code appears in ConnectionProfile.
-			String templatesPath = properties.getProperty("datamart.templates", "");
+			// TODO Redundant. Same code appears in Database.
+			String templatesPath = profile.getProperty("datamart.templates", "");
 			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
 		}
 		try {

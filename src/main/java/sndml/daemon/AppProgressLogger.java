@@ -44,7 +44,7 @@ public class AppProgressLogger extends ProgressLogger {
 		this.session = session;
 		this.number = number;
 		this.runKey = runKey;
-		this.putRunStatusURI = AppDaemon.getAPI(session, "putrunstatus");
+		this.putRunStatusURI = profile.getAPI("putrunstatus");
 	}
 
 	@Override

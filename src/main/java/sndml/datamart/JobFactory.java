@@ -18,12 +18,12 @@ public class JobFactory {
 	ConfigFactory configFactory = new ConfigFactory();
 	
 	public JobFactory(ConnectionProfile profile, DateTime start) {
-		this(profile, profile.getDatabase(),start);
+		this(profile, profile.getSession(), profile.getDatabase(),start);
 	}
 	
-	public JobFactory(ConnectionProfile profile, Database database, DateTime start) {
+	public JobFactory(ConnectionProfile profile, Session session, Database database, DateTime start) {
 		this.profile = profile;
-		this.session = profile.getSession();
+		this.session = session;
 		this.database = database;		
 		dateCalculator = new DateCalculator(start);
 	}

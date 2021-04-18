@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.*;
 
 public class AppSchemaFactory extends SchemaFactory {
 
 	private final Session session;
+	private final ConnectionProfile profile;
 	
 	public AppSchemaFactory(Session session) {
+		this.profile = DaemonLauncher.getConnectionProfile();
 		this.session = session;
 	}
 	
@@ -22,7 +25,7 @@ public class AppSchemaFactory extends SchemaFactory {
 		assert tablename != null;
 		Table table = session.table(tablename);
 		TableSchema schema = new TableSchema(table);
-		URI apiTableSchema = AppDaemon.getAPI(session, "gettableschema", tablename);
+		URI apiTableSchema = profile.getAPI("gettableschema", tablename);
 		JsonRequest request = new JsonRequest(session, apiTableSchema);
 		ObjectNode response = request.execute();
 		JsonNode result = response.get("result");

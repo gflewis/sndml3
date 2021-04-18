@@ -15,25 +15,25 @@ import sndml.servicenow.Log;
 import sndml.servicenow.Session;
 
 
-public class AppDaemon implements Daemon {
+public class DaemonLauncher implements Daemon {
 
-	static Logger logger = LoggerFactory.getLogger(AppDaemon.class);
+	static Logger logger = LoggerFactory.getLogger(DaemonLauncher.class);
 		
 	private static ThreadPoolExecutor workerPool;
 	private static int intervalSeconds;
 	private static int threadCount;
 	
-	private static AppDaemon daemon;
+	private static DaemonLauncher daemon;
 	private static Thread daemonThread;
 	private static String agentName;
 	private static ConnectionProfile daemonProfile;
-	private static Scanner scanner;
+	private static AgentScanner scanner;
 	
 	private static volatile boolean isRunning = false;
 	
 	private Timer timer;
 	
-	public AppDaemon(ConnectionProfile profile) {
+	public DaemonLauncher(ConnectionProfile profile) {
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
         daemon = this;
 		daemonProfile = profile;
@@ -46,10 +46,10 @@ public class AppDaemon implements Daemon {
 		assert intervalSeconds > 0;
 		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
 		workerPool = new ThreadPoolExecutor(threadCount, threadCount, 60, TimeUnit.SECONDS, blockingQueue);
-        scanner = new Scanner(profile, workerPool);
+        scanner = new AgentScanner(profile, workerPool);
 	}
 	
-	public static AppDaemon getDaemon() {
+	public static DaemonLauncher getDaemon() {
 		return daemon;		
 	}
 	
@@ -183,12 +183,14 @@ public class AppDaemon implements Daemon {
 	/**
 	 * Return the URI of an API
 	 */
+	@Deprecated
 	static URI getAPI(Session session, String apiName) {
 		return getAPI(session, apiName, null);
 	}
 	
+	@Deprecated
 	static URI getAPI(Session session, String apiName, String parameter) {
-		ConnectionProfile profile = AppDaemon.getConnectionProfile();
+		ConnectionProfile profile = DaemonLauncher.getConnectionProfile();
 		assert profile != null;
 		String defaultScope = "x_108443_sndml";
 		String propName = "loader.api." + apiName;

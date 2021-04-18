@@ -1,0 +1,2 @@
+tables:
+- {name: incident_load, source: incident, truncate: true, action: insert, maxrows: 5}

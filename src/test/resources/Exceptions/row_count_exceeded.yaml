@@ -1,3 +1,0 @@
-tables:
-- {name: incident_drop, source: incident, action: droptable}
-- {name: incident_load, source: incident, action: insert, maxrows: 5}

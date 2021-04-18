@@ -1,2 +1,0 @@
-tables:
-- {name: incident, truncate: true, columns: sys_id number state}

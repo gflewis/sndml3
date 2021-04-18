@@ -14,10 +14,15 @@ public class TestFolder extends File {
 
 	FilenameFilter yamlFilter = (dir, name) -> name.endsWith(".yaml");			
 	
+	@SuppressWarnings("rawtypes")
+	public TestFolder(Class myclass) {
+		this(myclass.getSimpleName());
+	}
+	
 	public TestFolder(String name) {
 		super("src/test/resources/YAML", name);
 	}
-	
+		
 	/**
 	 * Get a file from this folder
 	 */

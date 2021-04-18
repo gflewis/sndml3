@@ -285,6 +285,7 @@ public class JobConfig {
 		reader.setFilter(getFilter(table));
 		reader.setFields(getColumns());
 		reader.setPageSize(getPageSize());
+		reader.setMaxRows(getMaxRows());
 
 		return reader;
 

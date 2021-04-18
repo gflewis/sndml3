@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -15,6 +16,8 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.DaemonLauncher;
+import sndml.servicenow.Instance;
 import sndml.servicenow.Log;
 import sndml.servicenow.Session;
 
@@ -30,25 +33,39 @@ import sndml.servicenow.Session;
 public class ConnectionProfile {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final File profile;
 	private final Properties properties = new Properties();
-	private String pathname; // file used to initialize this object
-	private Session session = null; // initialized on request
-	private Database database = null; // initialized on request
+	private long lastModified;
+//	private Session session = null; // initialized on request
+//	private Database database = null; // initialized on request
 	private final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 	
 	public ConnectionProfile(File profile) throws IOException {
-		pathname = profile.getPath();
-		logger.info(Log.INIT, "ConnectionProfile: " + pathname);
+		this.profile = profile;
+		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
+		this.lastModified = profile.lastModified();
 		loadProperties(new FileInputStream(profile));
 	}
 
+	public String getPathName() {
+		return profile.getPath();
+	}
+		
+	synchronized void reloadIfChanged() throws IOException {
+		if (profile.lastModified() > this.lastModified) {
+			logger.info(Log.INIT, "Reloading " + getPathName());
+			this.lastModified = profile.lastModified();
+			loadProperties(new FileInputStream(profile));
+		}		
+	}
+	
 	/**
 	 * Load properties from an InputStream into this {@link ConnectionProfile}.
 	 * Any value which is inclosed in backticks will be passed to Runtime.exec()
 	 * for evaluation.
 	 * 
 	 */
-	void loadProperties(InputStream stream) throws IOException {
+	synchronized void loadProperties(InputStream stream) throws IOException {
 		assert stream != null;
 		Properties raw = new Properties();
 		raw.load(stream);
@@ -83,13 +100,6 @@ public class ConnectionProfile {
 		return output;
 	}
 
-	/**
-	 * Return all properties stored in this object.
-	 */
-	public Properties getProperties() {
-		return properties;
-	}
-
 	public boolean hasProperty(String name) {
 		return properties.getProperty(name) != null;
 	}
@@ -118,18 +128,24 @@ public class ConnectionProfile {
 		return new Integer(stringValue);
 	}
 	
+	/**
+	 * Return the URL of the ServiceNow
+	 */
+	public Instance getInstance() {
+		return new Instance(properties);
+	}
+	
 	/** 
 	 * Opens and returns a connection to the ServiceNow instance.
 	 * If a connection has already been opened, then it will be returned.
 	 * @return
 	 */
-	public Session getSession() throws ResourceException {
-		if (session == null) {
-			try {
-				session = new Session(properties);
-			} catch (IOException e) {
-				throw new ResourceException(e);
-			}
+	public synchronized Session getSession() throws ResourceException {
+		Session session;
+		try {
+			session = new Session(properties);
+		} catch (IOException e) {
+			throw new ResourceException(e);
 		}
 		return session;
 	}
@@ -139,22 +155,40 @@ public class ConnectionProfile {
 	 * If a connection has already been opened, then it will be returned.
 	 * If {@link #close()} has been called, then a new connection will be opened and returned.
 	 */
-	public Database getDatabase() throws ResourceException {
-		if (database == null || database.isClosed()) {
-			try {
-				database = new Database(properties);
-			} catch (SQLException | URISyntaxException e) {
-				throw new ResourceException(e);
-			}
+	public synchronized Database getDatabase() throws ResourceException {
+		Database database;
+		try {
+			database = new Database(this);
+		} catch (SQLException | URISyntaxException e) {
+			throw new ResourceException(e);
 		}
 		return database;
 	}
+
+	/**
+	 * Return the URI of an API. This will be dependent on the application scope
+	 * which is available from the property daemon.scope.
+	 */
+	public URI getAPI(String apiName) {
+		return getAPI(apiName, null);
+	}
+	
+	public URI getAPI(String apiName, String parameter) {
+		Instance instance = new Instance(getProperty("servicenow.instance"));
+		ConnectionProfile profile = DaemonLauncher.getConnectionProfile();
+		assert profile != null;		
+		String defaultScope = getProperty("daemon.scope", "x_108443_sndml");
+		String apiPath = "api/" + defaultScope + "/" + apiName;
+		if (parameter != null) apiPath += "/" + parameter;
+		return instance.getURI(apiPath);		
+	}
 	
 	/**
-	 * Closes the connection to the {@link Database}. 
+	 * Does nothing 
 	 */
-	public void close() {
-		logger.info(Log.FINISH, "Close profile " + pathname);
+	@Deprecated public void close() {
+		logger.info(Log.FINISH, "Close profile " + getPathName());
+		/*
 		try {
 			if (database != null) database.close();
 			if (session != null) session.close();
@@ -163,6 +197,7 @@ public class ConnectionProfile {
 		}
 		database = null;
 		session = null;
+		*/
 	}
 	
 	@Override
@@ -170,7 +205,7 @@ public class ConnectionProfile {
 	 * Returns the absolute path of the properties file used to initialize this object.
 	 */
 	public String toString() {
-		return pathname;
+		return getPathName();
 	}
 		
 }
