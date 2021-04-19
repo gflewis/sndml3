@@ -84,7 +84,11 @@ public class ConnectionProfile {
 					throw new AssertionError(String.format("Failed to evaluate \"%s\"", command));
 				logger.debug(Log.INIT, value);
 			}
-			properties.setProperty(name, value);			
+			properties.setProperty(name, value);
+			if (!name.contains("password")) {
+				String sysPropName = "sndml." + name;
+				System.setProperty(sysPropName, value);				
+			}
 		}
 	}
 

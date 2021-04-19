@@ -227,7 +227,7 @@ public class Session {
 	 * Create a new Session with the same properties as this one. 
 	 * The URL and credentials will be the same, but the Session ID will be different.
 	 */
-	public Session duplicate() throws IOException {
+	public Session cloneSession() throws IOException {
 		return new Session(this.properties);
 	}
 			

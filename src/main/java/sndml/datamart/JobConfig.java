@@ -276,7 +276,7 @@ public class JobConfig {
 		
 		Table myTable = table;
 		if (createNewSession) {
-			Session newSession = table.getSession().duplicate();
+			Session newSession = table.getSession().cloneSession();
 			myTable = newSession.table(table.getName());
 		}
 		TableReader reader;
