@@ -77,7 +77,7 @@ public class Session {
 		if (getDomain() != null) msg += " domain=" + getDomain();		
 		logger.info(Log.INIT, msg);
 	}
-		
+	
 	/**
 	 * Return the value of a property with the name "servicenow." + propname
 	 * if it is defined, otherwise return null.
@@ -221,7 +221,16 @@ public class Session {
 			throw new AssertionError("field count mismatch");
 		return table;
 	}
+
 	
+	/**
+	 * Create a new Session with the same properties as this one. 
+	 * The URL and credentials will be the same, but the Session ID will be different.
+	 */
+	public Session duplicate() throws IOException {
+		return new Session(this.properties);
+	}
+			
 	/**
 	 * <p>Returns a {@link Table} object which can be used for 
 	 * get, insert, update and delete operations.</p>

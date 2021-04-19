@@ -1,5 +1,6 @@
 package sndml.datamart;
 
+import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Objects;
 
@@ -258,7 +259,8 @@ public class JobConfig {
 		throw new ConfigParseException(msg);
 	}	
 	
-	public TableReader createReader(Table table, Database db, DatePart datePart) {
+	public TableReader createReader(Table table, Database db, DatePart datePart, boolean createNewSession) 
+			throws IOException {
 
 		assert table != null;
 		String sqlTableName = getTarget();
@@ -267,28 +269,31 @@ public class JobConfig {
 		assert jobName != null;
 		String partName = Objects.isNull(datePart) ? null : datePart.getName();
 		String readerName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
-				
+		
+		Table myTable = table;
+		if (createNewSession) {
+			Session newSession = table.getSession().duplicate();
+			myTable = newSession.table(table.getName());
+		}
 		TableReader reader;
 		if (action == Action.SYNC) {
 			// Database connection is required for Synchronizer only
 			assert db != null;
-			reader = new Synchronizer(table, db, sqlTableName, readerName);
+			reader = new Synchronizer(myTable, db, sqlTableName, readerName);
 		}
 		else {
-			reader = new RestTableReader(table);
+			reader = new RestTableReader(myTable);
 		}
 		reader.setReaderName(readerName);
 		reader.setPartName(partName);
-		reader.setFilter(getFilter(table));		
+		reader.setFilter(getFilter(myTable));		
 		reader.setCreatedRange(getCreatedRange(datePart));		
 		reader.setUpdatedRange(getUpdatedRange());
-		reader.setFilter(getFilter(table));
+		reader.setFilter(getFilter(myTable));
 		reader.setFields(getColumns());
 		reader.setPageSize(getPageSize());
 		reader.setMaxRows(getMaxRows());
-
 		return reader;
-
 	}
 	
 	public String toString() {

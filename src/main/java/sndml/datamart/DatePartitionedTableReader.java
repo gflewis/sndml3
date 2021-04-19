@@ -109,8 +109,9 @@ public final class DatePartitionedTableReader extends TableReader {
 	
 	private TableReader createReader(DatePart datePart) 
 			throws IOException, SQLException, InterruptedException {
-		String partName = datePart.getName();		
-		TableReader partReader = config.createReader(table, db, datePart);
+		String partName = datePart.getName();
+		boolean createNewSession = (threads > 1) ? true : false;
+		TableReader partReader = config.createReader(table, db, datePart, createNewSession);
 		String jobName = config.getName();
 		String partReaderName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
 		assert partReaderName != null;
@@ -119,7 +120,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		partReader.prepare(writer, partMetrics, partLogger);
 		return partReader;		
 	}
-		
+
 	@Override
 	public Metrics call() throws IOException, SQLException, InterruptedException {
 		progress.logStart();
@@ -140,7 +141,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			executor.shutdown();
 			while (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
 				logger.info(Log.FINISH, String.format("Waiting for %d / %d partitions to complete", 
-						numPartsIncomplete(), numPartsTotal()));
+					numPartsIncomplete(), numPartsTotal()));
 			}
 		}
 		else {
