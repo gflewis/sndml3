@@ -259,6 +259,10 @@ public class JobConfig {
 		throw new ConfigParseException(msg);
 	}	
 	
+	public TableReader createReader(Table table, Database db) throws IOException {
+		return createReader(table, db, null, false);
+	}
+	
 	public TableReader createReader(Table table, Database db, DatePart datePart, boolean createNewSession) 
 			throws IOException {
 

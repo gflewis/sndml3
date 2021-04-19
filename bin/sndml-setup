@@ -1,10 +1,12 @@
-# Defines a bash function named sndml_setup_args
-# which sets the following environment variables
-#   SNDML_CONFIGS
-#   SNDML_VERSION
+# Usage:
+#   source sndml-setup <dir>
+#
+# Defines the following environment variables:
 #   SNDML_CONFIG
-#   SNDML_PROFILE
+#   SNDML_CONFIGS
 #   SNDML_JAR
+#   SNDML_PROFILE
+#   SNDML_VERSION
 #
 # Assumes SNDML_HOME is predefined and structured as follows:
 #   pom.xml                       <- Maven Project Object Model
@@ -19,28 +21,31 @@
 #
 
 sndml_setup_args() {
-  # echo sndml_setup_args $1 $2
-  if [[ -z "$SNDML_HOME" ]]; then
+  if [[ -z "$SNDML_HOME" ]]
+  then
     echo SNDML_HOME not defined
     return 1
   fi
-  if [[ -z "$1" ]]; then
-    echo Config directory not specified
-    return 1
-  fi
-  if [[ -z "$SNDML_CONFIGS" ]]; then
+  if [[ -z "$SNDML_CONFIGS" ]]
+  then
     export SNDML_CONFIGS=$SNDML_HOME/configs
   fi
-  if [[ -d "$1" ]]
+  if [[ -z "$1" ]]
   then
-    cd $1
     export SNDML_CONFIG=`pwd`
   else
-    export SNDML_CONFIG=$SNDML_CONFIGS/$1
-    cd $SNDML_CONFIG
+	if [[ -d "$1" ]]
+	then
+	  cd $1
+	  export SNDML_CONFIG=`pwd`
+	else
+	  export SNDML_CONFIG=$SNDML_CONFIGS/$1
+	  cd $SNDML_CONFIG
+	fi
   fi
   export SNDML_PROFILE=$SNDML_CONFIG/.sndml_profile
-  if [[ ! -r "$SNDML_PROFILE" ]]; then
+  if [[ ! -r "$SNDML_PROFILE" ]]
+  then
     echo File not found: $SNDML_PROFILE
     return 1
   fi
@@ -94,6 +99,4 @@ sndml_determine_jar() {
   return 0
 }
 
-if [[ -n $1 ]]; then
-  sndml_setup_args $@
-fi
+sndml_setup_args $@

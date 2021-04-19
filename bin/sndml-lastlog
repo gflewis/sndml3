@@ -1,0 +1,5 @@
+#!/bin/bash
+# print the name of the most recent log file
+source sndml-setup $1
+lastlog=`ls -rt $SNDML_CONFIG/log | sed 1q`
+echo $SNDML_CONFIG/$lastlog

@@ -155,7 +155,7 @@ public class JobRunner implements Callable<Metrics> {
 		Interval partitionInterval = config.getPartitionInterval();
 		TableReader reader;
 		if (partitionInterval == null) {
-			reader = config.createReader(table, db, null);			
+			reader = config.createReader(table, db);			
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
 			reader.prepare(null, jobMetrics, progressLogger);
 		}
@@ -194,7 +194,7 @@ public class JobRunner implements Callable<Metrics> {
 		TableReader reader;
 		Log.setTableContext(table, config.getName());					
 		if (partitionInterval == null) {
-			reader = config.createReader(table, db, null);
+			reader = config.createReader(table, db);
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 			reader.prepare(writer, jobMetrics, progressLogger);
