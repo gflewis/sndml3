@@ -71,7 +71,7 @@ public class AppProgressLogger extends ProgressLogger {
 		
 	@Override
 	public void logProgress() {
-		logger.info(Log.PROCESS, "logProgress");
+		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
 		appendMetrics(body, metrics);

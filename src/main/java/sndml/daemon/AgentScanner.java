@@ -4,11 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.TimerTask;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -24,85 +19,71 @@ import sndml.servicenow.*;
 
 public class AgentScanner extends TimerTask {
 
-	static Logger logger = LoggerFactory.getLogger(AgentScanner.class);
-	
 	final ConnectionProfile profile;
 	final Session session;
-	final ExecutorService workerPool;
+	final WorkerPool workerPool;
 	final String agentName;
 	final URI uriGetRunList;
 	final URI uriPutRunStatus;
 	final AppStatusLogger statusLogger;
 	final boolean onExceptionContinue;
 	
-	AgentScanner(ConnectionProfile profile) {
-		this.profile = profile;
-		this.agentName = profile.getProperty("daemon.agent", "main");
-		assert agentName != null;
-		Log.setJobContext(agentName);
-		int threadCount = profile.getPropertyInt("daemon.threads", 0);
-		if (threadCount > 0) {
-			BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
-			this.workerPool = new ThreadPoolExecutor(threadCount, threadCount, 60, TimeUnit.SECONDS, blockingQueue);			
-		}
-		else {
-			this.workerPool = null;
-		}
-		this.session = profile.getSession();
-		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
-		this.uriPutRunStatus = profile.getAPI("putrunstatus");
-		this.statusLogger = new AppStatusLogger(profile, session);
-		this.onExceptionContinue = profile.getPropertyBoolean("daemon.continue",  false);		
-	}
+	final Logger logger = LoggerFactory.getLogger(AgentScanner.class);
+	final ConfigFactory configFactory = new ConfigFactory();
 	
-	AgentScanner(ConnectionProfile profile, ExecutorService workerPool) {
+	/**
+	 * Class that can be run once or run periodically from a timer.
+	 * It finds all the jobs that are ready to run, and either runs them immediately (if workerPool is null)
+	 * or schedules them to be run by workerPool.
+	 * @param profile - Used to establish ServiceNow and database connections.
+	 * @param workerPool - If null then jobs will be run sequentially in this thread.
+	 */
+	AgentScanner(ConnectionProfile profile, WorkerPool workerPool) {
 		this.profile = profile;
 		this.workerPool = workerPool; // null if single threaded
 		this.session = profile.getSession();
-		this.agentName = DaemonLauncher.getAgentName();
+		this.agentName = AgentDaemon.getAgentName();
 		assert agentName != null;
 		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = profile.getAPI("putrunstatus");
 		this.statusLogger = new AppStatusLogger(profile, session);
 		this.onExceptionContinue = profile.getPropertyBoolean("daemon.continue",  false);
+		Log.setJobContext(agentName);
+		logger.debug(Log.INIT, "workerPool=" + workerPool.toString());
 	}
 		
 	@Override
 	public synchronized void run() {
 		try {
+			profile.reloadIfChanged();
 			scan();
 		}
 		catch (NoContentException e) {
 			logger.error(Log.RESPONSE, String.format(
 				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
 				uriGetRunList.toString(), e.getClass().getName(), agentName));
-			if (!onExceptionContinue) DaemonLauncher.abort();
+			if (!onExceptionContinue) AgentDaemon.abort();
 		}		
 		catch (IOException e) {
 			String msg = e.getMessage();
 			// Connection resets may happen periodically and should not cause an abort
 			boolean connectionReset = msg.toLowerCase().contains("connnection reset");
 			logger.error(Log.RESPONSE, e.toString(), e);
-			if (!connectionReset && !onExceptionContinue) DaemonLauncher.abort();
+			if (!connectionReset && !onExceptionContinue) AgentDaemon.abort();
 		}
 		catch (Exception e) {
 			logger.error(Log.RESPONSE, e.toString(), e);
-			DaemonLauncher.abort();
+			AgentDaemon.abort();
 			throw e; 
 		}
 	}
 
-	public int scan() throws IOException, ConfigParseException {
-		if (workerPool == null)
-			return scanWithoutPool();
-		else
-			return scanWithPool();
-	}
 	
-	/**
+	/*
 	 * Run the first job in the list until GetRunList returns an empty list.
-	 */
-	public int scanWithoutPool() throws IOException, ConfigParseException {
+	 * This function returns when there are no more jobs to run.
+	 *
+	private int scanWithoutPool() throws IOException, ConfigParseException {
 		assert workerPool == null;
 		ConfigFactory configFactory = new ConfigFactory();
 		int jobCount = 0;
@@ -125,7 +106,7 @@ public class AgentScanner extends TimerTask {
 				Log.setJobContext(number);
 				logger.info(Log.INIT, jobConfig.toString());
 				setStatus(runKey, "prepare");
-				AppJobRunner runner = new AppJobRunner(profile, jobConfig);
+				AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
 				logger.info(Log.INIT, "Running job " + number);
 				runner.run();
 			}				
@@ -135,8 +116,10 @@ public class AgentScanner extends TimerTask {
 
 	/**
 	 * Submit all jobs for execution by the worker pool.
-	 */
-	public int scanWithPool() throws IOException, ConfigParseException {
+	 * This function will not wait for jobs to complete.
+	 * Each job will call rescan as it completes, to determine if additional jobs need to be submitted.
+	 *
+	private int scanWithPool_old() throws ConfigParseException, IOException  {
 		assert workerPool != null;
 		Log.setJobContext(agentName);
 		ConfigFactory configFactory = new ConfigFactory();
@@ -153,15 +136,96 @@ public class AgentScanner extends TimerTask {
 				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
 				setStatus(runKey, "prepare");
-				AppJobRunner runner = new AppJobRunner(profile, jobConfig);
+				AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
 				workerPool.execute(runner);
 				jobCount += 1;				
 			}
 		}
-		return jobCount;
-	
+		return jobCount;	
 	}
-		
+	*/
+	
+	/**
+	 * If single threaded, run all jobs that are ready.
+	 * If multi-threaded, submit for execution all jobs that are ready.
+	 * Return the number of jobs run or submitted.
+	 * Note that this function does NOT necessarily wait for all jobs to complete.
+	 */
+	public int scan() throws ConfigParseException, IOException {
+		logger.debug(Log.INIT, "scan");
+		ArrayList<AppJobRunner> joblist = getJobList();
+		for (AppJobRunner job : joblist) {
+			if (workerPool == null) {
+				// no worker pool; run the job
+				logger.info(Log.INIT, "Running job " + job.number);
+				job.run();
+			}
+			else {
+				// schedule the job for future execution
+				workerPool.execute(job);				
+			}
+		}
+		return joblist.size();
+	}
+
+	public void scanUntilDone() throws IOException, InterruptedException {
+		logger.debug(Log.INIT, "scanUntilDone");
+		if (workerPool == null) {
+			int jobcount;
+			do { 
+				jobcount = scan(); 
+			}			
+			while (jobcount > 0);
+		}
+		else {
+			scan();
+			int loopCounter = 0;
+			while (workerPool.getActiveCount() > 0) {
+				// print message every 15 seconds
+				if (++loopCounter % 15 == 0)
+					logger.info(Log.PROCESS, 
+						String.format("scanUntilDone: %d threads running", workerPool.getActiveCount()));
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					logger.error(Log.PROCESS, e.getMessage());
+					throw e;
+				}												
+			}
+		}	
+	}
+	
+	
+	/**
+	 * This function is called by {@link AppJobRunner} whenever a job completes.
+	 */
+	public void rescan() throws ConfigParseException, IOException {
+		logger.info(Log.PROCESS, "Rescan");
+		if (workerPool != null)
+			scan();
+	}		
+
+	private ArrayList<AppJobRunner> getJobList() throws ConfigParseException, IOException {
+		ArrayList<AppJobRunner> joblist = new ArrayList<AppJobRunner>();
+		ArrayNode runlist = getRunList();
+		if (runlist != null && runlist.size() > 0) {
+			for (JsonNode node : runlist) {
+				assert node.isObject();
+				RecordKey runKey = new RecordKey(node.get("sys_id").asText());
+				String number = node.get("number").asText();
+				assert runKey != null;
+				assert number != null;
+				ObjectNode obj = (ObjectNode) node;
+				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
+				logger.info(Log.INIT, jobConfig.toString());
+				setStatus(runKey, "prepare");
+				AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
+				joblist.add(runner);
+			}			
+		}
+		return joblist;	
+	}
+	
 	private ArrayNode getRunList() throws IOException, ConfigParseException {
 		ArrayNode runlist = null;	
 		JsonRequest request = new JsonRequest(session, uriGetRunList, HttpMethod.GET, null);

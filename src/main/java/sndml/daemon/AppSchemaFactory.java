@@ -16,7 +16,7 @@ public class AppSchemaFactory extends SchemaFactory {
 	private final ConnectionProfile profile;
 	
 	public AppSchemaFactory(Session session) {
-		this.profile = DaemonLauncher.getConnectionProfile();
+		this.profile = AgentDaemon.getConnectionProfile();
 		this.session = session;
 	}
 	

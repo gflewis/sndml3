@@ -1,6 +1,5 @@
 package sndml.daemon;
 
-import java.net.URI;
 import java.util.Timer;
 import java.util.concurrent.*;
 
@@ -12,49 +11,46 @@ import org.slf4j.LoggerFactory;
 
 import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.Log;
-import sndml.servicenow.Session;
 
+public class AgentDaemon implements Daemon {
 
-public class DaemonLauncher implements Daemon {
-
-	static Logger logger = LoggerFactory.getLogger(DaemonLauncher.class);
+	static Logger logger = LoggerFactory.getLogger(AgentDaemon.class);
 		
-	private static ThreadPoolExecutor workerPool;
-	private static int intervalSeconds;
-	private static int threadCount;
-	
-	private static DaemonLauncher daemon;
+	private static AgentDaemon daemon;
+
 	private static Thread daemonThread;
-	private static String agentName;
-	private static ConnectionProfile daemonProfile;
-	private static AgentScanner scanner;
+
+	private final ConnectionProfile profile;
+	private final String agentName;
+	private final AgentScanner scanner;
+	private final int threadCount;	
+	private final int intervalSeconds;
+	private final WorkerPool workerPool; // null if threadCount < 2
 	
 	private static volatile boolean isRunning = false;
 	
 	private Timer timer;
 	
-	public DaemonLauncher(ConnectionProfile profile) {
+	public AgentDaemon(ConnectionProfile profile) {
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
         daemon = this;
-		daemonProfile = profile;
 		daemonThread = Thread.currentThread();
-		agentName = profile.getProperty("daemon.agent", "main");
-		Log.setJobContext(agentName);
-		threadCount = profile.getPropertyInt("daemon.threads", 3);
-		intervalSeconds = profile.getPropertyInt("daemon.interval", 60);
-		assert threadCount > 0;
+		this.profile = profile;
+		this.agentName = profile.getProperty("daemon.agent", "main");
+		this.threadCount = profile.getPropertyInt("daemon.threads", 3);
+		this.intervalSeconds = profile.getPropertyInt("daemon.interval", 60);
 		assert intervalSeconds > 0;
-		BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
-		workerPool = new ThreadPoolExecutor(threadCount, threadCount, 60, TimeUnit.SECONDS, blockingQueue);
-        scanner = new AgentScanner(profile, workerPool);
+		this.workerPool = threadCount > 1 ? new WorkerPool(this, threadCount) : null;		
+        this.scanner = new AgentScanner(profile, workerPool);
+		Log.setJobContext(agentName);
 	}
 	
-	public static DaemonLauncher getDaemon() {
+	public static AgentDaemon getDaemon() {
 		return daemon;		
 	}
 	
 	public static String getAgentName() {
-		return agentName;
+		return getDaemon().agentName;
 	}
 	
 	/**
@@ -65,7 +61,7 @@ public class DaemonLauncher implements Daemon {
 	}
 	
 	public static ConnectionProfile getConnectionProfile() {
-		return daemonProfile;
+		return getDaemon().profile;
 	}
 	
 	/**
@@ -79,41 +75,39 @@ public class DaemonLauncher implements Daemon {
 	public static boolean isRunning() {
 		return isRunning;
 	}
-	
-	public int scanOnce() throws InterruptedException {
+
+	/**
+	 * Run the {@link AgentScanner} a single time. 
+	 * Wait for all jobs to complete.
+	 * Shut down the worker pool.
+	 */
+	public void scanOnce() throws InterruptedException {
 		assert Thread.currentThread() == daemonThread;
 		assert !isRunning;
 		isRunning = true;
 		Log.setJobContext(agentName);
 		logger.info(Log.INIT, String.format(
 			"runOnce agent=%s threads=%d", agentName, threadCount));
-		int jobCount = 0;
 		try {
-			jobCount = scanner.scan();
+			scanner.scanUntilDone();
 		} catch (Exception e) {
 			e.printStackTrace();
 			Runtime.getRuntime().exit(-1);
 		}
-		if (jobCount > 0) {
-			logger.info(Log.INIT, String.format("scanOnce: %d jobs initiated", jobCount));		
-			while (workerPool.getActiveCount() > 0) {
-				logger.debug(Log.PROCESS, 
-					String.format("scanOnce: %d threads running", workerPool.getActiveCount()));
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					logger.error(Log.PROCESS, e.getMessage());
-					throw e;
-				}
-			}
-			logger.info(Log.FINISH, "scanOnce: all threads complete");			
-		}
-		return 0;
+		this.stop();
 	}
-		
-	public void run() {
+
+
+	/**
+	 * Called by {@link WorkerPool} as each job completes.
+	 */
+	void rescan() {
+		logger.info(Log.PROCESS, "rescan");
+		daemon.scanner.run();
+	}
+			
+	public void runForever() {
 		assert !isRunning;
-		isRunning = true;
 		Log.setJobContext(agentName);
 		logger.info(Log.INIT, String.format(
 				"run agent=%s interval=%ds", agentName, intervalSeconds));								
@@ -139,28 +133,26 @@ public class DaemonLauncher implements Daemon {
 		logger.info(Log.INIT, "begin init");		
 	}
 
-	public static void rescan() {
-		logger.info(Log.PROCESS, "rescan");
-		scanner.run();
-	}
-	
 	// TODO Make this class work with JSCV and PROCRUN
 	@Override
 	public void start() {
+		assert !isRunning;
+		isRunning = true;
 		Log.setJobContext(agentName);
 		logger.debug(Log.INIT, String.format(
 			"start agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer("scanner", true);
-		ShutdownHook shutdownHook = new ShutdownHook(daemonProfile, scanner, workerPool);
+		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);
-		logger.debug(Log.INIT,"end start");		
+		logger.debug(Log.INIT,"End start");		
 	}
 	
 	@Override
 	public void stop() {
 		Log.setGlobalContext();
-		int waitSec = daemonProfile.getPropertyInt("daemon.shutdown_seconds", 30);
+		logger.info(Log.FINISH, "Begin stop");
+		int waitSec = profile.getPropertyInt("daemon.shutdown_seconds", 30);
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdown();
 		try { 
@@ -178,26 +170,6 @@ public class DaemonLauncher implements Daemon {
 	@Override
 	public void destroy() {
 		
-	}
-
-	/**
-	 * Return the URI of an API
-	 */
-	@Deprecated
-	static URI getAPI(Session session, String apiName) {
-		return getAPI(session, apiName, null);
-	}
-	
-	@Deprecated
-	static URI getAPI(Session session, String apiName, String parameter) {
-		ConnectionProfile profile = DaemonLauncher.getConnectionProfile();
-		assert profile != null;
-		String defaultScope = "x_108443_sndml";
-		String propName = "loader.api." + apiName;
-		String apiPath = profile.getProperty(propName);
-		if (apiPath == null) apiPath = "api/" + defaultScope + "/" + apiName;
-		if (parameter != null) apiPath += "/" + parameter;
-		return session.getURI(apiPath);		
 	}
 	
 }

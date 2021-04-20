@@ -20,7 +20,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.DaemonLauncher;
+import sndml.daemon.AgentDaemon;
 import sndml.servicenow.*;
 
 public class Loader {
@@ -35,6 +35,10 @@ public class Loader {
 	
 	static final Logger logger = LoggerFactory.getLogger(Loader.class);
 	
+	/**
+	 * This is the main class invoked from the JAR file.
+	 * 
+	 */
 	public static void main(String[] args) throws Exception {
 		Log.setGlobalContext();
 		Options options = new Options();
@@ -44,9 +48,9 @@ public class Loader {
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("yaml").required(false).hasArg(true).
 				desc("YAML config file (required)").build());
-		options.addOption(Option.builder("d").longOpt("daemon").required(false).hasArg(false).
+		options.addOption(Option.builder("daemon").longOpt("daemon").required(false).hasArg(false).
 				desc("Run as daemon/service").build());
-		options.addOption(Option.builder("s").longOpt("scan").required(false).hasArg(false).
+		options.addOption(Option.builder("scan").longOpt("scan").required(false).hasArg(false).
 				desc("Run the deamon scanner once").build());
 		CommandLine cmd = new DefaultParser().parse(options,  args);
 		String profileName = cmd.getOptionValue("p");
@@ -54,12 +58,11 @@ public class Loader {
 		int cmdCount = 0;
 		if (cmd.hasOption("y")) cmdCount += 1;
 		if (cmd.hasOption("t")) cmdCount += 1;
-		if (cmd.hasOption("d")) cmdCount += 1;
-		if (cmd.hasOption("s")) cmdCount += 1;		
+		if (cmd.hasOption("daemon")) cmdCount += 1;
+		if (cmd.hasOption("scan")) cmdCount += 1;		
 		if (cmdCount != 1) 
 			throw new CommandOptionsException(
 				"Must specify exactly one of: --yaml, --table, --daemon or --scan");
-		int exitCode = 0;
 		if (cmd.hasOption("t")) {
 			// Simple Table Loader
 			String tableName = cmd.getOptionValue("t");
@@ -78,19 +81,18 @@ public class Loader {
 			Loader loader = new Loader(profile, config);			
 			loader.loadTables();
 		}
-		else if (cmd.hasOption("d")) {
+		else if (cmd.hasOption("daemon")) {
 			// Daemon
-			DaemonLauncher daemon = new DaemonLauncher(profile);
-			logger.info(Log.INIT, "Starting daemon: " + DaemonLauncher.getAgentName());
-			daemon.run();
+			AgentDaemon daemon = new AgentDaemon(profile);
+			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
+			daemon.runForever();
 		}
-		else if (cmd.hasOption("s")) {
+		else if (cmd.hasOption("scan")) {
 			// Scan once
-			DaemonLauncher daemon = new DaemonLauncher(profile);
-			logger.info(Log.INIT, "Scanning agent: " + DaemonLauncher.getAgentName());
-			exitCode = daemon.scanOnce();
+			AgentDaemon daemon = new AgentDaemon(profile);
+			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
+			daemon.scanOnce();
 		}
-		Runtime.getRuntime().exit(exitCode);
 	}
 				
 	Loader(ConnectionProfile profile, LoaderConfig config) {

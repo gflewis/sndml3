@@ -17,7 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 
-import sndml.daemon.DaemonLauncher;
+import sndml.daemon.AgentDaemon;
 import sndml.daemon.AppSchemaFactory;
 
 /**
@@ -77,7 +77,15 @@ public class Session {
 		if (getDomain() != null) msg += " domain=" + getDomain();		
 		logger.info(Log.INIT, msg);
 	}
-	
+
+	/**
+	 * Create a new Session with the same properties as this one. 
+	 * The URL and credentials will be the same, but the Session ID will be different.
+	 */
+	public Session cloneSession() throws IOException {
+		return new Session(this.properties);
+	}
+		
 	/**
 	 * Return the value of a property with the name "servicenow." + propname
 	 * if it is defined, otherwise return null.
@@ -153,8 +161,9 @@ public class Session {
 	 */
 	public TableSchema getSchema(String tablename) 
 			throws InvalidTableNameException, IOException, InterruptedException {
+		// TODO: Session should not be referencing a different class. Move cache into SchemaFactory class.
 		if (schemaFactory == null) {
-			schemaFactory =	DaemonLauncher.isRunning() ?
+			schemaFactory =	AgentDaemon.isRunning() ?
 				new AppSchemaFactory(this) : 
 				new TableSchemaFactory(this);
 		}
@@ -223,14 +232,6 @@ public class Session {
 	}
 
 	
-	/**
-	 * Create a new Session with the same properties as this one. 
-	 * The URL and credentials will be the same, but the Session ID will be different.
-	 */
-	public Session cloneSession() throws IOException {
-		return new Session(this.properties);
-	}
-			
 	/**
 	 * <p>Returns a {@link Table} object which can be used for 
 	 * get, insert, update and delete operations.</p>

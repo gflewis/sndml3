@@ -1,7 +1,7 @@
 #!/bin/bash
 source sndml-setup $@
 sndml_set_log $2
-export SNDML_LOG4J=$SNDML_HOME/src/test/resources/log4j2-debug.xml
+export SNDML_LOG4J=log4j2-debug.xml
 env | grep SNDML | sort
 java -ea -Dlog4j.configurationFile=$SNDML_LOG4J -DlogFileName=$SNDML_LOG -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML
 echo log=$SNDML_LOG

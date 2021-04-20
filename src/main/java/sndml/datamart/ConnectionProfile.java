@@ -16,7 +16,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.DaemonLauncher;
+import sndml.daemon.AgentDaemon;
 import sndml.servicenow.Instance;
 import sndml.servicenow.Log;
 import sndml.servicenow.Session;
@@ -51,7 +51,7 @@ public class ConnectionProfile {
 		return profile.getPath();
 	}
 		
-	synchronized void reloadIfChanged() throws IOException {
+	public synchronized void reloadIfChanged() throws IOException {
 		if (profile.lastModified() > this.lastModified) {
 			logger.info(Log.INIT, "Reloading " + getPathName());
 			this.lastModified = profile.lastModified();
@@ -179,10 +179,10 @@ public class ConnectionProfile {
 	
 	public URI getAPI(String apiName, String parameter) {
 		Instance instance = new Instance(getProperty("servicenow.instance"));
-		ConnectionProfile profile = DaemonLauncher.getConnectionProfile();
+		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		assert profile != null;		
-		String defaultScope = getProperty("daemon.scope", "x_108443_sndml");
-		String apiPath = "api/" + defaultScope + "/" + apiName;
+		String appScope = getProperty("servicenow.scope", "x_108443_sndml");
+		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		
 	}
@@ -192,16 +192,6 @@ public class ConnectionProfile {
 	 */
 	@Deprecated public void close() {
 		logger.info(Log.FINISH, "Close profile " + getPathName());
-		/*
-		try {
-			if (database != null) database.close();
-			if (session != null) session.close();
-		} catch (IOException | SQLException e) {
-			logger.error(Log.FINISH, "ConnectionProfile.close() failure");;
-		}
-		database = null;
-		session = null;
-		*/
 	}
 	
 	@Override

@@ -13,13 +13,19 @@ import sndml.servicenow.*;
 
 public class AppJobRunner extends JobRunner implements Runnable {
 	
+	final AgentScanner scanner; // my parent
 	final ConnectionProfile profile;
-	final RecordKey runKey;
-	final String number;
+	final public RecordKey runKey;
+	final public String number;
 	final AppStatusLogger statusLogger;
-		
-	public AppJobRunner(ConnectionProfile profile, JobConfig config) {
+	
+	/**
+	 * Run a job with a new ServiceNow session and a new Database connection.
+	 * Update ServiceNow with the status of the job as it runs.
+	 */
+	public AppJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
 		super(profile.getSession(), profile.getDatabase(), config);
+		this.scanner = scanner;
 		this.profile = profile;
 		this.runKey = config.getSysId();
 		this.number = config.getNumber();
@@ -28,8 +34,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		assert number != null;
 		assert number.length() > 0;
 		this.table = session.table(config.getSource());
-		this.statusLogger = new AppStatusLogger(profile, session);
-		
+		this.statusLogger = new AppStatusLogger(profile, session);		
 	}
 
 	@Override
@@ -73,7 +78,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 			assert config.getNumber() != null;
 			Thread.currentThread().setName(config.number);			
 			Metrics metrics = super.call();
-			DaemonLauncher.rescan();
+			scanner.rescan();
 			return metrics;
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());

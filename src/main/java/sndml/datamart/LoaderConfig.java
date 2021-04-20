@@ -40,18 +40,6 @@ public class LoaderConfig {
 		if (metricsFileName.startsWith("/")) return new File(metricsFileName);
 		return new File(metricsFolder, metricsFileName);
 	}
-
-//	private DateCalculator getDateFactory() {
-//		File metricsFile = getMetricsFile();
-//		if (metricsFile != null)
-//			logger.info(Log.INIT, "metricsFile=" + metricsFile);			
-//		DateCalculator dateFactory = 
-//			(metricsFile != null && metricsFile.canRead()) ?
-//			dateFactory = new DateCalculator(start, metricsFile) :  
-//			new DateCalculator(start);
-//		logger.info(Log.INIT, String.format("start=%s last=%s", dateFactory.getStart(), dateFactory.getLast()));
-//		return dateFactory;
-//	}
 	
 	java.util.List<JobConfig> getJobs() {
 		return this.tables;
