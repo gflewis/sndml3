@@ -2,6 +2,7 @@ package sndml.datamart;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import sndml.servicenow.DateTime;
 
@@ -27,13 +28,13 @@ public class YamlFile extends File {
 	}
 	
 	public JobRunner getJobRunner(ConnectionProfile profile) 
-			throws ConfigParseException, IOException {
+			throws ConfigParseException, IOException, ResourceException, SQLException {
 		JobFactory jf = new JobFactory(profile, DateTime.now());
 		return jf.yamlJob(this);
 	}
 	
 	public Loader getLoader(ConnectionProfile profile) 
-			throws ConfigParseException, IOException {
+			throws ConfigParseException, IOException, ResourceException, SQLException {
 		ConfigFactory factory = new ConfigFactory();
 		LoaderConfig config = factory.loaderConfig(null, this);
 		return new Loader(profile, config);

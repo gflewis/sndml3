@@ -66,7 +66,8 @@ public class Loader {
 		if (cmd.hasOption("t")) {
 			// Simple Table Loader
 			String tableName = cmd.getOptionValue("t");
-			SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName);
+			Database database = profile.getDatabase();
+			SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName, database);
 			tableLoader.call();
 		}
 		else if (cmd.hasOption("y")) {
@@ -95,7 +96,7 @@ public class Loader {
 		}
 	}
 				
-	Loader(ConnectionProfile profile, LoaderConfig config) {
+	Loader(ConnectionProfile profile, LoaderConfig config) throws ResourceException, SQLException {
 		this.session = profile.getSession();
 		this.database = profile.getDatabase();
 		this.config = config;

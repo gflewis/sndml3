@@ -36,8 +36,6 @@ public class ConnectionProfile {
 	private final File profile;
 	private final Properties properties = new Properties();
 	private long lastModified;
-//	private Session session = null; // initialized on request
-//	private Database database = null; // initialized on request
 	private final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 	
 	public ConnectionProfile(File profile) throws IOException {
@@ -140,8 +138,7 @@ public class ConnectionProfile {
 	}
 	
 	/** 
-	 * Opens and returns a connection to the ServiceNow instance.
-	 * If a connection has already been opened, then it will be returned.
+	 * Opens and returns a new connection to the ServiceNow instance.
 	 * @return
 	 */
 	public synchronized Session getSession() throws ResourceException {
@@ -155,15 +152,14 @@ public class ConnectionProfile {
 	}
 
 	/**
-	 * Opens and returns a connection to the JDBC database.
-	 * If a connection has already been opened, then it will be returned.
+	 * Opens and returns a new connection to the JDBC database.
 	 * If {@link #close()} has been called, then a new connection will be opened and returned.
 	 */
-	public synchronized Database getDatabase() throws ResourceException {
+	public synchronized Database getDatabase() throws SQLException {
 		Database database;
 		try {
 			database = new Database(this);
-		} catch (SQLException | URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			throw new ResourceException(e);
 		}
 		return database;

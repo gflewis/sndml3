@@ -2,6 +2,9 @@ package sndml.datamart;
 
 import static org.junit.Assert.*;
 
+import java.net.URISyntaxException;
+import java.sql.SQLException;
+
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -13,10 +16,10 @@ public class ColumnsTest {
 	final TestingProfile profile;
 	final DBUtil util;
 	
-	public ColumnsTest() {
+	public ColumnsTest() throws SQLException, URISyntaxException {
 		profile = TestManager.getDefaultProfile();
 		TestManager.setProfile(this.getClass(), profile);
-		util = new DBUtil(profile.getDatabase());
+		util = new DBUtil(profile);
 	}
 	
 	@AfterClass

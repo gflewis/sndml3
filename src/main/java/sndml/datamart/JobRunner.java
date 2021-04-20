@@ -10,19 +10,28 @@ import sndml.servicenow.*;
 
 public class JobRunner implements Callable<Metrics> {
 
-	protected final Session session;
-	protected final Database db;
 	protected final JobConfig config;
+	protected ConnectionProfile profile;
+	protected Session session;
+	protected Database database;
 	
 	protected Action action;
 	protected Table table;
 	protected Metrics jobMetrics;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	public JobRunner(ConnectionProfile profile, JobConfig config) {
+		this.profile = profile;
+		this.config = config;
+	}
+	
 	public JobRunner(Session session, Database db, JobConfig config) {
 		this.session = session;
-		this.db = db;
+		this.database = db;
 		this.config = config;		
+		assert session!= null;
+		assert db != null;
+		assert config != null;
 	}
 			
 	protected String getName() {
@@ -51,17 +60,18 @@ public class JobRunner implements Callable<Metrics> {
 	@Override
 	public Metrics call() throws SQLException, IOException, InterruptedException {
 		assert config != null;
+		assert session != null;
+		assert database != null;
 		action = config.getAction();
 		assert action != null;
+		Log.setJobContext(config.getName());
 		if (Action.EXECUTE_ONLY.contains(action)) {
 			// Action with no table
 			table = null;
-			Log.setJobContext(config.getName());
 		}
 		else {
 			// Action with a source table
 			table = session.table(config.getSource());
-			Log.setTableContext(table, config.getName());		
 			logger.debug(Log.INIT, String.format(
 				"call table=%s action=%s", 
 				table.getName(), action.toString()));
@@ -101,8 +111,8 @@ public class JobRunner implements Callable<Metrics> {
 		jobMetrics.setExpected(0);
 		ProgressLogger progressLogger = createJobProgressLogger(null);
 		progressLogger.logStart();
-		db.executeStatement(sqlCommand);
-		db.commit();
+		database.executeStatement(sqlCommand);
+		database.commit();
 		progressLogger.logComplete();
 	}
 	
@@ -113,15 +123,15 @@ public class JobRunner implements Callable<Metrics> {
 		assert sqlTableName != null;
 		jobMetrics.setExpected(0);
 		ProgressLogger progressLogger = createJobProgressLogger(null);
-		if (config.getDropTable()) db.dropTable(sqlTableName, true);
-		db.createMissingTable(table, sqlTableName, config.getColumns());
+		if (config.getDropTable()) database.dropTable(sqlTableName, true);
+		database.createMissingTable(table, sqlTableName, config.getColumns());
 		progressLogger.logComplete();
 	}
 	
 	private void runDropTable() throws SQLException {
 		logger.debug(Log.INIT, "runDropTable " + config.getTarget());
 		jobMetrics.start();
-		db.dropTable(config.getTarget(), true);
+		database.dropTable(config.getTarget(), true);
 	}
 	
 	private void runPrune() throws SQLException, IOException, InterruptedException {
@@ -138,7 +148,7 @@ public class JobRunner implements Callable<Metrics> {
 		auditReader.setCreatedRange(new DateTimeRange(since, null));
 		auditReader.setMaxRows(config.getMaxRows());
 		DatabaseDeleteWriter deleteWriter = 
-			new DatabaseDeleteWriter(db, table, sqlTableName, config.getName());
+			new DatabaseDeleteWriter(database, table, sqlTableName, config.getName());
 		ProgressLogger progressLogger = createJobProgressLogger(auditReader);
 		deleteWriter.open(jobMetrics);
 		auditReader.prepare(deleteWriter, jobMetrics, progressLogger);
@@ -151,17 +161,17 @@ public class JobRunner implements Callable<Metrics> {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		if (config.getAutoCreate()) 
-			db.createMissingTable(table, sqlTableName, config.getColumns());
+			database.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
 		TableReader reader;
 		if (partitionInterval == null) {
-			reader = config.createReader(table, db);			
+			reader = config.createReader(table, database);			
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
 			reader.prepare(null, jobMetrics, progressLogger);
 		}
 		else {
 			DatePartitionedTableReader multiReader = 
-				new DatePartitionedTableReader(table, config, db);
+				new DatePartitionedTableReader(table, config, database);
 			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);	
 			reader.prepare(null, jobMetrics, progressLogger);
@@ -177,15 +187,15 @@ public class JobRunner implements Callable<Metrics> {
 		assert sqlTableName != null;
 		Action action = config.getAction();		
 		if (config.getAutoCreate()) 
-			db.createMissingTable(table, sqlTableName, config.getColumns());
-		if (config.getTruncate()) db.truncateTable(sqlTableName);
+			database.createMissingTable(table, sqlTableName, config.getColumns());
+		if (config.getTruncate()) database.truncateTable(sqlTableName);
 		
 		DatabaseTableWriter writer;
 		if (Action.INSERT.equals(action) || Action.LOAD.equals(action)) {
-			writer = new DatabaseInsertWriter(db, table, sqlTableName, config.getName());
+			writer = new DatabaseInsertWriter(database, table, sqlTableName, config.getName());
 		}
 		else {
-			writer = new DatabaseUpdateWriter(db, table, sqlTableName, config.getName());
+			writer = new DatabaseUpdateWriter(database, table, sqlTableName, config.getName());
 		}
 		writer.open(jobMetrics);
 		Interval partitionInterval = config.getPartitionInterval();
@@ -194,13 +204,13 @@ public class JobRunner implements Callable<Metrics> {
 		TableReader reader;
 		Log.setTableContext(table, config.getName());					
 		if (partitionInterval == null) {
-			reader = config.createReader(table, db);
+			reader = config.createReader(table, database);
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 			reader.prepare(writer, jobMetrics, progressLogger);
 		}
 		else {
-			DatePartitionedTableReader multiReader = new DatePartitionedTableReader(table, config, db);
+			DatePartitionedTableReader multiReader = new DatePartitionedTableReader(table, config, database);
 			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);
 			reader.prepare(writer, jobMetrics, progressLogger);

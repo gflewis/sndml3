@@ -4,8 +4,8 @@ import sndml.servicenow.*;
 
 public class SimpleTableLoader extends JobRunner implements Runnable {
 
-	public SimpleTableLoader(ConnectionProfile profile, String tableName) {
-		this(profile, profile.getSession().table(tableName), profile.getDatabase());		
+	public SimpleTableLoader(ConnectionProfile profile, String tableName, Database database) {
+		this(profile, profile.getSession().table(tableName), database);		
 	}
 	
 	public SimpleTableLoader(ConnectionProfile profile, Table table, Database database) {

@@ -123,6 +123,9 @@ public class JobConfig {
 		if (profile != null) updateFromProfile(profile);
 	}
 
+	/**
+	 * Set various default values
+	 */
 	private void updateCoreFields() {
 		// Determine Action
 		if (action == null)	action = 
@@ -130,6 +133,8 @@ public class JobConfig {
 				Action.INSERT : Action.UPDATE;
 		if (action == Action.LOAD)    action = Action.INSERT;
 		if (action == Action.REFRESH) action = Action.UPDATE;
+		
+		if (jobName == null && number != null) jobName = number;
 
 		if (action == Action.EXECUTE) {
 			if (jobName == null) jobName = "execute";
@@ -206,14 +211,13 @@ public class JobConfig {
 		
 	void validate() {
 		if (action == null) configError("Action not specified");
+		if (jobName == null) configError("Name not specified");		
 		if (action == Action.EXECUTE) {
 			if (sql == null) configError("Missing SQL");
-			if (jobName == null) configError("Name not specified");
 		}
 		else {
 			if (source == null) configError("Source not specified");
 			if (target == null) configError("Target not specified");
-			if (jobName == null) configError("Name not specified");
 		}
 		booleanValidForActions("Truncate", truncate, EnumSet.of(Action.INSERT));
 		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
@@ -276,7 +280,7 @@ public class JobConfig {
 		
 		Table myTable = table;
 		if (createNewSession) {
-			Session newSession = table.getSession().cloneSession();
+			Session newSession = table.getSession().duplicate();
 			myTable = newSession.table(table.getName());
 		}
 		TableReader reader;
@@ -320,8 +324,10 @@ public class JobConfig {
 			node.set("created", getCreatedRange(null).toJsonNode());
 		if (getPartitionInterval() != null) 
 			node.put("partition",  getPartitionInterval().toString());
-		if (this.filter != null) node.put("filter",this.filter);
+		if (filter != null) node.put("filter",this.filter);
 		if (includeColumns != null) node.put("columns", includeColumns.toString());
+		if (minRows != null) node.put("minrows", minRows);
+		if (maxRows != null) node.put("maxrows", maxRows);
 		String yaml;
 		try {
 			yaml = mapper.writeValueAsString(node);

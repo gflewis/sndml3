@@ -15,7 +15,7 @@ public class SessionVerificationTest {
 	@Test
 	public void testValidate() throws Exception {
 		Session session = TestManager.getDefaultProfile().getSession();
-		session.verify();
+		session.verifyUser();
 		Table user = session.table("sys_user");
 		TableWSDL wsdl = user.getWSDL();
 		int wsdlCount = wsdl.getReadFieldNames().size();
@@ -23,7 +23,7 @@ public class SessionVerificationTest {
 		TableSchema schema = user.getSchema();
 		int schemaCount = schema.getFieldNames().size();
 		logger.info("schema fields=" + schemaCount);
-		session.verify();
+		session.verifyUser();
 		assertEquals(wsdlCount, schemaCount);
 	}
 

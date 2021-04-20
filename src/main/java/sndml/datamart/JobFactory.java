@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.sql.SQLException;
 
 import sndml.servicenow.DateTime;
 import sndml.servicenow.Session;
@@ -17,7 +18,8 @@ public class JobFactory {
 	final DateCalculator dateCalculator;
 	ConfigFactory configFactory = new ConfigFactory();
 	
-	public JobFactory(ConnectionProfile profile, DateTime start) {
+	public JobFactory(ConnectionProfile profile, DateTime start)
+			throws ResourceException, SQLException {
 		this(profile, profile.getSession(), profile.getDatabase(),start);
 	}
 	

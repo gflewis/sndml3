@@ -57,13 +57,10 @@ public class Generator {
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
 		Session session = profile.getSession();
 		Table table = session.table(tablename);
-		Generator generator = new Generator(profile);
+		Database database = profile.getDatabase();
+		Generator generator = new Generator(database, profile, null);
 		String sql = generator.getCreateTable(table);
 		output.print(sql);		
-	}
-
-	public Generator(ConnectionProfile profile) {
-		this(profile.getDatabase(), profile, null);
 	}
 	
 	public Generator(Database database, ConnectionProfile profile, File templatesFile) {

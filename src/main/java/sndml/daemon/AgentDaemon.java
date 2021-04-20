@@ -16,9 +16,8 @@ public class AgentDaemon implements Daemon {
 
 	static Logger logger = LoggerFactory.getLogger(AgentDaemon.class);
 		
-	private static AgentDaemon daemon;
-
-	private static Thread daemonThread;
+	static final Thread daemonThread = Thread.currentThread();
+	static AgentDaemon daemon;
 
 	private final ConnectionProfile profile;
 	private final String agentName;
@@ -34,10 +33,9 @@ public class AgentDaemon implements Daemon {
 	public AgentDaemon(ConnectionProfile profile) {
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
         daemon = this;
-		daemonThread = Thread.currentThread();
 		this.profile = profile;
 		this.agentName = profile.getProperty("daemon.agent", "main");
-		this.threadCount = profile.getPropertyInt("daemon.threads", 3);
+		this.threadCount = profile.getPropertyInt("daemon.threads", 0);
 		this.intervalSeconds = profile.getPropertyInt("daemon.interval", 60);
 		assert intervalSeconds > 0;
 		this.workerPool = threadCount > 1 ? new WorkerPool(this, threadCount) : null;		
@@ -109,19 +107,18 @@ public class AgentDaemon implements Daemon {
 	public void runForever() {
 		assert !isRunning;
 		Log.setJobContext(agentName);
-		logger.info(Log.INIT, String.format(
-				"run agent=%s interval=%ds", agentName, intervalSeconds));								
 		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
 		this.start();
 		// Daemon now goes into an endless loop
 		boolean isInterrupted = false;
-		while (!isInterrupted && !workerPool.isTerminated()) {
-			logger.debug(Log.PROCESS, "awaiting threadpool termination");
+		final int sleepSeconds = 300;  
+		while (!isInterrupted) {
 			try {
-				workerPool.awaitTermination(300, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {			
+				Thread.sleep(1000 * sleepSeconds);				
+			}
+			catch (InterruptedException e) {
 				logger.info(Log.FINISH, "Interrupt detected");
-				isInterrupted = true;
+				isInterrupted = true;				
 			}
 		}
 		logger.info(Log.FINISH, "Calling stop");
@@ -139,9 +136,9 @@ public class AgentDaemon implements Daemon {
 		assert !isRunning;
 		isRunning = true;
 		Log.setJobContext(agentName);
-		logger.debug(Log.INIT, String.format(
+		logger.info(Log.INIT, String.format(
 			"start agent=%s interval=%ds", agentName, intervalSeconds));								
-        this.timer = new Timer("scanner", true);
+        this.timer = new Timer(AgentScanner.THREAD_NAME, true);
 		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);

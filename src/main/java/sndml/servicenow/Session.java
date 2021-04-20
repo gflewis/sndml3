@@ -44,7 +44,7 @@ public class Session {
 
 	final private Logger logger = Log.logger(this.getClass());
 
-	public Session(Properties props) throws IOException {
+	public Session(Properties props) throws IOException  {
 		this.properties = props;
 		String instancename = this.getProperty("instance");
 		String username = this.getProperty("username");
@@ -69,7 +69,7 @@ public class Session {
 				setDefaultCredentialsProvider(credsProvider).
 				setDefaultCookieStore(cookieStore).
 				build();			
-		if (this.getPropertyBoolean("verify_session", false)) this.verify();
+		if (this.getPropertyBoolean("verify_session", false)) this.verifyUser();
 	}
 
 	private void logInitInfo() {
@@ -82,7 +82,7 @@ public class Session {
 	 * Create a new Session with the same properties as this one. 
 	 * The URL and credentials will be the same, but the Session ID will be different.
 	 */
-	public Session cloneSession() throws IOException {
+	public Session duplicate() throws IOException {
 		return new Session(this.properties);
 	}
 		
@@ -192,10 +192,14 @@ public class Session {
 		return wsdl;
 	}
 	
-	public Session verify() throws IOException {
+	/**
+	 * Verify that this Session is valid by retrieving the users's record from sys_user.
+	 * If the time zone is not GMT then an exception will be thrown.
+	 */
+	public Session verifyUser() throws IOException {
 		Table user;
 		try {
-			user = verify("sys_user");
+			user = verifyTable("sys_user");
 		} catch (InterruptedException e) {
 			throw new IOException(e);
 		}
@@ -215,7 +219,10 @@ public class Session {
 		return this;
 	}
 	
-	public Table verify(String tablename) throws IOException, InterruptedException {
+	/**
+	 * Verify that the Schema for a table can be retrieved.
+	 */
+	public Table verifyTable(String tablename) throws IOException, InterruptedException {
 		Table table = this.table(tablename);
 		TableWSDL wsdl;
 		try {
@@ -256,4 +263,5 @@ public class Session {
 		}
 		return null;
 	}
+		
 }
