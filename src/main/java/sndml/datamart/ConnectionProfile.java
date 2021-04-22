@@ -41,27 +41,42 @@ public class ConnectionProfile {
 	public ConnectionProfile(File profile) throws IOException {
 		this.profile = profile;
 		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
-		this.lastModified = profile.lastModified();
-		loadProperties(new FileInputStream(profile));
+		this.loadProperties();
 	}
 
 	public String getPathName() {
 		return profile.getPath();
 	}
-		
+	
+	/**
+	 * Return true if the file has been modified since it was loaded.
+	 * @return
+	 */
+	public boolean hasChanged() {
+		return (profile.lastModified() > this.lastModified);	
+	}
+	
+	/**
+	 * Reload all properties if the file has been changed.
+	 */
 	public synchronized void reloadIfChanged() throws IOException {
-		if (profile.lastModified() > this.lastModified) {
+		if (hasChanged()) {
 			logger.info(Log.INIT, "Reloading " + getPathName());
-			this.lastModified = profile.lastModified();
-			loadProperties(new FileInputStream(profile));
+			loadProperties();
 		}		
+	}
+	
+	synchronized void loadProperties() throws IOException {
+		this.loadProperties(new FileInputStream(profile));
+		this.lastModified = profile.lastModified();		
 	}
 	
 	/**
 	 * Load properties from an InputStream into this {@link ConnectionProfile}.
 	 * Any value which is inclosed in backticks will be passed to Runtime.exec()
 	 * for evaluation.
-	 * 
+	 * Any property which is not a password will become a System property
+	 * with a "sndml." prefix.
 	 */
 	synchronized void loadProperties(InputStream stream) throws IOException {
 		assert stream != null;

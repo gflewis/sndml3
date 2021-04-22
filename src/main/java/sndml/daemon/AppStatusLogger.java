@@ -28,7 +28,7 @@ public class AppStatusLogger {
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 
-	public void setStatus(RecordKey runKey, String status) throws IOException {
+	public void setStatus(RecordKey runKey, String status) throws IOException {		
 		assert session != null;
 		assert runKey != null;
 		Log.setJobContext(runKey.toString());

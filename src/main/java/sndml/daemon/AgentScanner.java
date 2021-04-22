@@ -15,11 +15,10 @@ import org.slf4j.LoggerFactory;
 import sndml.datamart.*;
 import sndml.servicenow.*;
 
-public class AgentScanner extends TimerTask {
+public abstract class AgentScanner extends TimerTask {
 
 	final ConnectionProfile profile;
 	final Session session;
-	final WorkerPool workerPool;
 	final AppStatusLogger statusLogger;
 	final String agentName;
 	final URI uriGetRunList;
@@ -37,9 +36,8 @@ public class AgentScanner extends TimerTask {
 	 * @param profile - Used to establish ServiceNow and database connections.
 	 * @param workerPool - If null then jobs will be run sequentially in this thread.
 	 */
-	AgentScanner(ConnectionProfile profile, WorkerPool workerPool) {
+	AgentScanner(ConnectionProfile profile) {
 		this.profile = profile;
-		this.workerPool = workerPool; // null if single threaded
 		this.agentName = AgentDaemon.getAgentName();
 		Log.setJobContext(agentName);		
 		this.session = profile.getSession();
@@ -47,7 +45,6 @@ public class AgentScanner extends TimerTask {
 		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = profile.getAPI("putrunstatus");
 		this.statusLogger = new AppStatusLogger(profile, session);
-		logger.debug(Log.INIT, String.format("workerPool=%s", workerPool));
 	}
 		
 	@Override
@@ -84,81 +81,18 @@ public class AgentScanner extends TimerTask {
 		}
 	}
 	
-	public void scanUntilDone() throws IOException, InterruptedException, ConfigParseException, SQLException {
-		logger.debug(Log.INIT, "scanUntilDone");
-		if (workerPool == null) {
-			int jobcount;
-			do { 
-				jobcount = scan(); 
-			}			
-			while (jobcount > 0);
-		}
-		else {
-			scan();
-			int loopCounter = 0;
-			while (workerPool.getActiveCount() > 0) {
-				// print message every 15 seconds
-				if (++loopCounter % 15 == 0)
-					logger.info(Log.PROCESS, 
-						String.format("scanUntilDone: %d threads running", workerPool.getActiveCount()));
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					logger.error(Log.PROCESS, e.getMessage());
-					throw e;
-				}												
-			}
-		}	
-	}
+	public abstract void scanUntilDone() throws IOException, InterruptedException, ConfigParseException, SQLException;
 	
-	/**
-	 * This function is called by {@link AppJobRunner} whenever a job completes.
-	 * When a job completes it may cause other jobs to move to a "ready" state.
-	 * @throws SQLException 
-	 */
-	public void rescan() throws ConfigParseException, IOException, SQLException {
-		logger.info(Log.PROCESS, "Rescan");
-		if (workerPool != null)
-			scan();
-	}		
+	public abstract int scan() throws ConfigParseException, IOException, SQLException;
 
-	/**
-	 * If single threaded, run all jobs that are ready.
-	 * If multi-threaded, submit for execution all jobs that are ready.
-	 * Return the number of jobs run or submitted.
-	 * Note that this function does NOT necessarily wait for all jobs to complete.
-	 * @throws SQLException 
-	 */
-	public int scan() throws ConfigParseException, IOException, SQLException {
-		Log.setJobContext(agentName);		
-		logger.debug(Log.INIT, "scan");
-		ArrayList<AppJobRunner> joblist = getJobList();
-		if (joblist.size() > 0) {
-			if (workerPool == null) {
-				// Use a common ServiceNow Session and Database connection
-				Database database = profile.getDatabase();
-				// Run the jobs one at a time
-				for (AppJobRunner job : joblist) {
-					job.setSession(this.session);
-					job.setDatabase(database);
-					logger.info(Log.INIT, "Running job " + job.number);
-					job.run();																					
-				}				
-			}
-			else {
-				// Schedule all jobs for future execution
-				// Do not wait for them to complete
-				// Each job will generate create its own Session and Database connection
-				for (AppJobRunner job : joblist) {
-					workerPool.execute(job);						
-				}				
-			}
-			Log.setGlobalContext();			
-		}
-		return joblist.size();
-	}
+	public abstract void rescan() throws ConfigParseException, IOException, SQLException;
+	
+	public 	AppJobRunner createJob(JobConfig jobConfig) {
+		AppJobRunner job = new AppJobRunner(this, profile, jobConfig);
+		return job;
+	}	
 
-	private ArrayList<AppJobRunner> getJobList() throws ConfigParseException, IOException {
+	ArrayList<AppJobRunner> getJobList() throws ConfigParseException, IOException {
 		ArrayList<AppJobRunner> joblist = new ArrayList<AppJobRunner>();
 		ArrayNode runlist = getRunList();
 		if (runlist != null && runlist.size() > 0) {
@@ -173,14 +107,15 @@ public class AgentScanner extends TimerTask {
 				logger.info(Log.INIT, jobConfig.toString());
 				setStatus(runKey, "prepare");
 				Log.setJobContext(number);
-				AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
+				// AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
+				AppJobRunner runner = createJob(jobConfig);
 				joblist.add(runner);
 			}			
 		}
 		return joblist;	
 	}
 	
-	private ArrayNode getRunList() throws IOException, ConfigParseException {
+	ArrayNode getRunList() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
 		ArrayNode runlist = null;	
 		JsonRequest request = new JsonRequest(session, uriGetRunList, HttpMethod.GET, null);
@@ -199,11 +134,11 @@ public class AgentScanner extends TimerTask {
 		return runlist;		
 	}
 	
-	private void setStatus(RecordKey runKey, String status) throws IOException {
+	void setStatus(RecordKey runKey, String status) throws IOException {
 		statusLogger.setStatus(runKey, status);
 	}	
 	
-	private String getNumbers(ArrayNode runlist) {		
+	String getNumbers(ArrayNode runlist) {		
 		ArrayList<String> numbers = new ArrayList<String>();
 		for (JsonNode node : runlist) {
 			assert node.isObject();

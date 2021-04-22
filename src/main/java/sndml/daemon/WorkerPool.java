@@ -6,12 +6,13 @@ import java.util.concurrent.TimeUnit;
 
 public class WorkerPool extends ThreadPoolExecutor {
 
-	private static final long keepAliveSeconds = 60;
+	private static final long KEEP_ALIVE_SECONDS = 60;
 	
+	@SuppressWarnings("unused")
 	private final AgentDaemon daemon; 
 	
 	public WorkerPool(AgentDaemon daemon, int threadCount) {	
-		super(threadCount, threadCount, keepAliveSeconds, TimeUnit.SECONDS, newWorkQueue());
+		super(threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, newWorkQueue());
 		this.daemon = daemon;
 	}
 	
