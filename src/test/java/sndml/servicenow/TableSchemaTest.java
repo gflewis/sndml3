@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 public class TableSchemaTest {
 
-	static Logger logger = LoggerFactory.getLogger(TableSchemaTest.class);
+	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public TableSchemaTest() {
 		TestManager.setDefaultProfile(this.getClass());		

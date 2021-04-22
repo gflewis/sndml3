@@ -3,9 +3,6 @@ package sndml.servicenow;
 import java.io.PrintWriter;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public final class Metrics {
 
 	private final String name; // name as it appears in properties file; null if global
@@ -18,9 +15,6 @@ public final class Metrics {
 	private int skipped = 0;
 	private Date started = null;
 	private Date finished = null;
-
-	@SuppressWarnings("unused")
-	private static Logger logger = LoggerFactory.getLogger(Metrics.class);
 			
 	public Metrics(String name) {
 		this.name = name;

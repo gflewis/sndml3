@@ -98,6 +98,7 @@ public class ConnectionProfile {
 				logger.debug(Log.INIT, value);
 			}
 			properties.setProperty(name, value);
+			// TODO: Exporting as system properties does not appear to work for Log4J2. Remove?
 			if (!name.contains("password")) {
 				String sysPropName = "sndml." + name;
 				System.setProperty(sysPropName, value);				
@@ -192,7 +193,7 @@ public class ConnectionProfile {
 		Instance instance = new Instance(getProperty("servicenow.instance"));
 		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		assert profile != null;		
-		String appScope = getProperty("servicenow.scope", "x_108443_sndml");
+		String appScope = getProperty("daemon.scope", "x_108443_sndml");
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		

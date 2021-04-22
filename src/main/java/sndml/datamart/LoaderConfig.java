@@ -22,7 +22,7 @@ public class LoaderConfig {
 	@JsonProperty("tables")
 	public ArrayList<JobConfig> tables; // = new java.util.ArrayList<JobConfig>();
 
-	private static Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
+	private Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
 	
 	
 	public LoaderConfig() {		

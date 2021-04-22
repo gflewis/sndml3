@@ -21,25 +21,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
  
 public class TestManager {
-	
-	static final Logger logger = LoggerFactory.getLogger(TestManager.class);
-	
+		
+	static TestManager manager = null;
 	static final String TEST_PROPERTIES = "junit.properties";
 	
-	static Session defaultSession;
-	static Properties testProperties = getTestProperties();
-	static TestingProfile currentProfile;
-	static ObjectMapper jsonMapper = new ObjectMapper();
-	static ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());	
+	Session defaultSession;
+	Properties testProperties;
+	TestingProfile currentProfile;
+	ObjectMapper jsonMapper = new ObjectMapper();
+	ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());	
+	Logger logger;
 	
 	@SuppressWarnings("rawtypes")
-	static Class classUnderTest;
+	Class classUnderTest;
 
+	TestManager() {
+		logger = LoggerFactory.getLogger(this.getClass());
+		String propFileName = TEST_PROPERTIES;
+		testProperties = new Properties();
+		logger.info(Log.INIT, "loadProperties " + propFileName);
+		try {
+			InputStream stream = ClassLoader.getSystemResourceAsStream(propFileName);
+			testProperties.load(stream);
+		} catch (IOException e) {
+			logger.error("Unable to load: " +propFileName);
+			System.exit(-1);
+		}		
+	}
+	
+	private static void initialize() {
+		if (manager == null) manager = new TestManager();		
+	}
+	
 	/**
 	 * Get a profile from configs/name/.sndml_profile.
 	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
 	 */
 	public static TestingProfile getProfile(String name) {
+		initialize();
 		try {
 			return new TestingProfile(name);
 		} catch (IOException e) {
@@ -53,8 +72,9 @@ public class TestManager {
 	
 	@SuppressWarnings("rawtypes")
 	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
-		classUnderTest = myclass;
-		currentProfile = profile;
+		initialize();
+		manager.classUnderTest = myclass;
+		manager.currentProfile = profile;
 		// ResourceManager.setSession(profile.getSession());
 		// ResourceManager.setDatabase(profile.getDatabase());
 		return profile;
@@ -66,13 +86,15 @@ public class TestManager {
 	}
 	
 	public static TestingProfile getProfile() {
-		return currentProfile;
+		initialize();
+		return manager.currentProfile;
 	}
 	
 	public static void clearAll() {
-		currentProfile = null;
-		classUnderTest = null;
-		defaultSession = null;
+		initialize();
+		manager.currentProfile = null;
+		manager.classUnderTest = null;
+		manager.defaultSession = null;
 	}
 		
 	public static TestingProfile[] getProfiles(String names) {
@@ -109,29 +131,6 @@ public class TestManager {
 	}
 
 	/**
-	 * This function is called during TestingManager initialization.
-	 * If it fails, then it is bad news. (Note the System.exit(-1).)
-	 */
-	private static Properties getTestProperties() {
-		String propFileName = TEST_PROPERTIES;
-		Properties props = new Properties();
-		logger.info(Log.INIT, "loadProperties " + propFileName);
-		try {
-			InputStream stream = ClassLoader.getSystemResourceAsStream(propFileName);
-			props.load(stream);
-		} catch (IOException e) {
-			logger.error("Unable to load: " +propFileName);
-			System.exit(-1);
-		}
-		return props;
-	}
-
-	@Deprecated
-	public static Properties getProperties() throws TestingException {
-		return testProperties;
-	}
-		
-	/**
 	 * Return a value used for testing.
 	 * These properties are found in the file test/resources/junit.properties.
 	 * All properties have a prefix of junit.
@@ -141,9 +140,10 @@ public class TestManager {
 	 * @throws TestingException
 	 */
 	public static String getProperty(String name) throws TestingException {
-		logger.info(Log.INIT, "getProperty " + name);
+		initialize();
+		manager.logger.info(Log.INIT, "getProperty " + name);
 		String propname = "junit." + name;
-		String value = testProperties.getProperty(propname);
+		String value = manager.testProperties.getProperty(propname);
 		if (value == null) throw new IllegalArgumentException(propname);
 		return value;
 	}
@@ -160,6 +160,7 @@ public class TestManager {
 	@SuppressWarnings("rawtypes")
 	public static void bannerStart(Class cls, String testName, 
 			TestingProfile profile, YamlFile config) {
+		initialize();
 		Logger logger = getLogger(cls);
 		StringBuilder msg = new StringBuilder("Begin:" + testName);
 		if (profile != null) msg.append(" Profile:" + profile.getName());
@@ -169,35 +170,26 @@ public class TestManager {
 
 	@SuppressWarnings("rawtypes")
 	public static void bannerStart(Class cls, String testName) {
+		initialize();
 		bannerStart(cls, testName, null, null);
 	}
 	
 	public static void bannerStart(String testName) {
-		assert classUnderTest != null;
-		assert currentProfile != null;
-		bannerStart(classUnderTest, testName, currentProfile, null);
+		initialize();
+		bannerStart(manager.classUnderTest, testName, manager.currentProfile, null);
 	}
 	
 	@SuppressWarnings("rawtypes")	
 	public static void bannerStart(Class cls, String testName, YamlFile config) {
+		initialize();
 		bannerStart(cls, testName, null, config);
 	}
 	
 	@Deprecated
-	public static void banner(Logger logger, String classname, String msg) {
-		Log.banner(logger, Log.TEST, classname + " - " + msg);
-	}
-	
-	@Deprecated
-	public static void banner(Logger logger, @SuppressWarnings("rawtypes") Class cls, String msg) {
-		banner(logger, cls.getSimpleName(), msg);
-	}
-
-	@Deprecated
 	public static ObjectNode json(String text) throws ConfigParseException {
 		JsonNode node;
 		try {
-			node = jsonMapper.readTree(text);
+			node = manager.jsonMapper.readTree(text);
 		} catch (JsonProcessingException e) {
 			throw new ConfigParseException(e);
 		}
@@ -209,7 +201,7 @@ public class TestManager {
 	public static ObjectNode yaml(String text) throws ConfigParseException {		
 		JsonNode node;
 		try {
-			node = (ObjectNode) yamlMapper.readTree(text);
+			node = (ObjectNode) manager.yamlMapper.readTree(text);
 		} catch (JsonProcessingException e) {
 			throw new ConfigParseException(e);
 		}
@@ -242,10 +234,11 @@ public class TestManager {
 	}
 	
 	public static void sleep(double seconds) throws InterruptedException {
+		initialize();
 		assert seconds < 60;
 		long millisec = Math.round(1000 * seconds);
 		String msg = "Sleeping " + seconds + " sec...";
-		logger.info(Log.TEST, msg);
+		manager.logger.info(Log.TEST, msg);
 		Thread.sleep(millisec);
 	}
 	

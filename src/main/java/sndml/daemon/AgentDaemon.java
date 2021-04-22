@@ -17,7 +17,6 @@ import sndml.servicenow.Log;
 
 public class AgentDaemon implements Daemon {
 
-	static Logger logger = LoggerFactory.getLogger(AgentDaemon.class);
 		
 	static final Thread daemonThread = Thread.currentThread();
 	static AgentDaemon daemon;
@@ -28,6 +27,7 @@ public class AgentDaemon implements Daemon {
 	private final int threadCount;	
 	private final int intervalSeconds;
 	private final WorkerPool workerPool; // null if threadCount < 2
+	private final Logger logger;
 	
 	private static volatile boolean isRunning = false;
 	
@@ -49,6 +49,7 @@ public class AgentDaemon implements Daemon {
 			this.workerPool = null;
 			this.scanner = new SingleThreadScanner(profile);
 		}
+		this.logger = LoggerFactory.getLogger(this.getClass());
 		Log.setJobContext(agentName);
 	}
 	
@@ -75,7 +76,7 @@ public class AgentDaemon implements Daemon {
 	 * This function can be called by any thread to abort the daemon.
 	 */
 	public static void abort() {
-		logger.error(Log.FINISH, "Aborting the daemon");
+		daemon.logger.error(Log.FINISH, "Aborting the daemon");
 		Runtime.getRuntime().exit(-1);
 	}
 	

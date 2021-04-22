@@ -15,8 +15,8 @@ import java.sql.Statement;
 
 public class DBUtil {
 		
-	static Logger logger = TestManager.getLogger(DBUtil.class);
 	Database db;
+	Logger logger = TestManager.getLogger(DBUtil.class);
 
 	DBUtil(Database database) {
 		this.db = database;

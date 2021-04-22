@@ -15,7 +15,7 @@ import sndml.servicenow.InvalidDateTimeException;
 
 public class DateTimeTest {
 
-	static Logger logger = LoggerFactory.getLogger(DateTimeTest.class);
+	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Test
 	public void testEqualsDateTime() {

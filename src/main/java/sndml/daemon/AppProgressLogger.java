@@ -20,7 +20,7 @@ public class AppProgressLogger extends ProgressLogger {
 	final URI putRunStatusURI;
 	final String number;
 	final RecordKey runKey;
-	final static Logger logger = LoggerFactory.getLogger(AppProgressLogger.class);	
+	final Logger logger = LoggerFactory.getLogger(this.getClass());	
 
 	AppProgressLogger(
 			ConnectionProfile profile, 

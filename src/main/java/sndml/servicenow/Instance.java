@@ -10,7 +10,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIBuilder;
 
 /**
- * Represents the URL for a ServiceNow instance.
+ * Holds the URL for a ServiceNow instance.
+ * Does not hold connection credentials, cookies or session ID.
  */
 public class Instance {
 
