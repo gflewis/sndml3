@@ -38,7 +38,7 @@ public class AgentDaemon implements Daemon {
         daemon = this;
 		this.profile = profile;
 		this.agentName = profile.getProperty("daemon.agent", "main");
-		this.threadCount = profile.getPropertyInt("daemon.threads", 0);
+		this.threadCount = profile.getPropertyInt("daemon.threads", 3);
 		this.intervalSeconds = profile.getPropertyInt("daemon.interval", 60);
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
@@ -99,6 +99,7 @@ public class AgentDaemon implements Daemon {
 		try {
 			scanner.scanUntilDone();
 		} catch (Exception e) {
+			logger.error(Log.ERROR, "scanOnce caught " + e.getClass().getName());
 			e.printStackTrace();
 			Runtime.getRuntime().exit(-1);
 		}
@@ -138,7 +139,7 @@ public class AgentDaemon implements Daemon {
 				Thread.sleep(1000 * sleepSeconds);				
 			}
 			catch (InterruptedException e) {
-				logger.info(Log.FINISH, "Interrupt detected");
+				logger.info(Log.FINISH, e.getClass().getName());
 				isInterrupted = true;				
 			}
 		}

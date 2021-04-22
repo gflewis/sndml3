@@ -17,6 +17,7 @@ public class Log {
 	static public final Marker PROCESS  = MarkerFactory.getMarker("PROCESS");
 	static public final Marker BIND     = MarkerFactory.getMarker("BIND");
 	static public final Marker FINISH   = MarkerFactory.getMarker("FINISH");
+	static public final Marker ERROR    = MarkerFactory.getMarker("ERROR");
 	static public final Marker TEST     = MarkerFactory.getMarker("TEST");
 	
 	@SuppressWarnings("rawtypes")

@@ -9,7 +9,7 @@ import sndml.servicenow.*;
 
 /**
  * An Agent Scanner which does not utilize a thread pool and runs all jobs in the current thread
- * utilizing 
+ * utilizing the current Session and a single database connection.
  */
 public class SingleThreadScanner extends AgentScanner {
 	
@@ -42,7 +42,6 @@ public class SingleThreadScanner extends AgentScanner {
 			// Use a single database connection for all the jobs
 			Database database = profile.getDatabase();
 			// Run the jobs one at a time
-			// TODO: Timer tasks should complete quickly. Bad idea to run the job in the scanner thread.
 			for (AppJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);
 				job.setSession(session);

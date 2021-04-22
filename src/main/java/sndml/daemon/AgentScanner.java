@@ -62,20 +62,23 @@ public abstract class AgentScanner extends TimerTask {
 			scan();
 		}
 		catch (NoContentException e) {
-			logger.error(Log.RESPONSE, String.format(
+			logger.error(Log.ERROR, "run: " + e.getClass().getName());
+			logger.error(Log.ERROR, String.format(
 				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
 				uriGetRunList.toString(), e.getClass().getName(), agentName));
 			if (!onExceptionContinue) AgentDaemon.abort();
 		}		
 		catch (IOException | SQLException e) {
+			logger.error(Log.ERROR, "run: " + e.getClass().getName());
 			String msg = e.getMessage();
 			// Connection resets may happen periodically and should not cause an abort
 			boolean connectionReset = msg.toLowerCase().contains("connnection reset");
-			logger.error(Log.RESPONSE, e.toString(), e);
+			logger.error(Log.ERROR, e.toString(), e);
 			if (!connectionReset && !onExceptionContinue) AgentDaemon.abort();
 		}
 		catch (Exception e) {
-			logger.error(Log.RESPONSE, e.toString(), e);
+			logger.error(Log.ERROR, "run: " + e.getClass().getName());
+			logger.error(Log.ERROR, e.toString(), e);
 			AgentDaemon.abort();
 			throw e; 
 		}
