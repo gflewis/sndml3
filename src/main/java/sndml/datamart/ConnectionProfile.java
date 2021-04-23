@@ -98,11 +98,6 @@ public class ConnectionProfile {
 				logger.debug(Log.INIT, value);
 			}
 			properties.setProperty(name, value);
-			// TODO: Exporting as system properties does not appear to work for Log4J2. Remove?
-			if (!name.contains("password")) {
-				String sysPropName = "sndml." + name;
-				System.setProperty(sysPropName, value);				
-			}
 		}
 	}
 

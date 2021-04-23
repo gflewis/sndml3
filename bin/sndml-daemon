@@ -8,4 +8,4 @@ source sndml-setup $1
 export SNDML_AGENT=`awk -F= '/^daemon.agent/{print $2}' <$SNDML_PROFILE`
 export SNDML_LOG_DIR=$SNDML_CONFIG/log
 env | grep SNDML | sort
-java -ea -Dlog4j.configurationFile=log4j2-daemon.xml -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon
+java -ea -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=$SNDML_LOG_DIR -Dsndml.logPrefix=$SNDML_AGENT -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon

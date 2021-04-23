@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Daemon Log4j configuration uses writes to $SNDML_LOG_DIR directory with Rolling File Appender -->
+<!-- 
+  Daemon Log4j configuration uses writes to $SNDML_LOG_DIR directory with Rolling File Appender.
+  A new log file is created each day (based on the date pattern).
+-->
 <Configuration>
   <Appenders>
     <RollingFile name="RollingFile"
-    	fileName="${env:SNDML_LOG_DIR}/${env:SNDML_AGENT}-${date:yyyyMMdd}.log"
-    	filePattern="${env:SNDML_LOG_DIR}/${env:SNDML_AGENT}-%d{yyyyMMdd}-%i.log.gz">
+    	fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
+    	filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
       <Policies>
-        <TimeBasedTriggeringPolicy />
-        <SizeBasedTriggeringPolicy size="20MB"/>
+        <TimeBasedTriggeringPolicy/>
       </Policies> 
     </RollingFile>
   </Appenders>
@@ -19,8 +21,5 @@
       <AppenderRef ref="RollingFile" />
     </Root>
     <Logger name="sndml" level="info" />
-    <Logger name="sndml.daemon" level="info" />
-    <Logger name="sndml.datamart" level="info" />
-    <Logger name="sndml.servicenow" level="info" />
   </Loggers>
 </Configuration>

@@ -4,7 +4,6 @@
 # This command is intended to be used in cron jobs or other backgound contexts.
 #
 source sndml-setup $1 $2
-sndml_set_log $2
 env | grep SNDML | sort >$SNDML_LOG
 cd $SNDML_CONFIG
-java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML </dev/null >>$SNDML_LOG 2>&1
+java -ea -Dlog4j2.configurationFile=log4j2-file.xml -Dsndml.logFolder=$SNDML_CONFIG/log -Dsndml.logPrefix=$2 -jar $SNDML_JAR -p $SNDML_PROFILE -y $SNDML_YAML 
