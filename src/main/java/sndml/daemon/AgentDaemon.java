@@ -106,14 +106,14 @@ public class AgentDaemon implements Daemon {
 		this.stop();
 	}
 
-
-	/**
-	 * Called by {@link WorkerPool} as each job completes.
-	 */
-	void rescan() {
-		logger.info(Log.PROCESS, "rescan");
-		daemon.scanner.run();
-	}
+//	/**
+//	 * Called by {@link AppJobRunner} as each job completes.
+//	 */
+//	@Deprecated
+//	void rescan() {
+//		logger.info(Log.PROCESS, "rescan");
+//		daemon.scanner.run();
+//	}
 			
 	public void runForever() throws InterruptedException, ConfigParseException, IOException, SQLException {
 		if (threadCount > 1) {
@@ -122,33 +122,33 @@ public class AgentDaemon implements Daemon {
 		}
 		else {
 			scanForever();
-		}
-		
+		}		
 	}
 	
-	public void runForever_old() {
-		assert !isRunning;
-		Log.setJobContext(agentName);
-		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
-		this.start();
-		// Daemon now goes into an endless loop
-		boolean isInterrupted = false;
-		final int sleepSeconds = 300;  
-		while (!isInterrupted) {
-			try {
-				Thread.sleep(1000 * sleepSeconds);				
-			}
-			catch (InterruptedException e) {
-				logger.info(Log.FINISH, e.getClass().getName());
-				isInterrupted = true;				
-			}
-		}
-		logger.info(Log.FINISH, "Calling stop");
-		this.stop();
-	}
+//	public void runForever_old() {
+//		assert !isRunning;
+//		Log.setJobContext(agentName);
+//		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
+//		this.start();
+//		// Daemon now goes into an endless loop
+//		boolean isInterrupted = false;
+//		final int sleepSeconds = 300;  
+//		while (!isInterrupted) {
+//			try {
+//				Thread.sleep(1000 * sleepSeconds);				
+//			}
+//			catch (InterruptedException e) {
+//				logger.info(Log.FINISH, e.getClass().getName());
+//				isInterrupted = true;				
+//			}
+//		}
+//		logger.info(Log.FINISH, "Calling stop");
+//		this.stop();
+//	}
 
 	public void scanForever() throws ConfigParseException, IOException, SQLException, InterruptedException {
 		boolean isInterrupted = false;
+		isRunning = true;
 		while (!isInterrupted) {
 			scanner.scan();
 			Thread.sleep(1000 * intervalSeconds);
@@ -157,6 +157,7 @@ public class AgentDaemon implements Daemon {
 	
 	public void waitForever() throws InterruptedException {
 		final int sleepSeconds = 300;
+		isRunning = true;
 		while (true) {
 			Thread.sleep(1000 * sleepSeconds);
 		}
@@ -188,10 +189,11 @@ public class AgentDaemon implements Daemon {
 	@Override
 	public void stop() {
 		Log.setGlobalContext();
-		logger.info(Log.FINISH, "Begin stop");
+		logger.info(Log.FINISH, "Begin stop");		
 		int waitSec = profile.getPropertyInt("daemon.shutdown_seconds", 30);
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdown();
+		isRunning = false;
 		try { 
 			workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
 		}

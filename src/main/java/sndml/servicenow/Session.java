@@ -39,7 +39,7 @@ public class Session {
 			new ConcurrentHashMap<String,TableSchema>();
 	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
-	private final CloseableHttpClient client;
+	private CloseableHttpClient client = null; // created on request
 	private SchemaFactory schemaFactory;
 
 	final private Logger logger = Log.logger(this.getClass());
@@ -64,14 +64,15 @@ public class Session {
 		this.userPassCreds = new UsernamePasswordCredentials(username, password);		
 		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);	
 		this.connectionManager = new PoolingHttpClientConnectionManager();
-		this.client = HttpClients.custom().
-				setConnectionManager(connectionManager).
-				setDefaultCredentialsProvider(credsProvider).
-				setDefaultCookieStore(cookieStore).
-				build();			
+//		client is now created on initial request
+//		this.client = HttpClients.custom().
+//				setConnectionManager(connectionManager).
+//				setDefaultCredentialsProvider(credsProvider).
+//				setDefaultCookieStore(cookieStore).
+//				build();			
 		if (this.getPropertyBoolean("verify_session", false)) this.verifyUser();
 	}
-
+	
 	private void logInitInfo() {
 		String msg = "instance=" + instance.getURL() + " user=" + username;
 		if (getDomain() != null) msg += " domain=" + getDomain();		
@@ -137,7 +138,29 @@ public class Session {
 	}
 
 	public CloseableHttpClient getClient() {
-		return this.client;
+		if (client == null) createClient();
+		return client;
+	}
+
+	public void reset() {
+		closeClient();
+	}
+	
+	private void createClient() {
+		client = HttpClients.custom().
+			setConnectionManager(connectionManager).
+			setDefaultCredentialsProvider(credsProvider).
+			setDefaultCookieStore(cookieStore).
+			build();			
+	}
+	
+	private void closeClient() {
+		try {
+			client.close();
+		} catch (IOException e) {
+			logger.warn(Log.ERROR, "Unable to close HTTP client", e);
+		}
+		this.client = null;
 	}
 
 	public Instance getInstance() {

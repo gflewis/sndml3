@@ -76,7 +76,7 @@ public class JobRunner implements Callable<Metrics> {
 				"call table=%s action=%s", 
 				table.getName(), action.toString()));
 		}
-		jobMetrics = new Metrics(config.getName(), null);
+		jobMetrics = new Metrics(config.getName());
 		jobMetrics.start();
 		if (config.getSqlBefore() != null) runSQL(config.getSqlBefore());
 		switch (action) {

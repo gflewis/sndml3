@@ -18,6 +18,12 @@ public class MultiThreadScanner extends AgentScanner {
 	}
 	
 	@Override
+	protected int getErrorLimit() {
+		// Allow getrunlist to fail two times in a row, but not three
+		return 3;
+	}
+	
+	@Override
 	public void scanUntilDone() throws IOException, InterruptedException, ConfigParseException {
 		logger.debug(Log.INIT, "scanUntilDone");
 		scan();

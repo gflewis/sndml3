@@ -18,6 +18,11 @@ public class SingleThreadScanner extends AgentScanner {
 	}
 
 	@Override
+	protected int getErrorLimit() {
+		return 0;
+	}
+	
+	@Override
 	public void scanUntilDone() throws IOException, ConfigParseException, SQLException {
 		logger.debug(Log.INIT, "scanUntilDone");
 		int jobcount;

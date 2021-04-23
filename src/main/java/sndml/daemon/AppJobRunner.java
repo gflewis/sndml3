@@ -72,29 +72,29 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	@Override
 	public Metrics call() {
+		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
 		boolean onExceptionContinue = profile.getPropertyBoolean("daemon.continue", false);
 		setThreadName();
-		Metrics metrics = null;
 		try {
 			if (session == null) session = profile.getSession();
 			statusLogger = new AppStatusLogger(profile, session);		
 			if (database == null) database = profile.getDatabase();
 			assert database != null;
-			metrics = super.call();
+			super.call();
 			scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());
-			logger.error(Log.FINISH, e.toString(), e);
+			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
 			statusLogger.logError(runKey, e);
 			if (!onExceptionContinue) AgentDaemon.abort();			
 		} catch (Error e) {
-			logger.error(Log.FINISH, e.toString(), e);			
-			logger.error(Log.FINISH, "Critical error detected. Halting JVM.");
+			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
+			logger.error(Log.ERROR, "Critical error detected. Halting JVM.");
 			Runtime.getRuntime().halt(-1);
 		}
-		return metrics;
+		return jobMetrics;
 	}
 	
 	/**

@@ -23,11 +23,13 @@ public abstract class AgentScanner extends TimerTask {
 	final String agentName;
 	final URI uriGetRunList;
 	final URI uriPutRunStatus;
+	int errorCount = 0;
 	
 	final Logger logger = LoggerFactory.getLogger(AgentScanner.class);
 	final ConfigFactory configFactory = new ConfigFactory();
 	
 	final static public String THREAD_NAME = "scanner";
+	final static int ERROR_LIMIT = 3;
 	
 	/**
 	 * Class that can be run once or run periodically from a timer.
@@ -70,11 +72,13 @@ public abstract class AgentScanner extends TimerTask {
 		}		
 		catch (IOException | SQLException e) {
 			logger.error(Log.ERROR, "run: " + e.getClass().getName());
-			String msg = e.getMessage();
 			// Connection resets may happen periodically and should not cause an abort
-			boolean connectionReset = msg.toLowerCase().contains("connnection reset");
+			// Now handled in getjoblist
+			// String msg = e.getMessage();
+			// boolean connectionReset = msg.toLowerCase().contains("connnection reset");
 			logger.error(Log.ERROR, e.toString(), e);
-			if (!connectionReset && !onExceptionContinue) AgentDaemon.abort();
+			// if (!connectionReset && !onExceptionContinue) AgentDaemon.abort();
+			if (!onExceptionContinue) AgentDaemon.abort();
 		}
 		catch (Exception e) {
 			logger.error(Log.ERROR, "run: " + e.getClass().getName());
@@ -90,14 +94,34 @@ public abstract class AgentScanner extends TimerTask {
 
 	public abstract void rescan() throws ConfigParseException, IOException, SQLException;
 	
+	protected abstract int getErrorLimit();
+	
 	public 	AppJobRunner createJob(JobConfig jobConfig) {
 		AppJobRunner job = new AppJobRunner(this, profile, jobConfig);
 		return job;
 	}	
 
-	ArrayList<AppJobRunner> getJobList() throws ConfigParseException, IOException {
+	ArrayList<AppJobRunner> getJobList() throws IOException, ConfigParseException {
 		ArrayList<AppJobRunner> joblist = new ArrayList<AppJobRunner>();
-		ArrayNode runlist = getRunList();
+		ArrayNode runlist = null;
+		try {
+			runlist = getRunList();
+			// if getRunList was successful then reset errorCount
+			errorCount = 0;
+		} catch (IOException e) {
+			runlist = null;
+			errorCount += 1;
+			int errorLimit = getErrorLimit();
+			logger.error(Log.ERROR, e.getMessage(), e);
+			if (errorCount < errorLimit) {
+				session.reset();				
+			}
+			else {
+				// ResourceException will not be caught
+				throw new ResourceException(String.format(
+					"getrunlist has failed %d times", errorCount));				
+			}
+		}
 		if (runlist != null && runlist.size() > 0) {
 			for (JsonNode node : runlist) {
 				assert node.isObject();
