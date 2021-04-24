@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
   <Appenders>
-    <File name="File" fileName="${sys:logFileName}" append="false">
+    <File name="File"
+      fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMddHHmmss}.log"     
+      append="false">
       <Filters>
-        <ThresholdFilter level="trace" />
+        <ThresholdFilter level="debug" />
         <MarkerFilter marker="SCHEMA" onMatch="ALLOW" onMismatch="NEUTRAL" />
         <MarkerFilter marker="BIND" onMatch="ALLOW" onMismatch="NEUTRAL" />
       </Filters>
@@ -13,7 +15,7 @@
     </File>    
     <Console name="Console">
       <Filters>
-        <ThresholdFilter level="debug" />
+        <ThresholdFilter level="info" />
         <MarkerFilter marker="SCHEMA" onMatch="ALLOW" onMismatch="NEUTRAL" />
         <MarkerFilter marker="BIND" onMatch="DENY" onMismatch="NEUTRAL" />
       </Filters>
@@ -30,6 +32,6 @@
     <Logger name="org.apache.http.headers" level="info" />
     <Logger name="org.apache.http.impl" level="info" />
     <Logger name="org.apache.http.wire" level="info" />
-    <Logger name="sndml" level="trace" />>
+    <Logger name="sndml" level="debug" />>
   </Loggers>
 </Configuration>
