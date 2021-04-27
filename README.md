@@ -6,5 +6,8 @@ For information about this product visit the wiki:
 For a quick tutorial, please see
 * https://github.com/gflewis/sndml3/wiki/Getting-Started
 
+For a tutorial on the ServiceNow DataPump app, see
+* [Exporting to MySQL, Oracle or SQL Server with DataPump](https://community.servicenow.com/community?id=community_article&sys_id=90628858db7f2010030d443039961918)
+
 This program is freely distributed software. You are welcome to redistribute and/or modify it. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY, explicit or implied. 
 
