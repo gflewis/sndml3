@@ -132,13 +132,13 @@ public class ConnectionProfile {
 	public boolean getPropertyBoolean(String name, boolean defaultValue) {
 		String stringValue = getProperty(name);
 		if (stringValue == null) return defaultValue;
-		return new Boolean(stringValue);
+		return Boolean.valueOf(stringValue);
 	}
 	
 	public int getPropertyInt(String name, int defaultValue) {
 		String stringValue = getProperty(name);
 		if (stringValue == null) return defaultValue;
-		return new Integer(stringValue);
+		return Integer.valueOf(stringValue);
 	}
 	
 	/**

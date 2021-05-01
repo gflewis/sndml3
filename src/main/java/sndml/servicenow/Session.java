@@ -112,7 +112,7 @@ public class Session {
 	public int getPropertyInt(String name, int defaultValue) {
 		String stringValue = getProperty(name);
 		if (stringValue == null) return defaultValue;
-		return new Integer(stringValue);
+		return Integer.valueOf(stringValue);
 	}
 	
 	public int defaultPageSize() {
