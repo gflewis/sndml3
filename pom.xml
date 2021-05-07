@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2</version>
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
     <main.class>sndml.datamart.Loader</main.class>
   </properties>
 
@@ -69,11 +69,11 @@
       <artifactId>commons-text</artifactId>
       <version>1.9</version>
     </dependency>
-	<dependency>
-	  <groupId>commons-daemon</groupId>
-	  <artifactId>commons-daemon</artifactId>
-	  <version>1.2.4</version>
-	</dependency>
+    <dependency>
+      <groupId>commons-daemon</groupId>
+      <artifactId>commons-daemon</artifactId>
+      <version>1.2.4</version>
+    </dependency>
 
     <!-- Parsers -->
     <dependency>
@@ -91,12 +91,12 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.12.1</version>
     </dependency>
-	<dependency>
-	    <groupId>com.fasterxml.jackson.dataformat</groupId>
-	    <artifactId>jackson-dataformat-yaml</artifactId>
-	    <version>2.12.1</version>
-	</dependency>
-	
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.12.1</version>
+    </dependency>
+
     <!-- Database Dependencies -->
     <dependency>
       <groupId>mysql</groupId>
@@ -125,11 +125,27 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.34.0</version>
+      <optional>true</optional>
+    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
-
+    
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <release>11</release>
+        </configuration>
+      </plugin>
+      
       <plugin>
         <!-- Skip Unit Tests -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -170,10 +186,11 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>mysql</shadedClassifierName>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
                   <manifestEntries>
-                  	<Multi-Release>true</Multi-Release>
+                    <Multi-Release>true</Multi-Release>
                   </manifestEntries>
                 </transformer>
               </transformers>
@@ -205,6 +222,9 @@
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
+                  <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
                 </transformer>
               </transformers>
               <filters>
@@ -242,8 +262,12 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>ora</shadedClassifierName>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
+                  <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
                 </transformer>
               </transformers>
               <artifactSet>
@@ -274,6 +298,9 @@
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>${main.class}</mainClass>
+                  <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
                 </transformer>
               </transformers>
               <filters>
@@ -300,6 +327,50 @@
               </artifactSet>
             </configuration>
           </execution>
+          <!--  SQLite JAR  -->
+          <execution>
+            <id>sqlite</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>sqlite</shadedClassifierName>
+              <transformers>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>${main.class}</mainClass>
+                  <manifestEntries>
+                    <Multi-Release>true</Multi-Release>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <artifactSet>
+                <includes>
+                  <include></include>
+                  <include>org.xerial:*</include>
+                  <include>org.apache.*:*</include>
+                  <include>commons-*:*</include>
+                  <include>com.fasterxml.jackson.*:*</include>
+                  <include>org.jdom:*</include>
+                  <include>org.yaml:*</include>
+                  <include>org.slf4j:*</include>
+                  <include>log4j:*</include>
+                </includes>
+              </artifactSet>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -307,10 +378,7 @@
 
   <profiles>
     <profile>
-      <!--
-        To run api tests
-          mvn surefire:test -P test.api
-       -->
+      <!-- To run api tests mvn surefire:test -P test.api -->
       <id>test.api</id>
       <build>
         <plugins>
@@ -329,10 +397,7 @@
       </build>
     </profile>
     <profile>
-      <!--
-        To run datamart tests
-          mvn surefire:test -P test.datamart
-       -->
+      <!-- To run datamart tests mvn surefire:test -P test.datamart -->
       <id>test.datamart</id>
       <build>
         <plugins>
@@ -352,10 +417,7 @@
     </profile>
 
     <profile>
-      <!--
-        To create zip file for github release:
-          mvn package -P github.release
-       -->
+      <!-- To create zip file for github release: mvn package -P github.release -->
       <id>github.release</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -366,23 +428,23 @@
       </activation>
       <build>
         <plugins>
-           <plugin>
-             <artifactId>maven-assembly-plugin</artifactId>
-             <configuration>
-               <descriptorRefs>
-                 <descriptorRef>bin</descriptorRef>
-               </descriptorRefs>
-             </configuration>
-             <executions>
-               <execution>
-                 <id>make-assembly</id>
-                 <phase>package</phase>
-                 <goals>
-                   <goal>assembly</goal>
-                 </goals>
-               </execution>
-             </executions>
-           </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+              <descriptorRefs>
+                <descriptorRef>bin</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>make-assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>assembly</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
       </build>
 

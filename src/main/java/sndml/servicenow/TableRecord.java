@@ -120,7 +120,7 @@ public abstract class TableRecord implements InsertResponse {
 	public Integer getInteger(String fieldname) {
 		String value = getValue(fieldname);
 		if (value == null) return null;
-		return new Integer(value);
+		return Integer.valueOf(value);
 	}	   	
 
 	/**
@@ -151,7 +151,7 @@ public abstract class TableRecord implements InsertResponse {
 			throw new ServiceNowException("getDuration " + fieldname + "=" + value);
 		}
 		long millis = dt.getMillisec();
-		return new Integer((int) (millis / 1000));
+		return Integer.valueOf((int) (millis / 1000));
 	}
 		
 }

@@ -1,6 +1,8 @@
 package sndml.daemon;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Timer;
 import java.util.concurrent.*;
@@ -21,6 +23,7 @@ public class AgentDaemon implements Daemon {
 	static final Thread daemonThread = Thread.currentThread();
 	static AgentDaemon daemon;
 
+	private final ProcessHandle process;
 	private final ConnectionProfile profile;
 	private final String agentName;
 	private final AgentScanner scanner;
@@ -30,12 +33,13 @@ public class AgentDaemon implements Daemon {
 	private final Logger logger;
 	
 	private static volatile boolean isRunning = false;
-	
+	DaemonContext context = null;	
 	private Timer timer;
 	
 	public AgentDaemon(ConnectionProfile profile) throws SQLException {
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
         daemon = this;
+        this.process = ProcessHandle.current();
 		this.profile = profile;
 		this.agentName = profile.getProperty("daemon.agent", "main");
 		this.threadCount = profile.getPropertyInt("daemon.threads", 3);
@@ -50,6 +54,8 @@ public class AgentDaemon implements Daemon {
 			this.scanner = new SingleThreadScanner(profile);
 		}
 		this.logger = LoggerFactory.getLogger(this.getClass());
+		assert agentName != null;
+		assert agentName != "";
 		Log.setJobContext(agentName);
 	}
 	
@@ -89,10 +95,10 @@ public class AgentDaemon implements Daemon {
 	 * Wait for all jobs to complete.
 	 * Shut down the worker pool.
 	 */
-	public void scanOnce() throws InterruptedException {
+	public void scanOnce() throws DaemonInitException, InterruptedException {
 		assert Thread.currentThread() == daemonThread;
 		assert !isRunning;
-		isRunning = true;
+		init(null);		
 		Log.setJobContext(agentName);
 		logger.info(Log.INIT, String.format(
 			"runOnce agent=%s threads=%d", agentName, threadCount));
@@ -105,17 +111,10 @@ public class AgentDaemon implements Daemon {
 		}
 		this.stop();
 	}
-
-//	/**
-//	 * Called by {@link AppJobRunner} as each job completes.
-//	 */
-//	@Deprecated
-//	void rescan() {
-//		logger.info(Log.PROCESS, "rescan");
-//		daemon.scanner.run();
-//	}
 			
-	public void runForever() throws InterruptedException, ConfigParseException, IOException, SQLException {
+	public void runForever() 
+			throws DaemonInitException, InterruptedException, ConfigParseException, IOException, SQLException {
+		init(null);
 		if (threadCount > 1) {
 			start();
 			waitForever();			
@@ -125,47 +124,44 @@ public class AgentDaemon implements Daemon {
 		}		
 	}
 	
-//	public void runForever_old() {
-//		assert !isRunning;
-//		Log.setJobContext(agentName);
-//		if (logger.isDebugEnabled()) logger.debug(Log.INIT, "Debug is enabled");
-//		this.start();
-//		// Daemon now goes into an endless loop
-//		boolean isInterrupted = false;
-//		final int sleepSeconds = 300;  
-//		while (!isInterrupted) {
-//			try {
-//				Thread.sleep(1000 * sleepSeconds);				
-//			}
-//			catch (InterruptedException e) {
-//				logger.info(Log.FINISH, e.getClass().getName());
-//				isInterrupted = true;				
-//			}
-//		}
-//		logger.info(Log.FINISH, "Calling stop");
-//		this.stop();
-//	}
-
-	public void scanForever() throws ConfigParseException, IOException, SQLException, InterruptedException {
+	private void scanForever() throws ConfigParseException, IOException, SQLException, InterruptedException {
 		boolean isInterrupted = false;
-		isRunning = true;
+		assert isRunning;
 		while (!isInterrupted) {
 			scanner.scan();
 			Thread.sleep(1000 * intervalSeconds);
 		}		
 	}
 	
-	public void waitForever() throws InterruptedException {
+	private void waitForever() throws InterruptedException {
+		assert isRunning;
 		final int sleepSeconds = 300;
-		isRunning = true;
 		while (true) {
 			Thread.sleep(1000 * sleepSeconds);
 		}
 	}
 	
 	@Override
-	public void init(DaemonContext context) throws DaemonInitException, Exception {
-		logger.info(Log.INIT, "begin init");		
+	public void init(DaemonContext context) throws DaemonInitException {
+		logger.debug(Log.INIT, "begin init");
+		this.context = context;
+		String pidFileName = profile.getProperty("daemon.pidfile");
+		if (pidFileName != null) {
+			File pidFile = new File(pidFileName);
+			long pid = process.pid();
+			logger.info(Log.INIT, String.format(
+				"pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
+			try {
+				PrintWriter pidWriter = new PrintWriter(pidFile);
+				pidWriter.println(pid);
+				pidWriter.close();
+			}
+			catch (IOException e) {
+				throw new DaemonInitException(
+					"Unable to write pidfile: " + pidFileName, e);
+			}			
+		}
+		isRunning = true;
 	}
 
 	// TODO Make this class work with JSCV and PROCRUN
@@ -188,8 +184,8 @@ public class AgentDaemon implements Daemon {
 	
 	@Override
 	public void stop() {
-		Log.setGlobalContext();
-		logger.info(Log.FINISH, "Begin stop");		
+		Log.setJobContext(agentName);		
+		logger.debug(Log.FINISH, "Begin stop");
 		int waitSec = profile.getPropertyInt("daemon.shutdown_seconds", 30);
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdown();

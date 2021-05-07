@@ -90,6 +90,7 @@ sndml_determine_jar() {
   postgresql) suffix=pg ;;
   mysql)      suffix=mysql ;;
   sqlserver)  suffix=mssql ;;
+  sqlite)     suffix=sqlite ;;
   esac
   export SNDML_JAR=$SNDML_HOME/target/sndml-$SNDML_VERSION-$suffix.jar
   if [[ ! -r $SNDML_JAR ]]; then
