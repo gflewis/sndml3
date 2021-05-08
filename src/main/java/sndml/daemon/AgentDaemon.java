@@ -18,7 +18,6 @@ import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.Log;
 
 public class AgentDaemon implements Daemon {
-
 		
 	static final Thread daemonThread = Thread.currentThread();
 	static AgentDaemon daemon;
