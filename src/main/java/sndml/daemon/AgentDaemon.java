@@ -161,7 +161,6 @@ public class AgentDaemon implements Daemon {
 					"Unable to write pidfile: " + pidFileName, e);
 			}			
 		}
-		isRunning = true;
 	}
 
 	// TODO Make this class work with JSCV and PROCRUN
