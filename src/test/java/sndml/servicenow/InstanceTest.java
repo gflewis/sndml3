@@ -7,9 +7,6 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-import sndml.servicenow.Instance;
-import sndml.servicenow.Parameters;
-
 public class InstanceTest {
 
 	@Test

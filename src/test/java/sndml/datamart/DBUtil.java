@@ -1,6 +1,5 @@
 package sndml.datamart;
 
-import sndml.datamart.Database;
 import sndml.servicenow.*;
 
 import static org.junit.Assert.*;

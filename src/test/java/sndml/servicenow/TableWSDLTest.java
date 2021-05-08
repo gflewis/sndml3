@@ -5,11 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
 
-import sndml.servicenow.InvalidTableNameException;
-import sndml.servicenow.Session;
-import sndml.servicenow.Table;
-import sndml.servicenow.TableWSDL;
-
 import static org.junit.Assert.*;
 
 public class TableWSDLTest {

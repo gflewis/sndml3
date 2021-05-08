@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import sndml.datamart.Loader;
 import sndml.servicenow.*;
 
 public class ColumnsTest {

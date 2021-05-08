@@ -12,15 +12,6 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.DateTime;
-import sndml.servicenow.FieldValues;
-import sndml.servicenow.RecordKey;
-import sndml.servicenow.NoSuchRecordException;
-import sndml.servicenow.TableRecord;
-import sndml.servicenow.Session;
-import sndml.servicenow.Table;
-import sndml.servicenow.TableAPI;
-
 @RunWith(Parameterized.class)
 public class CRUDTest {
 

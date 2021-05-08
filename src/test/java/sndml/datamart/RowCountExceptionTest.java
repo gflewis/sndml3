@@ -9,8 +9,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import sndml.datamart.Loader;
-import sndml.datamart.YamlFile;
 import sndml.servicenow.*;
 
 @RunWith(Parameterized.class)

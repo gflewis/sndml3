@@ -11,8 +11,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import sndml.datamart.Database;
-import sndml.datamart.Generator;
 import sndml.servicenow.*;
 
 @RunWith(Parameterized.class)

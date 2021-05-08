@@ -7,8 +7,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import sndml.datamart.Loader;
-import sndml.datamart.YamlFile;
 import sndml.servicenow.TestManager;
 import sndml.servicenow.TestingProfile;
 import sndml.servicenow.Metrics;
