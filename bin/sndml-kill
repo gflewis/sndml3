@@ -1,7 +1,6 @@
 #!/bin/bash
 source sndml-setup $1
 SNDML_PIDFILE=$SNDML_CONFIG/daemon.pid
-ls -l $SNDML_PIDFILE
 if [[ ! -f $SNDML_PIDFILE ]]
 then
   echo $SNDML_PIDFILE not found
