@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-  Daemon Log4j configuration uses writes to $SNDML_LOG_DIR directory with Rolling File Appender.
-  A new log file is created each day (based on the date pattern).
+  Rolling File Appender to create a new log file each day (based on the date pattern).
+  The following system properties must be set:
+    sndml.logFolder
+    sndml.logPrefix
 -->
 <Configuration>
   <Appenders>
-    <RollingFile name="RollingFile"
-    	fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
-    	filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz">
+    <RollingFile name="RollingFile">
+      <FileName>
+        ${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log
+      </FileName>
+      <!-- Uncomment this section for archived log file 
+      <FilePattern>
+        ${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz
+      </FilePattern>
+       -->
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
