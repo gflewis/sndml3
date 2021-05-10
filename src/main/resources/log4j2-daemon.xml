@@ -7,20 +7,14 @@
 -->
 <Configuration>
   <Appenders>
-    <RollingFile name="RollingFile">
-      <FileName>
-        ${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log
-      </FileName>
-      <!-- Uncomment this section for archived log file 
-      <FilePattern>
-        ${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz
-      </FilePattern>
-       -->
+    <RollingFile name="RollingFile"
+        fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
+        filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz">
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
       <Policies>
-        <TimeBasedTriggeringPolicy/>
+        <TimeBasedTriggeringPolicy modulate="true"/>
       </Policies> 
     </RollingFile>
   </Appenders>
