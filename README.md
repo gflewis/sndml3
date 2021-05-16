@@ -4,6 +4,7 @@ There are two ways to configure the application.
 1. **YAML** configuration. For an introduction refer to these wiki pages
    - https://github.com/gflewis/sndml3/wiki/Getting-Started
    - https://github.com/gflewis/sndml3/wiki/YAML-Configuration
+   - https://github.com/gflewis/sndml3/wiki/Options
 2. **DataPump** is a scoped app which is installed in the ServiceNow instance and can be used to configure and manage export jobs. For information refer to
    - [Exporting to MySQL, Oracle or SQL Server with DataPump](https://community.servicenow.com/community?id=community_article&sys_id=90628858db7f2010030d443039961918)
 
