@@ -3,6 +3,7 @@ package sndml.datamart;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ public class JobConfig {
 	public String source;
 	public String target;
 	public Action action;
+	public RecordKey doc_id; // Action SINGLE only
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
 	@JsonProperty("created") public JsonNode createdExpr;
@@ -56,6 +58,7 @@ public class JobConfig {
 	public RecordKey getSysId() { return this.sys_id; }
 	public String getNumber() { return this.number; }
 	public Action getAction() { return action; }
+	public RecordKey getDocID() { return doc_id; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }
@@ -211,14 +214,20 @@ public class JobConfig {
 		
 	void validate() {
 		if (action == null) configError("Action not specified");
-		if (jobName == null) configError("Name not specified");		
+		if (jobName == null) configError("Name not specified");
+		
 		if (action == Action.EXECUTE) {
 			if (sql == null) configError("Missing SQL");
 		}
 		else {
 			if (source == null) configError("Source not specified");
 			if (target == null) configError("Target not specified");
+			if (!Pattern.compile("[a-z_]+").matcher(source).matches())
+				configError("Invalid source: " + source);
+			if (!Pattern.compile("[A-Za-z_]+").matcher(target).matches())
+				configError("Invalid target: " + target);
 		}
+				
 		booleanValidForActions("Truncate", truncate, EnumSet.of(Action.INSERT));
 		booleanValidForActions("Drop", dropTable, EnumSet.of(Action.CREATE));
 		validForActions("Created", createdRange, Action.INSERT_UPDATE_SYNC);
@@ -226,11 +235,14 @@ public class JobConfig {
 		validForActions("Filter", filter, Action.INSERT_UPDATE_SYNC);
 		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
 		validForActions("SQL", sql, Action.EXECUTE_ONLY);
+		validForActions("Doc_ID", doc_id, Action.SINGLE_ONLY);
 		
 		if (sinceExpr != null && sinceDate == null)
 			configError("Missing Since Date");
 		if (createdExpr != null && createdRange == null)
 			configError("Missing Created Range");
+		if (action == Action.SINGLE && doc_id == null)
+			configError("Missing doc_id");
 		
 		if (threads != null && partition == null)
 			configError("Threads only valid with Partition");
@@ -315,6 +327,7 @@ public class JobConfig {
 		node.put("source", this.source);
 		node.put("target", this.target);
 		node.put("action", this.action.toString());
+		if (doc_id != null) node.put("doc_id", doc_id.toString());
 		if (getTruncate()) node.put("truncate", true);
 		if (getDropTable()) node.put("drop", true);
 		if (getAutoCreate()) node.put("autocreate", getAutoCreate());

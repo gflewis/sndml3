@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Run the DataPump Daemon
+#
+source sndml-setup $1
+# export SNDML_LOG4J=$SNDML_HOME/src/main/resources/log4j2-daemon.xml
+# the next 2 variables are referenced in the above XML file
+export SNDML_AGENT=`awk -F= '/^daemon.agent/{print $2}' <$SNDML_PROFILE`
+export SNDML_LOG_DIR=$SNDML_CONFIG/log
+SNDML_LOG4J=log4j2-daemon.xml
+SNDML_LOG4J=log4j2.xml
+env | grep SNDML | sort
+java -ea -Dlog4j2.configurationFile=$SNDML_LOG4J -Dsndml.logFolder=$SNDML_LOG_DIR -Dsndml.logPrefix=$SNDML_AGENT -jar $SNDML_JAR --profile=$SNDML_PROFILE --server
