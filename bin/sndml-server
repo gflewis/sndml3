@@ -2,7 +2,6 @@
 #
 # Run the DataPump Daemon
 #
-#
 source sndml-setup $1
 # export SNDML_LOG4J=$SNDML_HOME/src/main/resources/log4j2-daemon.xml
 # the next 2 variables are referenced in the above XML file
