@@ -31,6 +31,7 @@ public class EvaluateTest {
 		
 	}
 	
+	/*
 	@Test
 	public void testSysProperties() throws Exception {
 		File file = new File("src/test/resources/profile_test.properties");
@@ -44,5 +45,6 @@ public class EvaluateTest {
 		assertEquals(username, System.getProperty("sndml.servicenow.username"));
 		assertNull(System.getProperty("sndml.servicenow.password"));		
 	}
+	*/
 	
 }

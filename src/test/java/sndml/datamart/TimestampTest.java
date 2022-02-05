@@ -73,10 +73,10 @@ public class TimestampTest {
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());				
 		Session session = profile.getSession();
 		Database database = profile.getDatabase();
-		YamlFile yaml = folder.getYaml("incident_load");
-		JobRunner loader = yaml.getJobRunner(profile);
-		Metrics loaderMetrics = loader.call();
-		assertTrue(loaderMetrics.getProcessed() > 10000);
+		Loader loader = folder.getYaml("incident-load").getLoader(profile);
+		Metrics metrics = loader.loadTables();
+		// assertTrue(loaderMetrics.getProcessed() > 10000);
+		assertTrue(metrics.getProcessed() > 0);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
 		TimestampHash timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));
@@ -92,6 +92,7 @@ public class TimestampTest {
 				firstRec.getValue("sys_created_on"), firstRec.getValue("sys_updated_on")));
 		DateTime firstRecUpdated = firstRec.getUpdatedTimestamp();
 		assertEquals(firstRecUpdated, firstTimestamp);
+				
 	}
 
 }

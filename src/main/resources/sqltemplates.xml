@@ -5,12 +5,15 @@
 <!ELEMENT drivers (driver*) >
 <!ELEMENT driver (#PCDATA)>
 <!ELEMENT properties (autocommit,namecase,namequotes) >
+<!ELEMENT autocommit (#PCDATA)>
 <!ELEMENT namecase (#PCDATA)>
 <!ELEMENT namequotes (#PCDATA)>
 <!ELEMENT initialize (statement*)>
 <!ELEMENT templates (create,grant,select_created,select_updated,insert,update,delete,truncate)>
 <!ELEMENT create (#PCDATA)>
 <!ELEMENT grant (#PCDATA)>
+<!ELEMENT select_created (#PCDATA)>
+<!ELEMENT select_updated (#PCDATA)>
 <!ELEMENT timestamp (#PCDATA)>
 <!ELEMENT all_timestamps (#PCDATA)>
 <!ELEMENT partition_timestamps (#PCDATA)>
@@ -573,5 +576,70 @@ where sys_id = $keyvalue</update>
     </datatypes>
     <fieldnames/>
   </sql>
+
+  <sql dialect="sqlite">
+    <!--
+      ***************
+      *** SQLite3 ***
+      ***************
+    -->
+    <drivers>
+      <driver>sqlite</driver>
+    </drivers>    
+    <properties>
+      <!-- namecase   must be upper, lower or auto -->
+      <!-- namequotes must be double, square or none -->
+      <autocommit>true</autocommit>
+      <namecase>lower</namecase>
+      <namequotes>double</namequotes>
+    </properties>
+    <initialize/>
+    <templates>
+      <create>create table $table (
+$fielddefinitions,
+primary key ("sys_id"))</create>
+      <grant/>
+      <select_created>SELECT sys_id, sys_created_on FROM $table</select_created>
+      <select_updated>SELECT sys_id, sys_updated_on FROM $table</select_updated>
+      <insert>insert into $table (
+$fieldnames) 
+values ($fieldvalues)</insert>
+      <update>update $table set 
+$fieldmap 
+where "sys_id" = $keyvalue</update>
+      <delete>delete from $table where "sys_id" = $keyvalue</delete>
+      <truncate>delete from $table</truncate>
+    </templates>
+    <datatypes>
+      <!-- Character types -->
+      <typemap glidetype="string"          >VARCHAR(#) NULL</typemap>      
+      <!-- Numeric types -->
+      <typemap glidetype="boolean"         >SMALLINT NULL</typemap>
+      <typemap glidetype="integer"         >INTEGER NULL</typemap>
+      <typemap glidetype="numeric"         >INTEGER NULL</typemap>
+      <typemap glidetype="float"           >FLOAT NULL</typemap>
+      <typemap glidetype="decimal"         >FLOAT NULL</typemap>
+      <!-- GUID is only used for sys_id (primary key) -->
+      <typemap glidetype="GUID"            >CHARACTER(32) NOT NULL</typemap>
+      <!-- Reference types -->
+      <typemap glidetype="reference"       >CHARACTER(#) NULL</typemap>      
+      <typemap glidetype="variables"       >CHARACTER(32) NULL</typemap>
+      <typemap glidetype="journal"         >CHARACTER(32) NULL</typemap>
+      <typemap glidetype="journal_input"   >CHARACTER(32) NULL</typemap>
+      <typemap glidetype="document_id"     >CHARACTER(32) NULL</typemap>
+      <!-- Dates and timestamps -->
+      <typemap glidetype="glide_date"      >DATE NULL</typemap>
+      <!-- Timestamps are always stored in UTC -->
+      <typemap glidetype="glide_date_time" >TIMESTAMP NULL</typemap>
+      <typemap glidetype="due_date"        >TIMESTAMP NULL</typemap>
+      <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
+      <typemap glidetype="glide_duration"  >INTEGER NULL</typemap>
+      <typemap glidetype="timer"           >INTEGER NULL</typemap>
+      <!-- Wildcard template must appear last -->
+      <typemap glidetype="*">VARCHAR(#) NULL</typemap>      
+    </datatypes>
+    <fieldnames/>
+  </sql>
+  
    
 </config>

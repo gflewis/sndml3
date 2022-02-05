@@ -25,9 +25,7 @@ public class InsertTest {
 	final ConfigFactory factory = new ConfigFactory();
 	TestFolder folder = new TestFolder(this.getClass().getSimpleName());
 	Properties metrics;
-	
-	// final TestFolder folder = new TestFolder("yaml");
-	
+		
 	@Parameters(name = "{index}:{0}")
 	public static TestingProfile[] profiles() {
 		return TestManager.allProfiles();

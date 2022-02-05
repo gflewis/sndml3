@@ -1,5 +1,0 @@
- source: incident
- target: incident
- columns: number state
- pagesize: 2000
- minrows: 40000
