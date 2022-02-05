@@ -224,7 +224,7 @@ public class JobConfig {
 			if (target == null) configError("Target not specified");
 			if (!Pattern.compile("[a-z_]+").matcher(source).matches())
 				configError("Invalid source: " + source);
-			if (!Pattern.compile("[A-Za-z_]+").matcher(target).matches())
+			if (!Pattern.compile("[A-Za-z0-9_]+").matcher(target).matches())
 				configError("Invalid target: " + target);
 		}
 				
