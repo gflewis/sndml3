@@ -2,6 +2,7 @@ The ServiceNow Data Mart Loader (SNDML) is a Java application which exports data
 
 There are two ways to configure the application.
 1. **YAML** configuration. For an introduction refer to these wiki pages
+   - https://github.com/gflewis/sndml3/wiki/Home
    - https://github.com/gflewis/sndml3/wiki/Getting-Started
    - https://github.com/gflewis/sndml3/wiki/YAML-Configuration
    - https://github.com/gflewis/sndml3/wiki/Options
