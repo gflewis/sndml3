@@ -6,7 +6,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.4.4</version>
+  <version>3.4.5</version>
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
@@ -111,7 +111,7 @@
       <!-- PostgreSQL -->
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.2.1.jre7</version>
+      <version>42.3.4</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
@@ -119,7 +119,7 @@
       <!-- Microsoft SQL Server -->
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
-      <version>8.2.2.jre8</version>
+      <version>8.4.1.jre8</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
