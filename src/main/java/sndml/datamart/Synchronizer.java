@@ -95,7 +95,7 @@ public class Synchronizer extends TableReader {
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
 		sntsr.setCreatedRange(this.createdRange);
 		sntsr.setFilter(this.filter);
-		sntsr.setPageSize(10000);
+		sntsr.setPageSize(this.getPageSize());
 		sntsr.enableStats(true);
 		RecordList snTimestamps = sntsr.getAllRecords();
 		RecordKey snMinKey = snTimestamps.minKey(); // for debug
