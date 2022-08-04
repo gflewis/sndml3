@@ -63,6 +63,7 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 			throw new RuntimeException(
 				"SQL table not found: " + db.qualifiedName(sqlTableName));
 		if (!this.get(0).getName().toLowerCase().equals("sys_id"))
+			// DatabaseUpdateStatement assumes sys_id is first columm
 			throw new RuntimeException(
 				String.format(
 					"expected 'sys_id', found '%s' in first column of table '%s'",

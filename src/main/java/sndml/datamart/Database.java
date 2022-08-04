@@ -35,6 +35,7 @@ public class Database {
 	private final String dburl;
 	private final URI dbURI;
 	private final String protocol;
+	private final Calendar calendar;
 	private final String dbuser;
 	private final String dbpass;
 	private final boolean warnOnTruncate;
@@ -48,18 +49,27 @@ public class Database {
 	
 	public Database(ConnectionProfile profile) throws SQLException, URISyntaxException {
 		this.profile = profile;
-		this.dburl = profile.getProperty("datamart.url");
+		this.dburl = databaseProperty("url", null);
 		this.dbURI = new URI(dburl);
 		this.protocol = getProtocol(this.dbURI);
-		this.dbuser = profile.getProperty("datamart.username");
-		this.dbpass = profile.getProperty("datamart.password", "");
-		schema = profile.getProperty("datamart.schema");
+		this.dbuser = databaseProperty("username", null);
+		this.dbpass = databaseProperty("password", "");
+		schema = profile.getProperty("schema", null);
 		
 		assert dbc == null;
 		assert dburl != null;
 		assert schema==null || schema.length() > 0;
+
+		// If timezone is not specified then use "GMT"
+		// If timezone is "default" then use time zone of virtual machine
+		String timezone = databaseProperty("timezone", "GMT");
+		this.calendar = 
+			timezone.equalsIgnoreCase("default") ? null :
+			Calendar.getInstance(TimeZone.getTimeZone(timezone));
+		
 		String logmsg = "database=" + dburl + " user=" + dbuser;
 		if (schema != null) logmsg += " schema=" + getSchema();
+				
 		logger.info(Log.INIT, logmsg);
 		String templateName = profile.getProperty("datamart.templates", "");
 		this.templates = (templateName.length() > 0) ? new File(templateName) : null;
@@ -69,6 +79,14 @@ public class Database {
 		assert dbc != null;
 	}
 
+	private String databaseProperty(String name, String defaultValue) {
+		// Allow property to begin with old prefix "datamart." or new prefix "database."
+		String value = 
+			profile.getProperty("database." + name,
+				profile.getProperty("datamart." + name, defaultValue));
+		return value;
+	}
+	
 	/**
 	 * Open the database connection.
 	 * Set the timezoneName to GMT.
@@ -108,14 +126,18 @@ public class Database {
 		return "oracle".equalsIgnoreCase(protocol);
 	}
 	
-	boolean isPostgresql() {
+	boolean isMSSQL() {
+		return "sqlserver".equalsIgnoreCase(protocol);
+	}
+	
+	boolean isPostgreSQL() {
 		return "postgresql".equalsIgnoreCase(protocol);		
 	}
 	
 	boolean isMySQL() {
 		return "mysql".equalsIgnoreCase(protocol);
 	}
-	
+		
 	boolean isAutoCommitEnabled() {
 		return generator.getAutoCommit();
 	}
@@ -135,6 +157,10 @@ public class Database {
 	static String getProtocol(URI dbURI) {
 		String urlPart[] = dbURI.toString().split(":");
 		return urlPart[1];		
+	}
+	
+	Calendar getCalendar() {
+		return this.calendar;
 	}
 	
 	Connection getConnection() {

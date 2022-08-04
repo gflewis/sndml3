@@ -27,14 +27,16 @@ public class DatabaseUpdateStatement extends DatabaseStatement {
 	}
 	
 	public boolean update(TableRecord rec) throws SQLException {
-		this.lastRec = rec;
+		setRecord(rec);
+		// Checked when columns is instantiated
+		// assert columns.get(0).getName().toLowerCase().equals("sys_id");
 		int n = columns.size();
 		// Skip column 0 which is the sys_id
 		for (int i = 1; i < n; ++i) {
-			bindField(i, rec, i);
+			bindField(i, i);
 		}
 		// Bind sys_id to the last position
-		bindField(n, rec, columns.get(0), rec.getKey().toString());
+		bindField(n, columns.get(0), rec.getKey().toString());
 		int count = stmt.executeUpdate();
 		if (count > 1) throw new AssertionError("update count=" + count);
 		return (count > 0);		

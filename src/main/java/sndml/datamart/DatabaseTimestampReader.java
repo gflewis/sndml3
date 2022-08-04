@@ -99,7 +99,7 @@ public class DatabaseTimestampReader {
 	private TimestampHash getQueryResult(PreparedStatement stmt) throws SQLException {
 		TimestampHash result = new TimestampHash();
 		ResultSet rs = stmt.executeQuery();
-		while (rs.next() ) {
+		while (rs.next()) {
 			String sys_id = rs.getString(1);
 			Timestamp sys_updated_on = rs.getTimestamp(2, tzGMT);
 			RecordKey key = new RecordKey(sys_id);

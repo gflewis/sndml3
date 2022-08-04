@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 
@@ -15,27 +14,38 @@ import sndml.servicenow.InvalidDateTimeException;
 import sndml.servicenow.Log;
 import sndml.servicenow.TableRecord;
 
+/**
+ * This abstract class has three derived classes:
+ * <ul>
+ * <li>{@link DatabaseInsertStatement}</li>
+ * <li>{@link DatabaseUpdateStatement}</li>
+ * <li>{@link DatabaseDeleteStatement}</li>
+ * </ul>
+ *
+ */
 public abstract class DatabaseStatement {
 
 	final Database db;
+	final Calendar calendar;
 	final String sqlTableName;
 	final Generator generator;
 	final ColumnDefinitions columns;
 	final String templateName;
 	final String stmtText;
 	final PreparedStatement stmt;
-	TableRecord lastRec;
+	TableRecord rec;
+	String fieldname; // for logging
 
     private final Pattern dateTimePattern = 
         	Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d");
 
-	public final Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     
 	final private Logger logger = Log.logger(this.getClass());
 	final boolean traceEnabled;
 	
 	public DatabaseStatement(Database db, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
 		this.db = db;
+		this.calendar = db.getCalendar();
 		this.sqlTableName = sqlTableName;
 		this.templateName = templateName;
 		this.generator = db.getGenerator();
@@ -49,6 +59,18 @@ public abstract class DatabaseStatement {
 
 	abstract String buildStatement() throws SQLException;
 		
+	protected void setRecord(TableRecord rec) {
+		this.rec = rec;
+	}
+		
+	/**
+	 * Bind a string value to a variable in a prepared statement.
+	 * Called from {@link DatabaseDeleteStatement}
+	 * 
+	 * @param bindCol Index (starting with 1) of the variable within the statement.
+	 * @param value Value to be bound
+	 * @throws SQLException
+	 */
 	protected void bindField(int bindCol, String value) throws SQLException {
 		stmt.setString(bindCol, value);
 	}
@@ -57,34 +79,42 @@ public abstract class DatabaseStatement {
 	 * Get a value from a Glide Record and bind it to a variable in prepared statement.
 	 * 
 	 * @param bindCol Index (starting with 1) of the variable within the statement.
-	 * @param rec Glide Record which serves as a source of the data.
 	 * @param glideCol Index (starting with 0) of the variable in the columns array.
 	 * @throws SQLException
 	 */	
-	protected void bindField(int bindCol, TableRecord rec, int glideCol) throws SQLException {
+	protected void bindField(int bindCol, int glideCol) throws SQLException {
+		assert this.rec != null;
 		DatabaseFieldDefinition defn = columns.get(glideCol);
-		String glidename = defn.getGlideName();
-		String value = rec.getValue(glidename);
+		String value = rec.getValue(fieldname);
 		try {
-			bindField(bindCol, rec, defn, value);
+			bindField(bindCol, defn, value);
 		}
 		catch (SQLException|NumberFormatException e) {
+			fieldname = defn.getGlideName();
 			logger.error(Log.PROCESS, 
-					String.format("bindField %s=\"%s\"", glidename, value));
+					String.format("bindField %s=\"%s\"", fieldname, value));
 			throw e;
 		}		
 	}
 	
-	protected void bindField(int bindCol, TableRecord rec, DatabaseFieldDefinition d, String value) throws SQLException {
-		String glidename = d.getGlideName();
+	/**
+	 * Bind a value to a variable in a prepared statement
+	 * 
+	 * @param bindCol Index (starting with 1) of the variable within the statement
+	 * @param d Database field definition
+	 * @param value Value to be bound
+	 * @throws SQLException
+	 */
+	protected void bindField(int bindCol, DatabaseFieldDefinition d, String value) throws SQLException {
+		fieldname = d.getGlideName();
 		int sqltype = d.sqltype;
 		// If value is null then bind to null and exit
 		if (value == null) {
 			stmt.setNull(bindCol, sqltype);
 			return;
 		}		
-		if ((sqltype == Types.NUMERIC || sqltype == Types.DECIMAL || 
-				sqltype == Types.INTEGER || sqltype == Types.DOUBLE) && 
+		if ((sqltype == Types.NUMERIC || sqltype == Types.DECIMAL || sqltype == Types.INTEGER || 
+					sqltype == Types.DOUBLE || sqltype == Types.BIGINT) && 
 				value.length() == 19) {
 			// If the target data type is numeric
 			// and the value appears to be a date (dddd-dd-dd dd:dd:dd)
@@ -95,15 +125,15 @@ public abstract class DatabaseStatement {
 					DateTime timestamp = new DateTime(value, DateTime.DATE_TIME);
 					long seconds = timestamp.toDate().getTime() / 1000L;
 					if (traceEnabled)
-						logger.trace(Log.BIND, "date " + glidename + " " + value + "=" + seconds);
+						logger.trace(Log.BIND, "date " + fieldname + " " + value + "=" + seconds);
 					if (seconds < 0L) {
 						logger.warn(Log.PROCESS, rec.getKey() + " duration underflow: " +
-							glidename + "=" + value);
+							fieldname + "=" + value);
 						value = null;
 					}
 					else if (seconds > 999999999L) {
 						logger.warn(Log.PROCESS, rec.getKey() + " duration overflow: " +
-							glidename + "=" + value);
+							fieldname + "=" + value);
 						value = null;
 					}
 					else {
@@ -111,7 +141,7 @@ public abstract class DatabaseStatement {
 					}
 				} catch (InvalidDateTimeException e) {
 					logger.warn(Log.PROCESS, rec.getKey() + " duration error: " +
-							glidename + "=" + value);
+							fieldname + "=" + value);
 					value = null;
 				}
 				if (value == null) {
@@ -144,12 +174,12 @@ public abstract class DatabaseStatement {
 					throw new RuntimeException(e);
 				}
 			}
-			if (db.isPostgresql()) {
+			if (db.isPostgreSQL()) {
 				// PostgreSQL doesn't support storing NULL characters in text fields
 				value = value.replaceAll("\u0000", "");
 			}
 			if (value.length() != oldSize) {
-				String message = rec.getKey() + " truncated: " + glidename +
+				String message = rec.getKey() + " truncated: " + fieldname +
 					" from " + oldSize + " to " + value.length();
 				if (db.getWarnOnTruncate())
 					logger.warn(Log.PROCESS, message);
@@ -160,7 +190,7 @@ public abstract class DatabaseStatement {
 		if (traceEnabled) {
 			int len = (value == null ? 0 : value.length());
 			logger.trace(Log.BIND, String.format("bind %d %s %s=%s (len=%d)",
-					bindCol, sqlTypeName(sqltype), glidename, value, len));
+					bindCol, sqlTypeName(sqltype), fieldname, value, len));
 		}
 		assert value != null;
 		switch (sqltype) {
@@ -169,11 +199,11 @@ public abstract class DatabaseStatement {
 			try {
 				dt = new DateTime(value);
 				java.sql.Date sqldate = new java.sql.Date(dt.getMillisec());
-				stmt.setDate(bindCol, sqldate, GMT);
+				stmt.setDate(bindCol, sqldate, calendar);
 			}
 			catch (InvalidDateTimeException e) {
 				logger.warn(Log.PROCESS, rec.getKey() + " date error: " +
-						glidename + "=" + value);
+						fieldname + "=" + value);
 				stmt.setDate(bindCol,  null);			
 			}
 			break;
@@ -186,12 +216,12 @@ public abstract class DatabaseStatement {
 				java.sql.Timestamp sqlts = new java.sql.Timestamp(ts.getMillisec());
 				assert sqlts.getTime() == ts.getMillisec();
 				if (traceEnabled)
-					logger.trace(Log.BIND, String.format("timestamp %s=%s", glidename, sqlts.toString()));
-				stmt.setTimestamp(bindCol, sqlts, GMT);
+					logger.trace(Log.BIND, String.format("timestamp %s=%s", fieldname, sqlts.toString()));
+				stmt.setTimestamp(bindCol, sqlts, calendar);
 			}
 			catch (InvalidDateTimeException e) {
 				logger.warn(Log.PROCESS, rec.getKey() + " timestamp error: " +
-						glidename + "=" + value);
+						fieldname + "=" + value);
 				stmt.setTimestamp(bindCol, null);				
 			}
 			break;
@@ -203,37 +233,21 @@ public abstract class DatabaseStatement {
 				stmt.setBoolean(bindCol,  false);
 			else {
 				logger.warn(Log.PROCESS, rec.getKey() + "boolean error: " +
-						glidename + "=" + value);
+						fieldname + "=" + value);
 				stmt.setNull(bindCol, sqltype);
 			}
 			break;
 		case Types.TINYINT :
-			if (value.equalsIgnoreCase("false")) value = "0";
-			if (value.equalsIgnoreCase("true"))  value = "1";
-			stmt.setByte(bindCol, Byte.parseByte(value));
+			stmt.setByte(bindCol, Byte.parseByte(cleanInteger(value)));
 			break;
 		case Types.SMALLINT :
-			if (value.equalsIgnoreCase("false")) value = "0";
-			if (value.equalsIgnoreCase("true"))  value = "1";
-			stmt.setShort(bindCol, Short.parseShort(value));
-			break;
+			stmt.setShort(bindCol, Short.parseShort(cleanInteger(value)));
+			break;			
 		case Types.INTEGER :
-			// This is a workaround for the fact that ServiceNow includes decimal portions
-			// in integer fields, which can cause JDBC to choke.
-			int p = value.indexOf('.');
-			if (p > -1) {
-				String message = rec.getKey() + " decimal truncated: " +
-						glidename + "=" + value;
-				if (db.getWarnOnTruncate())
-					logger.warn(Log.PROCESS, message);
-				else
-					logger.debug(Log.PROCESS, message);
-				value = value.substring(0,  p);
-			}
-			if (value.length() == 0) value = "0";
-			if (value.equalsIgnoreCase("false")) value = "0";
-			if (value.equalsIgnoreCase("true"))  value = "1";
-			stmt.setInt(bindCol, Integer.parseInt(value));
+			stmt.setInt(bindCol, Integer.parseInt(cleanInteger(value)));
+			break;
+		case Types.BIGINT:
+			stmt.setLong(bindCol, Long.parseLong(value));
 			break;
 		case Types.DOUBLE :
 		case Types.FLOAT :
@@ -244,7 +258,7 @@ public abstract class DatabaseStatement {
 			stmt.setDouble(bindCol, Double.parseDouble(value));
 			break;
 		default :
-			if (db.isPostgresql()) {
+			if (db.isPostgreSQL()) {
 				// PostgreSQL doesn't support storing NULL characters in text fields
 				value = value.replaceAll("\u0000", "");
 			}
@@ -252,6 +266,26 @@ public abstract class DatabaseStatement {
 		}
 	}
 
+	// Return a string that will not throw an error when parseInt is called
+	private String cleanInteger(String value) {
+		if (value.length() == 0) return "0";
+		// This is a workaround for the fact that ServiceNow includes decimal portions
+		// in integer fields, which can cause JDBC to choke.
+		int p = value.indexOf('.');
+		if (p > -1) {
+			String message = rec.getKey() + " decimal truncated: " +
+					fieldname + "=" + value;
+			if (db.getWarnOnTruncate())
+				logger.warn(Log.PROCESS, message);
+			else
+				logger.debug(Log.PROCESS, message);
+			return value.substring(0,  p);
+		}
+		if (value.equalsIgnoreCase("false")) return "0";
+		if (value.equalsIgnoreCase("true"))  return "1";
+		return value;
+	}
+	
 	private static String sqlTypeName(int sqltype) {
 		switch (sqltype) {
 			case Types.ARRAY:         return "ARRAY";

@@ -31,10 +31,10 @@ public class DatabaseInsertStatement extends DatabaseStatement {
 	}
 	
 	public void insert(TableRecord rec) throws SQLException {
-		this.lastRec = rec;
+		setRecord(rec);
 		int n = columns.size();
 		for (int i = 0; i < n; ++i) {
-			bindField(i + 1, rec, i);
+			bindField(i + 1, i);
 		}
 		int count = stmt.executeUpdate();
 		if (count > 1) throw new AssertionError("insert count=" + count);		
