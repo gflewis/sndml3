@@ -113,7 +113,7 @@
       <!-- PostgreSQL -->
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.3.4</version>
+      <version>42.4.1</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
