@@ -108,6 +108,7 @@ public class JobRunner implements Callable<Metrics> {
 	}
 	
 	private void runSQL(String sqlCommand) throws SQLException {
+		logger.debug(Log.INIT, "runSQL " + sqlCommand);		
 		jobMetrics.setExpected(0);
 		ProgressLogger progressLogger = createJobProgressLogger(null);
 		progressLogger.logStart();
