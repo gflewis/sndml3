@@ -15,7 +15,7 @@
     </File>    
     <Console name="Console">
       <Filters>
-        <ThresholdFilter level="info" />
+        <ThresholdFilter level="debug" />
         <MarkerFilter marker="SCHEMA" onMatch="ALLOW" onMismatch="NEUTRAL" />
         <MarkerFilter marker="BIND" onMatch="DENY" onMismatch="NEUTRAL" />
       </Filters>

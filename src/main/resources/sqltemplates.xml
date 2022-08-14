@@ -87,8 +87,8 @@ where "sys_id" = $keyvalue</update>
       <typemap glidetype="glide_date_time" >TIMESTAMP NULL</typemap>
       <typemap glidetype="due_date"        >TIMESTAMP NULL</typemap>
       <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
-      <typemap glidetype="glide_duration"  >INTEGER NULL</typemap>
-      <typemap glidetype="timer"           >INTEGER NULL</typemap>
+      <typemap glidetype="glide_duration"  >BIGINT NULL</typemap>
+      <typemap glidetype="timer"           >BIGINT NULL</typemap>
       <!-- Wildcard template must appear last -->
       <typemap glidetype="*">VARCHAR(#) NULL</typemap>      
     </datatypes>
@@ -429,8 +429,8 @@ WHERE sys_id = $keyvalue</update>
       <typemap glidetype="glide_date_time" >TIMESTAMP NULL</typemap>
       <typemap glidetype="due_date"        >TIMESTAMP NULL</typemap>
       <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
-      <typemap glidetype="glide_duration"  >INTEGER NULL</typemap>
-      <typemap glidetype="timer"           >INTEGER NULL</typemap>
+      <typemap glidetype="glide_duration"  >BIGINT NULL</typemap>
+      <typemap glidetype="timer"           >BIGINT NULL</typemap>
       <!-- Wildcard templates must appear last -->
       <typemap glidetype="*" maxsize="3999">VARCHAR(#) NULL</typemap>
       <typemap glidetype="*" minsize="4000">TEXT NULL</typemap>
@@ -498,8 +498,8 @@ where [sys_id] = $keyvalue</update>
       <typemap glidetype="glide_date_time" >datetimeoffset</typemap>
       <typemap glidetype="due_date"        >datetimeoffset</typemap>
       <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
-      <typemap glidetype="glide_duration"  >int</typemap>
-      <typemap glidetype="timer"           >int</typemap>
+      <typemap glidetype="glide_duration"  >bigint</typemap>
+      <typemap glidetype="timer"           >bigint</typemap>
       <!-- Wildcard templates must appear last -->
       <typemap glidetype="*" maxsize="3999">varchar(#)</typemap>
       <typemap glidetype="*" minsize="4000">varchar(max)</typemap>
@@ -568,8 +568,8 @@ where sys_id = $keyvalue</update>
       <typemap glidetype="glide_date_time" >timestamp with time zone null</typemap>
       <typemap glidetype="due_date"        >timestamp with time zone null</typemap>
       <!-- Durations fields will be stored as number of seconds (NOT milliseconds) -->
-      <typemap glidetype="glide_duration"  >integer null</typemap>
-      <typemap glidetype="timer"           >integer null</typemap>
+      <typemap glidetype="glide_duration"  >bigint null</typemap>
+      <typemap glidetype="timer"           >bigint null</typemap>
       <!-- Wildcard template must appear last -->
       <typemap glidetype="*" maxsize="3999">varchar(#) null</typemap>
       <typemap glidetype="*" minsize="4000">text null</typemap>

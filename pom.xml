@@ -6,7 +6,7 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.4.6</version>
+  <version>3.4.7</version>
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
@@ -14,10 +14,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.class>sndml.datamart.Main</main.class>
-    <!-- 
-    <maven.compiler.source>1.9</maven.compiler.source>
-    <maven.compiler.target>1.9</maven.compiler.target>
-     -->
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -121,7 +119,7 @@
       <!-- Microsoft SQL Server -->
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
-      <version>8.4.1.jre8</version>
+      <version>11.2.0.jre11</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
