@@ -4,9 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.*;
+import org.junit.runner.*;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
@@ -25,16 +24,27 @@ public class CreateTableTest {
 	TestingProfile profile;
 	Session session;
 	Database database;
-	DBUtil util;
 	Logger logger = TestManager.getLogger(this.getClass());
 	
 	public CreateTableTest(TestingProfile profile) throws Exception {
+		this.profile = profile;
 		TestManager.setProfile(this.getClass(), profile);
-		session = TestManager.getProfile().getSession();
-		util = new DBUtil(profile);
-		database = util.getDatabase();
 	}
 
+	@Before
+	public void openDatabase() throws Exception {
+		session = profile.getSession();
+		database = profile.getDatabase();
+	}
+	
+	@After
+	public void closeDatabase() throws Exception {
+		if (session != null) session.close();
+		if (database != null) database.close();
+		session = null;
+		database = null;
+	}
+	
 	@AfterClass
 	public static void clear() throws Exception {
 		TestManager.clearAll();
@@ -52,7 +62,7 @@ public class CreateTableTest {
 		for (String name: testFields) {
 			logger.info(Log.TEST, "field: " + name);
 			assertTrue(schemaFields.contains(name));
-		}		
+		}
 	}
 
 	@Test
@@ -60,7 +70,8 @@ public class CreateTableTest {
 		String tablename = "incident";
 		Table table = session.table(tablename);
 		Generator generator = database.getGenerator();		
-		String sql = generator.getCreateTable(table);		
+		String sql = generator.getCreateTable(table);
+		logger.info(Log.TEST, sql);
 		Log.setTableContext(table, "testCreateTable_incident");
 		logger.info(Log.TEST, sql);
 		sql = sql.toLowerCase();
@@ -73,6 +84,17 @@ public class CreateTableTest {
 			assertTrue(sql.indexOf(name) > 5);
 		}
 		assertNotNull(generator);
+	}
+	
+	@Test 
+	public void testCreateTable_problem() throws Exception {				
+		String tablename = "problem";
+		Table table = session.table(tablename);
+		new DBUtil(database).dropTable(tablename);
+		assertFalse(database.tableExists(tablename));
+		database.createMissingTable(table, null);
+		assertTrue(database.tableExists(tablename));
+		Log.setTableContext(table, "testCreateTable_problem");
 	}
 	
 	@Test
@@ -92,17 +114,5 @@ public class CreateTableTest {
 		}
 		assertNotNull(generator);
 	}
-	
-	@Test
-	public void testCreateTable_problem() throws Exception {				
-		String tablename = "problem";
-		Table table = session.table(tablename);
-		util.dropTable(tablename);
-		assertFalse(database.tableExists(tablename));
-		database.createMissingTable(table, null);
-		assertTrue(database.tableExists(tablename));
-		Log.setTableContext(table, "testCreateTable_problem");
-	}
-	
 	
 }

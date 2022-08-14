@@ -36,7 +36,8 @@ public class DatabaseUpdateStatement extends DatabaseStatement {
 			bindField(i, i);
 		}
 		// Bind sys_id to the last position
-		bindField(n, columns.get(0), rec.getKey().toString());
+		// bindField(n, columns.get(0), "sys_id", rec.getKey().toString());
+		bindField(n, 0);
 		int count = stmt.executeUpdate();
 		if (count > 1) throw new AssertionError("update count=" + count);
 		return (count > 0);		

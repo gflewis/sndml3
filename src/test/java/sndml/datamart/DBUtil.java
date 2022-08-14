@@ -56,15 +56,19 @@ public class DBUtil {
 	/**
 	 * Delete all records in a table
 	 */
-	void truncateTable(String tablename) throws SQLException {
+	void truncateTable(String tablename) throws SQLException {		
+		logger.info(Log.TEST, "begin truncateTable " + tablename);
 		db.truncateTable(tablename);		
+		logger.info(Log.TEST, "end truncateTable " + tablename);
 	}
 	
 	/**
 	 * Drop a table if it exists
 	 */
 	void dropTable(String tablename) throws SQLException {
+		logger.info(Log.TEST, "begin dropTable " + tablename);
 		db.dropTable(tablename, true);
+		logger.info(Log.TEST, "end dropTable " + tablename);
 	}
 	
 	boolean tableExists(String tablename) throws SQLException {

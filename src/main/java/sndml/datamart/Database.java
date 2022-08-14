@@ -67,7 +67,10 @@ public class Database {
 			timezone.equalsIgnoreCase("default") ? null :
 			Calendar.getInstance(TimeZone.getTimeZone(timezone));
 		
-		String logmsg = "database=" + dburl + " user=" + dbuser;
+		String logmsg = "database=" + dburl;
+		logmsg += " " + timezone;
+		logmsg += " user=" + dbuser;
+		
 		if (schema != null) logmsg += " schema=" + getSchema();
 				
 		logger.info(Log.INIT, logmsg);
@@ -203,6 +206,7 @@ public class Database {
 		String sql = generator.getTemplate("truncate", sqlTableName);
 		logger.info(Log.INIT, sql);
 		executeStatement(sql);
+		commit();
 	}
 	
 	/**
@@ -312,7 +316,7 @@ public class Database {
 	}
 	
 	void createMissingTable(Table table, String sqlTableName) 
-			throws SQLException, IOException, InterruptedException  {
+			throws SQLException, IOException, InterruptedException {
 		createMissingTable(table, sqlTableName, null);
 	}
 
@@ -320,10 +324,10 @@ public class Database {
 			throws SQLException, IOException, InterruptedException  {
 		assert table != null;
 		if (sqlTableName == null) sqlTableName = table.getName();
-		if (tableExists(sqlTableName)) {
-			return;
-		}
-		else {
+		// logger.debug(Log.INIT, "createMissingTable " + sqlTableName + " checking if table exists");
+		boolean exists = tableExists(sqlTableName);
+		logger.debug(Log.INIT, "createMissingTable " + sqlTableName + " exists=" + exists);
+		if (!exists) {
 			createTable(table, sqlTableName, columns);
 		}
 	}

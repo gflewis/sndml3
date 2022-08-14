@@ -13,12 +13,10 @@ import sndml.servicenow.*;
 public class ColumnsTest {
 	
 	final TestingProfile profile;
-	final DBUtil util;
 	
 	public ColumnsTest() throws SQLException, URISyntaxException {
 		profile = TestManager.getDefaultProfile();
 		TestManager.setProfile(this.getClass(), profile);
-		util = new DBUtil(profile);
 	}
 	
 	@AfterClass
@@ -29,6 +27,8 @@ public class ColumnsTest {
 	@Test
 	public void test() throws Exception {
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());
+		Database database = profile.getDatabase();
+		DBUtil util = new DBUtil(database);
 		Loader loader1 = folder.getYaml("incident-include-columns").getLoader(profile);
 		Metrics metrics1 = loader1.loadTables();
 		int processed = metrics1.getProcessed();

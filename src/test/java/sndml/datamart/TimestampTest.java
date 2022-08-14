@@ -3,10 +3,10 @@ package sndml.datamart;
 import static org.junit.Assert.*;
 
 import org.junit.*;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
@@ -22,21 +22,31 @@ public class TimestampTest {
 	final Logger logger = TestManager.getLogger(this.getClass());
 	final String tablename = "incident";
 	final TestingProfile profile;
-	final Session session;
-	final Database database;
-	final DBUtil util;	
-	ConfigFactory factory = new ConfigFactory();
+	Session session;
+	Database database;
+	// Session session;
+	// Database database;
+	// DBUtil util;	
+	// ConfigFactory factory = new ConfigFactory();
 	
-	public TimestampTest(TestingProfile profile) throws Exception {
+	public TimestampTest(TestingProfile profile) {
 		this.profile = profile;
-		this.session = profile.getSession();
-		this.database = profile.getDatabase();
-		TestManager.setProfile(this.getClass(), profile);
-		util = new DBUtil(database);
-		// util.dropTable(tablename);
-		database.createMissingTable(session.table(tablename));
 	}
 
+	@Before
+	public void openDatabase() throws Exception {
+		session = profile.getSession();
+		database = profile.getDatabase();
+	}
+	
+	@After
+	public void closeDatabase() throws Exception {
+		if (session != null) session.close();
+		if (database != null) database.close();
+		session = null;
+		database = null;
+	}
+	
 	@AfterClass
 	public static void clear() throws Exception {
 		TestManager.clearAll();
@@ -44,40 +54,43 @@ public class TimestampTest {
 	
 	@Test
 	public void testIncidentTimestamp() throws Exception {
-		TestManager.bannerStart("testIncidentTimestamps");
-		Session session = profile.getSession();
-		Database database = profile.getDatabase();
+		TestManager.bannerStart(this.getClass(), "testIncidentTimestamps");
 		Table tbl = session.table(tablename);
 		database.createMissingTable(tbl, tablename);
-		util.truncateTable(tablename);
+		logger.info(Log.TEST, "begin truncateTable");
+		database.truncateTable(tablename);
 		String sys_id = TestManager.getProperty("some_incident_sys_id");
 		TableRecord rec = tbl.getRecord(new RecordKey(sys_id));
 		String created = rec.getValue("sys_created_on");
-		JobConfig config = factory.tableLoader(profile, tbl);
+		JobConfig config = new ConfigFactory().tableLoader(profile, tbl);
 		config.filter = "sys_id=" + sys_id;
 		DateTimeRange emptyRange = new DateTimeRange(null, null);
-		config.setCreated(emptyRange);		
+		config.setCreated(emptyRange);
+		logger.info(Log.TEST, config.toString());
 		JobRunner runner = new TestJobRunner(profile, config);
+		logger.info(Log.TEST, "begin JobRunner.call");
 		Metrics loadMetrics = runner.call();
 		assertTrue(loadMetrics.getProcessed() > 0);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
+		logger.info(Log.TEST, "begin DatabaseTimestampReader.getTimestampCreated");		
 		DateTime dbcreated = reader.getTimestampCreated(tbl.getName(), new RecordKey(sys_id));
 		logger.info(Log.TEST, "created=" + created + " dbcreated=" + dbcreated);
 		assertNotNull(dbcreated);
-		assertEquals(created, dbcreated.toString());		
+		assertEquals(created, dbcreated.toString());
 	}
 	
 	@Test
 	public void testGetTimestamps() throws Exception {		
-		TestManager.bannerStart("testGetTimestamps");
+		TestManager.bannerStart(this.getClass(), "testGetTimestamps");
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());				
-		Session session = profile.getSession();
-		Database database = profile.getDatabase();
 		Loader loader = folder.getYaml("incident-load").getLoader(profile);
+		logger.info(Log.TEST, "begin Loader.loadTables()");
 		Metrics metrics = loader.loadTables();
+		logger.info(Log.TEST, "processed=" + metrics.getProcessed());
 		// assertTrue(loaderMetrics.getProcessed() > 10000);
 		assertTrue(metrics.getProcessed() > 0);
 		DatabaseTimestampReader reader = new DatabaseTimestampReader(database);
+		logger.info(Log.TEST, "begin DatabaseTimestampReader.getTimestamps");
 		TimestampHash timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));
 		assertTrue(timestamps.size() > 0);
@@ -92,7 +105,6 @@ public class TimestampTest {
 				firstRec.getValue("sys_created_on"), firstRec.getValue("sys_updated_on")));
 		DateTime firstRecUpdated = firstRec.getUpdatedTimestamp();
 		assertEquals(firstRecUpdated, firstTimestamp);
-				
 	}
 
 }

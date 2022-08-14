@@ -125,8 +125,8 @@ public class Session {
 		return defaultPageSize();
 	}
 		
-	public void close() throws IOException {
-		client.close();
+	public void close() {
+		if (client != null) closeClient();
 	}
 		
 	public URI getURI(String path) {

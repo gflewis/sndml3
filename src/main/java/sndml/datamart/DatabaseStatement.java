@@ -13,6 +13,7 @@ import sndml.servicenow.DateTime;
 import sndml.servicenow.InvalidDateTimeException;
 import sndml.servicenow.Log;
 import sndml.servicenow.TableRecord;
+import sndml.servicenow.RecordKey;
 
 /**
  * This abstract class has three derived classes:
@@ -34,13 +35,12 @@ public abstract class DatabaseStatement {
 	final String stmtText;
 	final PreparedStatement stmt;
 	TableRecord rec;
-	String fieldname; // for logging
 
     private final Pattern dateTimePattern = 
         	Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d");
 
     
-	final private Logger logger = Log.logger(this.getClass());
+	final protected Logger logger = Log.logger(this.getClass());
 	final boolean traceEnabled;
 	
 	public DatabaseStatement(Database db, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
@@ -85,14 +85,20 @@ public abstract class DatabaseStatement {
 	protected void bindField(int bindCol, int glideCol) throws SQLException {
 		assert this.rec != null;
 		DatabaseFieldDefinition defn = columns.get(glideCol);
+		String fieldname = defn.getGlideName();
 		String value = rec.getValue(fieldname);
 		try {
-			bindField(bindCol, defn, value);
+			bindField(bindCol, defn, fieldname, value);
 		}
 		catch (SQLException|NumberFormatException e) {
 			fieldname = defn.getGlideName();
+			RecordKey key = rec.getKey();
+			String typename = sqlTypeName(defn.sqltype);
 			logger.error(Log.PROCESS, 
-					String.format("bindField %s=\"%s\"", fieldname, value));
+					String.format(
+						"bindField sys_id=%s field=%s type=%s value=\"%s\"", 
+						key, fieldname, typename, value));
+			logger.error(Log.PROCESS, rec.asText(true));
 			throw e;
 		}		
 	}
@@ -101,13 +107,14 @@ public abstract class DatabaseStatement {
 	 * Bind a value to a variable in a prepared statement
 	 * 
 	 * @param bindCol Index (starting with 1) of the variable within the statement
-	 * @param d Database field definition
+	 * @param defn Database field definition
+	 * @param fieldname Name of the field
 	 * @param value Value to be bound
 	 * @throws SQLException
 	 */
-	protected void bindField(int bindCol, DatabaseFieldDefinition d, String value) throws SQLException {
-		fieldname = d.getGlideName();
-		int sqltype = d.sqltype;
+	protected void bindField(int bindCol, DatabaseFieldDefinition defn, String fieldname, String value) 
+			throws SQLException {
+		int sqltype = defn.sqltype;
 		// If value is null then bind to null and exit
 		if (value == null) {
 			stmt.setNull(bindCol, sqltype);
@@ -131,12 +138,12 @@ public abstract class DatabaseStatement {
 							fieldname + "=" + value);
 						value = null;
 					}
-					else if (seconds > 999999999L) {
+					if (seconds > 999999999L && sqltype == Types.INTEGER) {
 						logger.warn(Log.PROCESS, rec.getKey() + " duration overflow: " +
 							fieldname + "=" + value);
 						value = null;
 					}
-					else {
+					if (value != null) {
 						value = Long.toString(seconds);
 					}
 				} catch (InvalidDateTimeException e) {
@@ -155,7 +162,7 @@ public abstract class DatabaseStatement {
 		// and truncate if necessary
 		if (sqltype == Types.VARCHAR || sqltype == Types.CHAR) {
 			int oldSize = value.length();
-			int maxSize = d.getSize();
+			int maxSize = defn.getSize();
 			if (value.length() > maxSize) {
 				value = value.substring(0,  maxSize);
 			}
@@ -238,13 +245,16 @@ public abstract class DatabaseStatement {
 			}
 			break;
 		case Types.TINYINT :
-			stmt.setByte(bindCol, Byte.parseByte(cleanInteger(value)));
+			value = truncate(fieldname, value);
+			stmt.setByte(bindCol, Byte.parseByte(value));
 			break;
 		case Types.SMALLINT :
-			stmt.setShort(bindCol, Short.parseShort(cleanInteger(value)));
+			value = truncate(fieldname, value);
+			stmt.setShort(bindCol, Short.parseShort(value));
 			break;			
 		case Types.INTEGER :
-			stmt.setInt(bindCol, Integer.parseInt(cleanInteger(value)));
+			value = truncate(fieldname, value);
+			stmt.setInt(bindCol, Integer.parseInt(value));
 			break;
 		case Types.BIGINT:
 			stmt.setLong(bindCol, Long.parseLong(value));
@@ -253,8 +263,6 @@ public abstract class DatabaseStatement {
 		case Types.FLOAT :
 		case Types.NUMERIC :
 		case Types.DECIMAL :
-			if (value.equalsIgnoreCase("false")) value = "0";
-			if (value.equalsIgnoreCase("true"))  value = "1";
 			stmt.setDouble(bindCol, Double.parseDouble(value));
 			break;
 		default :
@@ -267,7 +275,7 @@ public abstract class DatabaseStatement {
 	}
 
 	// Return a string that will not throw an error when parseInt is called
-	private String cleanInteger(String value) {
+	private String truncate(String fieldname, String value) {
 		if (value.length() == 0) return "0";
 		// This is a workaround for the fact that ServiceNow includes decimal portions
 		// in integer fields, which can cause JDBC to choke.
@@ -281,8 +289,6 @@ public abstract class DatabaseStatement {
 				logger.debug(Log.PROCESS, message);
 			return value.substring(0,  p);
 		}
-		if (value.equalsIgnoreCase("false")) return "0";
-		if (value.equalsIgnoreCase("true"))  return "1";
 		return value;
 	}
 	

@@ -164,7 +164,6 @@ public class ConnectionProfile {
 
 	/**
 	 * Opens and returns a new connection to the JDBC database.
-	 * If {@link #close()} has been called, then a new connection will be opened and returned.
 	 */
 	public synchronized Database getDatabase() throws SQLException {
 		Database database;
@@ -193,14 +192,7 @@ public class ConnectionProfile {
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		
 	}
-	
-	/**
-	 * Does nothing 
-	 */
-	@Deprecated public void close() {
-		logger.info(Log.FINISH, "Close profile " + getPathName());
-	}
-	
+		
 	@Override
 	/**
 	 * Returns the absolute path of the properties file used to initialize this object.

@@ -49,7 +49,7 @@ public class TestManager {
 		}		
 	}
 	
-	private static void initialize() {
+	private static void _initialize() {
 		if (manager == null) manager = new TestManager();		
 	}
 	
@@ -58,7 +58,7 @@ public class TestManager {
 	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
 	 */
 	public static TestingProfile getProfile(String name) {
-		initialize();
+		_initialize();
 		try {
 			return new TestingProfile(name);
 		} catch (IOException e) {
@@ -72,7 +72,7 @@ public class TestManager {
 	
 	@SuppressWarnings("rawtypes")
 	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
-		initialize();
+		_initialize();
 		manager.classUnderTest = myclass;
 		manager.currentProfile = profile;
 		// ResourceManager.setSession(profile.getSession());
@@ -86,12 +86,12 @@ public class TestManager {
 	}
 	
 	public static TestingProfile getProfile() {
-		initialize();
+		_initialize();
 		return manager.currentProfile;
 	}
 	
 	public static void clearAll() {
-		initialize();
+		_initialize();
 		manager.currentProfile = null;
 		manager.classUnderTest = null;
 		manager.defaultSession = null;
@@ -123,6 +123,7 @@ public class TestManager {
 	
 	@SuppressWarnings("rawtypes")
 	public static Logger getLogger(Class cls) {
+		assert cls != null;
 		String className = cls.getName();
 		if (myLoggers.contains(className)) return myLoggers.get(className);
 		Logger logger = LoggerFactory.getLogger(className);
@@ -140,7 +141,7 @@ public class TestManager {
 	 * @throws TestingException
 	 */
 	public static String getProperty(String name) throws TestingException {
-		initialize();
+		_initialize();
 		manager.logger.info(Log.INIT, "getProperty " + name);
 		String propname = "junit." + name;
 		String value = manager.testProperties.getProperty(propname);
@@ -160,7 +161,8 @@ public class TestManager {
 	@SuppressWarnings("rawtypes")
 	public static void bannerStart(Class cls, String testName, 
 			TestingProfile profile, YamlFile config) {
-		initialize();
+		assert cls != null;
+		_initialize();
 		Logger logger = getLogger(cls);
 		StringBuilder msg = new StringBuilder("Begin:" + testName);
 		if (profile != null) msg.append(" Profile:" + profile.getName());
@@ -170,18 +172,19 @@ public class TestManager {
 
 	@SuppressWarnings("rawtypes")
 	public static void bannerStart(Class cls, String testName) {
-		initialize();
+		_initialize();
 		bannerStart(cls, testName, null, null);
 	}
 	
 	public static void bannerStart(String testName) {
-		initialize();
+		assert manager.classUnderTest != null;
+		_initialize();
 		bannerStart(manager.classUnderTest, testName, manager.currentProfile, null);
 	}
 	
 	@SuppressWarnings("rawtypes")	
 	public static void bannerStart(Class cls, String testName, YamlFile config) {
-		initialize();
+		_initialize();
 		bannerStart(cls, testName, null, config);
 	}
 	
@@ -234,7 +237,7 @@ public class TestManager {
 	}
 	
 	public static void sleep(double seconds) throws InterruptedException {
-		initialize();
+		_initialize();
 		assert seconds < 60;
 		long millisec = Math.round(1000 * seconds);
 		String msg = "Sleeping " + seconds + " sec...";

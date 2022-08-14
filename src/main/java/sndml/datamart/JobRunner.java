@@ -160,6 +160,7 @@ public class JobRunner implements Callable<Metrics> {
 	private void runSync() throws SQLException, IOException, InterruptedException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
+		logger.debug(Log.INIT, "runLoad " + config.toString());
 		if (config.getAutoCreate()) 
 			database.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
@@ -185,7 +186,8 @@ public class JobRunner implements Callable<Metrics> {
 	private void runLoad() throws SQLException, IOException, InterruptedException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
-		Action action = config.getAction();		
+		Action action = config.getAction();	
+		logger.debug(Log.INIT, "runLoad " + config.toString());
 		if (config.getAutoCreate()) 
 			database.createMissingTable(table, sqlTableName, config.getColumns());
 		if (config.getTruncate()) database.truncateTable(sqlTableName);
