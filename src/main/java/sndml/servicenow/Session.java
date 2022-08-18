@@ -44,11 +44,23 @@ public class Session {
 
 	final private Logger logger = Log.logger(this.getClass());
 
-	public Session(Properties props) throws IOException  {
+	public Session(Properties props) throws IOException {
+		this(props, false);
+	}
+	
+	public Session(Properties props, boolean agentApp) throws IOException  {
 		this.properties = props;
-		String instancename = this.getProperty("instance");
-		String username = this.getProperty("username");
-		String password = this.getProperty("password");
+		String instancename, username, password;
+		if (agentApp) {
+			instancename = this.getAppProperty("instance");
+			username = this.getAppProperty("username");
+			password = this.getAppProperty("password");
+		}
+		else {
+			instancename = this.getProperty("instance");
+			username = this.getProperty("username");
+			password = this.getProperty("password");			
+		}
 		String domainname = this.getProperty("domain");
 		assert instancename != null; 
 		assert instancename != "";
@@ -92,11 +104,25 @@ public class Session {
 	 * if it is defined, otherwise return null.
 	 */
 	public String getProperty(String propname) {
-		propname = "servicenow." + propname;
-		String value = System.getProperty(propname);
+		String value =  getPrefixProperty("servicenow", propname);
+		// TODO Why is this here?
 		if (value == null && properties != null)	
 			value = properties.getProperty(propname);
 		return value;
+	}
+	
+	private String getAppProperty(String propname) {
+		String value = getPrefixProperty("app", propname);
+		if (value == null) value = getPrefixProperty("servicenow", propname);
+		return value;
+	}
+	
+	private String getPrefixProperty(String prefix, String propname) {
+		propname = prefix + "." + propname;
+		String value = System.getProperty(propname);
+		if (value == null && properties != null)	
+			value = properties.getProperty(propname);
+		return value;		
 	}
 	
 	private boolean getPropertyBoolean(String propname, boolean defaultValue) {
