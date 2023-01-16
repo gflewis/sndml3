@@ -33,7 +33,7 @@ public class ShutdownHook extends Thread {
 			logger.info(Log.FINISH, "Shutting down workerPool");
 			// send interrupt to all workers
 			workerPool.shutdown();
-			int waitSec = profile.getPropertyInt("daemon.shutdown_seconds", 30);
+			int waitSec = profile.daemon.getInt("shutdown_seconds", 30);
 			logger.info(Log.FINISH, "Awaiting worker pool termination");
 			try {
 				workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);

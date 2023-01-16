@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import sndml.daemon.AgentDaemon;
 import sndml.servicenow.Instance;
 import sndml.servicenow.Log;
+import sndml.servicenow.PropertySet;
 import sndml.servicenow.Session;
 
 /**
@@ -30,62 +31,66 @@ import sndml.servicenow.Session;
  * for evaluation.</p>
  *
  */
-public class ConnectionProfile {
+@SuppressWarnings("serial")
+public class ConnectionProfile extends java.util.Properties {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final File profile;
-	private final Properties properties = new Properties();
-	private long lastModified;
-	private final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
+	public final PropertySet source; // Properties for ServiceNow instance that is source of data
+	public final PropertySet app;   // Properties for ServiceNow instance that contains scopped app
+	public final PropertySet target; // Properties for SQL Database
+	public final PropertySet daemon; 
+	public final PropertySet loader;
+	public final PropertySet httpserver;
 	
 	public ConnectionProfile(File profile) throws IOException {
 		this.profile = profile;
+		FileInputStream stream = new FileInputStream(profile);
+		this.loadWithSubstitutions(stream);
 		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
-		this.loadProperties();
+		this.source = 
+			hasProperty("input.instance") ? getSubset("input") : 
+			getSubset("servicenow");
+		this.app = 
+			hasProperty("app.instance") ? getSubset("app") : 
+			getSubset("servicenow");
+		this.target = 
+			hasProperty("output.url") ? getSubset("output") : 
+			hasProperty("database.url") ? getSubset("datamart") :
+			getSubset("datamart");
+		this.loader = getSubset("loader");
+		this.daemon = getSubset("daemon");
+		this.httpserver = getSubset("http"); // HTTP Server
 	}
 
 	public String getPathName() {
 		return profile.getPath();
 	}
-	
-	/**
-	 * Return true if the file has been modified since it was loaded.
-	 * @return
-	 */
-	public boolean hasChanged() {
-		return (profile.lastModified() > this.lastModified);	
+
+	public PropertySet getSubset(String prefix) {
+		PropertySet result = new PropertySet(this, prefix);
+		return result;
+	}
+
+	public boolean hasProperty(String name) {
+		return containsKey(name);
 	}
 	
 	/**
-	 * Reload all properties if the file has been changed.
+	 * Load properties from an InputStream.
+	 * Any value ${name} will be replaced with a system property.
+	 * Any value inclosed in backticks will be passed to Runtime.exec() for evaluation.
 	 */
-	public synchronized void reloadIfChanged() throws IOException {
-		if (hasChanged()) {
-			logger.info(Log.INIT, "Reloading " + getPathName());
-			loadProperties();
-		}		
-	}
-	
-	synchronized void loadProperties() throws IOException {
-		this.loadProperties(new FileInputStream(profile));
-		this.lastModified = profile.lastModified();		
-	}
-	
-	/**
-	 * Load properties from an InputStream into this {@link ConnectionProfile}.
-	 * Any value which is inclosed in backticks will be passed to Runtime.exec()
-	 * for evaluation.
-	 * Any property which is not a password will become a System property
-	 * with a "sndml." prefix.
-	 */
-	synchronized void loadProperties(InputStream stream) throws IOException {
+	public synchronized void loadWithSubstitutions(InputStream stream) throws IOException {
+		final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		assert stream != null;
 		Properties raw = new Properties();
 		raw.load(stream);
 		for (String name : raw.stringPropertyNames()) {
 			String value = raw.getProperty(name);
 			// Replace any environment variables
-			StringSubstitutor envMap = new StringSubstitutor(System.getenv());
+			StringSubstitutor envMap = 
+					new org.apache.commons.text.StringSubstitutor(System.getenv());
 			value = envMap.replace(value);
 			// If property is in backticks then evaluate as a command 
 			Matcher cmdMatcher = cmdPattern.matcher(value); 
@@ -97,10 +102,10 @@ public class ConnectionProfile {
 					throw new AssertionError(String.format("Failed to evaluate \"%s\"", command));
 				logger.debug(Log.INIT, value);
 			}
-			properties.setProperty(name, value);
+			this.setProperty(name, value);
 		}
 	}
-
+	
 	/**
 	 * Pass a string to Runtime.exec() for evaluation
 	 * @param command - Command to be executed
@@ -112,40 +117,13 @@ public class ConnectionProfile {
 		String output = IOUtils.toString(p.getInputStream(), "UTF-8").trim();
 		return output;
 	}
-
-	public boolean hasProperty(String name) {
-		return properties.getProperty(name) != null;
-	}
 	
-	/**
-	 * Return a property value.
-	 */
-	public String getProperty(String name) {
-		return properties.getProperty(name);
-	}
-	
-	public String getProperty(String name, String defaultValue) {
-		String value = getProperty(name);
-		return value == null ? defaultValue : value;
-	}
-	
-	public boolean getPropertyBoolean(String name, boolean defaultValue) {
-		String stringValue = getProperty(name);
-		if (stringValue == null) return defaultValue;
-		return Boolean.valueOf(stringValue);
-	}
-	
-	public int getPropertyInt(String name, int defaultValue) {
-		String stringValue = getProperty(name);
-		if (stringValue == null) return defaultValue;
-		return Integer.valueOf(stringValue);
-	}
 	
 	/**
 	 * Return the URL of the ServiceNow
 	 */
 	public Instance getInstance() {
-		return new Instance(properties);
+		return new Instance(source);
 	}
 	
 	/** 
@@ -153,12 +131,7 @@ public class ConnectionProfile {
 	 * @return
 	 */
 	public synchronized Session getSession() throws ResourceException {
-		Session session;
-		try {
-			session = new Session(properties);
-		} catch (IOException e) {
-			throw new ResourceException(e);
-		}
+		Session session = new Session(source);
 		return session;
 	}
 
@@ -184,10 +157,10 @@ public class ConnectionProfile {
 	}
 	
 	public URI getAPI(String apiName, String parameter) {
-		Instance instance = new Instance(getProperty("servicenow.instance"));
+		Instance instance = new Instance(app.getString("instance"));
 		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		assert profile != null;		
-		String appScope = getProperty("daemon.scope", "x_108443_sndml");
+		String appScope = daemon.getString("scope", "x_108443_sndml");
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		

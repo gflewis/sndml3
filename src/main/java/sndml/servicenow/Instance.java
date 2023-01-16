@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Properties;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIBuilder;
@@ -23,8 +22,8 @@ public class Instance {
 		this.host = new HttpHost(url.getHost());
 	}
 
-	public Instance(Properties properties) {
-		this(properties.getProperty("servicenow.instance"));
+	public Instance(PropertySet props) {
+		this(props.getProperty("instance"));
 	}
 	
 	public Instance(String name) {

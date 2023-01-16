@@ -1,0 +1,35 @@
+package sndml.datamart;
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class PropertySetTest {
+
+	static private Logger logger = LoggerFactory.getLogger(PropertySetTest.class);
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public void testSampleFile() throws Exception {
+		File file = new File("src/test/resources/profile_test.properties");
+		ConnectionProfile profile = new ConnectionProfile(file);
+		int size = profile.source.size();
+		logger.debug("size=" + size);		
+		assertEquals("dev00000", profile.source.getProperty("instance"));
+		assertEquals("admin", profile.target.getProperty("username"));		
+	}
+	
+}

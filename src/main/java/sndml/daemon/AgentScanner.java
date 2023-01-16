@@ -57,10 +57,10 @@ public abstract class AgentScanner extends TimerTask {
 	 * as each job completes.
 	 */
 	public synchronized void run() {
-		boolean onExceptionContinue = profile.getPropertyBoolean("daemon.continue", false);
+		boolean onExceptionContinue = profile.daemon.getBoolean("continue", false);
 		Log.setJobContext(agentName);		
 		try {
-			profile.reloadIfChanged();
+//			profile.reloadIfChanged();
 			scan();
 		}
 		catch (NoContentException e) {

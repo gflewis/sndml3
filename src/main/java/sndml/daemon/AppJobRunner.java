@@ -75,7 +75,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
-		boolean onExceptionContinue = profile.getPropertyBoolean("daemon.continue", false);
+		boolean onExceptionContinue = profile.daemon.getBoolean("continue", false);
 		setThreadName();
 		try {
 			if (session == null) session = profile.getSession();

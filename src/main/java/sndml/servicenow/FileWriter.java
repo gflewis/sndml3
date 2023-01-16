@@ -44,10 +44,11 @@ public class FileWriter extends RecordWriter {
 		String outfilename = cmdline.getOptionValue("o");
 		String tablename = cmdline.getOptionValue("t");
 		String querystring = cmdline.getOptionValue("q");
-		Properties props = new Properties();
+		Properties properties = new Properties();
 		File propfile = new File(propfilename);
-		props.load(new FileInputStream(propfile));
+		properties.load(new FileInputStream(propfile));
 		File outfile = (outfilename == null) ? null : new File(outfilename);
+		PropertySet props = new PropertySet(properties, "servicenow"); 
 		Session session = new Session(props);
 		Table table = session.table(tablename);
 		TableReader reader = new RestTableReader(table);
@@ -57,7 +58,6 @@ public class FileWriter extends RecordWriter {
 		FileWriter writer = new FileWriter(outfile);
 		Metrics metrics = new Metrics(outfile.getName());
 		ProgressLogger progress = new Log4jProgressLogger(reader, Action.INSERT);
-//		reader.setWriter(writer, metrics);
 		reader.prepare(writer, metrics, progress);
 		writer.open(metrics);
 		reader.call();

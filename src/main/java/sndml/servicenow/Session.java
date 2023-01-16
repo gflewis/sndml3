@@ -27,7 +27,8 @@ import sndml.daemon.AppSchemaFactory;
 public class Session {
 
 	private final Instance instance;
-	private final Properties properties;
+	// private final Properties properties;
+	private final PropertySet props;
 	private final AuthScope authScope;
 	private final String username;
 	private final Domain domain;
@@ -44,14 +45,26 @@ public class Session {
 
 	final private Logger logger = Log.logger(this.getClass());
 
+	@Deprecated
 	public Session(Properties props) throws IOException {
 		this(props, false);
 	}
 	
-	public Session(Properties props, boolean agentApp) throws IOException  {
+	@Deprecated
+	public Session(Properties properties, boolean agentApp) throws IOException  {
+		this(agentApp ? new PropertySet(properties, "app") : new PropertySet(properties, "servicenow"));
+		/*
+		if (agentApp) {
+			props = new PropertySet(properties, "app");
+		}
+		else {
+			props = new PropertySet(properties, "servicenow");
+			
+		}
 		this.properties = props;
 		String instancename, username, password;
 		if (agentApp) {
+			
 			instancename = this.getAppProperty("instance");
 			username = this.getAppProperty("username");
 			password = this.getAppProperty("password");
@@ -83,6 +96,31 @@ public class Session {
 //				setDefaultCookieStore(cookieStore).
 //				build();			
 		if (this.getPropertyBoolean("verify_session", false)) this.verifyUser();
+		*/
+	}
+	
+	
+	public Session(PropertySet props) {
+		this.props = props;
+		String instancename = props.getProperty("instance");
+		String username = props.getProperty("username");
+		String password = props.getProperty("password");
+		String domainname = props.getProperty("domain");
+		assert instancename != null; 
+		assert instancename != "";
+		assert username != null;
+		assert username != "";
+		this.instance = new Instance(instancename);
+		this.username = username;
+		this.domain = (domainname == null || domainname.length() == 0) ? 
+			null : new Domain(domainname);		
+		this.logInitInfo();
+		this.authScope = new AuthScope(instance.getHost());
+		this.credsProvider = new BasicCredentialsProvider();
+		this.userPassCreds = new UsernamePasswordCredentials(username, password);		
+		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);	
+		this.connectionManager = new PoolingHttpClientConnectionManager();
+		// Note that HTTP Client is created on initial request by createClient method below
 	}
 	
 	private void logInitInfo() {
@@ -96,7 +134,7 @@ public class Session {
 	 * The URL and credentials will be the same, but the Session ID will be different.
 	 */
 	public Session duplicate() throws IOException {
-		return new Session(this.properties);
+		return new Session(this.props);
 	}
 		
 	/**
@@ -104,45 +142,48 @@ public class Session {
 	 * if it is defined, otherwise return null.
 	 */
 	public String getProperty(String propname) {
+		return props.getString(propname);
+		/*
 		String value =  getPrefixProperty("servicenow", propname);
 		// TODO Why is this here?
 		if (value == null && properties != null)	
 			value = properties.getProperty(propname);
 		return value;
+		*/
 	}
 	
-	private String getAppProperty(String propname) {
-		String value = getPrefixProperty("app", propname);
-		if (value == null) value = getPrefixProperty("servicenow", propname);
-		return value;
-	}
+//	private String getAppProperty(String propname) {
+//		String value = getPrefixProperty("app", propname);
+//		if (value == null) value = getPrefixProperty("servicenow", propname);
+//		return value;
+//	}
 	
-	private String getPrefixProperty(String prefix, String propname) {
-		propname = prefix + "." + propname;
-		String value = System.getProperty(propname);
-		if (value == null && properties != null)	
-			value = properties.getProperty(propname);
-		return value;		
-	}
+//	private String getPrefixProperty(String prefix, String propname) {
+//		propname = prefix + "." + propname;
+//		String value = System.getProperty(propname);
+//		if (value == null && properties != null)	
+//			value = properties.getProperty(propname);
+//		return value;		
+//	}
 	
-	private boolean getPropertyBoolean(String propname, boolean defaultValue) {
-		String propvalue = getProperty(propname);
-		if (propvalue == null) return defaultValue;
-		return Boolean.parseBoolean(propvalue);
-	}
-	
-	private boolean getPropertyBoolean(String propname) {
-		return getPropertyBoolean(propname, false);
-	}
-	
-	public int getPropertyInt(String name, int defaultValue) {
-		String stringValue = getProperty(name);
-		if (stringValue == null) return defaultValue;
-		return Integer.valueOf(stringValue);
-	}
+//	private boolean getPropertyBoolean(String propname, boolean defaultValue) {
+//		String propvalue = getProperty(propname);
+//		if (propvalue == null) return defaultValue;
+//		return Boolean.parseBoolean(propvalue);
+//	}
+//	
+//	private boolean getPropertyBoolean(String propname) {
+//		return getPropertyBoolean(propname, false);
+//	}
+//	
+//	public int getPropertyInt(String name, int defaultValue) {
+//		String stringValue = getProperty(name);
+//		if (stringValue == null) return defaultValue;
+//		return Integer.valueOf(stringValue);
+//	}
 	
 	public int defaultPageSize() {
-		int pageSize = getPropertyInt("pagesize", 200);
+		int pageSize = props.getInt("pagesize", 200);
 		assert pageSize > 0;
 		return pageSize;
 	}
@@ -257,7 +298,7 @@ public class Session {
 		String timezone = profile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;
-			if (getPropertyBoolean("verify_timezone")) {
+			if (props.getBoolean("verify_timezone", false)) {
 				logger.error(Log.INIT, message);				
 				throw new ServiceNowException(message);				
 			}

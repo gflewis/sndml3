@@ -55,7 +55,7 @@ public class Generator {
 		PrintStream output = cmdline.hasOption("o") ? 
 			new PrintStream(new File(cmdline.getOptionValue("o"))) : System.out;
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
-		Session session = profile.getSession();
+		Session session = new Session(profile.source);
 		Table table = session.table(tablename);
 		Database database = profile.getDatabase();
 		Generator generator = new Generator(database, profile, null);
@@ -65,12 +65,12 @@ public class Generator {
 	
 	public Generator(Database database, ConnectionProfile profile, File templatesFile) {
 		assert database != null;
-		String schemaName = profile.getProperty("datamart.schema");
-		String dialectName = profile.getProperty("datamart.dialect");
+		String schemaName = profile.target.getProperty("schema");
+		String dialectName = profile.target.getProperty("dialect");
 		// only check properties if file was not passed in as an argument
 		if (templatesFile == null) {
 			// TODO Redundant. Same code appears in Database.
-			String templatesPath = profile.getProperty("datamart.templates", "");
+			String templatesPath = profile.target.getProperty("templates", "");
 			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
 		}
 		try {

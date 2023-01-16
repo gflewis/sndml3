@@ -54,7 +54,7 @@ public class Database {
 		this.protocol = getProtocol(this.dbURI);
 		this.dbuser = databaseProperty("username", null);
 		this.dbpass = databaseProperty("password", "");
-		schema = profile.getProperty("schema", null);
+		schema = profile.target.getProperty("schema", null);
 		
 		assert dbc == null;
 		assert dburl != null;
@@ -74,9 +74,9 @@ public class Database {
 		if (schema != null) logmsg += " schema=" + getSchema();
 				
 		logger.info(Log.INIT, logmsg);
-		String templateName = profile.getProperty("datamart.templates", "");
+		String templateName = profile.target.getProperty("templates", "");
 		this.templates = (templateName.length() > 0) ? new File(templateName) : null;
-		this.warnOnTruncate = profile.getPropertyBoolean("loader.warn_on_truncate", true);
+		this.warnOnTruncate = profile.loader.getBoolean("warn_on_truncate", true);
 				
 		this.open();
 		assert dbc != null;
@@ -84,9 +84,7 @@ public class Database {
 
 	private String databaseProperty(String name, String defaultValue) {
 		// Allow property to begin with old prefix "datamart." or new prefix "database."
-		String value = 
-			profile.getProperty("database." + name,
-				profile.getProperty("datamart." + name, defaultValue));
+		String value = profile.target.getProperty(name, defaultValue);
 		return value;
 	}
 	

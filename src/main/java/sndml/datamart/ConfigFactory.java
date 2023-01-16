@@ -52,7 +52,7 @@ public class ConfigFactory {
 		DateTime start = DateTime.now();
 		File metricsFolder = null;
 		if (profile != null) {
-			String metricsFolderName = profile.getProperty("loader.metrics_folder");
+			String metricsFolderName = profile.loader.getProperty("metrics_folder");
 			if (metricsFolderName != null && metricsFolderName.length() > 0)
 				metricsFolder = new File(metricsFolderName);
 		}

@@ -206,7 +206,7 @@ public class JobConfig {
 		// AutoCreate defaults to True
 		if (autoCreate == null) {
 			if (anyLoadAction.contains(action))
-				autoCreate = profile.getPropertyBoolean("datamart.autocreate", true);
+				autoCreate = profile.target.getBoolean("autocreate", true);
 			else
 				autoCreate = false;
 		}				
