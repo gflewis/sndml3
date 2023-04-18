@@ -218,13 +218,15 @@ public class Database {
 		assert tablename != null;
 		assert tablename.length() > 0;
 		DatabaseMetaData meta = getConnection().getMetaData();
-		String catalog = null, schema = null;
+		String catalog = null;
+		String schema = getSchema();
+		/*
+		 *  3.4.7 MySQL behaving like normal databases now? 
 		if (isMySQL()) {
 			catalog = getSchema();
+			schema = null;
 		}
-		else {
-			schema = getSchema();
-		}
+		*/
 		if (isOracle()) tablename = tablename.toUpperCase();
 		ResultSet rsTables = meta.getTables(catalog, schema, tablename, null);
 		int count = 0;
