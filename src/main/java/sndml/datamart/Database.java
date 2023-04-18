@@ -220,13 +220,11 @@ public class Database {
 		DatabaseMetaData meta = getConnection().getMetaData();
 		String catalog = null;
 		String schema = getSchema();
-		/*
-		 *  3.4.7 MySQL behaving like normal databases now? 
+		// Why are these reversed for MySQL?
 		if (isMySQL()) {
-			catalog = getSchema();
+			catalog = schema;
 			schema = null;
 		}
-		*/
 		if (isOracle()) tablename = tablename.toUpperCase();
 		ResultSet rsTables = meta.getTables(catalog, schema, tablename, null);
 		int count = 0;
