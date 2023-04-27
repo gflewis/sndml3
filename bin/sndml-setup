@@ -78,10 +78,14 @@ sndml_determine_jar() {
   if [[ -z "$SNDML_VERSION" ]]; then
     sndml_determine_version
   fi
-  local url=`awk -F= '/^datamart.url/{print $2}' <$SNDML_PROFILE`
+  local url
+  url=`awk -F= '/^datamart.url/{print $2}' <$SNDML_PROFILE`
   if [[ -z "$url" ]]; then
-    echo datamart.url not found in $SNDML_PROFILE
-    return 1
+  	url=`awk -F= '/^output.url/{print $2}' <$SNDML_PROFILE`
+  	if [[ -z "$url" ]]; then
+		echo datamart.url not found in $SNDML_PROFILE
+		return 1
+	fi
   fi
   local db=`echo $url | awk -F: '{print $2}'`
   local suffix

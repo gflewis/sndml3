@@ -28,11 +28,11 @@ public class TableSchemaFactory extends SchemaFactory {
 		String tablename = table.getName();
 		String saveJob = Log.getJobContext();
 		String myname = dictionary.getName() + "." + tablename;
-		Log.setTableContext(dictionary,  myname);		
-		TableSchema schema = new TableSchema(table);
+		Log.setTableContext(dictionary,  myname);	
 		logger.debug(Log.SCHEMA, "get definition for table " + tablename);
+		TableSchema schema = new TableSchema(table);
 		String parentname = determineParentName(tablename);
-		logger.debug(Log.SCHEMA, tablename + " parent is " + parentname);
+		logger.info(Log.SCHEMA, String.format("table=%s parent=%s", tablename, parentname));
 		if (parentname != null) {
 			// recursive call for parent definition
 			TableSchema parentSchema = getSchema(parentname);
