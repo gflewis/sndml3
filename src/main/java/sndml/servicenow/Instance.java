@@ -8,6 +8,8 @@ import java.net.URL;
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIBuilder;
 
+import sndml.util.PropertySet;
+
 /**
  * Holds the URL for a ServiceNow instance.
  * Does not hold connection credentials, cookies or session ID.

@@ -11,7 +11,7 @@ public class JsonRecord extends TableRecord {
 	final ObjectNode root;
 	
 	public JsonRecord(Table table, ObjectNode obj) {
-		this.table = table;
+		super(table);
 		this.root = obj;		
 	}
 	

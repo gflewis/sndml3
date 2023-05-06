@@ -9,10 +9,10 @@ import java.util.Calendar;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 
-import sndml.servicenow.DateTime;
-import sndml.servicenow.InvalidDateTimeException;
-import sndml.servicenow.Log;
 import sndml.servicenow.TableRecord;
+import sndml.util.DateTime;
+import sndml.util.InvalidDateTimeException;
+import sndml.util.Log;
 import sndml.servicenow.RecordKey;
 
 /**

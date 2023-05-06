@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.servicenow.*;
+import sndml.util.DateTime;
+import sndml.util.Log;
 
 /**
  * A class which knows how to compare the keys and timestamps from a ServiceNow table

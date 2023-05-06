@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import sndml.util.Log;
+
 public class JsonRequest extends ServiceNowRequest {
 
 	static final ObjectMapper mapper = new ObjectMapper();

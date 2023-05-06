@@ -29,14 +29,14 @@ public class ColumnsTest {
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());
 		Database database = profile.getDatabase();
 		DBUtil util = new DBUtil(database);
-		Loader loader1 = folder.getYaml("incident-include-columns").getLoader(profile);
+		YamlLoader loader1 = folder.getYaml("incident-include-columns").getLoader(profile);
 		Metrics metrics1 = loader1.loadTables();
 		int processed = metrics1.getProcessed();
 		assertTrue(processed > 0);
 		assertEquals(processed, util.sqlCount("select count(*) from incident"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where short_description is null"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where state is not null"));
-		Loader loader2 = folder.getYaml("load-incident-truncate").getLoader(profile);
+		YamlLoader loader2 = folder.getYaml("load-incident-truncate").getLoader(profile);
 		loader2.loadTables();
 		assertEquals(processed, util.sqlCount("select count(*) from incident"));
 		assertEquals(processed, util.sqlCount("select count(*) from incident where short_description is not null"));

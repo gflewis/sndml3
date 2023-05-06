@@ -37,7 +37,7 @@ public class RowCountExceptionTest {
 	public void testTooManyRows() throws Exception {
 		YamlFile yamlFile = folder.getYaml("too-many-rows");	
 		TestManager.bannerStart(this.getClass(), "testTooManyRows", yamlFile);
-		Loader loader = yamlFile.getLoader(profile);
+		YamlLoader loader = yamlFile.getLoader(profile);
 		JobRunner job = loader.getJob("incident_load");
 		assertNotNull(job);
 		assertNotNull(job.getConfig());
@@ -52,7 +52,7 @@ public class RowCountExceptionTest {
 	public void testTooFewRows() throws Exception {
 		YamlFile yamlFile = folder.getYaml("too-few-rows");	
 		TestManager.bannerStart(this.getClass(), "testTooFewRows", yamlFile);
-		Loader loader = yamlFile.getLoader(profile);
+		YamlLoader loader = yamlFile.getLoader(profile);
 		JobRunner job = loader.getJob("user_load");
 		assertNotNull(job);
 		assertNotNull(job.getConfig());

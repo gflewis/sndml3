@@ -8,9 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.*;
+import sndml.util.DateTime;
+import sndml.util.Log;
 
-public class LoaderConfig {
+public class YamlLoaderConfig {
 	
 	@JsonIgnore final DateTime start = DateTime.now();
 	@JsonIgnore File metricsFolder = null;
@@ -22,10 +23,10 @@ public class LoaderConfig {
 	@JsonProperty("tables")
 	public ArrayList<JobConfig> tables; // = new java.util.ArrayList<JobConfig>();
 
-	private Logger logger = LoggerFactory.getLogger(LoaderConfig.class);
+	private Logger logger = LoggerFactory.getLogger(YamlLoaderConfig.class);
 	
 	
-	public LoaderConfig() {		
+	public YamlLoaderConfig() {		
 	}
 
 	void setMetricsFolder(File metricsFolder) {

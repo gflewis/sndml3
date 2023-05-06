@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.servicenow.DateTime;
+import sndml.util.DateTime;
 
 /**
  * A file with YAML Loader Config instructions. 
@@ -33,11 +33,11 @@ public class YamlFile extends File {
 		return jf.yamlJob(this);
 	}
 	
-	public Loader getLoader(ConnectionProfile profile) 
+	public YamlLoader getLoader(ConnectionProfile profile) 
 			throws ConfigParseException, IOException, ResourceException, SQLException {
 		ConfigFactory factory = new ConfigFactory();
-		LoaderConfig config = factory.loaderConfig(null, this);
-		return new Loader(profile, config);
+		YamlLoaderConfig config = factory.loaderConfig(null, this);
+		return new YamlLoader(profile, config);
 	}
 	
 	/**

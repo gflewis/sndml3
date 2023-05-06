@@ -4,6 +4,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.util.Log;
+
 public abstract class TableAPI {
 
 	final protected Table table;

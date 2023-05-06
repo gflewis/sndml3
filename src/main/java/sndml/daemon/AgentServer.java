@@ -10,8 +10,9 @@ import org.slf4j.LoggerFactory;
 import com.sun.net.httpserver.HttpServer;
 
 import sndml.datamart.ConnectionProfile;
-import sndml.servicenow.Log;
+import sndml.util.Log;
 
+@Deprecated
 public class AgentServer {
 
 	final int port;

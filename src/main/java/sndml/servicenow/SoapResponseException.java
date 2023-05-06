@@ -5,6 +5,8 @@ import java.net.URI;
 
 import org.jdom2.Element;
 
+import sndml.util.Log;
+
 /**
  * Exception thrown when there is an undetermined problem with a SOAP response.
  */

@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import sndml.datamart.*;
-import sndml.servicenow.*;
+import sndml.util.Log;
 
 /**
  * An Agent Scanner which does not utilize a thread pool and runs all jobs in the current thread

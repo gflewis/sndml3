@@ -20,6 +20,8 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 
+import sndml.util.Log;
+
 class XmlRequest extends ServiceNowRequest {
 
 	final Logger logger = Log.logger(this.getClass());

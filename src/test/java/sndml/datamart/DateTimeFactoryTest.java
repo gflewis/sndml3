@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.junit.Test;
 
 import sndml.servicenow.*;
+import sndml.util.DateTime;
 
 public class DateTimeFactoryTest {
 

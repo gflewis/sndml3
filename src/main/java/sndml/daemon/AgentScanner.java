@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.datamart.*;
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 public abstract class AgentScanner extends TimerTask {
 

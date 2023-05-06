@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.*;
+import sndml.util.DateTimeRange;
+import sndml.util.Log;
 
 public final class DatePartitionedTableReader extends TableReader {
 

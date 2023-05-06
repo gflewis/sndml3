@@ -1,21 +1,27 @@
 package sndml.datamart;
 
-import sndml.servicenow.*;
+import sndml.servicenow.Table;
+import sndml.util.DateTime;
+import sndml.util.Log;
 
 public class SimpleTableLoader extends JobRunner implements Runnable {
 
-	public SimpleTableLoader(ConnectionProfile profile, String tableName, Database database) {
-		this(profile, profile.getSession().table(tableName), database);		
+	public SimpleTableLoader(ConnectionProfile profile, Database database, String tableName) {
+		this(profile, database, profile.getSession().table(tableName), null);		
 	}
 	
-	public SimpleTableLoader(ConnectionProfile profile, Table table, Database database) {
-		super(table.getSession(), database, jobConfig(profile, table));
+	public SimpleTableLoader(ConnectionProfile profile, Database database, String tableName, String filter) {
+		this(profile, database, profile.getSession().table(tableName), filter);		
+	}
+	
+	public SimpleTableLoader(ConnectionProfile profile, Database database, Table table, String filter) {
+		super(table.getSession(), database, jobConfig(profile, table, filter));
 		this.table = table;
 	}
 	
-	private static JobConfig jobConfig(ConnectionProfile profile, Table table) {
+	private static JobConfig jobConfig(ConnectionProfile profile, Table table, String filter) {
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
-		return configFactory.tableLoader(profile, table);		
+		return configFactory.tableLoader(profile, table, filter);		
 	}
 
 	@Override

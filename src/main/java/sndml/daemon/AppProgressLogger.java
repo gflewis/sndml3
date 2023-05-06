@@ -12,6 +12,7 @@ import sndml.datamart.ConnectionProfile;
 import sndml.datamart.DatePart;
 import sndml.datamart.ResourceException;
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 public class AppProgressLogger extends ProgressLogger {
 

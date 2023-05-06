@@ -54,7 +54,7 @@ public class TableLoaderTest {
 
 	@Test
 	public void test() throws Exception {
-		Loader loader = yamlFile.getLoader(profile);
+		YamlLoader loader = yamlFile.getLoader(profile);
 		Metrics metrics = loader.loadTables();
 		int processed = metrics.getProcessed();
 		assertTrue(processed > 0);

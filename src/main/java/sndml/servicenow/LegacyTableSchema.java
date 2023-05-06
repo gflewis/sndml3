@@ -5,6 +5,8 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.util.Log;
+
 /**
  * This class holds the the schema or definition for a ServiceNow table.
  * The definition is read from <b>sys_dictionary</b> by the {@link Table} constructor.

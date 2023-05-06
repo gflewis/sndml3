@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.datamart.ConfigParseException;
 import sndml.datamart.ConnectionProfile;
-import sndml.servicenow.Log;
+import sndml.util.Log;
 
 public class AgentDaemon implements Daemon {
 		

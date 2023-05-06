@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.util;
 
 import java.text.DateFormat;
 import java.text.ParseException;

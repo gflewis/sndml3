@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import sndml.daemon.AgentDaemon;
 import sndml.servicenow.Instance;
-import sndml.servicenow.Log;
-import sndml.servicenow.PropertySet;
 import sndml.servicenow.Session;
+import sndml.util.Log;
+import sndml.util.PropertySet;
 
 /**
  * <p>A {@link ConnectionProfile} holds connection credentials for a ServiceNow instance
@@ -36,28 +36,25 @@ public class ConnectionProfile extends java.util.Properties {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final File profile;
-	public final PropertySet source; // Properties for ServiceNow instance that is source of data
-	public final PropertySet app;   // Properties for ServiceNow instance that contains scopped app
-	public final PropertySet target; // Properties for SQL Database
+	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
+	public final PropertySet app;    // Properties for ServiceNow instance that contains scopped app
+	public final PropertySet writer; // Properties for SQL Database
 	public final PropertySet daemon; 
 	public final PropertySet loader;
-	public final PropertySet httpserver;
+	@Deprecated public final PropertySet httpserver;
 	
 	public ConnectionProfile(File profile) throws IOException {
 		this.profile = profile;
 		FileInputStream stream = new FileInputStream(profile);
 		this.loadWithSubstitutions(stream);
 		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
-		this.source = 
-			hasProperty("input.instance") ? getSubset("input") : 
-			getSubset("servicenow");
+		this.reader = 
+			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
 		this.app = 
-			hasProperty("app.instance") ? getSubset("app") : 
-			getSubset("servicenow");
-		this.target = 
-			hasProperty("output.url") ? getSubset("output") : 
-			hasProperty("database.url") ? getSubset("datamart") :
-			getSubset("datamart");
+			hasProperty("app.instance") ? getSubset("app") : getSubset("servicenow");
+		this.writer = 
+			hasProperty("writer.url") ? getSubset("writer") : getSubset("datamart");
+		
 		this.loader = getSubset("loader");
 		this.daemon = getSubset("daemon");
 		this.httpserver = getSubset("http"); // HTTP Server
@@ -76,6 +73,8 @@ public class ConnectionProfile extends java.util.Properties {
 		return containsKey(name);
 	}
 	
+	public String getMetricsFolder() { return loader.getProperty("metrics_folder"); }
+	public boolean getWarnOnTruncate() { return loader.getBoolean("warn_on_truncate", true); }
 	/**
 	 * Load properties from an InputStream.
 	 * Any value ${name} will be replaced with a system property.
@@ -123,7 +122,7 @@ public class ConnectionProfile extends java.util.Properties {
 	 * Return the URL of the ServiceNow
 	 */
 	public Instance getInstance() {
-		return new Instance(source);
+		return new Instance(reader);
 	}
 	
 	/** 
@@ -131,7 +130,7 @@ public class ConnectionProfile extends java.util.Properties {
 	 * @return
 	 */
 	public synchronized Session getSession() throws ResourceException {
-		Session session = new Session(source);
+		Session session = new Session(reader);
 		return session;
 	}
 

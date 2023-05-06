@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import sndml.datamart.*;
-import sndml.servicenow.*;
+import sndml.util.Log;
 
 public class MultiThreadScanner extends AgentScanner {
 

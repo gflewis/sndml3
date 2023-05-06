@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 public class AppStatusLogger {
 

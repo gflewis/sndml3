@@ -3,6 +3,8 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.util.Log;
+
 public class RestTableReader extends TableReader {
 
 	final protected RestTableAPI restAPI;

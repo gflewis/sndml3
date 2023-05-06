@@ -10,6 +10,7 @@ import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 /**
  * A class which knows how to generate SQL statements (as strings)
@@ -55,7 +56,7 @@ public class Generator {
 		PrintStream output = cmdline.hasOption("o") ? 
 			new PrintStream(new File(cmdline.getOptionValue("o"))) : System.out;
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
-		Session session = new Session(profile.source);
+		Session session = new Session(profile.reader);
 		Table table = session.table(tablename);
 		Database database = profile.getDatabase();
 		Generator generator = new Generator(database, profile, null);
@@ -65,12 +66,12 @@ public class Generator {
 	
 	public Generator(Database database, ConnectionProfile profile, File templatesFile) {
 		assert database != null;
-		String schemaName = profile.target.getProperty("schema");
-		String dialectName = profile.target.getProperty("dialect");
+		String schemaName = profile.writer.getProperty("schema");
+		String dialectName = profile.writer.getProperty("dialect");
 		// only check properties if file was not passed in as an argument
 		if (templatesFile == null) {
 			// TODO Redundant. Same code appears in Database.
-			String templatesPath = profile.target.getProperty("templates", "");
+			String templatesPath = profile.writer.getProperty("templates", "");
 			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
 		}
 		try {

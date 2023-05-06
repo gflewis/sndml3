@@ -1,6 +1,7 @@
 package sndml.datamart;
 
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 import static org.junit.Assert.*;
 
@@ -45,7 +46,7 @@ public class InsertTest {
 	public void testInsert() throws Exception {
 		YamlFile yaml = folder.getYaml("load_truncate");
 		TestManager.bannerStart(this.getClass(), "testInsert", profile, yaml);
-		LoaderConfig config = factory.loaderConfig(profile, yaml);
+		YamlLoaderConfig config = factory.loaderConfig(profile, yaml);
 		JobConfig job = config.getJobs().get(0);
 		assertTrue(job.getTruncate());
 		assertEquals(Action.INSERT, job.getAction());
@@ -75,8 +76,8 @@ public class InsertTest {
 		YamlFile yaml = folder.getYaml("load_twice");
 		File metricsFile = new File("/tmp/load_twice.metrics");
 		TestManager.bannerStart(this.getClass(), "testInsertTwice", profile, yaml);
-		LoaderConfig config = factory.loaderConfig(profile, yaml);
-		Loader loader = new Loader(profile, config);
+		YamlLoaderConfig config = factory.loaderConfig(profile, yaml);
+		YamlLoader loader = new YamlLoader(profile, config);
 		loader.loadTables();
 		loadMetrics(metricsFile);
 		int rows = getMetric("load1.processed");

@@ -10,6 +10,9 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
+import sndml.util.DateTime;
+import sndml.util.DateTimeRange;
+import sndml.util.Log;
 
 @RunWith(Parameterized.class)
 public class TimestampTest {
@@ -83,7 +86,7 @@ public class TimestampTest {
 	public void testGetTimestamps() throws Exception {		
 		TestManager.bannerStart(this.getClass(), "testGetTimestamps");
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());				
-		Loader loader = folder.getYaml("incident-load").getLoader(profile);
+		YamlLoader loader = folder.getYaml("incident-load").getLoader(profile);
 		logger.info(Log.TEST, "begin Loader.loadTables()");
 		Metrics metrics = loader.loadTables();
 		logger.info(Log.TEST, "processed=" + metrics.getProcessed());

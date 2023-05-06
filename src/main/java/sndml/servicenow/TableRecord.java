@@ -4,12 +4,20 @@ import java.util.Iterator;
 
 import org.slf4j.Logger;
 
+import sndml.util.DateTime;
+import sndml.util.InvalidDateTimeException;
+import sndml.util.Log;
+
 public abstract class TableRecord implements InsertResponse {
 
 	static final Logger logger = Log.logger(TableRecord.class);
 	
-	protected Table table;
+	protected final Table table;
 
+	protected TableRecord(Table table) {
+		this.table = table;
+	}
+	
 	/**
 	 * The table from which this record was retrieved.
 	 */

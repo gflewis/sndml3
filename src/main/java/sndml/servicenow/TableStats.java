@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import sndml.util.DateTimeRange;
+
 public class TableStats {
 	
 	public int count;

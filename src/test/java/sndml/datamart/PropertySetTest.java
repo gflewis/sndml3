@@ -26,10 +26,10 @@ public class PropertySetTest {
 	public void testSampleFile() throws Exception {
 		File file = new File("src/test/resources/profile_test.properties");
 		ConnectionProfile profile = new ConnectionProfile(file);
-		int size = profile.source.size();
+		int size = profile.reader.size();
 		logger.debug("size=" + size);		
-		assertEquals("dev00000", profile.source.getProperty("instance"));
-		assertEquals("admin", profile.target.getProperty("username"));		
+		assertEquals("dev00000", profile.reader.getProperty("instance"));
+		assertEquals("admin", profile.writer.getProperty("username"));		
 	}
 	
 }

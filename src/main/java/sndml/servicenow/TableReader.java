@@ -7,6 +7,8 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.util.DateTimeRange;
+
 public abstract class TableReader implements Callable<Metrics> {
  
 	public final Table table;
@@ -81,8 +83,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	
 	public String getPartName() {
 		return partName;
-	}
-		
+	}		
 	
 	public void setProgressLogger(ProgressLogger progressLogger) {
 		this.progress = progressLogger;
@@ -286,10 +287,10 @@ public abstract class TableReader implements Callable<Metrics> {
 		return this.metrics;
 	}
 	
-	@Deprecated
-	public void setMetrics(Metrics metrics) {
-		this.metrics = metrics;
-	}
+//	@Deprecated
+//	public void setMetrics(Metrics metrics) {
+//		this.metrics = metrics;
+//	}
 
 	public RecordList getAllRecords() throws IOException, InterruptedException {
 		assert !initialized;

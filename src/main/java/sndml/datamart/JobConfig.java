@@ -16,6 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.servicenow.*;
+import sndml.util.DateTime;
+import sndml.util.DateTimeRange;
+import sndml.util.Log;
 
 public class JobConfig {
 
@@ -206,7 +209,7 @@ public class JobConfig {
 		// AutoCreate defaults to True
 		if (autoCreate == null) {
 			if (anyLoadAction.contains(action))
-				autoCreate = profile.target.getBoolean("autocreate", true);
+				autoCreate = profile.writer.getBoolean("autocreate", true);
 			else
 				autoCreate = false;
 		}				
@@ -306,7 +309,6 @@ public class JobConfig {
 		}
 		reader.setReaderName(readerName);
 		reader.setPartName(partName);
-		reader.setFilter(getFilter(myTable));		
 		reader.setCreatedRange(getCreatedRange(datePart));		
 		reader.setUpdatedRange(getUpdatedRange());
 		reader.setFilter(getFilter(myTable));

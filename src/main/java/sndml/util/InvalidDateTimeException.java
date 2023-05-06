@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.util;
 
 
 @SuppressWarnings("serial")

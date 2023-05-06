@@ -1,6 +1,7 @@
 package sndml.datamart;
 
 import sndml.servicenow.*;
+import sndml.util.DateTime;
 
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -27,7 +28,7 @@ public class LoaderConfigTest {
 	// This syntax is no longer supported
 	public void testSimpleOld() throws Exception {
 		String yaml = "tables: [core_company, incident]";
-		LoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));
+		YamlLoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));
 		assertEquals(2, config.getJobs().size());
 		assertEquals("core_company", config.getJobs().get(0).getName());
 		assertEquals("incident", config.getJobs().get(1).getName());
@@ -36,7 +37,7 @@ public class LoaderConfigTest {
 
 	public void testSimpleNew() throws Exception {
 		String yaml = "tables: [{source: core_company}, {source: incident}]";
-		LoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));
+		YamlLoaderConfig config = factory.loaderConfig(profile, new StringReader(yaml));
 		assertEquals(2, config.getJobs().size());
 		assertEquals("core_company", config.getJobs().get(0).getName());
 		assertEquals("incident", config.getJobs().get(1).getName());
@@ -46,7 +47,7 @@ public class LoaderConfigTest {
 	@Test
 	public void testGoodConfig1() throws Exception {
 		File config1 = folder.getYaml("multi-table-load");
-		LoaderConfig config = factory.loaderConfig(profile, config1);
+		YamlLoaderConfig config = factory.loaderConfig(profile, config1);
 		DateTime start = config.getStart();
 		DateTime today = DateTime.today();
 		assertEquals(8, config.getJobs().size());
@@ -60,7 +61,7 @@ public class LoaderConfigTest {
 	@Test
 	public void testGoodSync1() throws Exception {
 		File goodConfig = folder.getYaml("incident-sync");
-		LoaderConfig config = factory.loaderConfig(profile, goodConfig);
+		YamlLoaderConfig config = factory.loaderConfig(profile, goodConfig);
 		assertNotNull(config);
 	}
 	

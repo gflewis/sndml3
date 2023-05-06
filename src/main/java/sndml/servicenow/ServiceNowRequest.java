@@ -2,6 +2,9 @@ package sndml.servicenow;
 
 import java.net.URI;
 import org.slf4j.Logger;
+
+import sndml.util.Log;
+
 import org.apache.http.StatusLine;
 import org.apache.http.impl.client.CloseableHttpClient;
 

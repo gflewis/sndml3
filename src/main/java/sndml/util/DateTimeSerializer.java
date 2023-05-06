@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.util;
 
 import java.io.IOException;
 

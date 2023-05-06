@@ -16,6 +16,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import sndml.datamart.ConfigParseException;
 import sndml.datamart.YamlFile;
+import sndml.util.Log;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

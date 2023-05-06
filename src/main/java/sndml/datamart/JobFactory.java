@@ -7,8 +7,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.sql.SQLException;
 
-import sndml.servicenow.DateTime;
 import sndml.servicenow.Session;
+import sndml.util.DateTime;
 
 public class JobFactory {
 

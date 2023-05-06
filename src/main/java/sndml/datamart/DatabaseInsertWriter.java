@@ -6,9 +6,9 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.regex.Pattern;
 
 import sndml.servicenow.RecordKey;
-import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.TableRecord;
+import sndml.util.Log;
 import sndml.servicenow.Table;
 
 public class DatabaseInsertWriter extends DatabaseTableWriter {

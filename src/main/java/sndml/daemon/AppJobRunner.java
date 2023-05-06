@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import sndml.datamart.*;
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 public class AppJobRunner extends JobRunner implements Runnable {
 	

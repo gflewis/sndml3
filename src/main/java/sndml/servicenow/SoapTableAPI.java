@@ -6,6 +6,8 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
 
+import sndml.util.Log;
+
 public class SoapTableAPI extends TableAPI {
 
 	final SoapClient client;

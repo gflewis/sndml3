@@ -13,90 +13,34 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.AgentDaemon;
 import sndml.servicenow.*;
+import sndml.util.Log;
 
-public class Loader {
+public class YamlLoader {
 
+	static ConfigFactory factory = new ConfigFactory();
 	final Session session;
 	final Database database;
-	LoaderConfig config;
+	YamlLoaderConfig config;
 	File metricsFile = null;
 	PrintWriter statsWriter;
 	
 	ArrayList<JobRunner> jobs = new ArrayList<JobRunner>();
 	
-	static final Logger logger = LoggerFactory.getLogger(Loader.class);
-	
-	/**
-	 * This is the main class invoked from the JAR file.
-	 * 
-	 */
-	public static void main(String[] args) throws Exception {
-		Log.setGlobalContext();
-		Options options = new Options();
-		options.addOption(Option.builder("p").longOpt("profile").required(true).hasArg(true).
-				desc("Property file (required)").build());
-		options.addOption(Option.builder("t").longOpt("table").required(false).hasArg(true).
-				desc("Table name").build());
-		options.addOption(Option.builder("y").longOpt("yaml").required(false).hasArg(true).
-				desc("YAML config file (required)").build());
-		options.addOption(Option.builder("daemon").longOpt("daemon").required(false).hasArg(false).
-				desc("Run as daemon/service").build());
-		options.addOption(Option.builder("scan").longOpt("scan").required(false).hasArg(false).
-				desc("Run the deamon scanner once").build());
-		CommandLine cmd = new DefaultParser().parse(options,  args);
-		String profileName = cmd.getOptionValue("p");
-		ConnectionProfile profile = new ConnectionProfile(new File(profileName));
-		int cmdCount = 0;
-		if (cmd.hasOption("y")) cmdCount += 1;
-		if (cmd.hasOption("t")) cmdCount += 1;
-		if (cmd.hasOption("daemon")) cmdCount += 1;
-		if (cmd.hasOption("scan")) cmdCount += 1;		
-		if (cmdCount != 1) 
-			throw new CommandOptionsException(
-				"Must specify exactly one of: --yaml, --table, --daemon or --scan");
-		if (cmd.hasOption("t")) {
-			// Simple Table Loader
-			String tableName = cmd.getOptionValue("t");
-			Database database = profile.getDatabase();
-			SimpleTableLoader tableLoader = new SimpleTableLoader(profile, tableName, database);
-			tableLoader.call();
-		}
-		else if (cmd.hasOption("y")) {
-			// YAML file
-			String yamlFileName = cmd.getOptionValue("y");
-			File yamlFile = new File(yamlFileName);
-			String yamlText = readFully(yamlFile);
-			logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
-			FileReader reader = new FileReader(new File(yamlFileName));
-			ConfigFactory factory = new ConfigFactory();
-			LoaderConfig config = factory.loaderConfig(profile, reader);
-			Loader loader = new Loader(profile, config);			
-			loader.loadTables();
-		}
-		else if (cmd.hasOption("daemon")) {
-			// Daemon
-			AgentDaemon daemon = new AgentDaemon(profile);
-			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
-			daemon.runForever();
-		}
-		else if (cmd.hasOption("scan")) {
-			// Scan once
-			AgentDaemon daemon = new AgentDaemon(profile);
-			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
-			daemon.scanOnce();
-		}
+	static final Logger logger = LoggerFactory.getLogger(YamlLoader.class);
+
+	YamlLoader(ConnectionProfile profile, File yamlFile) throws ResourceException, SQLException, IOException {
+		this(profile, new FileReader(yamlFile));
 	}
-				
-	Loader(ConnectionProfile profile, LoaderConfig config) throws ResourceException, SQLException {
+	
+	YamlLoader(ConnectionProfile profile, FileReader reader) throws ResourceException, SQLException, IOException {
+		this(profile, factory.loaderConfig(profile, reader));
+	}
+	
+	YamlLoader(ConnectionProfile profile, YamlLoaderConfig config) throws ResourceException, SQLException {
 		this.session = profile.getSession();
 		this.database = profile.getDatabase();
 		this.config = config;

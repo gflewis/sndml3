@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import sndml.util.DateTime;
+import sndml.util.DateTimeRange;
 
 /**
  * <p>Encapsulates an Encoded Query.</p> 

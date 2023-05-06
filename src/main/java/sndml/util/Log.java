@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.util;
 
 import java.net.URI;
 import org.apache.commons.lang3.StringUtils;
@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+
+import sndml.servicenow.Table;
 
 public class Log {
 

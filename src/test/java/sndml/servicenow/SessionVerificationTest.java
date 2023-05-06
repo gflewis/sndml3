@@ -3,6 +3,8 @@ package sndml.servicenow;
 import org.junit.*;
 import org.slf4j.Logger;
 
+import sndml.util.Log;
+
 import static org.junit.Assert.*;
 
 import java.io.IOException;

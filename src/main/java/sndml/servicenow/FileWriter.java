@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import sndml.datamart.Action;
 import sndml.datamart.Log4jProgressLogger;
+import sndml.util.Log;
+import sndml.util.PropertySet;
 
 public class FileWriter extends RecordWriter {
 

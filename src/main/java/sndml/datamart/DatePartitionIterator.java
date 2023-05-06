@@ -2,8 +2,8 @@ package sndml.datamart;
 
 import java.util.Iterator;
 
-import sndml.servicenow.DateTime;
-import sndml.servicenow.DateTimeRange;
+import sndml.util.DateTime;
+import sndml.util.DateTimeRange;
 
 /**
  * Iterate through the ranges of a partition backwards, starting with

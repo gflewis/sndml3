@@ -2,7 +2,7 @@ package sndml.datamart;
 
 import java.util.Iterator;
 
-import sndml.servicenow.DateTimeRange;
+import sndml.util.DateTimeRange;
 
 public class DatePartition implements Iterable<DatePart> {
 	

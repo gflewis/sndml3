@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
+import sndml.util.Log;
 
 /**
  * Contains SQL data type information for all columns in the table which are readable

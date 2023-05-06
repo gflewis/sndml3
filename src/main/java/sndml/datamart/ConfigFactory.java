@@ -16,9 +16,9 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import sndml.servicenow.DateTime;
-import sndml.servicenow.Log;
 import sndml.servicenow.Table;
+import sndml.util.DateTime;
+import sndml.util.Log;
 
 public class ConfigFactory {
 	
@@ -41,13 +41,13 @@ public class ConfigFactory {
 		yamlMapper.setSerializationInclusion(Include.NON_NULL);		
 	}
 	
-	LoaderConfig loaderConfig(ConnectionProfile profile, File yamlFile) 
+	YamlLoaderConfig loaderConfig(ConnectionProfile profile, File yamlFile) 
 			throws IOException, ConfigParseException {
 		Reader reader = new FileReader(yamlFile);
 		return loaderConfig(profile, reader);		
 	}
 		
-	LoaderConfig loaderConfig(ConnectionProfile profile, Reader reader) 
+	YamlLoaderConfig loaderConfig(ConnectionProfile profile, Reader reader) 
 			throws IOException, ConfigParseException {
 		DateTime start = DateTime.now();
 		File metricsFolder = null;
@@ -56,9 +56,9 @@ public class ConfigFactory {
 			if (metricsFolderName != null && metricsFolderName.length() > 0)
 				metricsFolder = new File(metricsFolderName);
 		}
-		LoaderConfig loader;
+		YamlLoaderConfig loader;
 		try {
-			loader = yamlMapper.readValue(reader, LoaderConfig.class);			
+			loader = yamlMapper.readValue(reader, YamlLoaderConfig.class);			
 		}
 		catch (JsonProcessingException e) {
 			throw new ConfigParseException(e);
@@ -112,11 +112,16 @@ public class ConfigFactory {
 		logger.debug(Log.INIT, "jobConfig: " + job.toString());
 		return job;
 	}
-		
-	JobConfig tableLoader(ConnectionProfile profile, Table table) throws ConfigParseException {
+
+	JobConfig tableLoader(ConnectionProfile profile, Table table) {
+		return tableLoader(profile, table, null);
+	}
+	
+	JobConfig tableLoader(ConnectionProfile profile, Table table, String filter) throws ConfigParseException {
 		DateCalculator dateFactory = new DateCalculator();
 		JobConfig job = new JobConfig();
 		job.source = table.getName();
+		if (filter != null) job.filter = filter;
 		job.initialize(profile, dateFactory);
 		job.validate();
 		logger.debug(Log.INIT, "tableLoader: " + job.toString());

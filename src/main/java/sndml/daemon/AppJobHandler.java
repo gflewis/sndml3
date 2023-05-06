@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.*;
 
 import sndml.datamart.*;
-import sndml.servicenow.Log;
+import sndml.util.Log;
 
 public class AppJobHandler implements HttpHandler {
 

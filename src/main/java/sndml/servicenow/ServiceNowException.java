@@ -3,6 +3,8 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.net.URI;
 
+import sndml.util.Log;
+
 @SuppressWarnings("serial")
 public class ServiceNowException extends IOException {
 

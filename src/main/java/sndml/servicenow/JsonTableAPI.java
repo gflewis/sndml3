@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import sndml.util.Log;
+
 public class JsonTableAPI extends TableAPI {
 
 	final URI uri;

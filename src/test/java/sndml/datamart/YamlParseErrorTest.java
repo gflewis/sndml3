@@ -9,9 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import sndml.servicenow.Log;
 import sndml.servicenow.TestManager;
 import sndml.servicenow.TestingProfile;
+import sndml.util.Log;
 
 public class YamlParseErrorTest {
 
@@ -36,7 +36,7 @@ public class YamlParseErrorTest {
 			Throwable err = null;			
 			try {
 				@SuppressWarnings("unused")
-				LoaderConfig config = factory.loaderConfig(profile, file);
+				YamlLoaderConfig config = factory.loaderConfig(profile, file);
 				fail("No exception for " + file.getPath());				
 			} catch (ConfigParseException e) {
 				err = e;

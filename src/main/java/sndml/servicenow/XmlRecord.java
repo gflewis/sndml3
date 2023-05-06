@@ -19,7 +19,7 @@ public class XmlRecord extends TableRecord {
 	
 	public XmlRecord(Table table, Element element) 
 			throws SoapResponseException {
-		this.table = table;
+		super(table);
 		this.element = element;
 		this.ns = element.getNamespace();
 	}

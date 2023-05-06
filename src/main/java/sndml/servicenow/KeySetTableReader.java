@@ -3,6 +3,8 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.util.Log;
+
 /**
  * A {@link TableReader} which attempts to read records using a {@link KeySet}.
  */

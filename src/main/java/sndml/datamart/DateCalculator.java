@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.servicenow.DateTime;
-import sndml.servicenow.Log;
+import sndml.util.DateTime;
+import sndml.util.Log;
 
 /**
  * Class which knows how to retrieve a DateTime from the metrics file

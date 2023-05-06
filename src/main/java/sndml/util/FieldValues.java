@@ -1,7 +1,9 @@
-package sndml.servicenow;
+package sndml.util;
 
 import java.text.DateFormat;
 import java.util.Date;
+
+import sndml.servicenow.Parameters;
 
 /**
  * <p>This object contains a collection of name/value pairs.

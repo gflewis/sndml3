@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 
 import sndml.daemon.AgentDaemon;
 import sndml.daemon.AppSchemaFactory;
+import sndml.util.Log;
+import sndml.util.PropertySet;
 
 /**
  * Holds a ServiceNow URL, connection credentials, a cookie store with a session ID

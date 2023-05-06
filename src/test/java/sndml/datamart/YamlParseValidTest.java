@@ -9,9 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import sndml.servicenow.Log;
 import sndml.servicenow.TestManager;
 import sndml.servicenow.TestingProfile;
+import sndml.util.Log;
 
 public class YamlParseValidTest {
 
@@ -34,7 +34,7 @@ public class YamlParseValidTest {
 			logger.info(Log.TEST, "Testing " + file.getPath() + 
 					"\n" + TestManager.readFully(file).trim());
 			try {
-				LoaderConfig config = factory.loaderConfig(profile, file);
+				YamlLoaderConfig config = factory.loaderConfig(profile, file);
 				String json = factory.jsonMapper.writeValueAsString(config);
 				logger.info(Log.TEST, json);
 			} catch (FileNotFoundException e) {

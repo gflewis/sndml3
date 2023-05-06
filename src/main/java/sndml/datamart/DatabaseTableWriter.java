@@ -5,10 +5,10 @@ import java.sql.SQLException;
 
 import org.slf4j.Logger;
 
-import sndml.servicenow.Log;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;
+import sndml.util.Log;
 import sndml.servicenow.RecordList;
 import sndml.servicenow.RecordWriter;
 import sndml.servicenow.Table;

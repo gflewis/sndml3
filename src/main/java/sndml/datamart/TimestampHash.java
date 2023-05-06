@@ -3,6 +3,7 @@ package sndml.datamart;
 import java.util.Hashtable;
 
 import sndml.servicenow.*;
+import sndml.util.DateTime;
 
 public class TimestampHash extends Hashtable<RecordKey, DateTime> {
 
