@@ -38,6 +38,7 @@ public class AppStatusLogger {
 		body.put("status", status);
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		ObjectNode response = request.execute();
+		// TODO Delete logger.info
 		logger.info(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());

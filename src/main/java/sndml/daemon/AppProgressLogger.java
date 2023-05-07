@@ -3,6 +3,7 @@ package sndml.daemon;
 import java.io.IOException;
 import java.net.URI;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
@@ -79,7 +80,6 @@ public class AppProgressLogger extends ProgressLogger {
 		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
-		logger.info(Log.RESPONSE, "setStatus " + runKey + " " + body.toString());		
 		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
@@ -157,7 +157,15 @@ public class AppProgressLogger extends ProgressLogger {
 		} catch (IOException e) {
 			throw new ResourceException(e);
 		}
-		logger.info(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());		
+		JsonNode responseResult = response.get("result");
+		String responseStatus = responseResult.get("status").asText();
+		// TODO: delete logger.info
+		logger.info(Log.RESPONSE, String.format(
+				"putRunStatus %s status=%s %s", runKey, responseStatus, response.toString()));
+		if ("cancelled".equals(responseStatus) || "failed".equals(responseStatus)) {
+			logger.warn(Log.FINISH, "Job Cancellation Detected");
+			throw new JobCancelledException(runKey);			
+		}
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, String.format(
 				"putRunStatus %s %s", runKey, response.toString()));		
