@@ -79,6 +79,7 @@ public class AppProgressLogger extends ProgressLogger {
 		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
+		logger.info(Log.RESPONSE, "setStatus " + runKey + " " + body.toString());		
 		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
