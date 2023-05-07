@@ -55,53 +55,8 @@ public class Session {
 	@Deprecated
 	public Session(Properties properties, boolean agentApp) throws IOException  {
 		this(agentApp ? new PropertySet(properties, "app") : new PropertySet(properties, "servicenow"));
-		/*
-		if (agentApp) {
-			props = new PropertySet(properties, "app");
-		}
-		else {
-			props = new PropertySet(properties, "servicenow");
-			
-		}
-		this.properties = props;
-		String instancename, username, password;
-		if (agentApp) {
-			
-			instancename = this.getAppProperty("instance");
-			username = this.getAppProperty("username");
-			password = this.getAppProperty("password");
-		}
-		else {
-			instancename = this.getProperty("instance");
-			username = this.getProperty("username");
-			password = this.getProperty("password");			
-		}
-		String domainname = this.getProperty("domain");
-		assert instancename != null; 
-		assert instancename != "";
-		assert username != null;
-		assert username != "";
-		this.instance = new Instance(instancename);
-		this.username = username;
-		this.domain = (domainname == null || domainname.length() == 0) ? 
-			null : new Domain(domainname);		
-		this.logInitInfo();
-		this.authScope = new AuthScope(instance.getHost());
-		this.credsProvider = new BasicCredentialsProvider();
-		this.userPassCreds = new UsernamePasswordCredentials(username, password);		
-		this.credsProvider.setCredentials(this.authScope, this.userPassCreds);	
-		this.connectionManager = new PoolingHttpClientConnectionManager();
-//		client is now created on initial request
-//		this.client = HttpClients.custom().
-//				setConnectionManager(connectionManager).
-//				setDefaultCredentialsProvider(credsProvider).
-//				setDefaultCookieStore(cookieStore).
-//				build();			
-		if (this.getPropertyBoolean("verify_session", false)) this.verifyUser();
-		*/
 	}
-	
-	
+		
 	public Session(PropertySet props) {
 		this.props = props;
 		String instancename = props.getProperty("instance");
@@ -145,45 +100,8 @@ public class Session {
 	 */
 	public String getProperty(String propname) {
 		return props.getString(propname);
-		/*
-		String value =  getPrefixProperty("servicenow", propname);
-		// TODO Why is this here?
-		if (value == null && properties != null)	
-			value = properties.getProperty(propname);
-		return value;
-		*/
 	}
-	
-//	private String getAppProperty(String propname) {
-//		String value = getPrefixProperty("app", propname);
-//		if (value == null) value = getPrefixProperty("servicenow", propname);
-//		return value;
-//	}
-	
-//	private String getPrefixProperty(String prefix, String propname) {
-//		propname = prefix + "." + propname;
-//		String value = System.getProperty(propname);
-//		if (value == null && properties != null)	
-//			value = properties.getProperty(propname);
-//		return value;		
-//	}
-	
-//	private boolean getPropertyBoolean(String propname, boolean defaultValue) {
-//		String propvalue = getProperty(propname);
-//		if (propvalue == null) return defaultValue;
-//		return Boolean.parseBoolean(propvalue);
-//	}
-//	
-//	private boolean getPropertyBoolean(String propname) {
-//		return getPropertyBoolean(propname, false);
-//	}
-//	
-//	public int getPropertyInt(String name, int defaultValue) {
-//		String stringValue = getProperty(name);
-//		if (stringValue == null) return defaultValue;
-//		return Integer.valueOf(stringValue);
-//	}
-	
+		
 	public int defaultPageSize() {
 		int pageSize = props.getInt("pagesize", 200);
 		assert pageSize > 0;

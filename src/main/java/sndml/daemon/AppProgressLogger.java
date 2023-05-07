@@ -159,11 +159,9 @@ public class AppProgressLogger extends ProgressLogger {
 		}
 		JsonNode responseResult = response.get("result");
 		String responseStatus = responseResult.get("status").asText();
-		// TODO: delete logger.info
-		logger.info(Log.RESPONSE, String.format(
-				"putRunStatus %s status=%s %s", runKey, responseStatus, response.toString()));
 		if ("cancelled".equals(responseStatus) || "failed".equals(responseStatus)) {
-			logger.warn(Log.FINISH, "Job Cancellation Detected");
+			logger.warn(Log.RESPONSE, String.format(
+					"putRunStatus Job Cancellation Detected %s status=%s %s", runKey, responseStatus, response.toString()));
 			throw new JobCancelledException(runKey);			
 		}
 		if (logger.isDebugEnabled())
