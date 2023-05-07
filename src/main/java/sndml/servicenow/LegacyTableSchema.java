@@ -5,6 +5,7 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.JobCancelledException;
 import sndml.util.Log;
 
 /**
@@ -27,7 +28,7 @@ public class LegacyTableSchema {
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	protected LegacyTableSchema(Table table) 
-			throws IOException, InvalidTableNameException, InterruptedException {
+			throws IOException, InvalidTableNameException, InterruptedException, JobCancelledException {
 		this.table = table;
 		this.session = table.session;
 		this.tablename = table.getName();

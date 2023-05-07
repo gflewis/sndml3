@@ -3,6 +3,7 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.daemon.JobCancelledException;
 import sndml.util.Log;
 
 /**
@@ -43,7 +44,7 @@ public class SoapKeySetTableReader extends TableReader {
 		return allKeys.size();
 	}
 		
-	public Metrics call() throws IOException, InterruptedException, SQLException {
+	public Metrics call() throws IOException, InterruptedException, SQLException, JobCancelledException {
 		progress.logStart();
 		assert writer != null;
 		assert allKeys != null;

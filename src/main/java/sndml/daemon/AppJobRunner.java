@@ -58,7 +58,12 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		
 	@Override
 	public void run() {
-		this.call();
+		try {
+			this.call();
+		} catch (JobCancelledException e) {
+			logger.warn(Log.ERROR, "Job Cancellation Detected");
+			throw new ResourceException(e);
+		}
 	}
 
 	@Override
@@ -72,7 +77,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	}
 	
 	@Override
-	public Metrics call() {
+	public Metrics call() throws JobCancelledException {
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;

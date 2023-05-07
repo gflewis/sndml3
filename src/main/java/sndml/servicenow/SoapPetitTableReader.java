@@ -3,6 +3,8 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.daemon.JobCancelledException;
+
 /**
  * <p>A {@link TableReader} which attempts to read a set of records
  * using a single Web Service call.</p>
@@ -60,7 +62,7 @@ public class SoapPetitTableReader extends TableReader {
 		throw new UnsupportedOperationException();
 	}		
 	
-	public Metrics call() throws IOException, SQLException {
+	public Metrics call() throws IOException, SQLException, JobCancelledException {
 		assert writer != null;
 		assert pageSize > 1;
 		int firstRow = 0;

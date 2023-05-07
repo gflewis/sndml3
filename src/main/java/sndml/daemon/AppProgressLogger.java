@@ -57,11 +57,15 @@ public class AppProgressLogger extends ProgressLogger {
 	
 	@Override
 	public void logPrepare() {
-		putRunStatus(messageBody("prepare"));
+		try {
+			putRunStatus(messageBody("prepare"));
+		} catch (JobCancelledException e) {
+			throw new ResourceException(e);
+		}
 	}
 
 	@Override
-	public void logStart() {
+	public void logStart() throws JobCancelledException {
 		int expected = metrics.getExpected();
 		logger.info(Log.INIT, String.format("logStart %d", expected));
 		ObjectNode body = messageBody("running");
@@ -71,7 +75,7 @@ public class AppProgressLogger extends ProgressLogger {
 	}
 		
 	@Override
-	public void logProgress() {
+	public void logProgress() throws JobCancelledException {
 		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
 		ObjectNode body = messageBody("running");
@@ -91,7 +95,11 @@ public class AppProgressLogger extends ProgressLogger {
 			body.put("elapsed", String.format("%.1f", metrics.getElapsedSec()));			
 		}
 		appendMetrics(body, metrics);
-		putRunStatus(body);
+		try {
+			putRunStatus(body);
+		} catch (JobCancelledException e) {
+			logger.warn(Log.FINISH, "Job Cancellation Detected");
+		}
 	}
 
 	/**
@@ -138,7 +146,7 @@ public class AppProgressLogger extends ProgressLogger {
 		}		
 	}
 	
-	void putRunStatus(ObjectNode body) {
+	void putRunStatus(ObjectNode body) throws JobCancelledException {
 		logger.debug(Log.REQUEST, String.format(
 			"putRunStatus %s %s", runKey, body.toString()));
 		JsonRequest request = new JsonRequest(session, putRunStatusURI, HttpMethod.PUT, body);		
@@ -148,6 +156,7 @@ public class AppProgressLogger extends ProgressLogger {
 		} catch (IOException e) {
 			throw new ResourceException(e);
 		}
+		logger.info(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());		
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, String.format(
 				"putRunStatus %s %s", runKey, response.toString()));		

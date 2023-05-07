@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.slf4j.Logger;
 
+import sndml.daemon.JobCancelledException;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;
@@ -67,7 +68,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	@Override
 	public synchronized void processRecords(
 			RecordList recs, Metrics metrics, ProgressLogger progressLogger) 
-			throws IOException, SQLException {
+			throws JobCancelledException, IOException, SQLException  {
 		assert metrics != null;
 		assert progressLogger != null;
 		for (TableRecord rec : recs) {

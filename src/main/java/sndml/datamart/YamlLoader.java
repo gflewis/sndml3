@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
@@ -63,7 +64,7 @@ public class YamlLoader {
 		return null;
 	}
 	
-	public Metrics loadTables() throws SQLException, IOException, InterruptedException {
+	public Metrics loadTables() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		ArrayList<Metrics> allJobMetrics = new ArrayList<Metrics>();
 		Log.setGlobalContext();
 		Metrics loaderMetrics = new Metrics(null);

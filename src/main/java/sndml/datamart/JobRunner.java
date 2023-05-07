@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
@@ -61,7 +62,7 @@ public class JobRunner implements Callable<Metrics> {
 	}
 	
 	@Override
-	public Metrics call() throws SQLException, IOException, InterruptedException {
+	public Metrics call() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		assert config != null;
 		assert session != null;
 		assert database != null;
@@ -110,7 +111,7 @@ public class JobRunner implements Callable<Metrics> {
 		return jobMetrics;
 	}
 	
-	private void runSQL(String sqlCommand) throws SQLException {
+	private void runSQL(String sqlCommand) throws SQLException, JobCancelledException {
 		logger.debug(Log.INIT, "runSQL " + sqlCommand);		
 		jobMetrics.setExpected(0);
 		ProgressLogger progressLogger = createJobProgressLogger(null);
@@ -138,7 +139,7 @@ public class JobRunner implements Callable<Metrics> {
 		database.dropTable(config.getTarget(), true);
 	}
 	
-	private void runPrune() throws SQLException, IOException, InterruptedException {
+	private void runPrune() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		Table audit = session.table("sys_audit_delete");
@@ -161,33 +162,34 @@ public class JobRunner implements Callable<Metrics> {
 		deleteWriter.close(jobMetrics);
 	}
 	
-	private void runSync() throws SQLException, IOException, InterruptedException {
+	private void runSync() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		logger.debug(Log.INIT, "runLoad " + config.toString());
 		if (config.getAutoCreate()) 
 			database.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
-		TableReader reader;
+		TableReader synchronizer;
 		if (partitionInterval == null) {
-			reader = config.createReader(table, database);			
-			ProgressLogger progressLogger = createJobProgressLogger(reader);
-			reader.prepare(null, jobMetrics, progressLogger);
+			synchronizer = config.createReader(table, database);			
+			ProgressLogger progressLogger = createJobProgressLogger(synchronizer);
+			synchronizer.prepare(null, jobMetrics, progressLogger);
 		}
 		else {
 			DatePartitionedTableReader multiReader = 
 				new DatePartitionedTableReader(table, config, database);
-			reader = multiReader;
+			synchronizer = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);	
-			reader.prepare(null, jobMetrics, progressLogger);
+			synchronizer.prepare(null, jobMetrics, progressLogger);
 			DatePartition partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 		}
+		assert(synchronizer instanceof Synchronizer);
 		Log.setTableContext(table, config.getName());
-		reader.call();
+		synchronizer.call();
 	}
 	
-	private void runLoad() throws SQLException, IOException, InterruptedException {
+	private void runLoad() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		Action action = config.getAction();	
@@ -226,8 +228,14 @@ public class JobRunner implements Callable<Metrics> {
 		assert reader.getMetrics() != null;
 		assert reader.getMetrics().getName() == config.getName();
 		Log.setTableContext(table, config.getName());
-		reader.call();
+		JobCancelledException cancel = null;
+		try {
+			reader.call();
+		} catch (JobCancelledException e) {
+			cancel = e;
+		}
 		writer.close(jobMetrics);
+		if (cancel != null) throw(cancel);
 	}
 
 }

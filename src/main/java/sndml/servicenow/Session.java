@@ -250,6 +250,7 @@ public class Session {
 	
 	/**
 	 * Generate {@link TableSchema} or retrieve from cache.
+	 * @throws  
 	 */
 	public TableSchema getSchema(String tablename) 
 			throws InvalidTableNameException, IOException, InterruptedException {

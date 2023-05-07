@@ -1,5 +1,6 @@
 package sndml.servicenow;
 
+import sndml.daemon.JobCancelledException;
 import sndml.datamart.DatePart;
 
 public abstract class ProgressLogger {
@@ -35,9 +36,9 @@ public abstract class ProgressLogger {
 	/**
 	 * We are starting the actual processing of records.
 	 */
-	public abstract void logStart();
+	public abstract void logStart() throws JobCancelledException;
 	
-	public abstract void logProgress();	
+	public abstract void logProgress() throws JobCancelledException;	
 
 	/**
 	 * We have completed all processing of record.

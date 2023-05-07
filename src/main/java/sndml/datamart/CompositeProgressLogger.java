@@ -1,6 +1,7 @@
 package sndml.datamart;
 
 import sndml.daemon.AppProgressLogger;
+import sndml.daemon.JobCancelledException;
 import sndml.servicenow.*;
 
 public class CompositeProgressLogger extends ProgressLogger {
@@ -42,13 +43,13 @@ public class CompositeProgressLogger extends ProgressLogger {
 	}
 	
 	@Override
-	public void logStart() {
+	public void logStart() throws JobCancelledException {
 		if (appLogger != null) appLogger.logStart();
 		if (textLogger != null) textLogger.logStart();		
 	}
 	
 	@Override
-	public void logProgress() {
+	public void logProgress() throws JobCancelledException {
 		if (appLogger != null) appLogger.logProgress();
 		if (textLogger != null) textLogger.logProgress();
 	}

@@ -3,6 +3,7 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.daemon.JobCancelledException;
 import sndml.util.Log;
 
 /**
@@ -52,7 +53,7 @@ public class KeySetTableReader extends TableReader {
 	}
 		
 	@Override
-	public Metrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, InterruptedException, JobCancelledException {
 		progress.logStart();
 		int pageSize = this.getPageSize();
 		if (writer == null) throw new IllegalStateException("writer not defined");

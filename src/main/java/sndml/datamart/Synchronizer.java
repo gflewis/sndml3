@@ -3,6 +3,7 @@ package sndml.datamart;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.daemon.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.Log;
@@ -36,7 +37,7 @@ public class Synchronizer extends TableReader {
 	}
 
 	public void prepare(Metrics metrics, ProgressLogger progress) 
-			throws IOException, SQLException, InterruptedException {
+			throws IOException, SQLException, InterruptedException, JobCancelledException {
 		prepare(null, metrics, progress);
 	}
 	
@@ -58,10 +59,11 @@ public class Synchronizer extends TableReader {
 	 * @throws IOException
 	 * @throws SQLException
 	 * @throws InterruptedException
+	 * @throws JobCancelledException 
 	 */	
 	@Override
 	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
-			throws IOException, SQLException, InterruptedException {
+			throws IOException, SQLException, InterruptedException, JobCancelledException {
 		assert writer == null;
 		beginPrepare(writer, metrics, progress);
 		dbTimestamps = getDatabaseTimestamps();
@@ -92,7 +94,7 @@ public class Synchronizer extends TableReader {
 		return dbTimestamps;		
 	}
 	
-	private RecordList getServiceNowTimestamps() throws IOException, InterruptedException {
+	private RecordList getServiceNowTimestamps() throws IOException, InterruptedException, JobCancelledException {
 		RestTableReader sntsr = new RestTableReader(this.table);
 		sntsr.setFields(new FieldNames("sys_id,sys_updated_on"));
 		sntsr.setCreatedRange(this.createdRange);
@@ -159,7 +161,7 @@ public class Synchronizer extends TableReader {
 //		return this;
 //	}
 	
-	private void processInserts() throws IOException, SQLException, InterruptedException {
+	private void processInserts() throws IOException, SQLException, InterruptedException, JobCancelledException {
 		logger.info(Log.PROCESS, String.format("Inserting %d rows", insertSet.size()));
 		if (insertSet.size() > 0) {
 			String insertPartName = writerName + ".INSERT";
@@ -182,7 +184,7 @@ public class Synchronizer extends TableReader {
 		}		
 	}
 
-	private void processUpdates() throws IOException, SQLException, InterruptedException {
+	private void processUpdates() throws IOException, SQLException, InterruptedException, JobCancelledException {
 		logger.info(Log.PROCESS, String.format("Updating %d rows",  updateSet.size()));
 		if (updateSet.size() > 0) {
 			String udpatePartName = writerName + ".UPDATE";
@@ -224,7 +226,7 @@ public class Synchronizer extends TableReader {
 	}
 	
 	@Override
-	public Metrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, InterruptedException, JobCancelledException {
 		assert initialized;
 		assert progress != null;
 		metrics.addSkipped(skipSet.size());

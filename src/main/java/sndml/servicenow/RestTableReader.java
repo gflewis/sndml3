@@ -3,6 +3,7 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.daemon.JobCancelledException;
 import sndml.util.Log;
 
 public class RestTableReader extends TableReader {
@@ -45,7 +46,7 @@ public class RestTableReader extends TableReader {
 		}
 	}
 	
-	public Metrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, JobCancelledException, InterruptedException {
 		Log.setTableContext(table, this.getReaderName());
 		progress.logStart();
 		assert writer != null;

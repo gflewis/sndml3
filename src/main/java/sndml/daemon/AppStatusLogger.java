@@ -29,7 +29,7 @@ public class AppStatusLogger {
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 
-	public void setStatus(RecordKey runKey, String status) throws IOException {		
+	public void setStatus(RecordKey runKey, String status) throws IOException, JobCancelledException {		
 		assert session != null;
 		assert runKey != null;
 		Log.setJobContext(runKey.toString());
@@ -38,6 +38,7 @@ public class AppStatusLogger {
 		body.put("status", status);
 		JsonRequest request = new JsonRequest(session, putRunStatus, HttpMethod.PUT, body);
 		ObjectNode response = request.execute();
+		logger.info(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 		Log.setGlobalContext();

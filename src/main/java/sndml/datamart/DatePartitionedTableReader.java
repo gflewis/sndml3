@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTimeRange;
 import sndml.util.Log;
@@ -110,7 +111,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	}
 	
 	private TableReader createReader(DatePart datePart) 
-			throws IOException, SQLException, InterruptedException {
+			throws IOException, SQLException, InterruptedException, JobCancelledException {
 		String partName = datePart.getName();
 		boolean createNewSession = (threads > 1) ? true : false;
 		TableReader partReader = config.createReader(table, db, datePart, createNewSession);
@@ -124,7 +125,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	}
 
 	@Override
-	public Metrics call() throws IOException, SQLException, InterruptedException {
+	public Metrics call() throws IOException, SQLException, InterruptedException, JobCancelledException {
 		progress.logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");

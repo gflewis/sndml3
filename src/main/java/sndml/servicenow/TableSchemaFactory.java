@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.JobCancelledException;
+import sndml.datamart.ResourceException;
 import sndml.util.Log;
 
 public class TableSchemaFactory extends SchemaFactory {
@@ -51,7 +53,12 @@ public class TableSchemaFactory extends SchemaFactory {
 		reader.setFilter(query);
 		reader.setFields(FieldDefinition.DICT_FIELDS);
 		reader.setPageSize(2000);
-		RecordList recs = reader.getAllRecords();
+		RecordList recs;
+		try {
+			recs = reader.getAllRecords();
+		} catch (JobCancelledException e) {
+			throw new ResourceException(e);
+		}
 		for (TableRecord rec : recs) {
 			String fieldname = rec.getValue("element");
 			if (fieldname != null) {

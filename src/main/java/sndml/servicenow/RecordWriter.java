@@ -3,6 +3,8 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.daemon.JobCancelledException;
+
 /**
  * A class which knows how to process records retrieved from ServiceNow.
  * 
@@ -17,7 +19,7 @@ public abstract class RecordWriter {
 			
 	public abstract void processRecords(
 			RecordList recs, Metrics metrics, ProgressLogger progressLogger) 
-		throws IOException, SQLException;	
+		throws JobCancelledException, IOException, SQLException;	
 
 	public RecordWriter open(Metrics metrics) throws IOException, SQLException {
 		metrics.start();

@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.daemon.JobCancelledException;
 import sndml.util.DateTimeRange;
 
 public abstract class TableReader implements Callable<Metrics> {
@@ -63,10 +64,10 @@ public abstract class TableReader implements Callable<Metrics> {
 
 	// Note: Only Synchronizer can throw SQLException during initialization	
 	public abstract void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progressLogger) 
-		throws IOException, SQLException, InterruptedException;
+		throws IOException, SQLException, InterruptedException, JobCancelledException;
 		
 	public abstract Metrics call() 
-		throws IOException, SQLException, InterruptedException;
+		throws IOException, SQLException, InterruptedException, JobCancelledException;
 	
 	public void setReaderName(String name) {
 		if (initialized) throw new IllegalStateException();		
@@ -292,7 +293,7 @@ public abstract class TableReader implements Callable<Metrics> {
 //		this.metrics = metrics;
 //	}
 
-	public RecordList getAllRecords() throws IOException, InterruptedException {
+	public RecordList getAllRecords() throws IOException, InterruptedException, JobCancelledException {
 		assert !initialized;
 		if (this.metrics == null) {
 			Metrics accumulatorMetrics = new Metrics("accumulator");

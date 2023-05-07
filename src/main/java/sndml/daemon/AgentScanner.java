@@ -125,6 +125,7 @@ public abstract class AgentScanner extends TimerTask {
 		}
 		if (runlist != null && runlist.size() > 0) {
 			for (JsonNode node : runlist) {
+				boolean cancelDetected = false;
 				assert node.isObject();
 				RecordKey runKey = new RecordKey(node.get("sys_id").asText());
 				String number = node.get("number").asText();
@@ -133,11 +134,18 @@ public abstract class AgentScanner extends TimerTask {
 				ObjectNode obj = (ObjectNode) node;
 				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
-				setStatus(runKey, "prepare");
-				Log.setJobContext(number);
-				// AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
-				AppJobRunner runner = createJob(jobConfig);
-				joblist.add(runner);
+				try {
+					setStatus(runKey, "prepare");
+				} catch (JobCancelledException e) {
+					logger.warn(Log.FINISH, "Job Cancel Detected");
+					cancelDetected = true;
+				}
+				if (!cancelDetected) {
+					Log.setJobContext(number);
+					// AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
+					AppJobRunner runner = createJob(jobConfig);
+					joblist.add(runner);					
+				}
 			}			
 		}
 		return joblist;	
@@ -162,7 +170,7 @@ public abstract class AgentScanner extends TimerTask {
 		return runlist;		
 	}
 	
-	void setStatus(RecordKey runKey, String status) throws IOException {
+	void setStatus(RecordKey runKey, String status) throws JobCancelledException, IOException {
 		statusLogger.setStatus(runKey, status);
 	}	
 	
