@@ -42,10 +42,11 @@ public class YamlLoader {
 	}
 	
 	YamlLoader(ConnectionProfile profile, YamlLoaderConfig config) throws ResourceException, SQLException {
-		this.session = profile.getSession();
+		this.session = profile.getReaderSession();
 		this.database = profile.getDatabase();
 		this.config = config;
 		this.metricsFile = config.getMetricsFile();
+		SchemaFactory.setSchemaReader(new TableSchemaReader(this.session));
 		for (JobConfig jobConfig : config.getJobs()) {
 			JobRunner runner = new JobRunner(session, database, jobConfig);
 			jobs.add(runner);

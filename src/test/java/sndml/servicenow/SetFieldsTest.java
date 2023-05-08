@@ -14,7 +14,7 @@ public class SetFieldsTest {
 
 	@Test
 	public void testSetColumns() throws Exception {
-		Session session = TestManager.getDefaultProfile().getSession();
+		Session session = TestManager.getDefaultProfile().getReaderSession();
 		Table incident = session.table("change_request");
 		RecordListAccumulator accumulator = new RecordListAccumulator(incident);
 		TableReader reader = incident.rest().getDefaultReader();

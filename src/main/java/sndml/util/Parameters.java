@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.util;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -7,6 +7,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import sndml.servicenow.RecordKey;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 

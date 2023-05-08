@@ -1,7 +1,6 @@
 package sndml.datamart;
 
 import java.io.File;
-import java.io.FileReader;
 import java.nio.file.Files;
 
 import org.apache.commons.cli.CommandLine;
@@ -11,7 +10,8 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.*;
+import sndml.daemon.AgentDaemon;
+import sndml.server.AgentServer;
 import sndml.util.Log;
 
 public class Main {

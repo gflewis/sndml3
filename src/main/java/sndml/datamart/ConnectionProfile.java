@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.daemon.AgentDaemon;
 import sndml.servicenow.Instance;
+import sndml.servicenow.SchemaFactory;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.PropertySet;
@@ -56,8 +57,9 @@ public class ConnectionProfile extends java.util.Properties {
 			hasProperty("writer.url") ? getSubset("writer") : getSubset("datamart");
 		
 		this.loader = getSubset("loader");
-		this.daemon = getSubset("daemon");
+		this.daemon = getSubset("daemon");			
 		this.httpserver = getSubset("http"); // HTTP Server
+		
 	}
 
 	public String getPathName() {
@@ -129,8 +131,13 @@ public class ConnectionProfile extends java.util.Properties {
 	 * Opens and returns a new connection to the ServiceNow instance.
 	 * @return
 	 */
-	public synchronized Session getSession() throws ResourceException {
+	public synchronized Session getReaderSession() throws ResourceException {
 		Session session = new Session(reader);
+		return session;
+	}
+	
+	public synchronized Session getAppSession() throws ResourceException {
+		Session session = new Session(app);
 		return session;
 	}
 

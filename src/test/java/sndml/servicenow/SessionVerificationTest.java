@@ -3,11 +3,10 @@ package sndml.servicenow;
 import org.junit.*;
 import org.slf4j.Logger;
 
-import sndml.util.Log;
+import sndml.util.PropertySet;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.util.Properties;
 
 public class SessionVerificationTest {
@@ -16,7 +15,7 @@ public class SessionVerificationTest {
 	
 	@Test
 	public void testValidate() throws Exception {
-		Session session = TestManager.getDefaultProfile().getSession();
+		Session session = TestManager.getDefaultProfile().getReaderSession();
 		session.verifyUser();
 		Table user = session.table("sys_user");
 		TableWSDL wsdl = user.getWSDL();
@@ -35,16 +34,11 @@ public class SessionVerificationTest {
 		props.setProperty("servicenow.instance", "dev00000");
 		props.setProperty("servicenow.username", "admin");
 		props.setProperty("servicenow.password", "secret");
-		Session session1 = new Session(props);
+		PropertySet propset = new PropertySet(props, "servicenow");
+		Session session1 = new Session(propset);
 		assertNotNull(session1);
 		props.setProperty("servicenow.verify_session", "true");
-		Session session2 = null;
-		try {
-			session2 = new Session(props);
-		}
-		catch (IOException e) {
-			logger.info(Log.TEST, e.getMessage());
-		}
+		Session session2 = new Session(propset);
 		assertNull(session2);
 	}
 }

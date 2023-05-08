@@ -34,7 +34,7 @@ public class CreateTableTest {
 
 	@Before
 	public void openDatabase() throws Exception {
-		session = profile.getSession();
+		session = profile.getReaderSession();
 		database = profile.getDatabase();
 	}
 	

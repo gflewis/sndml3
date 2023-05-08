@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.util.Log;
+import sndml.util.Parameters;
 
 public class JsonTableAPI extends TableAPI {
 

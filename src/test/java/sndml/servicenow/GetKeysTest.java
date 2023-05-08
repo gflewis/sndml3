@@ -19,7 +19,7 @@ public class GetKeysTest {
 
 	@Test
 	public void test() throws Exception {
-		Session session = profile.getSession();
+		Session session = profile.getReaderSession();
 		Table table = session.table("sys_user");
 		logger.info(Log.TEST, "Calling getStats");
 		TableStats stats = table.rest().getStats(null, false);

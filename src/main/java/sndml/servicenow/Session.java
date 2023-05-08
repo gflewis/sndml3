@@ -2,7 +2,6 @@ package sndml.servicenow;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpHost;
@@ -17,9 +16,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 
-import sndml.daemon.AgentDaemon;
-import sndml.daemon.AppSchemaFactory;
 import sndml.util.Log;
+import sndml.util.Parameters;
 import sndml.util.PropertySet;
 
 /**
@@ -30,7 +28,7 @@ public class Session {
 
 	private final Instance instance;
 	// private final Properties properties;
-	private final PropertySet props;
+	private final PropertySet propset;
 	private final AuthScope authScope;
 	private final String username;
 	private final Domain domain;
@@ -38,31 +36,31 @@ public class Session {
 	private final CredentialsProvider credsProvider;
 	final private BasicCookieStore cookieStore = new BasicCookieStore();
 	final private PoolingHttpClientConnectionManager connectionManager;	
-	private final ConcurrentHashMap<String,TableSchema> schemaCache = 
-			new ConcurrentHashMap<String,TableSchema>();
+//	private final ConcurrentHashMap<String,TableSchema> schemaCache = 
+//			new ConcurrentHashMap<String,TableSchema>();
 	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
 	private CloseableHttpClient client = null; // created on request
-	private SchemaFactory schemaFactory;
+//	private SchemaFactory schemaFactory;
 
 	final private Logger logger = Log.logger(this.getClass());
 
-	@Deprecated
-	public Session(Properties props) throws IOException {
-		this(props, false);
-	}
-	
-	@Deprecated
-	public Session(Properties properties, boolean agentApp) throws IOException  {
-		this(agentApp ? new PropertySet(properties, "app") : new PropertySet(properties, "servicenow"));
-	}
+//	@Deprecated
+//	public Session(Properties props) throws IOException {
+//		this(props, false);
+//	}
+//	
+//	@Deprecated
+//	public Session(Properties properties, boolean agentApp) throws IOException  {
+//		this(agentApp ? new PropertySet(properties, "app") : new PropertySet(properties, "servicenow"));
+//	}
 		
-	public Session(PropertySet props) {
-		this.props = props;
-		String instancename = props.getProperty("instance");
-		String username = props.getProperty("username");
-		String password = props.getProperty("password");
-		String domainname = props.getProperty("domain");
+	public Session(PropertySet propset) {
+		this.propset = propset;
+		String instancename = propset.getProperty("instance");
+		String username = propset.getProperty("username");
+		String password = propset.getProperty("password");
+		String domainname = propset.getProperty("domain");
 		assert instancename != null; 
 		assert instancename != "";
 		assert username != null;
@@ -91,7 +89,7 @@ public class Session {
 	 * The URL and credentials will be the same, but the Session ID will be different.
 	 */
 	public Session duplicate() throws IOException {
-		return new Session(this.props);
+		return new Session(this.propset);
 	}
 		
 	/**
@@ -99,11 +97,11 @@ public class Session {
 	 * if it is defined, otherwise return null.
 	 */
 	public String getProperty(String propname) {
-		return props.getString(propname);
+		return propset.getString(propname);
 	}
 		
 	public int defaultPageSize() {
-		int pageSize = props.getInt("pagesize", 200);
+		int pageSize = propset.getInt("pagesize", 200);
 		assert pageSize > 0;
 		return pageSize;
 	}
@@ -170,24 +168,24 @@ public class Session {
 	 * Generate {@link TableSchema} or retrieve from cache.
 	 * @throws  
 	 */
-	public TableSchema getSchema(String tablename) 
-			throws InvalidTableNameException, IOException, InterruptedException {
-		// TODO: Session should not be referencing a different class. Move cache into SchemaFactory class.
-		if (schemaFactory == null) {
-			schemaFactory =	AgentDaemon.isRunning() ?
-				new AppSchemaFactory(this) : 
-				new TableSchemaFactory(this);
-		}
-		if (schemaCache.containsKey(tablename)) 
-			return schemaCache.get(tablename);
-		String saveJob = Log.getJobContext();
-		Log.setJobContext(tablename + ".schema");		
-		TableSchema schema = schemaFactory.getSchema(tablename);
-		if (schema.isEmpty()) throw new InvalidTableNameException(tablename);
-		schemaCache.put(tablename, schema);
-		Log.setJobContext(saveJob);
-		return schema;
-	}
+//	public TableSchema getSchema(String tablename) 
+//			throws InvalidTableNameException, IOException, InterruptedException {
+//		// TODO: Session should not be referencing a different class. Move cache into SchemaFactory class.
+//		if (schemaFactory == null) {
+//			schemaFactory =	AgentDaemon.isRunning() ?
+//				new AppSchemaFactory(this) : 
+//				new TableSchemaFactory(this);
+//		}
+//		if (schemaCache.containsKey(tablename)) 
+//			return schemaCache.get(tablename);
+//		String saveJob = Log.getJobContext();
+//		Log.setJobContext(tablename + ".schema");		
+//		TableSchema schema = schemaFactory.getSchema(tablename);
+//		if (schema.isEmpty()) throw new InvalidTableNameException(tablename);
+//		schemaCache.put(tablename, schema);
+//		Log.setJobContext(saveJob);
+//		return schema;
+//	}
 	
 	/**
 	 * Generate {@link TableWSDL} or retrieve from cache.
@@ -219,7 +217,7 @@ public class Session {
 		String timezone = profile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;
-			if (props.getBoolean("verify_timezone", false)) {
+			if (propset.getBoolean("verify_timezone", false)) {
 				logger.error(Log.INIT, message);				
 				throw new ServiceNowException(message);				
 			}

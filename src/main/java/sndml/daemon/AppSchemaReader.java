@@ -10,12 +10,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.*;
 
-public class AppSchemaFactory extends SchemaFactory {
+public class AppSchemaReader implements SchemaReader {
 
 	private final Session session;
 	private final ConnectionProfile profile;
 	
-	public AppSchemaFactory(Session session) {
+	public AppSchemaReader(Session session) {
 		this.profile = AgentDaemon.getConnectionProfile();
 		this.session = session;
 	}

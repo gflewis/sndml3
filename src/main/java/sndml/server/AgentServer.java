@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.server;
 
 
 import java.io.IOException;

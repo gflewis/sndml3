@@ -7,6 +7,7 @@ import org.jdom2.Namespace;
 import org.slf4j.Logger;
 
 import sndml.util.Log;
+import sndml.util.Parameters;
 
 public class SoapTableAPI extends TableAPI {
 

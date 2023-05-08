@@ -95,13 +95,13 @@ public class Table {
 		return api;
 	}
 	
-	@Deprecated
-	public TableReader getDefaultReader() throws IOException {
-		if (api == apiJSON) return apiJSON.getDefaultReader();
-		if (api == apiREST) return apiREST.getDefaultReader();
-		if (api == apiSOAP) return apiSOAP.getDefaultReader();
-		throw new IllegalStateException();
-	}
+//	@Deprecated
+//	public TableReader getDefaultReader() throws IOException {
+//		if (api == apiJSON) return apiJSON.getDefaultReader();
+//		if (api == apiREST) return apiREST.getDefaultReader();
+//		if (api == apiSOAP) return apiSOAP.getDefaultReader();
+//		throw new IllegalStateException();
+//	}
 			
 	public TableRecord getRecord(RecordKey key) throws IOException {
 		return api.getRecord(key);
@@ -112,7 +112,8 @@ public class Table {
 	}
 	
 	public TableSchema getSchema() throws IOException, InterruptedException {
-		return session.getSchema(getName());
+//		return session.getSchema(getName());
+		return SchemaFactory.getSchema(getName());
 	}
 		
 }

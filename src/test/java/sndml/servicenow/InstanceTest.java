@@ -7,6 +7,8 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
+import sndml.util.Parameters;
+
 public class InstanceTest {
 
 	@Test

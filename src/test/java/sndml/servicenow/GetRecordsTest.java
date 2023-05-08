@@ -25,7 +25,7 @@ public class GetRecordsTest {
 	public GetRecordsTest(TestingProfile profile) throws IOException {
 		TestManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
-		this.session = profile.getSession();
+		this.session = profile.getReaderSession();
 	}
 
 	@Test

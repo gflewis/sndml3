@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -14,6 +14,7 @@ import com.sun.net.httpserver.*;
 import sndml.datamart.*;
 import sndml.util.Log;
 
+@Deprecated
 public class AppJobHandler implements HttpHandler {
 
 	private final ConnectionProfile profile;

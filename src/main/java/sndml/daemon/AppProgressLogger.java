@@ -161,7 +161,7 @@ public class AppProgressLogger extends ProgressLogger {
 		String responseStatus = responseResult.get("status").asText();
 		if ("cancelled".equals(responseStatus) || "failed".equals(responseStatus)) {
 			logger.warn(Log.RESPONSE, String.format(
-					"putRunStatus Job Cancellation Detected %s status=%s %s", runKey, responseStatus, response.toString()));
+					"putRunStatus Job Cancellation Detected %s %s", runKey, response.toString()));
 			throw new JobCancelledException(runKey);			
 		}
 		if (logger.isDebugEnabled())

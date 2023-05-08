@@ -19,7 +19,7 @@ import sndml.util.Log;
 public abstract class AgentScanner extends TimerTask {
 
 	final ConnectionProfile profile;
-	final Session session;
+	final Session appSession;
 	final AppStatusLogger statusLogger;
 	final String agentName;
 	final URI uriGetRunList;
@@ -43,11 +43,12 @@ public abstract class AgentScanner extends TimerTask {
 		this.profile = profile;
 		this.agentName = AgentDaemon.getAgentName();
 		Log.setJobContext(agentName);		
-		this.session = profile.getSession();
+		this.appSession = profile.getAppSession();
 		assert agentName != null;
 		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = profile.getAPI("putrunstatus");
-		this.statusLogger = new AppStatusLogger(profile, session);
+		this.statusLogger = new AppStatusLogger(profile, appSession);
+		SchemaFactory.setSchemaReader(new AppSchemaReader(this.appSession));		
 	}
 		
 	@Override
@@ -97,13 +98,13 @@ public abstract class AgentScanner extends TimerTask {
 	
 	protected abstract int getErrorLimit();
 	
-	public 	AppJobRunner createJob(JobConfig jobConfig) {
-		AppJobRunner job = new AppJobRunner(this, profile, jobConfig);
+	public 	ScannerJobRunner createJob(JobConfig jobConfig) {
+		ScannerJobRunner job = new ScannerJobRunner(this, profile, jobConfig);
 		return job;
 	}	
 
-	ArrayList<AppJobRunner> getJobList() throws IOException, ConfigParseException {
-		ArrayList<AppJobRunner> joblist = new ArrayList<AppJobRunner>();
+	ArrayList<ScannerJobRunner> getJobList() throws IOException, ConfigParseException {
+		ArrayList<ScannerJobRunner> joblist = new ArrayList<ScannerJobRunner>();
 		ArrayNode runlist = null;
 		try {
 			runlist = getRunList();
@@ -115,7 +116,7 @@ public abstract class AgentScanner extends TimerTask {
 			int errorLimit = getErrorLimit();
 			logger.error(Log.ERROR, e.getMessage(), e);
 			if (errorCount < errorLimit) {
-				session.reset();				
+				appSession.reset();				
 			}
 			else {
 				// ResourceException will not be caught
@@ -143,7 +144,7 @@ public abstract class AgentScanner extends TimerTask {
 				if (!cancelDetected) {
 					Log.setJobContext(number);
 					// AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
-					AppJobRunner runner = createJob(jobConfig);
+					ScannerJobRunner runner = createJob(jobConfig);
 					joblist.add(runner);					
 				}
 			}			
@@ -154,7 +155,7 @@ public abstract class AgentScanner extends TimerTask {
 	ArrayNode getRunList() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
 		ArrayNode runlist = null;	
-		JsonRequest request = new JsonRequest(session, uriGetRunList, HttpMethod.GET, null);
+		JsonRequest request = new JsonRequest(appSession, uriGetRunList, HttpMethod.GET, null);
 		ObjectNode response = request.execute();
 		logger.debug(Log.RESPONSE, response.toPrettyString());
 		ObjectNode objResult = (ObjectNode) response.get("result");

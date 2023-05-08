@@ -12,7 +12,7 @@ public class RestTableReaderTest {
 	final Session session;
 	
 	public RestTableReaderTest() {
-		session = TestManager.getDefaultProfile().getSession();
+		session = TestManager.getDefaultProfile().getReaderSession();
 	}
 
 	@Test

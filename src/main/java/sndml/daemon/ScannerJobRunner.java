@@ -7,7 +7,7 @@ import sndml.datamart.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
-public class AppJobRunner extends JobRunner implements Runnable {
+public class ScannerJobRunner extends JobRunner implements Runnable {
 	
 	final AgentScanner scanner; // my parent
 	final public RecordKey runKey;
@@ -18,7 +18,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	 * Run a job with a new ServiceNow session and a new Database connection.
 	 * Update ServiceNow with the status of the job as it runs.
 	 */
-	public AppJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
+	public ScannerJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
 		super(profile, config);
 		this.scanner = scanner;
 		this.profile = profile;
@@ -84,7 +84,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.daemon.getBoolean("continue", false);
 		setThreadName();
 		try {
-			if (session == null) session = profile.getSession();
+			if (session == null) session = profile.getReaderSession();
 			statusLogger = new AppStatusLogger(profile, session);		
 			if (database == null) database = profile.getDatabase();
 			assert database != null;

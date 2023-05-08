@@ -8,6 +8,7 @@ import java.net.URL;
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIBuilder;
 
+import sndml.util.Parameters;
 import sndml.util.PropertySet;
 
 /**

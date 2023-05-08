@@ -31,7 +31,7 @@ public class CRUDTest {
 	public CRUDTest(TestingProfile profile) throws IOException {
 		TestManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
-		this.session = profile.getSession();
+		this.session = profile.getReaderSession();
 	}
 
 	@AfterClass
@@ -59,7 +59,7 @@ public class CRUDTest {
 	    TestManager.banner(logger,  "Update");
 	    TableRecord rec = api.getRecord(key);
 	    assertEquals(descr1, rec.getValue("short_description"));
-	    api.updateRecord(key, new sndml.servicenow.Parameters("short_description", descr2));
+	    api.updateRecord(key, new sndml.util.Parameters("short_description", descr2));
 	    TestManager.banner(logger, "Delete");
 	    rec = api.getRecord(key);
 	    assertEquals(descr2, rec.getValue("short_description"));
@@ -75,7 +75,7 @@ public class CRUDTest {
 		RecordKey badKey = new RecordKey("0123456789abcdef0123456789abcdef");
 		Table tbl = session.table("incident");
 		TableAPI api = tbl.api();
-		sndml.servicenow.Parameters parms = new sndml.servicenow.Parameters();
+		sndml.util.Parameters parms = new sndml.util.Parameters();
 		parms.add("short_description", "Updated incident");
 		api.updateRecord(badKey,  parms);;
 	}

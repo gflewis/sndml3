@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.util.Log;
+import sndml.util.Parameters;
 
 public abstract class TableAPI {
 

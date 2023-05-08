@@ -9,7 +9,7 @@ import sndml.daemon.JobCancelledException;
 import sndml.datamart.ResourceException;
 import sndml.util.Log;
 
-public class TableSchemaFactory extends SchemaFactory {
+public class TableSchemaReader implements SchemaReader {
 
 	private final Session session;
 	private final Table dictionary;
@@ -17,13 +17,12 @@ public class TableSchemaFactory extends SchemaFactory {
 	
 	final private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public TableSchemaFactory(Session session) {
+	public TableSchemaReader(Session session) {
 		this.session = session;
 		this.dictionary = session.table("sys_dictionary");
 		this.hierarchy = session.table("sys_db_object");		
 	}
 	
-	@Override
 	public TableSchema getSchema(String tablename) throws IOException, InterruptedException {
 		return getSchema(session.table(tablename));
 	}

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import sndml.daemon.JobCancelledException;
 import sndml.util.Log;
+import sndml.util.Parameters;
 
 /**
  * A {@link TableReader} which attempts to read records using a {@link KeySet}.

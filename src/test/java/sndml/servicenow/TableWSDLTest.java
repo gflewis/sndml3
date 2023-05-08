@@ -13,7 +13,7 @@ public class TableWSDLTest {
 	final Session session;
 
 	public TableWSDLTest() {
-		session = TestManager.getDefaultProfile().getSession();
+		session = TestManager.getDefaultProfile().getReaderSession();
 	}
 	
 	TableWSDL getWSDL(String tablename) throws IOException {

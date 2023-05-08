@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.daemon.JobCancelledException;
+import sndml.util.Parameters;
 
 /**
  * <p>A {@link TableReader} which attempts to read a set of records

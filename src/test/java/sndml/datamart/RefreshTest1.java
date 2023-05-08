@@ -42,10 +42,10 @@ public class RefreshTest1 {
 	@Test
 	public void testRefresh() throws Exception {
 		String tableName = "incident";
-		Session session = profile.getSession();
+		Session session = profile.getReaderSession();
 		DBUtil db = new DBUtil(profile);
 		JobFactory jf = new JobFactory(profile, session, db.getDatabase(), DateTime.now());
-		TableAPI api = profile.getSession().table(tableName).api();
+		TableAPI api = profile.getReaderSession().table(tableName).api();
 	    TestManager.banner(logger, "Load");
 		db.dropTable(tableName);
 		JobRunner create = jf.yamlJob("{source: incident, action: create}");
