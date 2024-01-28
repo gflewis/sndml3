@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import sndml.daemon.AgentDaemon;
 import sndml.servicenow.Instance;
-import sndml.servicenow.SchemaFactory;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.PropertySet;
