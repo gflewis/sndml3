@@ -81,7 +81,7 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
-		boolean onExceptionContinue = profile.daemon.getBoolean("continue", false);
+		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
 			if (session == null) session = profile.getReaderSession();

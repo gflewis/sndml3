@@ -46,9 +46,8 @@ public class ConnectionProfile extends java.util.Properties {
 	private final File profile;
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
 	public final PropertySet schema; // Properties for ServiceNow instance used for schema
-	public final PropertySet app;    // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet database; // Properties for SQL Database
-	public final PropertySet daemon; 
+	public final PropertySet agent; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet loader;
 	public final SchemaSource schemaSource;
 	@Deprecated public final PropertySet httpserver;
@@ -62,10 +61,14 @@ public class ConnectionProfile extends java.util.Properties {
 			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
 		this.schema =
 			hasProperty("schema.instance") ? getSubset("schema") : this.reader;
-		this.app = 
-			hasProperty("app.instance") ? getSubset("app") : this.reader;
+		this.agent =
+			hasProperty("app.agent") ? getSubset("app") :
+			hasProperty("daemon.agent") ? getSubset("daemon") :
+			this.reader;
 		this.database = 
 			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
+		this.loader = getSubset("loader");
+		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
 		else if (hasProperty("schema.instance"))
@@ -73,8 +76,6 @@ public class ConnectionProfile extends java.util.Properties {
 		else 
 			this.schemaSource = SchemaSource.READER;
 		
-		this.loader = getSubset("loader");
-		this.daemon = getSubset("daemon");			
 		this.httpserver = getSubset("http"); // HTTP Server
 		
 	}
@@ -154,7 +155,7 @@ public class ConnectionProfile extends java.util.Properties {
 	}
 	
 	public synchronized Session getAppSession() throws ResourceException {
-		Session session = new Session(app);
+		Session session = new Session(agent);
 		return session;
 	}
 
@@ -172,7 +173,7 @@ public class ConnectionProfile extends java.util.Properties {
 	}
 
 	public String getAgentName() {
-		return daemon.getString("agent", DEFAULT_AGENT_NAME);
+		return agent.getString("agent", DEFAULT_AGENT_NAME);
 	}
 	/**
 	 * Return the URI of an API. This will be dependent on the application scope
@@ -183,10 +184,10 @@ public class ConnectionProfile extends java.util.Properties {
 	}
 	
 	public URI getAPI(String apiName, String parameter) {
-		Instance instance = new Instance(app.getString("instance"));
+		Instance instance = new Instance(agent.getString("instance"));
 		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		assert profile != null;		
-		String appScope = daemon.getString("scope", DEFAULT_APP_SCOPE);
+		String appScope = agent.getString("scope", DEFAULT_APP_SCOPE);
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		

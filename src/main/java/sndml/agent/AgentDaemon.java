@@ -40,9 +40,9 @@ public class AgentDaemon implements Daemon {
         daemon = this;
         this.process = ProcessHandle.current();
 		this.profile = profile;
-		this.agentName = profile.daemon.getString("agent", "main");
-		this.threadCount = profile.daemon.getInt("threads", 3);
-		this.intervalSeconds = profile.daemon.getInt("interval", 60);
+		this.agentName = profile.agent.getString("agent", "main");
+		this.threadCount = profile.agent.getInt("threads", 3);
+		this.intervalSeconds = profile.agent.getInt("interval", 60);
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
 			this.workerPool = new WorkerPool(this, threadCount);
@@ -144,7 +144,7 @@ public class AgentDaemon implements Daemon {
 	public void init(DaemonContext context) throws DaemonInitException {
 		logger.debug(Log.INIT, "begin init");
 		this.context = context;
-		String pidFileName = profile.daemon.getString("pidfile");
+		String pidFileName = profile.agent.getString("pidfile");
 		if (pidFileName != null) {
 			File pidFile = new File(pidFileName);
 			long pid = process.pid();
@@ -184,7 +184,7 @@ public class AgentDaemon implements Daemon {
 	public void stop() {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.FINISH, "Begin stop");
-		int waitSec = profile.daemon.getInt("shutdown_seconds", 30);
+		int waitSec = profile.agent.getInt("shutdown_seconds", 30);
 		// shutdownNow will send an interrupt to all threads
 		workerPool.shutdown();
 		isRunning = false;
