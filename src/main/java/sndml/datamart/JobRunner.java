@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.JobCancelledException;
+import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;

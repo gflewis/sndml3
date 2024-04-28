@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.agent;
 
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;

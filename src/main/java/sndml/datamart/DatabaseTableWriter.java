@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.slf4j.Logger;
 
-import sndml.daemon.JobCancelledException;
+import sndml.agent.JobCancelledException;
 import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;

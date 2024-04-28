@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.agent;
 
 import sndml.datamart.ConnectionProfile;
 import sndml.servicenow.RecordKey;

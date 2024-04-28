@@ -1,7 +1,7 @@
 package sndml.datamart;
 
-import sndml.daemon.AppProgressLogger;
-import sndml.daemon.JobCancelledException;
+import sndml.agent.AppProgressLogger;
+import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 
 public class CompositeProgressLogger extends ProgressLogger {

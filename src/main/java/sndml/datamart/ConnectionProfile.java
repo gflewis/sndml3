@@ -16,7 +16,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.AgentDaemon;
+import sndml.agent.AgentDaemon;
 import sndml.servicenow.Instance;
 import sndml.servicenow.Session;
 import sndml.util.Log;

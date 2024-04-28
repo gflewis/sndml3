@@ -3,7 +3,7 @@ package sndml.datamart;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.daemon.JobCancelledException;
+import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.Log;

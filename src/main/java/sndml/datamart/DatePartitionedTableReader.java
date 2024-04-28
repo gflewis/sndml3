@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.daemon.JobCancelledException;
+import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTimeRange;
 import sndml.util.Log;

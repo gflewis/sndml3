@@ -3,7 +3,7 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.daemon.JobCancelledException;
+import sndml.agent.JobCancelledException;
 import sndml.util.Log;
 import sndml.util.Parameters;
 

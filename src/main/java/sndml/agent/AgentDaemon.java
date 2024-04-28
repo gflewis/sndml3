@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.agent;
 
 import java.io.File;
 import java.io.IOException;

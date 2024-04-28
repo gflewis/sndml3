@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.agent;
 
 import java.io.IOException;
 import java.sql.SQLException;

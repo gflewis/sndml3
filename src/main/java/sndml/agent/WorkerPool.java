@@ -1,4 +1,4 @@
-package sndml.daemon;
+package sndml.agent;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
