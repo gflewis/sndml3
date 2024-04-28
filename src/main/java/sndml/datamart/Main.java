@@ -10,8 +10,8 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.AgentDaemon;
-import sndml.server.AgentServer;
+import sndml.agent.*;
+import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
 public class Main {
@@ -31,21 +31,23 @@ public class Main {
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("yaml").required(false).hasArg(true).
 				desc("YAML config file (required)").build());
-		options.addOption(Option.builder("j").longOpt("job").required(false).hasArg(true).
+		options.addOption(Option.builder("job").longOpt("job").required(false).hasArg(true).
 				desc("sys_id of job").build());
 		options.addOption(Option.builder("daemon").longOpt("daemon").required(false).hasArg(false).
 				desc("Run as daemon/service").build());
-		options.addOption(Option.builder("server").longOpt("server").required(false).hasArg(false).
-				desc("Run as server").build());		
 		options.addOption(Option.builder("scan").longOpt("scan").required(false).hasArg(false).
 				desc("Run the deamon scanner once").build());
 		options.addOption(Option.builder("f").longOpt("filter").required(false).hasArg(true).
 				desc("Encoded query for use with --table").build());
+		/*
+		options.addOption(Option.builder("server").longOpt("server").required(false).hasArg(false).
+				desc("Run as server").build());
+		*/		
 		CommandLine cmd = new DefaultParser().parse(options,  args);
 		int cmdCount = 0;
 		if (cmd.hasOption("y")) cmdCount += 1;
 		if (cmd.hasOption("t")) cmdCount += 1;
-		if (cmd.hasOption("j")) cmdCount += 1;
+		if (cmd.hasOption("job")) cmdCount += 1;
 		if (cmd.hasOption("daemon")) cmdCount += 1;
 		if (cmd.hasOption("scan")) cmdCount += 1;		
 		if (cmdCount != 1) 
@@ -81,16 +83,25 @@ public class Main {
 			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
 			daemon.runForever();
 		}
-		if (cmd.hasOption("server")) {
-			// Server
-			AgentServer server = new AgentServer(profile);
-			server.start();
-		}
 		if (cmd.hasOption("scan")) {
 			// Scan once
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
 			daemon.scanOnce();
 		}
+		if (cmd.hasOption("job")) {
+			// Run a single job
+			String sys_id = cmd.getOptionValue("j");
+			RecordKey jobkey = new RecordKey(sys_id);
+			AgentJobRunner jobRunner = new AgentJobRunner(profile, jobkey);
+			jobRunner.call();			
+		}
+		/*
+		if (cmd.hasOption("server")) {
+			// Server
+			AgentServer server = new AgentServer(profile);
+			server.start();
+		}
+		*/
 	}
 }

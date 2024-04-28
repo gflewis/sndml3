@@ -33,6 +33,9 @@ import sndml.util.PropertySet;
  */
 @SuppressWarnings("serial")
 public class ConnectionProfile extends java.util.Properties {
+	
+	public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
+	public static final String DEFAULT_AGENT_NAME = "main";
 
 	enum SchemaSource {
 		APP,    // Use app instance and {@link AppSchemaReader}
@@ -168,6 +171,9 @@ public class ConnectionProfile extends java.util.Properties {
 		return database;
 	}
 
+	public String getAgentName() {
+		return daemon.getString("agent", DEFAULT_AGENT_NAME);
+	}
 	/**
 	 * Return the URI of an API. This will be dependent on the application scope
 	 * which is available from the property daemon.scope.
@@ -180,7 +186,7 @@ public class ConnectionProfile extends java.util.Properties {
 		Instance instance = new Instance(app.getString("instance"));
 		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		assert profile != null;		
-		String appScope = daemon.getString("scope", "x_108443_sndml");
+		String appScope = daemon.getString("scope", DEFAULT_APP_SCOPE);
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		
