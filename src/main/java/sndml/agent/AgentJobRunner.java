@@ -2,6 +2,7 @@ package sndml.agent;
 
 import java.io.IOException;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import sndml.servicenow.RecordKey;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 
-public class AgentJobRunner implements Callable<Metrics> {
+public class AgentJobRunner implements Runnable {
 
 	final ConnectionProfile profile;
 	final Session appSession;
@@ -32,6 +33,7 @@ public class AgentJobRunner implements Callable<Metrics> {
 	final URI uriGetRun;
 	final ConfigFactory configFactory = new ConfigFactory();
 	final Logger logger = LoggerFactory.getLogger(AgentJobRunner.class);
+	Metrics metrics;
 	
 	public AgentJobRunner(ConnectionProfile profile, RecordKey jobKey) 
 			throws ConfigParseException, IOException {
@@ -57,9 +59,22 @@ public class AgentJobRunner implements Callable<Metrics> {
 		return objResult;
 	}
 
-	@Override
+	/*
 	public Metrics call() throws Exception {
 		return jobRunner.call();
+	}
+	*/
+
+	@Override
+	public void run() {
+		try {
+			metrics = jobRunner.call();
+		} catch (SQLException | IOException | InterruptedException | JobCancelledException e) {
+			// Throw an unchecked exception which should abort the process.
+			// (We are done anyway)
+			throw new RuntimeException(e);
+		}
+		
 	}
 	
 	

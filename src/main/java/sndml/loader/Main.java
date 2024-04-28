@@ -94,7 +94,7 @@ public class Main {
 			String sys_id = cmd.getOptionValue("j");
 			RecordKey jobkey = new RecordKey(sys_id);
 			AgentJobRunner jobRunner = new AgentJobRunner(profile, jobkey);
-			jobRunner.call();			
+			jobRunner.run();			
 		}
 		/*
 		if (cmd.hasOption("server")) {
