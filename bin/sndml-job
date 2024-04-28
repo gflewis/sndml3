@@ -1,0 +1,4 @@
+#!/bin/bash
+source sndml-setup $1
+env | grep SNDML | sort
+java -ea -jar $SNDML_JAR -p $SNDML_PROFILE -job $2
