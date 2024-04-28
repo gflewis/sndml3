@@ -57,14 +57,13 @@ public class Session {
 		
 	public Session(PropertySet propset) {
 		this.propset = propset;
+		propset.assertNotEmpty("instance");
+		propset.assertNotEmpty("username");
+		propset.assertNotEmpty("password");
 		String instancename = propset.getProperty("instance");
 		String username = propset.getProperty("username");
 		String password = propset.getProperty("password");
-		String domainname = propset.getProperty("domain");
-		assert instancename != null; 
-		assert instancename != "";
-		assert username != null;
-		assert username != "";
+		String domainname = propset.getProperty("domain");		
 		this.instance = new Instance(instancename);
 		this.username = username;
 		this.domain = (domainname == null || domainname.length() == 0) ? 
@@ -163,29 +162,6 @@ public class Session {
 	public Domain getDomain() {
 		return this.domain;
 	}
-	
-	/**
-	 * Generate {@link TableSchema} or retrieve from cache.
-	 * @throws  
-	 */
-//	public TableSchema getSchema(String tablename) 
-//			throws InvalidTableNameException, IOException, InterruptedException {
-//		// TODO: Session should not be referencing a different class. Move cache into SchemaFactory class.
-//		if (schemaFactory == null) {
-//			schemaFactory =	AgentDaemon.isRunning() ?
-//				new AppSchemaFactory(this) : 
-//				new TableSchemaFactory(this);
-//		}
-//		if (schemaCache.containsKey(tablename)) 
-//			return schemaCache.get(tablename);
-//		String saveJob = Log.getJobContext();
-//		Log.setJobContext(tablename + ".schema");		
-//		TableSchema schema = schemaFactory.getSchema(tablename);
-//		if (schema.isEmpty()) throw new InvalidTableNameException(tablename);
-//		schemaCache.put(tablename, schema);
-//		Log.setJobContext(saveJob);
-//		return schema;
-//	}
 	
 	/**
 	 * Generate {@link TableWSDL} or retrieve from cache.

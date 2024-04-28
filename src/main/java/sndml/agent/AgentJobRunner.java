@@ -3,7 +3,6 @@ package sndml.agent;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,12 +57,6 @@ public class AgentJobRunner implements Runnable {
 		ObjectNode objResult = (ObjectNode) response.get("result");
 		return objResult;
 	}
-
-	/*
-	public Metrics call() throws Exception {
-		return jobRunner.call();
-	}
-	*/
 
 	@Override
 	public void run() {

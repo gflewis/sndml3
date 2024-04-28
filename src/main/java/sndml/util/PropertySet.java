@@ -26,7 +26,19 @@ public class PropertySet extends java.util.Properties {
 			}			
 		}		
 	}
-		
+	
+	public void assertNotEmpty(String name) throws IllegalStateException {
+		if (!hasProperty(name)) missingProperty(name);
+		String value = getString(name);
+		if (value == null) missingProperty(name);
+		if (value.length() == 0) missingProperty(name);
+	}
+	
+	public void missingProperty(String name) throws IllegalStateException {
+		String errmsg = String.format("missing property: %s.%s", prefix, name); 
+		throw new IllegalStateException(errmsg);		
+	}
+	
 	public Properties getParent() {
 		return this.parent;
 	}

@@ -31,8 +31,8 @@ import sndml.util.PropertySet;
  * for evaluation.</p>
  *
  */
-@SuppressWarnings("serial")
-public class ConnectionProfile extends java.util.Properties {
+
+public class ConnectionProfile {
 	
 	public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
 	public static final String DEFAULT_AGENT_NAME = "main";
@@ -43,24 +43,27 @@ public class ConnectionProfile extends java.util.Properties {
 		SCHEMA  // Use schema instance and {@link TableSchemaReader}
 	}
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private final File profile;
+	private final File file;
+	private final Properties allProperties;
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
-	public final PropertySet schema; // Properties for ServiceNow instance used for schema
+	public final PropertySet dict; // Properties for ServiceNow instance used for schema
 	public final PropertySet database; // Properties for SQL Database
 	public final PropertySet agent; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet loader;
-	public final SchemaSource schemaSource;
+	// TODO Implement AgentServer
 	@Deprecated public final PropertySet httpserver;
+	public final SchemaSource schemaSource;
 	
 	public ConnectionProfile(File profile) throws IOException {
-		this.profile = profile;
+		this.file = profile;
+		this.allProperties = new Properties();
 		FileInputStream stream = new FileInputStream(profile);
 		this.loadWithSubstitutions(stream);
 		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
 		this.reader = 
 			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
-		this.schema =
-			hasProperty("schema.instance") ? getSubset("schema") : this.reader;
+		this.dict =
+			hasProperty("dict.instance") ? getSubset("dict") : this.reader;
 		this.agent =
 			hasProperty("app.agent") ? getSubset("app") :
 			hasProperty("daemon.agent") ? getSubset("daemon") :
@@ -68,29 +71,27 @@ public class ConnectionProfile extends java.util.Properties {
 		this.database = 
 			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
 		this.loader = getSubset("loader");
+		this.httpserver = getSubset("server");
 		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
 		else if (hasProperty("schema.instance"))
 			this.schemaSource = SchemaSource.SCHEMA;
 		else 
-			this.schemaSource = SchemaSource.READER;
-		
-		this.httpserver = getSubset("http"); // HTTP Server
-		
+			this.schemaSource = SchemaSource.READER;				
 	}
 
 	public String getPathName() {
-		return profile.getPath();
+		return file.getPath();
 	}
 
-	public PropertySet getSubset(String prefix) {
-		PropertySet result = new PropertySet(this, prefix);
+	private PropertySet getSubset(String prefix) {
+		PropertySet result = new PropertySet(allProperties, prefix);
 		return result;
 	}
 
-	public boolean hasProperty(String name) {
-		return containsKey(name);
+	private boolean hasProperty(String name) {
+		return allProperties.containsKey(name);
 	}
 	
 	public String getMetricsFolder() { return loader.getProperty("metrics_folder"); }
@@ -121,7 +122,7 @@ public class ConnectionProfile extends java.util.Properties {
 					throw new AssertionError(String.format("Failed to evaluate \"%s\"", command));
 				logger.debug(Log.INIT, value);
 			}
-			this.setProperty(name, value);
+			allProperties.setProperty(name, value);
 		}
 	}
 	
@@ -155,8 +156,25 @@ public class ConnectionProfile extends java.util.Properties {
 	}
 	
 	public synchronized Session getAppSession() throws ResourceException {
-		Session session = new Session(agent);
+		Session session = null;
+		if (agent.containsKey("instance"))
+			session = new Session(agent);
+		else if (reader.containsKey("instance"))
+			session = new Session(reader);
+		else
+			reader.missingProperty("instance");
 		return session;
+	}
+	
+	public Instance getAppInstance() throws ResourceException {
+		Instance instance = null;
+		if (agent.containsKey("instance"))
+			instance = new Instance(agent);
+		else if (reader.containsKey("instance"))
+			instance = new Instance(reader);
+		else
+			reader.missingProperty("instance");
+		return instance;		
 	}
 
 	/**
@@ -184,7 +202,7 @@ public class ConnectionProfile extends java.util.Properties {
 	}
 	
 	public URI getAPI(String apiName, String parameter) {
-		Instance instance = new Instance(agent.getString("instance"));
+		Instance instance = getAppInstance();
 		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		assert profile != null;		
 		String appScope = agent.getString("scope", DEFAULT_APP_SCOPE);
@@ -192,16 +210,6 @@ public class ConnectionProfile extends java.util.Properties {
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		
 	}
-
-	/** 
-	 * @return Name of templates file or null if not specified
-	 */
-//	public File getTemplatesFile() {
-//		File templatesFile = null;
-//		String templatesPath = database.getProperty("templates", "");
-//		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
-//		return templatesFile;
-//	}
 	
 	/**
 	 * Return true if this process is connected to a scoped app 
