@@ -29,7 +29,7 @@ public class PropertySetTest {
 		int size = profile.reader.size();
 		logger.debug("size=" + size);		
 		assertEquals("dev00000", profile.reader.getProperty("instance"));
-		assertEquals("admin", profile.writer.getProperty("username"));		
+		assertEquals("admin", profile.database.getProperty("username"));		
 	}
 	
 }

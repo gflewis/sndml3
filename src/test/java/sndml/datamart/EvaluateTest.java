@@ -27,7 +27,7 @@ public class EvaluateTest {
 		File file = new File("src/test/resources/profile_test.properties");
 		ConnectionProfile profile = new ConnectionProfile(file);
 		assertEquals("orange", profile.reader.getProperty("password"));
-		assertEquals("yellow", profile.writer.getProperty("password"));
+		assertEquals("yellow", profile.database.getProperty("password"));
 		
 	}
 	

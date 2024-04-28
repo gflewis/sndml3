@@ -51,14 +51,14 @@ public class Database {
 	public Database(ConnectionProfile profile) throws SQLException, URISyntaxException {
 		this.profile = profile;
 		this.dburl = databaseProperty("url", null);
+		assert this.dburl != null : "Property database.url not found";
 		this.dbURI = new URI(dburl);
 		this.protocol = getProtocol(this.dbURI);
 		this.dbuser = databaseProperty("username", null);
 		this.dbpass = databaseProperty("password", "");
-		schema = profile.writer.getProperty("schema", null);
+		schema = profile.database.getProperty("schema", null);
 		
 		assert dbc == null;
-		assert dburl != null;
 		assert schema==null || schema.length() > 0;
 
 		// If timezone is not specified then use "GMT"
@@ -75,17 +75,17 @@ public class Database {
 		if (schema != null) logmsg += " schema=" + getSchema();
 				
 		logger.info(Log.INIT, logmsg);
-		String templateName = profile.writer.getProperty("templates", "");
+		String templateName = profile.database.getProperty("templates", "");
 		this.templates = (templateName.length() > 0) ? new File(templateName) : null;
 		this.warnOnTruncate = profile.loader.getBoolean("warn_on_truncate", true);
 				
 		this.open();
 		assert dbc != null;
 	}
-
+	
 	private String databaseProperty(String name, String defaultValue) {
 		// Allow property to begin with old prefix "datamart." or new prefix "database."
-		String value = profile.writer.getProperty(name, defaultValue);
+		String value = profile.database.getProperty(name, defaultValue);
 		return value;
 	}
 	

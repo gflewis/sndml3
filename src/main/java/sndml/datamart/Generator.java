@@ -66,12 +66,12 @@ public class Generator {
 	
 	public Generator(Database database, ConnectionProfile profile, File templatesFile) {
 		assert database != null;
-		String schemaName = profile.writer.getProperty("schema");
-		String dialectName = profile.writer.getProperty("dialect");
+		String schemaName = profile.database.getProperty("schema");
+		String dialectName = profile.database.getProperty("dialect");
 		// only check properties if file was not passed in as an argument
 		if (templatesFile == null) {
 			// TODO Redundant. Same code appears in Database.
-			String templatesPath = profile.writer.getProperty("templates", "");
+			String templatesPath = profile.database.getProperty("templates", "");
 			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
 		}
 		try {

@@ -34,13 +34,20 @@ import sndml.util.PropertySet;
 @SuppressWarnings("serial")
 public class ConnectionProfile extends java.util.Properties {
 
+	enum SchemaSource {
+		APP,    // Use app instance and {@link AppSchemaReader}
+		READER, // Use reader instance and {@link TableSchemaReader}
+		SCHEMA  // Use schema instance and {@link TableSchemaReader}
+	}
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final File profile;
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
+	public final PropertySet schema; // Properties for ServiceNow instance used for schema
 	public final PropertySet app;    // Properties for ServiceNow instance that contains scopped app
-	public final PropertySet writer; // Properties for SQL Database
+	public final PropertySet database; // Properties for SQL Database
 	public final PropertySet daemon; 
 	public final PropertySet loader;
+	public final SchemaSource schemaSource;
 	@Deprecated public final PropertySet httpserver;
 	
 	public ConnectionProfile(File profile) throws IOException {
@@ -50,10 +57,18 @@ public class ConnectionProfile extends java.util.Properties {
 		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
 		this.reader = 
 			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
+		this.schema =
+			hasProperty("schema.instance") ? getSubset("schema") : this.reader;
 		this.app = 
-			hasProperty("app.instance") ? getSubset("app") : getSubset("servicenow");
-		this.writer = 
-			hasProperty("writer.url") ? getSubset("writer") : getSubset("datamart");
+			hasProperty("app.instance") ? getSubset("app") : this.reader;
+		this.database = 
+			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
+		if (hasProperty("app.instance"))
+			this.schemaSource = SchemaSource.APP;
+		else if (hasProperty("schema.instance"))
+			this.schemaSource = SchemaSource.SCHEMA;
+		else 
+			this.schemaSource = SchemaSource.READER;
 		
 		this.loader = getSubset("loader");
 		this.daemon = getSubset("daemon");			
