@@ -1,6 +1,5 @@
 package sndml.loader;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -41,7 +40,7 @@ public class Database {
 	private final String dbpass;
 	private final boolean warnOnTruncate;
 	private final String schema;
-	private final File templates;
+	// private final File templates;
 	
 	private Connection dbc = null;
 	private Generator generator;
@@ -75,8 +74,6 @@ public class Database {
 		if (schema != null) logmsg += " schema=" + getSchema();
 				
 		logger.info(Log.INIT, logmsg);
-		String templateName = profile.database.getProperty("templates", "");
-		this.templates = (templateName.length() > 0) ? new File(templateName) : null;
 		this.warnOnTruncate = profile.loader.getBoolean("warn_on_truncate", true);
 				
 		this.open();
@@ -96,7 +93,7 @@ public class Database {
 	 */
 	void open() throws SQLException {		
 		dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		generator = new Generator(this, this.profile, this.templates);
+		generator = new Generator(this, this.profile);
 		dbc.setAutoCommit(generator.getAutoCommit());
 		Statement stmt = dbc.createStatement();
 		Iterator<String> iter = generator.getInitializations().listIterator();

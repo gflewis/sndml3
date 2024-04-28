@@ -28,7 +28,7 @@ public class Generator {
 	private final NameCase namecase; 
 	private final NameQuotes namequotes;
 	private final String schemaName;
-	private final NameMap namemap;
+	private final NameMap namemap;	
 	
 	Logger logger = Log.logger(this.getClass());
 	
@@ -59,23 +59,21 @@ public class Generator {
 		Session session = new Session(profile.reader);
 		Table table = session.table(tablename);
 		Database database = profile.getDatabase();
-		Generator generator = new Generator(database, profile, null);
+		Generator generator = new Generator(database, profile);
 		String sql = generator.getCreateTable(table);
 		output.print(sql);		
 	}
 	
-	public Generator(Database database, ConnectionProfile profile, File templatesFile) {
+	public Generator(Database database, ConnectionProfile profile) {
 		assert database != null;
 		String schemaName = profile.database.getProperty("schema");
 		String dialectName = profile.database.getProperty("dialect");
-		// only check properties if file was not passed in as an argument
-		if (templatesFile == null) {
-			// TODO Redundant. Same code appears in Database.
-			String templatesPath = profile.database.getProperty("templates", "");
-			if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
-		}
+		String templatesPath = profile.database.getProperty("templates", "");
+		File templatesFile = null;
+		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
+		
 		try {
-			// if file not specified as argument or property
+			// if file not specified as property
 			// then use the default XML from the JAR
 			InputStream sqlConfigStream =
 				(templatesFile == null) ?

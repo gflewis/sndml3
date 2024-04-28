@@ -192,7 +192,27 @@ public class ConnectionProfile extends java.util.Properties {
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		
 	}
-		
+
+	/** 
+	 * @return Name of templates file or null if not specified
+	 */
+//	public File getTemplatesFile() {
+//		File templatesFile = null;
+//		String templatesPath = database.getProperty("templates", "");
+//		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
+//		return templatesFile;
+//	}
+	
+	/**
+	 * Return true if this process is connected to a scoped app 
+	 * in the ServiceNow instance. 
+	 * 
+	 * @return true if using scoped app, otherwise false
+	 */	
+	public boolean isAgent() {
+		return Main.isAgent();
+	}
+	
 	@Override
 	/**
 	 * Returns the absolute path of the properties file used to initialize this object.

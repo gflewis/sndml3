@@ -17,6 +17,8 @@ import sndml.util.Log;
 public class Main {
 
 	static final Logger logger = LoggerFactory.getLogger(Main.class);
+	static Options options;
+	static boolean agent_mode = false;
 	
 	/**
 	 * This is the main class invoked from the JAR file.
@@ -24,7 +26,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		Log.setGlobalContext();
 		
-		Options options = new Options();
+		options = new Options();
 		options.addOption(Option.builder("p").longOpt("profile").required(true).hasArg(true).
 				desc("Property file (required)").build());
 		options.addOption(Option.builder("t").longOpt("table").required(false).hasArg(true).
@@ -39,6 +41,7 @@ public class Main {
 				desc("Run the deamon scanner once").build());
 		options.addOption(Option.builder("f").longOpt("filter").required(false).hasArg(true).
 				desc("Encoded query for use with --table").build());
+		// TODO Coming Soon: --server
 		/*
 		options.addOption(Option.builder("server").longOpt("server").required(false).hasArg(false).
 				desc("Run as server").build());
@@ -79,18 +82,21 @@ public class Main {
 		}
 		if (cmd.hasOption("daemon")) {
 			// Daemon
+			agent_mode = true;
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
 			daemon.runForever();
 		}
 		if (cmd.hasOption("scan")) {
 			// Scan once
+			agent_mode = true;
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
 			daemon.scanOnce();
 		}
 		if (cmd.hasOption("job")) {
 			// Run a single job
+			agent_mode = true;
 			String sys_id = cmd.getOptionValue("j");
 			RecordKey jobkey = new RecordKey(sys_id);
 			AgentJobRunner jobRunner = new AgentJobRunner(profile, jobkey);
@@ -103,5 +109,15 @@ public class Main {
 			server.start();
 		}
 		*/
+	}
+	
+	/**
+	 * Return true if this process is connected to a scoped app 
+	 * in the ServiceNow instance. 
+	 * 
+	 * @return true if using scoped app, otherwise false
+	 */
+	public static boolean isAgent() {
+		return agent_mode;
 	}
 }
