@@ -41,7 +41,7 @@ public class PruneTest {
 	public void testPrune() throws Exception {
 		TestManager.bannerStart("testPrune");
 		String tableName = "incident";
-		Session session = TestManager.getProfile().getReaderSession();
+		Session session = TestManager.getProfile().newReaderSession();
 		Table tbl = session.table(tableName);
 		DBUtil db = new DBUtil(profile);
 		

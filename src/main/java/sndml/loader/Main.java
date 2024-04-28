@@ -63,7 +63,7 @@ public class Main {
 			// Simple Table Loader
 			String tableName = cmd.getOptionValue("t");
 			String filter = cmd.getOptionValue("f");
-			Database database = profile.getDatabase();
+			DatabaseConnection database = profile.newDatabaseConnection();
 			SimpleTableLoader tableLoader = new SimpleTableLoader(profile, database, tableName, filter);
 			tableLoader.call();
 		}
@@ -97,9 +97,9 @@ public class Main {
 		if (cmd.hasOption("job")) {
 			// Run a single job
 			agent_mode = true;
-			String sys_id = cmd.getOptionValue("j");
+			String sys_id = cmd.getOptionValue("job");
 			RecordKey jobkey = new RecordKey(sys_id);
-			AgentJobRunner jobRunner = new AgentJobRunner(profile, jobkey);
+			AgentSingle jobRunner = new AgentSingle(profile, jobkey);
 			jobRunner.run();			
 		}
 		/*

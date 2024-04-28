@@ -17,19 +17,19 @@ public class JobRunner implements Callable<Metrics> {
 	protected final JobConfig config;
 	protected ConnectionProfile profile;
 	protected Session session;
-	protected Database database;
+	protected DatabaseConnection database;
 	
 	protected Action action;
 	protected Table table;
 	protected Metrics jobMetrics;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public JobRunner(ConnectionProfile profile, JobConfig config) {
+	protected JobRunner(ConnectionProfile profile, JobConfig config) {
 		this.profile = profile;
 		this.config = config;
 	}
 	
-	public JobRunner(Session session, Database db, JobConfig config) {
+	public JobRunner(Session session, DatabaseConnection db, JobConfig config) {
 		this.session = session;
 		this.database = db;
 		this.config = config;		

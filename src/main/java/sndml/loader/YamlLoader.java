@@ -24,7 +24,7 @@ public class YamlLoader {
 
 	static ConfigFactory factory = new ConfigFactory();
 	final Session session;
-	final Database database;
+	final DatabaseConnection database;
 	YamlLoaderConfig config;
 	File metricsFile = null;
 	PrintWriter statsWriter;
@@ -42,8 +42,8 @@ public class YamlLoader {
 	}
 	
 	YamlLoader(ConnectionProfile profile, YamlLoaderConfig config) throws ResourceException, SQLException {
-		this.session = profile.getReaderSession();
-		this.database = profile.getDatabase();
+		this.session = profile.newReaderSession();
+		this.database = profile.newDatabaseConnection();
 		this.config = config;
 		this.metricsFile = config.getMetricsFile();
 		SchemaFactory.setSchemaReader(new TableSchemaReader(this.session));

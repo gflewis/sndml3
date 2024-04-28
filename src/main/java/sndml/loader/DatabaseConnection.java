@@ -28,7 +28,7 @@ import sndml.util.Log;
  * </p>
  * 
  */
-public class Database {
+public class DatabaseConnection {
 
 	private final Logger logger = Log.logger(this.getClass());
 	private final ConnectionProfile profile;
@@ -47,7 +47,7 @@ public class Database {
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
-	public Database(ConnectionProfile profile) throws SQLException, URISyntaxException {
+	public DatabaseConnection(ConnectionProfile profile) throws SQLException, URISyntaxException {
 		this.profile = profile;
 		this.dburl = databaseProperty("url", null);
 		assert this.dburl != null : "Property database.url not found";

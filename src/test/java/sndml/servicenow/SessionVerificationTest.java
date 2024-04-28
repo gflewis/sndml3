@@ -15,7 +15,7 @@ public class SessionVerificationTest {
 	
 	@Test
 	public void testValidate() throws Exception {
-		Session session = TestManager.getDefaultProfile().getReaderSession();
+		Session session = TestManager.getDefaultProfile().newReaderSession();
 		session.verifyUser();
 		Table user = session.table("sys_user");
 		TableWSDL wsdl = user.getWSDL();

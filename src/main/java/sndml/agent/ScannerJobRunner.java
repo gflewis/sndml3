@@ -34,7 +34,7 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 		this.session = session;
 	}
 	
-	void setDatabase(Database database) {
+	void setDatabase(DatabaseConnection database) {
 		this.database = database;
 	}
 	
@@ -84,12 +84,12 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
-			if (session == null) session = profile.getReaderSession();
+			if (session == null) session = profile.newReaderSession();
 			statusLogger = new AppStatusLogger(profile, session);		
-			if (database == null) database = profile.getDatabase();
+			if (database == null) database = profile.newDatabaseConnection();
 			assert database != null;
 			super.call();
-			scanner.rescan();
+			if (scanner != null) scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());
 			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);

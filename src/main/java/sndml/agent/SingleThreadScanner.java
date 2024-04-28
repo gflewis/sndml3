@@ -45,7 +45,7 @@ public class SingleThreadScanner extends AgentScanner {
 		ArrayList<ScannerJobRunner> joblist = getJobList();
 		if (joblist.size() > 0) {
 			// Use a single database connection for all the jobs
-			Database database = profile.getDatabase();
+			DatabaseConnection database = profile.newDatabaseConnection();
 			// Run the jobs one at a time
 			for (ScannerJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);

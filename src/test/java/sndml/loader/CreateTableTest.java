@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import sndml.loader.Database;
+import sndml.loader.DatabaseConnection;
 import sndml.loader.Generator;
 import sndml.servicenow.*;
 import sndml.util.Log;
@@ -26,7 +26,7 @@ public class CreateTableTest {
 
 	TestingProfile profile;
 	Session session;
-	Database database;
+	DatabaseConnection database;
 	Logger logger = TestManager.getLogger(this.getClass());
 	
 	public CreateTableTest(TestingProfile profile) throws Exception {
@@ -36,8 +36,8 @@ public class CreateTableTest {
 
 	@Before
 	public void openDatabase() throws Exception {
-		session = profile.getReaderSession();
-		database = profile.getDatabase();
+		session = profile.newReaderSession();
+		database = profile.newDatabaseConnection();
 	}
 	
 	@After

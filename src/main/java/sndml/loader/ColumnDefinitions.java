@@ -31,7 +31,7 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	public ColumnDefinitions(Database db, Table table, String sqlTableName) 
+	public ColumnDefinitions(DatabaseConnection db, Table table, String sqlTableName) 
 			throws SQLException, IOException {
 		super();
 		assert db != null;
@@ -73,7 +73,7 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 		Log.setJobContext(saveJob);	
 	}
 	
-	private ResultSet getColumnDefinitions(Database database, String tablename) 
+	private ResultSet getColumnDefinitions(DatabaseConnection database, String tablename) 
 			throws SQLException {
 		assert tablename != null;
 		assert tablename.length() > 0;

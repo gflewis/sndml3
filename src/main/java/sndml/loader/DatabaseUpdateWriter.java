@@ -14,7 +14,7 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 	protected DatabaseInsertStatement insertStmt;
 	protected DatabaseUpdateStatement updateStmt;
 	
-	public DatabaseUpdateWriter(Database db, Table table, String sqlTableName, String writerName) 
+	public DatabaseUpdateWriter(DatabaseConnection db, Table table, String sqlTableName, String writerName) 
 			throws IOException, SQLException {
 		super(db, table, sqlTableName, writerName);
 	}

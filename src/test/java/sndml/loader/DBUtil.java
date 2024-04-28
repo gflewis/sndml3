@@ -1,6 +1,6 @@
 package sndml.loader;
 
-import sndml.loader.Database;
+import sndml.loader.DatabaseConnection;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
@@ -16,22 +16,22 @@ import java.sql.Statement;
 
 public class DBUtil {
 		
-	Database db;
+	DatabaseConnection db;
 	Logger logger = TestManager.getLogger(DBUtil.class);
 
-	DBUtil(Database database) {
+	DBUtil(DatabaseConnection database) {
 		this.db = database;
 	}
 	
 	DBUtil(TestingProfile profile) throws SQLException, URISyntaxException {
-		this(profile.getDatabase());
+		this(profile.newDatabaseConnection());
 	}
 	
 	DBUtil() throws SQLException, URISyntaxException {
 		this(TestManager.getProfile());
 	}
 	
-	Database getDatabase() {
+	DatabaseConnection getDatabase() {
 		return this.db;
 	}
 	

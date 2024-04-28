@@ -7,7 +7,7 @@ import sndml.servicenow.*;
 
 public class DatabaseDeleteStatement extends DatabaseStatement {
 
-	public DatabaseDeleteStatement(Database db, String sqlTableName) throws SQLException {
+	public DatabaseDeleteStatement(DatabaseConnection db, String sqlTableName) throws SQLException {
 		super(db, "delete", sqlTableName, null);
 	}
 	

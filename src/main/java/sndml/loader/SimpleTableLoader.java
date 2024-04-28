@@ -8,15 +8,15 @@ import sndml.util.Log;
 
 public class SimpleTableLoader extends JobRunner implements Runnable {
 
-	public SimpleTableLoader(ConnectionProfile profile, Database database, String tableName) {
-		this(profile, database, profile.getReaderSession().table(tableName), null);		
+	public SimpleTableLoader(ConnectionProfile profile, DatabaseConnection database, String tableName) {
+		this(profile, database, profile.newReaderSession().table(tableName), null);		
 	}
 	
-	public SimpleTableLoader(ConnectionProfile profile, Database database, String tableName, String filter) {
-		this(profile, database, profile.getReaderSession().table(tableName), filter);		
+	public SimpleTableLoader(ConnectionProfile profile, DatabaseConnection database, String tableName, String filter) {
+		this(profile, database, profile.newReaderSession().table(tableName), filter);		
 	}
 	
-	public SimpleTableLoader(ConnectionProfile profile, Database database, Table table, String filter) {
+	public SimpleTableLoader(ConnectionProfile profile, DatabaseConnection database, Table table, String filter) {
 		super(table.getSession(), database, jobConfig(profile, table, filter));
 		this.table = table;
 	}

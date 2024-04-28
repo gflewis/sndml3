@@ -14,16 +14,16 @@ public class JobFactory {
 
 	final ConnectionProfile profile;
 	final Session session;
-	final Database database;	
+	final DatabaseConnection database;	
 	final DateCalculator dateCalculator;
 	ConfigFactory configFactory = new ConfigFactory();
 	
 	public JobFactory(ConnectionProfile profile, DateTime start)
 			throws ResourceException, SQLException {
-		this(profile, profile.getReaderSession(), profile.getDatabase(),start);
+		this(profile, profile.newReaderSession(), profile.newDatabaseConnection(),start);
 	}
 	
-	public JobFactory(ConnectionProfile profile, Session session, Database database, DateTime start) {
+	public JobFactory(ConnectionProfile profile, Session session, DatabaseConnection database, DateTime start) {
 		this.profile = profile;
 		this.session = session;
 		this.database = database;		

@@ -7,7 +7,7 @@ import sndml.servicenow.TableRecord;
 
 public class DatabaseInsertStatement extends DatabaseStatement {
 
-	public DatabaseInsertStatement(Database db, String sqlTableName, ColumnDefinitions columns)
+	public DatabaseInsertStatement(DatabaseConnection db, String sqlTableName, ColumnDefinitions columns)
 			throws SQLException {
 		super(db, "insert", sqlTableName, columns);
 	}

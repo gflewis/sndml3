@@ -10,7 +10,7 @@ public class GetRecordTest {
 	Session session;
 	
 	GetRecordTest() {
-		session = TestManager.getDefaultProfile().getReaderSession();
+		session = TestManager.getDefaultProfile().newReaderSession();
 	}
 	
 	@Ignore @Test

@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
 import sndml.loader.ConfigFactory;
-import sndml.loader.Database;
+import sndml.loader.DatabaseConnection;
 import sndml.loader.DatabaseTimestampReader;
 import sndml.loader.JobConfig;
 import sndml.loader.JobRunner;
@@ -34,7 +34,7 @@ public class TimestampTest {
 	final String tablename = "incident";
 	final TestingProfile profile;
 	Session session;
-	Database database;
+	DatabaseConnection database;
 	// Session session;
 	// Database database;
 	// DBUtil util;	
@@ -46,8 +46,8 @@ public class TimestampTest {
 
 	@Before
 	public void openDatabase() throws Exception {
-		session = profile.getReaderSession();
-		database = profile.getDatabase();
+		session = profile.newReaderSession();
+		database = profile.newDatabaseConnection();
 	}
 	
 	@After

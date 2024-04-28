@@ -278,11 +278,11 @@ public class JobConfig {
 		throw new ConfigParseException(msg);
 	}	
 	
-	public TableReader createReader(Table table, Database db) throws IOException {
+	public TableReader createReader(Table table, DatabaseConnection db) throws IOException {
 		return createReader(table, db, null, false);
 	}
 	
-	public TableReader createReader(Table table, Database db, DatePart datePart, boolean createNewSession) 
+	public TableReader createReader(Table table, DatabaseConnection db, DatePart datePart, boolean createNewSession) 
 			throws IOException {
 
 		assert table != null;

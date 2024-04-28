@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import sndml.loader.Database;
+import sndml.loader.DatabaseConnection;
 import sndml.loader.YamlLoader;
 import sndml.servicenow.*;
 
@@ -29,7 +29,7 @@ public class ColumnsTest {
 	@Test
 	public void test() throws Exception {
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());
-		Database database = profile.getDatabase();
+		DatabaseConnection database = profile.newDatabaseConnection();
 		DBUtil util = new DBUtil(database);
 		YamlLoader loader1 = folder.getYaml("incident-include-columns").getLoader(profile);
 		Metrics metrics1 = loader1.loadTables();

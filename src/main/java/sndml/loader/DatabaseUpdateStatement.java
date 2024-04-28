@@ -7,7 +7,7 @@ import sndml.servicenow.TableRecord;
 
 public class DatabaseUpdateStatement extends DatabaseStatement {
 
-	public DatabaseUpdateStatement(Database db, String sqlTableName, ColumnDefinitions columns)
+	public DatabaseUpdateStatement(DatabaseConnection db, String sqlTableName, ColumnDefinitions columns)
 			throws SQLException {
 		super(db, "update", sqlTableName, columns);
 	}

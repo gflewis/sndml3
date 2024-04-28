@@ -26,7 +26,7 @@ import sndml.servicenow.Table;
  */
 public abstract class DatabaseTableWriter extends RecordWriter {
 
-	final protected Database db;
+	final protected DatabaseConnection db;
 	final protected Table table;
 	final protected String sqlTableName;
 	
@@ -34,7 +34,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	final Logger logger = Log.logger(this.getClass());
 	
-	public DatabaseTableWriter(Database db, Table table, String sqlTableName, String writerName) 
+	public DatabaseTableWriter(DatabaseConnection db, Table table, String sqlTableName, String writerName) 
 			throws IOException, SQLException {
 		super();
 		assert db != null;

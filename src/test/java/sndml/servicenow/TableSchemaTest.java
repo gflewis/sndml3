@@ -16,7 +16,7 @@ public class TableSchemaTest {
 	
 	@Test
 	public void testReport() throws Exception {
-		Session session = TestManager.getProfile().getReaderSession();
+		Session session = TestManager.getProfile().newReaderSession();
 		TableSchemaReader factory = new TableSchemaReader(session);
 		TableSchema schema = factory.getSchema("incident");
 		assertFalse(schema.isEmpty());
@@ -30,7 +30,7 @@ public class TableSchemaTest {
 
 	@Test
 	public void testSysTemplate() throws Exception {
-		Session session = TestManager.getProfile().getReaderSession();
+		Session session = TestManager.getProfile().newReaderSession();
 		TableSchemaReader factory = new TableSchemaReader(session);
 		TableSchema schema = factory.getSchema("sys_template");
 		assertFalse(schema.isEmpty());
@@ -40,7 +40,7 @@ public class TableSchemaTest {
 	
 	@Test(expected = InvalidTableNameException.class)
 	public void testBadTable() throws Exception {
-		Session session = TestManager.getProfile().getReaderSession();
+		Session session = TestManager.getProfile().newReaderSession();
 		TableSchemaReader factory = new TableSchemaReader(session);
 		TableSchema schema = factory.getSchema("incidentxx");
 		assertTrue(schema.isEmpty());

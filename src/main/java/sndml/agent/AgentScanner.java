@@ -43,7 +43,7 @@ public abstract class AgentScanner extends TimerTask {
 		this.profile = profile;
 		this.agentName = AgentDaemon.getAgentName();
 		Log.setJobContext(agentName);		
-		this.appSession = profile.getAppSession();
+		this.appSession = profile.newAppSession();
 		assert agentName != null;
 		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = profile.getAPI("putrunstatus");

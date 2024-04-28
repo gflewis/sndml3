@@ -16,7 +16,6 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.AgentDaemon;
 import sndml.servicenow.Instance;
 import sndml.servicenow.Session;
 import sndml.util.Log;
@@ -150,12 +149,12 @@ public class ConnectionProfile {
 	 * Opens and returns a new connection to the ServiceNow instance.
 	 * @return
 	 */
-	public synchronized Session getReaderSession() throws ResourceException {
+	public synchronized Session newReaderSession() throws ResourceException {
 		Session session = new Session(reader);
 		return session;
 	}
 	
-	public synchronized Session getAppSession() throws ResourceException {
+	public synchronized Session newAppSession() throws ResourceException {
 		Session session = null;
 		if (agent.containsKey("instance"))
 			session = new Session(agent);
@@ -180,10 +179,10 @@ public class ConnectionProfile {
 	/**
 	 * Opens and returns a new connection to the JDBC database.
 	 */
-	public synchronized Database getDatabase() throws SQLException {
-		Database database;
+	public synchronized DatabaseConnection newDatabaseConnection() throws SQLException {
+		DatabaseConnection database;
 		try {
-			database = new Database(this);
+			database = new DatabaseConnection(this);
 		} catch (URISyntaxException e) {
 			throw new ResourceException(e);
 		}
@@ -203,8 +202,8 @@ public class ConnectionProfile {
 	
 	public URI getAPI(String apiName, String parameter) {
 		Instance instance = getAppInstance();
-		ConnectionProfile profile = AgentDaemon.getConnectionProfile();
-		assert profile != null;		
+		// ConnectionProfile profile = AgentDaemon.getConnectionProfile();
+		// assert profile != null;		
 		String appScope = agent.getString("scope", DEFAULT_APP_SCOPE);
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;

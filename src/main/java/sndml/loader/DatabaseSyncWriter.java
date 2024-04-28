@@ -15,7 +15,7 @@ public class DatabaseSyncWriter extends DatabaseTableWriter {
 	private final DatabaseDeleteWriter deleteWriter;
 	private final Metrics metrics;
 	
-	public DatabaseSyncWriter(Database db, Table table, String sqlTableName, 
+	public DatabaseSyncWriter(DatabaseConnection db, Table table, String sqlTableName, 
 			String writerName, Metrics metrics)
 			throws IOException, SQLException {
 		super(db, table, sqlTableName, writerName);

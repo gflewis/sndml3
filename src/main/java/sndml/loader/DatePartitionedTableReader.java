@@ -21,7 +21,7 @@ import sndml.util.Log;
 public final class DatePartitionedTableReader extends TableReader {
 
 	final JobConfig config;
-	final Database db;
+	final DatabaseConnection db;
 	final int threads;
 	final Interval interval;
 	
@@ -31,7 +31,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	public DatePartitionedTableReader(Table table, JobConfig config, Database db) {
+	public DatePartitionedTableReader(Table table, JobConfig config, DatabaseConnection db) {
 		super(table);
 		this.config = config;
 		this.db = db;
