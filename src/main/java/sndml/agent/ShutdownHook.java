@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.ConnectionProfile;
+import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
 public class ShutdownHook extends Thread {

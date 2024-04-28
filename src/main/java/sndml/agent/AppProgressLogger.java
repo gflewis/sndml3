@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.ConnectionProfile;
-import sndml.datamart.DatePart;
-import sndml.datamart.ResourceException;
+import sndml.loader.ConnectionProfile;
+import sndml.loader.DatePart;
+import sndml.loader.ResourceException;
 import sndml.servicenow.*;
 import sndml.util.Log;
 

@@ -13,8 +13,8 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.Action;
-import sndml.datamart.Log4jProgressLogger;
+import sndml.loader.Action;
+import sndml.loader.Log4jProgressLogger;
 import sndml.util.Log;
 import sndml.util.PropertySet;
 

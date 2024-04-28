@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
-import sndml.datamart.ResourceException;
+import sndml.loader.ResourceException;
 import sndml.util.Log;
 
 public class TableSchemaReader implements SchemaReader {

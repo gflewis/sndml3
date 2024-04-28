@@ -1,0 +1,16 @@
+package sndml.loader;
+
+import java.util.Hashtable;
+
+import sndml.servicenow.*;
+import sndml.util.DateTime;
+
+public class TimestampHash extends Hashtable<RecordKey, DateTime> {
+
+	private static final long serialVersionUID = 4282304281964973453L;
+
+	KeySet getKeys() {
+		return new KeySet(this.keySet());
+	}
+
+}

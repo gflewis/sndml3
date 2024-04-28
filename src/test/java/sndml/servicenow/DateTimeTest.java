@@ -7,8 +7,8 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.DatePartition;
-import sndml.datamart.Interval;
+import sndml.loader.DatePartition;
+import sndml.loader.Interval;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.InvalidDateTimeException;

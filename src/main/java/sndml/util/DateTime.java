@@ -9,7 +9,7 @@ import java.util.TimeZone;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import sndml.datamart.Interval;
+import sndml.loader.Interval;
 
 /**
  * An immutable thread-safe DateTime field in ServiceNow format.

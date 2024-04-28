@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.*;
+import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 

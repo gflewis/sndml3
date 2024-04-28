@@ -3,7 +3,7 @@ package sndml.agent;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.datamart.*;
+import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 

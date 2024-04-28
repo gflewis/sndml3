@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import sndml.datamart.ConnectionProfile;
+import sndml.loader.ConnectionProfile;
 
 public class TestingProfile extends ConnectionProfile {
 

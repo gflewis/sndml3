@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.datamart.ConfigFactory;
-import sndml.datamart.ConfigParseException;
-import sndml.datamart.ConnectionProfile;
-import sndml.datamart.JobConfig;
-import sndml.datamart.JobRunner;
+import sndml.loader.ConfigFactory;
+import sndml.loader.ConfigParseException;
+import sndml.loader.ConnectionProfile;
+import sndml.loader.JobConfig;
+import sndml.loader.JobRunner;
 import sndml.servicenow.HttpMethod;
 import sndml.servicenow.JsonRequest;
 import sndml.servicenow.Metrics;

@@ -13,8 +13,8 @@ import org.apache.commons.daemon.DaemonInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.datamart.ConfigParseException;
-import sndml.datamart.ConnectionProfile;
+import sndml.loader.ConfigParseException;
+import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
 public class AgentDaemon implements Daemon {

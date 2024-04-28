@@ -8,7 +8,7 @@ import sndml.agent.JobCancelledException;
 /**
  * A class which knows how to process records retrieved from ServiceNow.
  * 
- * Although this is normally instantiated as a {@link sndml.datamart.DatabaseTableWriter}.
+ * Although this is normally instantiated as a {@link sndml.loader.DatabaseTableWriter}.
  * there are several other subclasses.
  *
  */

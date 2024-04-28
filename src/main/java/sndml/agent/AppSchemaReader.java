@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.datamart.ConnectionProfile;
+import sndml.loader.ConnectionProfile;
 import sndml.servicenow.*;
 
 public class AppSchemaReader implements SchemaReader {

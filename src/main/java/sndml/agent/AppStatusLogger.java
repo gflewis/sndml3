@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.datamart.ConnectionProfile;
+import sndml.loader.ConnectionProfile;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
