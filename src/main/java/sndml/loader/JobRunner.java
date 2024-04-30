@@ -20,6 +20,7 @@ public class JobRunner implements Callable<Metrics> {
 	// session and database connection may be deferred by a subclass.
 	// (Refer to "call" method of the subclass.)
 	// TODO: Why deferred? A JobRunner is only called once.
+	//
 	protected ConnectionProfile profile;
 	protected Session readerSession;
 	protected DatabaseConnection database;
