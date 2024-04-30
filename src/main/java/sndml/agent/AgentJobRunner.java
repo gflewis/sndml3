@@ -7,7 +7,7 @@ import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
-public class ScannerJobRunner extends JobRunner implements Runnable {
+public class AgentJobRunner extends JobRunner implements Runnable {
 	
 	final AgentScanner scanner; // my parent
 	final public RecordKey runKey;
@@ -15,10 +15,15 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 	AppStatusLogger statusLogger;
 	
 	/**
-	 * Run a job with a new ServiceNow session and a new Database connection.
-	 * Update ServiceNow with the status of the job as it runs.
+	 * This class uses a composite progress logger which writes to Log4J2
+	 * and also updates ServiceNow with the status of the job as it runs.
+	 *
+	 * Creation of Session and DatabaseConnection is deferred until the "call" method. 
+	 * The session and database variables are initialized in the "call" method if 
+	 * they are null.
+	 * 
 	 */
-	public ScannerJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
+	AgentJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
 		super(profile, config);
 		this.scanner = scanner;
 		this.profile = profile;
@@ -29,12 +34,17 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 		assert number != null;
 		assert number.length() > 0;
 	}
-
-	void setSession(Session session) {
-		this.session = session;
+	
+	AgentJobRunner(ConnectionProfile profile, JobConfig config) {
+		// scanner is null for SingleJobRunner
+		this(null, profile, config);
 	}
 	
-	void setDatabase(DatabaseConnection database) {
+	protected void setSession(Session session) {
+		this.readerSession = session;
+	}
+	
+	protected void setDatabase(DatabaseConnection database) {
 		this.database = database;
 	}
 	
@@ -50,7 +60,7 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 		else {
 			textLogger =  new Log4jProgressLogger(this.getClass(), action, jobMetrics);
 		}
-		appLogger =	new AppProgressLogger(profile, session, jobMetrics, number, runKey);
+		appLogger =	new AppProgressLogger(profile, readerSession, jobMetrics, number, runKey);
 		assert appLogger.getMetrics() == jobMetrics;
 		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
 		return compositeLogger;
@@ -84,10 +94,9 @@ public class ScannerJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
-			if (session == null) session = profile.newReaderSession();
-			statusLogger = new AppStatusLogger(profile, session);		
+			if (readerSession == null) readerSession = profile.newReaderSession();
+			statusLogger = new AppStatusLogger(profile, readerSession);		
 			if (database == null) database = profile.newDatabaseConnection();
-			assert database != null;
 			super.call();
 			if (scanner != null) scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {

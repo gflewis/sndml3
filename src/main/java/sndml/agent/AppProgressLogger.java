@@ -18,7 +18,7 @@ import sndml.util.Log;
 public class AppProgressLogger extends ProgressLogger {
 
 	final ConnectionProfile profile;
-	final Session session;
+	final Session appSession;
 	final URI putRunStatusURI;
 	final String number;
 	final RecordKey runKey;
@@ -26,16 +26,18 @@ public class AppProgressLogger extends ProgressLogger {
 
 	AppProgressLogger(
 			ConnectionProfile profile, 
-			Session session,
+			Session appSession,
 			Metrics metrics,
 			String number, 
 			RecordKey runKey) {
-		this(profile, session, metrics, number, runKey, null);
+		this(profile, appSession, metrics, number, runKey, null);
+		logger.debug(Log.INIT, String.format(
+			"URI=%s sys_id=%s", putRunStatusURI, runKey));
 	}
 	
 	AppProgressLogger(
 			ConnectionProfile profile, 
-			Session session,
+			Session appSession,
 			Metrics metrics,
 			String number, 
 			RecordKey runKey,
@@ -43,7 +45,7 @@ public class AppProgressLogger extends ProgressLogger {
 		super(metrics, part);
 		assert runKey != null;
 		this.profile = profile;
-		this.session = session;
+		this.appSession = appSession;
 		this.number = number;
 		this.runKey = runKey;
 		this.putRunStatusURI = profile.getAPI("putrunstatus");
@@ -53,13 +55,13 @@ public class AppProgressLogger extends ProgressLogger {
 	public ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
 		// logger.info(Log.INIT, "newPartLogger");
 		return new AppProgressLogger(
-			this.profile, this.session, newMetrics, this.number, this.runKey, newPart);
+			this.profile, this.appSession, newMetrics, this.number, this.runKey, newPart);
 	}
 	
 	@Override
 	public void logPrepare() {
 		try {
-			putRunStatus(messageBody("prepare"));
+			putRunStatus(messageBody(AppStatusLogger.PREPARE));
 		} catch (JobCancelledException e) {
 			throw new ResourceException(e);
 		}
@@ -79,7 +81,7 @@ public class AppProgressLogger extends ProgressLogger {
 	public void logProgress() throws JobCancelledException {
 		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
-		ObjectNode body = messageBody("running");
+		ObjectNode body = messageBody(AppStatusLogger.RUNNING);
 		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
@@ -87,7 +89,7 @@ public class AppProgressLogger extends ProgressLogger {
 	@Override
 	public void logComplete() {
 		logger.info(Log.FINISH, "logComplete");
-		ObjectNode body = messageBody("complete");
+		ObjectNode body = messageBody(AppStatusLogger.COMPLETE);
 		if (metrics.hasParent()) {
 			Metrics parentMetrics = metrics.getParent();
 			body.put("part_elapsed", String.format("%.1f", parentMetrics.getElapsedSec()));			
@@ -149,8 +151,8 @@ public class AppProgressLogger extends ProgressLogger {
 	
 	void putRunStatus(ObjectNode body) throws JobCancelledException {
 		logger.debug(Log.REQUEST, String.format(
-			"putRunStatus %s %s", runKey, body.toString()));
-		JsonRequest request = new JsonRequest(session, putRunStatusURI, HttpMethod.PUT, body);		
+			"putRunStatus %s", body.toString()));
+		JsonRequest request = new JsonRequest(appSession, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
 		try {
 			response = request.execute();

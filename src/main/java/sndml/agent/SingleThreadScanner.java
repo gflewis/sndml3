@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import sndml.loader.*;
+import sndml.loader.ConfigParseException;
+import sndml.loader.ConnectionProfile;
+import sndml.loader.DatabaseConnection;
+import sndml.servicenow.Session;
 import sndml.util.Log;
 
 /**
@@ -42,14 +45,15 @@ public class SingleThreadScanner extends AgentScanner {
 	public int scan() throws IOException, ConfigParseException, SQLException {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.INIT, "scan");
-		ArrayList<ScannerJobRunner> joblist = getJobList();
+		ArrayList<AgentJobRunner> joblist = getJobList();
 		if (joblist.size() > 0) {
 			// Use a single database connection for all the jobs
 			DatabaseConnection database = profile.newDatabaseConnection();
+			Session session = profile.newReaderSession();
 			// Run the jobs one at a time
-			for (ScannerJobRunner job : joblist) {
+			for (AgentJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);
-				job.setSession(appSession);
+				job.setSession(session);
 				job.setDatabase(database);
 				job.run();																					
 			}				
@@ -59,7 +63,7 @@ public class SingleThreadScanner extends AgentScanner {
 	}
 
 	/**
-	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
+	 * This function is called by {@link AgentJobRunner} whenever a job completes.
 	 * When a job completes it may cause other jobs to move to a "ready" state.
 	 * @throws SQLException 
 	 */	

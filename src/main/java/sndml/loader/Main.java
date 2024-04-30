@@ -99,7 +99,7 @@ public class Main {
 			agent_mode = true;
 			String sys_id = cmd.getOptionValue("job");
 			RecordKey jobkey = new RecordKey(sys_id);
-			AgentSingle jobRunner = new AgentSingle(profile, jobkey);
+			SingleJobRunner jobRunner = new SingleJobRunner(profile, jobkey);
 			jobRunner.run();			
 		}
 		/*

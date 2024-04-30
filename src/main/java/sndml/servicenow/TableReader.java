@@ -49,7 +49,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	}
 	
 	protected void beginPrepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) {	
-		if (initialized) throw new IllegalStateException("initialize() called more than once");
+		if (initialized) throw new IllegalStateException("beginPrepare() called more than once");
 		this.writer = writer;
 		this.metrics = metrics;
 		this.progress = progress;

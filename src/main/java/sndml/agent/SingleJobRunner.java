@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import sndml.loader.ConfigFactory;
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
-import sndml.loader.DatabaseConnection;
 import sndml.loader.JobConfig;
 import sndml.loader.JobRunner;
 import sndml.servicenow.HttpMethod;
@@ -26,7 +25,7 @@ import sndml.util.Log;
 /**
  * A class to execute a single agent job and then terminates.
  */
-public class AgentSingle implements Runnable {
+public class SingleJobRunner implements Runnable {
 
 	final ConnectionProfile profile;
 	final Session appSession;
@@ -35,10 +34,10 @@ public class AgentSingle implements Runnable {
 	final JobConfig jobConfig;
 	final URI uriGetRun;
 	final ConfigFactory configFactory = new ConfigFactory();
-	final Logger logger = LoggerFactory.getLogger(AgentSingle.class);
+	final Logger logger = LoggerFactory.getLogger(SingleJobRunner.class);
 	Metrics metrics;
 	
-	public AgentSingle(ConnectionProfile profile, RecordKey jobKey) 
+	public SingleJobRunner(ConnectionProfile profile, RecordKey jobKey) 
 			throws ConfigParseException, IOException {
 		this.profile = profile;
 		this.jobKey = jobKey;
@@ -66,9 +65,7 @@ public class AgentSingle implements Runnable {
 		logger.info(Log.INIT, jobConfig.toString());		
 		PrintWriter output = new PrintWriter(System.out);
 		try {
-			Session session = profile.newReaderSession();
-			DatabaseConnection database = profile.newDatabaseConnection();
-			JobRunner jobRunner = new JobRunner(session, database, jobConfig);
+			JobRunner jobRunner = new AgentJobRunner(profile, jobConfig);
 			metrics = jobRunner.call();
 			logger.info(Log.FINISH, metrics.toString());
 			metrics.write(output);

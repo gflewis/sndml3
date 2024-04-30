@@ -48,7 +48,7 @@ public abstract class AgentScanner extends TimerTask {
 		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = profile.getAPI("putrunstatus");
 		this.statusLogger = new AppStatusLogger(profile, appSession);
-		SchemaFactory.setSchemaReader(new AppSchemaReader(this.appSession));		
+		SchemaFactory.setSchemaReader(new AppSchemaReader(appSession));		
 	}
 		
 	@Override
@@ -98,13 +98,35 @@ public abstract class AgentScanner extends TimerTask {
 	
 	protected abstract int getErrorLimit();
 	
-	public 	ScannerJobRunner createJob(JobConfig jobConfig) {
-		ScannerJobRunner job = new ScannerJobRunner(this, profile, jobConfig);
+	// TODO: How is the progress logger handled?
+	public 	AgentJobRunner createJob(JobConfig jobConfig) {
+		Session readerSession;
+		DatabaseConnection dbconnection;
+		readerSession = profile.newReaderSession();
+		try {
+			dbconnection = profile.newDatabaseConnection();
+		} catch (SQLException e) {
+			throw new ResourceException(e);
+		}
+		AgentJobRunner job = new AgentJobRunner(this, profile, jobConfig);
 		return job;
 	}	
 
-	ArrayList<ScannerJobRunner> getJobList() throws IOException, ConfigParseException {
-		ArrayList<ScannerJobRunner> joblist = new ArrayList<ScannerJobRunner>();
+	private Session newReaderSession() {
+		return profile.newReaderSession();
+	}
+	
+	private DatabaseConnection newDatabaseConnection() {
+		try {
+			return profile.newDatabaseConnection();
+		} catch (SQLException e) {
+			throw new ResourceException(e);
+		}
+	}
+	
+	
+	ArrayList<AgentJobRunner> getJobList() throws IOException, ConfigParseException {
+		ArrayList<AgentJobRunner> joblist = new ArrayList<AgentJobRunner>();
 		ArrayNode runlist = null;
 		try {
 			runlist = getRunList();
@@ -136,15 +158,14 @@ public abstract class AgentScanner extends TimerTask {
 				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
 				try {
-					setStatus(runKey, "prepare");
+					setStatus(runKey, AppStatusLogger.PREPARE);
 				} catch (JobCancelledException e) {
 					logger.warn(Log.FINISH, "Job Cancel Detected");
 					cancelDetected = true;
 				}
 				if (!cancelDetected) {
 					Log.setJobContext(number);
-					// AppJobRunner runner = new AppJobRunner(this, profile, jobConfig);
-					ScannerJobRunner runner = createJob(jobConfig);
+					AgentJobRunner runner = createJob(jobConfig);
 					joblist.add(runner);					
 				}
 			}			

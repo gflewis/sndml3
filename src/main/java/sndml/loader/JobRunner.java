@@ -15,8 +15,13 @@ import sndml.util.Log;
 public class JobRunner implements Callable<Metrics> {
 
 	protected final JobConfig config;
+	
+	// If profile is specified in constructor
+	// session and database connection may be deferred by a subclass.
+	// (Refer to "call" method of the subclass.)
+	// TODO: Why deferred? A JobRunner is only called once.
 	protected ConnectionProfile profile;
-	protected Session session;
+	protected Session readerSession;
 	protected DatabaseConnection database;
 	
 	protected Action action;
@@ -30,7 +35,7 @@ public class JobRunner implements Callable<Metrics> {
 	}
 	
 	public JobRunner(Session session, DatabaseConnection db, JobConfig config) {
-		this.session = session;
+		this.readerSession = session;
 		this.database = db;
 		this.config = config;		
 		assert session!= null;
@@ -64,7 +69,7 @@ public class JobRunner implements Callable<Metrics> {
 	@Override
 	public Metrics call() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		assert config != null;
-		assert session != null;
+		assert readerSession != null;
 		assert database != null;
 		action = config.getAction();
 		assert action != null;
@@ -75,7 +80,7 @@ public class JobRunner implements Callable<Metrics> {
 		}
 		else {
 			// Action with a source table
-			table = session.table(config.getSource());
+			table = readerSession.table(config.getSource());
 			logger.debug(Log.INIT, String.format(
 				"call table=%s action=%s", 
 				table.getName(), action.toString()));
@@ -142,7 +147,7 @@ public class JobRunner implements Callable<Metrics> {
 	private void runPrune() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
-		Table audit = session.table("sys_audit_delete");
+		Table audit = readerSession.table("sys_audit_delete");
 		EncodedQuery auditQuery = new EncodedQuery(audit);
 		auditQuery.addQuery("tablename", EncodedQuery.EQUALS, table.getName());
 		RestTableReader auditReader = new RestTableReader(audit);

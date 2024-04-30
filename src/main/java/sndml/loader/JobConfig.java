@@ -50,7 +50,7 @@ public class JobConfig {
 	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
 	public Integer threads;
-	
+	public String status; // Used by ConfigFactory
 	static EnumSet<Action> anyLoadAction =
 			EnumSet.of(Action.INSERT, Action.UPDATE, Action.SYNC);
 	

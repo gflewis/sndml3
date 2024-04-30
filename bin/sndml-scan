@@ -4,4 +4,9 @@
 #
 source sndml-setup $1
 env | grep SNDML | sort
-java -ea -jar $SNDML_JAR --profile=$SNDML_PROFILE --scan
+options=""
+if [ "$SNDML_DEBUG" = "TRUE" ]; then
+  options="$options -Dlog4j2.configurationFile=log4j2-debug.xml"
+  options="$options -Dsndml.logFolder=$SNDML_CONFIG/log -Dsndml.logPrefix=scan"  
+fi
+java -ea $options -jar $SNDML_JAR --profile=$SNDML_PROFILE --scan

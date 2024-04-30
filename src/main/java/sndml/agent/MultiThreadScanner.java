@@ -51,12 +51,12 @@ public class MultiThreadScanner extends AgentScanner {
 	public int scan() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.INIT, "scan");
-		ArrayList<ScannerJobRunner> joblist = getJobList();
+		ArrayList<AgentJobRunner> joblist = getJobList();
 		if (joblist.size() > 0) {
 			// Schedule all jobs for future execution
 			// Do not wait for them to complete
 			// Each job will generate create its own Session and Database connection
-			for (ScannerJobRunner job : joblist) {
+			for (AgentJobRunner job : joblist) {
 				workerPool.execute(job);						
 			}				
 		}
@@ -65,7 +65,7 @@ public class MultiThreadScanner extends AgentScanner {
 	}
 
 	/**
-	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
+	 * This function is called by {@link AgentJobRunner} whenever a job completes.
 	 * When a job completes it may cause other jobs to move to a "ready" state.
 	 * @throws SQLException 
 	 */	
