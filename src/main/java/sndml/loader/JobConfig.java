@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import sndml.agent.AppJobStatus;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
@@ -50,7 +51,7 @@ public class JobConfig {
 	public Boolean autoCreate;
 	@JsonIgnore public FieldNames includeColumns;
 	public Integer threads;
-	public String status; // Used by ConfigFactory
+	public AppJobStatus status; // Used by ConfigFactory
 	static EnumSet<Action> anyLoadAction =
 			EnumSet.of(Action.INSERT, Action.UPDATE, Action.SYNC);
 	

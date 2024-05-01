@@ -6,13 +6,10 @@ import java.util.ArrayList;
 
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
-import sndml.loader.DatabaseConnection;
-import sndml.servicenow.Session;
 import sndml.util.Log;
 
 /**
- * An Agent Scanner which does not utilize a thread pool and runs all jobs in the current thread
- * utilizing the current Session and a single database connection.
+ * An Agent Scanner which does not utilize a thread pool and runs all jobs in the current thread.
  */
 public class SingleThreadScanner extends AgentScanner {
 	
@@ -47,14 +44,9 @@ public class SingleThreadScanner extends AgentScanner {
 		logger.debug(Log.INIT, "scan");
 		ArrayList<AgentJobRunner> joblist = getJobList();
 		if (joblist.size() > 0) {
-			// Use a single database connection for all the jobs
-			DatabaseConnection database = profile.newDatabaseConnection();
-			Session session = profile.newReaderSession();
 			// Run the jobs one at a time
 			for (AgentJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);
-				job.setSession(session);
-				job.setDatabase(database);
 				job.run();																					
 			}				
 			Log.setGlobalContext();			

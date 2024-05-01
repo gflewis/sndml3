@@ -100,30 +100,9 @@ public abstract class AgentScanner extends TimerTask {
 	
 	// TODO: How is the progress logger handled?
 	public 	AgentJobRunner createJob(JobConfig jobConfig) {
-		Session readerSession;
-		DatabaseConnection dbconnection;
-		readerSession = profile.newReaderSession();
-		try {
-			dbconnection = profile.newDatabaseConnection();
-		} catch (SQLException e) {
-			throw new ResourceException(e);
-		}
 		AgentJobRunner job = new AgentJobRunner(this, profile, jobConfig);
 		return job;
 	}	
-
-	private Session newReaderSession() {
-		return profile.newReaderSession();
-	}
-	
-	private DatabaseConnection newDatabaseConnection() {
-		try {
-			return profile.newDatabaseConnection();
-		} catch (SQLException e) {
-			throw new ResourceException(e);
-		}
-	}
-	
 	
 	ArrayList<AgentJobRunner> getJobList() throws IOException, ConfigParseException {
 		ArrayList<AgentJobRunner> joblist = new ArrayList<AgentJobRunner>();
@@ -158,7 +137,7 @@ public abstract class AgentScanner extends TimerTask {
 				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
 				try {
-					setStatus(runKey, AppStatusLogger.PREPARE);
+					setStatus(runKey, AppJobStatus.prepare);
 				} catch (JobCancelledException e) {
 					logger.warn(Log.FINISH, "Job Cancel Detected");
 					cancelDetected = true;
@@ -192,7 +171,7 @@ public abstract class AgentScanner extends TimerTask {
 		return runlist;		
 	}
 	
-	void setStatus(RecordKey runKey, String status) throws JobCancelledException, IOException {
+	void setStatus(RecordKey runKey, AppJobStatus status) throws JobCancelledException, IOException {
 		statusLogger.setStatus(runKey, status);
 	}	
 	

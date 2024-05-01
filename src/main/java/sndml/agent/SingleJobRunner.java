@@ -45,6 +45,11 @@ public class SingleJobRunner implements Runnable {
 		this.uriGetRun = profile.getAPI("getrun", jobKey.toString());
 		this.agentName = profile.getAgentName();
 		this.jobConfig = configFactory.jobConfig(profile, getRun());
+		if (!jobConfig.status.equals(AppJobStatus.ready))
+			throw new IllegalStateException(String.format(
+					"%s has unexpected Status \"%s\" (expected \"ready\");", 
+					jobConfig.number, jobConfig.status.toString())); 
+		
 	}
 
 	static JobConfig getAgentJobRunnerConfig(ConnectionProfile profile, RecordKey jobKey) {
@@ -65,7 +70,7 @@ public class SingleJobRunner implements Runnable {
 		logger.info(Log.INIT, jobConfig.toString());		
 		PrintWriter output = new PrintWriter(System.out);
 		try {
-			JobRunner jobRunner = new AgentJobRunner(profile, jobConfig);
+			JobRunner jobRunner = new AgentJobRunner(null, profile, jobConfig);
 			metrics = jobRunner.call();
 			logger.info(Log.FINISH, metrics.toString());
 			metrics.write(output);

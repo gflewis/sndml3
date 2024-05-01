@@ -21,6 +21,7 @@ public class AppStatusLogger {
 	final URI uriGetRun;
 	final Logger logger;
 	
+	/*
 	public static String SCHEDULED = "scheduled";
 	public static String READY = "ready";
 	public static String PREPARE = "prepare";
@@ -28,6 +29,7 @@ public class AppStatusLogger {
 	public static String COMPLETE = "complete";
 	public static String FAILED = "failed";
 	public static String CANCELLED = "cancelled";
+	*/
 		
 	public AppStatusLogger(ConnectionProfile profile, Session appSession) {
 		assert profile != null;
@@ -39,20 +41,20 @@ public class AppStatusLogger {
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 
-	public void setStatus(RecordKey runKey, String status) 
+	public void setStatus(RecordKey runKey, AppJobStatus status) 
 			throws IOException, JobCancelledException, IllegalStateException {		
 		assert appSession != null;
 		assert runKey != null;
 		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
-		body.put("status", status);
+		body.put("status", status.toString());
 		JsonRequest request = new JsonRequest(appSession, uriPutRunStatus, HttpMethod.PUT, body);
 		ObjectNode response = request.execute();
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + response.toString());
 		String newStatus = response.get("status").asText();
-		if (newStatus != status)
+		if (!newStatus.equalsIgnoreCase(status.toString()))
 			throw new IllegalStateException("Failed to update status. Is there an ACL problem?");
 		Log.setGlobalContext();
 	}	

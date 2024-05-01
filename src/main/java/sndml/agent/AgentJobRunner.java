@@ -9,11 +9,13 @@ import sndml.util.Log;
 
 public class AgentJobRunner extends JobRunner implements Runnable {
 	
+	final ConnectionProfile profile;
 	final AgentScanner scanner; // my parent
 	final public RecordKey runKey;
 	final public String number;
 	AppStatusLogger statusLogger;
-	
+
+	// TODO Remove
 	/**
 	 * This class uses a composite progress logger which writes to Log4J2
 	 * and also updates ServiceNow with the status of the job as it runs.
@@ -23,10 +25,23 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 	 * they are null.
 	 * 
 	 */
+	/*
 	AgentJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
-		super(profile, config);
+		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
 		this.scanner = scanner;
+		this.runKey = config.getSysId();
+		this.number = config.getNumber();
+		assert runKey != null;
+		assert runKey.isGUID();
+		assert number != null;
+		assert number.length() > 0;
+	}
+	*/
+	
+	AgentJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
+		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
 		this.profile = profile;
+		this.scanner = scanner;
 		this.runKey = config.getSysId();
 		this.number = config.getNumber();
 		assert runKey != null;
@@ -35,11 +50,7 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 		assert number.length() > 0;
 	}
 	
-	AgentJobRunner(ConnectionProfile profile, JobConfig config) {
-		// scanner is null for SingleJobRunner
-		this(null, profile, config);
-	}
-	
+	/*
 	protected void setSession(Session session) {
 		this.readerSession = session;
 	}
@@ -47,6 +58,7 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 	protected void setDatabase(DatabaseConnection database) {
 		this.database = database;
 	}
+	*/
 	
 	@Override
 	protected ProgressLogger createJobProgressLogger(TableReader reader) {
@@ -94,9 +106,7 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
-			if (readerSession == null) readerSession = profile.newReaderSession();
 			statusLogger = new AppStatusLogger(profile, readerSession);		
-			if (database == null) database = profile.newDatabaseConnection();
 			super.call();
 			if (scanner != null) scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {

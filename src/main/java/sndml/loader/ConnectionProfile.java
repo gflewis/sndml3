@@ -178,12 +178,15 @@ public class ConnectionProfile {
 
 	/**
 	 * Opens and returns a new connection to the JDBC database.
+	 * Throw an unchecked ResourceException if unsuccessful.
 	 */
-	public synchronized DatabaseConnection newDatabaseConnection() throws SQLException {
+	public synchronized DatabaseConnection newDatabaseConnection() {
 		DatabaseConnection database;
 		try {
 			database = new DatabaseConnection(this);
 		} catch (URISyntaxException e) {
+			throw new ResourceException(e);
+		} catch (SQLException e) {
 			throw new ResourceException(e);
 		}
 		return database;

@@ -21,19 +21,20 @@ public class JobRunner implements Callable<Metrics> {
 	// (Refer to "call" method of the subclass.)
 	// TODO: Why deferred? A JobRunner is only called once.
 	//
-	protected ConnectionProfile profile;
-	protected Session readerSession;
-	protected DatabaseConnection database;
+	protected final Session readerSession;
+	protected final DatabaseConnection database;
 	
 	protected Action action;
 	protected Table table;
 	protected Metrics jobMetrics;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	/*
 	protected JobRunner(ConnectionProfile profile, JobConfig config) {
 		this.profile = profile;
 		this.config = config;
 	}
+	*/
 	
 	public JobRunner(Session session, DatabaseConnection db, JobConfig config) {
 		this.readerSession = session;

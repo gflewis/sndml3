@@ -61,7 +61,7 @@ public class AppProgressLogger extends ProgressLogger {
 	@Override
 	public void logPrepare() {
 		try {
-			putRunStatus(messageBody(AppStatusLogger.PREPARE));
+			putRunStatus(messageBody(AppJobStatus.prepare));
 		} catch (JobCancelledException e) {
 			throw new ResourceException(e);
 		}
@@ -71,7 +71,7 @@ public class AppProgressLogger extends ProgressLogger {
 	public void logStart() throws JobCancelledException {
 		int expected = metrics.getExpected();
 		logger.info(Log.INIT, String.format("logStart %d", expected));
-		ObjectNode body = messageBody("running");
+		ObjectNode body = messageBody(AppJobStatus.running);
 		String fieldname = hasPart() ? "part_expected" : "expected";
 		body.put(fieldname, expected);
 		putRunStatus(body);
@@ -81,7 +81,7 @@ public class AppProgressLogger extends ProgressLogger {
 	public void logProgress() throws JobCancelledException {
 		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
-		ObjectNode body = messageBody(AppStatusLogger.RUNNING);
+		ObjectNode body = messageBody(AppJobStatus.running);
 		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
@@ -89,7 +89,7 @@ public class AppProgressLogger extends ProgressLogger {
 	@Override
 	public void logComplete() {
 		logger.info(Log.FINISH, "logComplete");
-		ObjectNode body = messageBody(AppStatusLogger.COMPLETE);
+		ObjectNode body = messageBody(AppJobStatus.complete);
 		if (metrics.hasParent()) {
 			Metrics parentMetrics = metrics.getParent();
 			body.put("part_elapsed", String.format("%.1f", parentMetrics.getElapsedSec()));			
@@ -108,16 +108,16 @@ public class AppProgressLogger extends ProgressLogger {
 	/**
 	 * Create a new message body
 	 */
-	private ObjectNode messageBody(String status) {
+	private ObjectNode messageBody(AppJobStatus status) {
 		assert status != null;
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
 		if (hasPart()) {
 			body.put("part_name", datePart.getName());
-			body.put("part_status", status);	
+			body.put("part_status", status.toString());	
 		}
 		else {
-			body.put("status", status);	
+			body.put("status", status.toString());	
 		}
 		return body;
 	}

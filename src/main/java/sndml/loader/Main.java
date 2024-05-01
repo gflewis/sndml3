@@ -18,6 +18,7 @@ public class Main {
 
 	static final Logger logger = LoggerFactory.getLogger(Main.class);
 	static Options options;
+	static ConnectionProfile profile;
 	static boolean agent_mode = false;
 	
 	/**
@@ -57,7 +58,7 @@ public class Main {
 			throw new CommandOptionsException(
 				"Must specify exactly one of: --yaml, --table, --job, --daemon or --scan");
 		String profileName = cmd.getOptionValue("p");
-		ConnectionProfile profile = new ConnectionProfile(new File(profileName));
+		profile = new ConnectionProfile(new File(profileName));
 
 		if (cmd.hasOption("t")) {
 			// Simple Table Loader
@@ -111,6 +112,10 @@ public class Main {
 		*/
 	}
 	
+	public static ConnectionProfile getProfile() {
+		return profile;
+	}
+	
 	/**
 	 * Return true if this process is connected to a scoped app 
 	 * in the ServiceNow instance. 
@@ -119,5 +124,9 @@ public class Main {
 	 */
 	public static boolean isAgent() {
 		return agent_mode;
+	}
+	
+	public String getAgentName() {
+		return profile.getAgentName();
 	}
 }
