@@ -45,9 +45,10 @@ public class SingleJobRunner implements Runnable {
 		this.uriGetRun = profile.getAPI("getrun", jobKey.toString());
 		this.agentName = profile.getAgentName();
 		this.jobConfig = configFactory.jobConfig(profile, getRun());
-		if (!jobConfig.status.equals(AppJobStatus.ready))
+		logger.info(Log.INIT, jobConfig.toString());
+		if (!jobConfig.status.equals(AppJobStatus.READY))
 			throw new IllegalStateException(String.format(
-					"%s has unexpected Status \"%s\" (expected \"ready\");", 
+					"%s has unexpected Status \"%s\" (expected \"READY\");", 
 					jobConfig.number, jobConfig.status.toString())); 
 		
 	}
@@ -67,7 +68,6 @@ public class SingleJobRunner implements Runnable {
 
 	@Override
 	public void run() {
-		logger.info(Log.INIT, jobConfig.toString());		
 		PrintWriter output = new PrintWriter(System.out);
 		try {
 			JobRunner jobRunner = new AgentJobRunner(null, profile, jobConfig);

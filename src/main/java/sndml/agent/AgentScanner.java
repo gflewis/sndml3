@@ -137,7 +137,7 @@ public abstract class AgentScanner extends TimerTask {
 				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
 				try {
-					setStatus(runKey, AppJobStatus.prepare);
+					setStatus(runKey, AppJobStatus.PREPARE);
 				} catch (JobCancelledException e) {
 					logger.warn(Log.FINISH, "Job Cancel Detected");
 					cancelDetected = true;

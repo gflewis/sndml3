@@ -1,12 +1,12 @@
 package sndml.agent;
 
 public enum AppJobStatus {
-	draft,
-	scheduled,
-	ready,
-	prepare,
-	running,
-	complete,
-	failed,
-	cancelled,
+	DRAFT,
+	SCHEDULED,
+	READY,
+	PREPARE,
+	RUNNING,
+	COMPLETE,
+	RENAME,
+	CANCELLED,
 }

@@ -61,7 +61,7 @@ public class AppProgressLogger extends ProgressLogger {
 	@Override
 	public void logPrepare() {
 		try {
-			putRunStatus(messageBody(AppJobStatus.prepare));
+			putRunStatus(messageBody(AppJobStatus.PREPARE));
 		} catch (JobCancelledException e) {
 			throw new ResourceException(e);
 		}
@@ -71,7 +71,7 @@ public class AppProgressLogger extends ProgressLogger {
 	public void logStart() throws JobCancelledException {
 		int expected = metrics.getExpected();
 		logger.info(Log.INIT, String.format("logStart %d", expected));
-		ObjectNode body = messageBody(AppJobStatus.running);
+		ObjectNode body = messageBody(AppJobStatus.RUNNING);
 		String fieldname = hasPart() ? "part_expected" : "expected";
 		body.put(fieldname, expected);
 		putRunStatus(body);
@@ -81,7 +81,7 @@ public class AppProgressLogger extends ProgressLogger {
 	public void logProgress() throws JobCancelledException {
 		logger.debug(Log.PROCESS, "logProgress");
 		assert metrics != null;
-		ObjectNode body = messageBody(AppJobStatus.running);
+		ObjectNode body = messageBody(AppJobStatus.RUNNING);
 		appendMetrics(body, metrics);
 		putRunStatus(body);
 	}
@@ -89,7 +89,7 @@ public class AppProgressLogger extends ProgressLogger {
 	@Override
 	public void logComplete() {
 		logger.info(Log.FINISH, "logComplete");
-		ObjectNode body = messageBody(AppJobStatus.complete);
+		ObjectNode body = messageBody(AppJobStatus.COMPLETE);
 		if (metrics.hasParent()) {
 			Metrics parentMetrics = metrics.getParent();
 			body.put("part_elapsed", String.format("%.1f", parentMetrics.getElapsedSec()));			

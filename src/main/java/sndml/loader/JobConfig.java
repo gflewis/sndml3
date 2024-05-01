@@ -62,6 +62,7 @@ public class JobConfig {
 	public RecordKey getSysId() { return this.sys_id; }
 	public String getNumber() { return this.number; }
 	public Action getAction() { return action; }
+	public AppJobStatus getStatus() { return status; }
 	public RecordKey getDocID() { return doc_id; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
@@ -324,6 +325,7 @@ public class JobConfig {
 		ObjectNode node = mapper.createObjectNode();
 		if (sys_id != null) node.put("sys_id",  sys_id.toString());
 		if (number != null) node.put("number",  getNumber());
+		if (status != null) node.put("status",  getStatus().toString());
 		node.put("start",  this.start.toString());
 		if (this.last != null) node.put("last", this.last.toString());
 		node.put("name", this.jobName);
