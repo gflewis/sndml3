@@ -16,11 +16,6 @@ public class JobRunner implements Callable<Metrics> {
 
 	protected final JobConfig config;
 	
-	// If profile is specified in constructor
-	// session and database connection may be deferred by a subclass.
-	// (Refer to "call" method of the subclass.)
-	// TODO: Why deferred? A JobRunner is only called once.
-	//
 	protected final Session readerSession;
 	protected final DatabaseConnection database;
 	
@@ -28,14 +23,7 @@ public class JobRunner implements Callable<Metrics> {
 	protected Table table;
 	protected Metrics jobMetrics;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	/*
-	protected JobRunner(ConnectionProfile profile, JobConfig config) {
-		this.profile = profile;
-		this.config = config;
-	}
-	*/
-	
+		
 	public JobRunner(Session session, DatabaseConnection db, JobConfig config) {
 		this.readerSession = session;
 		this.database = db;

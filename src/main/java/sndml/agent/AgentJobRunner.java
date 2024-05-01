@@ -14,29 +14,6 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 	final public RecordKey runKey;
 	final public String number;
 	AppStatusLogger statusLogger;
-
-	// TODO Remove
-	/**
-	 * This class uses a composite progress logger which writes to Log4J2
-	 * and also updates ServiceNow with the status of the job as it runs.
-	 *
-	 * Creation of Session and DatabaseConnection is deferred until the "call" method. 
-	 * The session and database variables are initialized in the "call" method if 
-	 * they are null.
-	 * 
-	 */
-	/*
-	AgentJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
-		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
-		this.scanner = scanner;
-		this.runKey = config.getSysId();
-		this.number = config.getNumber();
-		assert runKey != null;
-		assert runKey.isGUID();
-		assert number != null;
-		assert number.length() > 0;
-	}
-	*/
 	
 	AgentJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
 		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
