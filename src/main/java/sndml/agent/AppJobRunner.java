@@ -7,7 +7,9 @@ import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
-public class AgentJobRunner extends JobRunner implements Runnable {
+public class AppJobRunner extends JobRunner implements Runnable {
+
+	protected final AppJobConfig config;
 	
 	final ConnectionProfile profile;
 	final AgentScanner scanner; // my parent
@@ -15,8 +17,9 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 	final public String number;
 	AppStatusLogger statusLogger;
 	
-	AgentJobRunner(AgentScanner scanner, ConnectionProfile profile, JobConfig config) {
+	AppJobRunner(AgentScanner scanner, ConnectionProfile profile, AppJobConfig config) {
 		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
+		this.config = config;
 		this.profile = profile;
 		this.scanner = scanner;
 		this.runKey = config.getSysId();
@@ -26,17 +29,7 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 		assert number != null;
 		assert number.length() > 0;
 	}
-	
-	/*
-	protected void setSession(Session session) {
-		this.readerSession = session;
-	}
-	
-	protected void setDatabase(DatabaseConnection database) {
-		this.database = database;
-	}
-	*/
-	
+		
 	@Override
 	protected ProgressLogger createJobProgressLogger(TableReader reader) {
 		assert action != null;
@@ -66,7 +59,7 @@ public class AgentJobRunner extends JobRunner implements Runnable {
 	}
 
 	@Override
-	protected void close() throws ResourceException {
+	public void close() throws ResourceException {
 		// Close the database connection
 		try {
 			database.close();

@@ -27,7 +27,7 @@ public abstract class AgentScanner extends TimerTask {
 	int errorCount = 0;
 	
 	final Logger logger = LoggerFactory.getLogger(AgentScanner.class);
-	final ConfigFactory configFactory = new ConfigFactory();
+	final AppConfigFactory configFactory = new AppConfigFactory();
 	
 	final static public String THREAD_NAME = "scanner";
 	final static int ERROR_LIMIT = 3;
@@ -98,14 +98,13 @@ public abstract class AgentScanner extends TimerTask {
 	
 	protected abstract int getErrorLimit();
 	
-	// TODO: How is the progress logger handled?
-	public 	AgentJobRunner createJob(JobConfig jobConfig) {
-		AgentJobRunner job = new AgentJobRunner(this, profile, jobConfig);
+	public 	AppJobRunner createJob(AppJobConfig jobConfig) {
+		AppJobRunner job = new AppJobRunner(this, profile, jobConfig);
 		return job;
 	}	
 	
-	ArrayList<AgentJobRunner> getJobList() throws IOException, ConfigParseException {
-		ArrayList<AgentJobRunner> joblist = new ArrayList<AgentJobRunner>();
+	ArrayList<AppJobRunner> getJobList() throws IOException, ConfigParseException {
+		ArrayList<AppJobRunner> joblist = new ArrayList<AppJobRunner>();
 		ArrayNode runlist = null;
 		try {
 			runlist = getRunList();
@@ -134,7 +133,7 @@ public abstract class AgentScanner extends TimerTask {
 				assert runKey != null;
 				assert number != null;
 				ObjectNode obj = (ObjectNode) node;
-				JobConfig jobConfig = configFactory.jobConfig(profile, obj);
+				AppJobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
 				try {
 					setStatus(runKey, AppJobStatus.PREPARE);
@@ -144,7 +143,7 @@ public abstract class AgentScanner extends TimerTask {
 				}
 				if (!cancelDetected) {
 					Log.setJobContext(number);
-					AgentJobRunner runner = createJob(jobConfig);
+					AppJobRunner runner = createJob(jobConfig);
 					joblist.add(runner);					
 				}
 			}			

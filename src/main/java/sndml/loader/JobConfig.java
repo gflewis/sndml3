@@ -27,8 +27,6 @@ public class JobConfig {
 	
 	public DateTime start;
 	public DateTime last;
-	public RecordKey sys_id;
-	public String number;
 	@JsonProperty("name") public String jobName;
 	public String source;
 	public String target;
@@ -59,8 +57,6 @@ public class JobConfig {
 	public String getSource() {	return source;	}
 	public String getTarget() {	return this.target;	}
 	
-	public RecordKey getSysId() { return this.sys_id; }
-	public String getNumber() { return this.number; }
 	public Action getAction() { return action; }
 	public AppJobStatus getStatus() { return status; }
 	public RecordKey getDocID() { return doc_id; }
@@ -120,12 +116,12 @@ public class JobConfig {
 		return new DateTimeRange(null, this.start);
 	}
 
-	void initializeAndValidate(ConnectionProfile profile, DateCalculator dateCalculator) {
+	public void initializeAndValidate(ConnectionProfile profile, DateCalculator dateCalculator) {
 		initialize(profile, dateCalculator);
 		validate();		
 	}
 	
-	void initialize(ConnectionProfile profile, DateCalculator dateCalculator) {
+	public void initialize(ConnectionProfile profile, DateCalculator dateCalculator) {
 		updateCoreFields();
 		updateDateFields(dateCalculator);
 		if (profile != null) updateFromProfile(profile);
@@ -134,7 +130,7 @@ public class JobConfig {
 	/**
 	 * Set various default values
 	 */
-	private void updateCoreFields() {
+	protected void updateCoreFields() {
 		// Determine Action
 		if (action == null)	action = 
 				Boolean.TRUE.equals(truncate) ?	
@@ -142,8 +138,6 @@ public class JobConfig {
 		if (action == Action.LOAD)    action = Action.INSERT;
 		if (action == Action.REFRESH) action = Action.UPDATE;
 		
-		if (jobName == null && number != null) jobName = number;
-
 		if (action == Action.EXECUTE) {
 			if (jobName == null) jobName = "execute";
 		}
@@ -217,7 +211,7 @@ public class JobConfig {
 		}				
 	}
 		
-	void validate() {
+	public void validate() {
 		if (action == null) configError("Action not specified");
 		if (jobName == null) configError("Name not specified");
 		
@@ -323,8 +317,17 @@ public class JobConfig {
 	public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
-		if (sys_id != null) node.put("sys_id",  sys_id.toString());
-		if (number != null) node.put("number",  getNumber());
+		addFieldsToObject(node);
+		String yaml;
+		try {
+			yaml = mapper.writeValueAsString(node);
+		} catch (JsonProcessingException e) {
+			throw new ConfigParseException(e);
+		}
+		return yaml;
+	}
+
+	protected void addFieldsToObject(ObjectNode node) {
 		if (status != null) node.put("status",  getStatus().toString());
 		node.put("start",  this.start.toString());
 		if (this.last != null) node.put("last", this.last.toString());
@@ -345,14 +348,6 @@ public class JobConfig {
 		if (filter != null) node.put("filter",this.filter);
 		if (includeColumns != null) node.put("columns", includeColumns.toString());
 		if (minRows != null) node.put("minrows", minRows);
-		if (maxRows != null) node.put("maxrows", maxRows);
-		String yaml;
-		try {
-			yaml = mapper.writeValueAsString(node);
-		} catch (JsonProcessingException e) {
-			throw new ConfigParseException(e);
-		}
-		return yaml;
+		if (maxRows != null) node.put("maxrows", maxRows);		
 	}
-		
 }

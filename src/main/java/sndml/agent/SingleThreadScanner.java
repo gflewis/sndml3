@@ -42,10 +42,10 @@ public class SingleThreadScanner extends AgentScanner {
 	public int scan() throws IOException, ConfigParseException, SQLException {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.INIT, "scan");
-		ArrayList<AgentJobRunner> joblist = getJobList();
+		ArrayList<AppJobRunner> joblist = getJobList();
 		if (joblist.size() > 0) {
 			// Run the jobs one at a time
-			for (AgentJobRunner job : joblist) {
+			for (AppJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);
 				job.run();																					
 			}				
@@ -55,7 +55,7 @@ public class SingleThreadScanner extends AgentScanner {
 	}
 
 	/**
-	 * This function is called by {@link AgentJobRunner} whenever a job completes.
+	 * This function is called by {@link AppJobRunner} whenever a job completes.
 	 * When a job completes it may cause other jobs to move to a "ready" state.
 	 * @throws SQLException 
 	 */	

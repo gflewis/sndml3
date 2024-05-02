@@ -30,12 +30,12 @@ public class DateCalculator {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	DateCalculator() {
+	public DateCalculator() {
 		this.start = DateTime.now();
 		this.last = null;
 	}
 	
-	DateCalculator(DateTime start) {
+	public DateCalculator(DateTime start) {
 		this.start = start;
 		this.last = null;
 	}

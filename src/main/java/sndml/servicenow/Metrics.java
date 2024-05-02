@@ -182,7 +182,8 @@ public final class Metrics {
 		writer.println(prefix + "updated="   + String.valueOf(getUpdated()));
 		writer.println(prefix + "deleted="   + String.valueOf(getDeleted()));
 		writer.println(prefix + "skipped="   + String.valueOf(getSkipped()));
-		writer.println(prefix + "processed=" + String.valueOf(getProcessed()));		
+		writer.println(prefix + "processed=" + String.valueOf(getProcessed()));	
+		writer.flush();
 	}
 	
 	// Used for debugging

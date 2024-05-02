@@ -23,8 +23,8 @@ import sndml.util.Log;
 
 public class ConfigFactory {
 	
-	ObjectMapper jsonMapper;
-	ObjectMapper yamlMapper;
+	protected ObjectMapper jsonMapper;
+	protected ObjectMapper yamlMapper;
 	Logger logger = LoggerFactory.getLogger(ConfigFactory.class);	
 	
 	public ConfigFactory() {
@@ -34,12 +34,12 @@ public class ConfigFactory {
 	public ConfigFactory(DateTime start) {
 		jsonMapper = new ObjectMapper();
 		jsonMapper.setSerializationInclusion(Include.NON_NULL);		
-	    jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	    jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);	    
 	    jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 	    jsonMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
 		yamlMapper = new ObjectMapper(new YAMLFactory());
 		yamlMapper.setSerializationInclusion(Include.NON_NULL);
-	    yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	    yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
 	    yamlMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 	    yamlMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
 	}

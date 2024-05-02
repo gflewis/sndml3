@@ -52,7 +52,7 @@ public class JobRunner implements Callable<Metrics> {
 		return progressLogger;
 	}
 			
-	protected void close() throws ResourceException {
+	public void close() throws ResourceException {
 		// {@Link AppJobRunner} will override this method
 	}
 	

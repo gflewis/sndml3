@@ -3,18 +3,14 @@ package sndml.agent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
-import java.sql.SQLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.loader.ConfigFactory;
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
-import sndml.loader.JobConfig;
-import sndml.loader.JobRunner;
 import sndml.servicenow.HttpMethod;
 import sndml.servicenow.JsonRequest;
 import sndml.servicenow.Metrics;
@@ -31,9 +27,9 @@ public class SingleJobRunner implements Runnable {
 	final Session appSession;
 	final String agentName;	
 	final RecordKey jobKey;
-	final JobConfig jobConfig;
+	final AppJobConfig jobConfig;
 	final URI uriGetRun;
-	final ConfigFactory configFactory = new ConfigFactory();
+	final AppConfigFactory configFactory = new AppConfigFactory();
 	final Logger logger = LoggerFactory.getLogger(SingleJobRunner.class);
 	Metrics metrics;
 	
@@ -53,7 +49,7 @@ public class SingleJobRunner implements Runnable {
 		
 	}
 
-	static JobConfig getAgentJobRunnerConfig(ConnectionProfile profile, RecordKey jobKey) {
+	static AppJobConfig getAgentJobRunnerConfig(ConnectionProfile profile, RecordKey jobKey) {
 		throw new UnsupportedOperationException("not yet implemented");	
 	}
 	
@@ -70,11 +66,12 @@ public class SingleJobRunner implements Runnable {
 	public void run() {
 		PrintWriter output = new PrintWriter(System.out);
 		try {
-			JobRunner jobRunner = new AgentJobRunner(null, profile, jobConfig);
+			AppJobRunner jobRunner = new AppJobRunner(null, profile, jobConfig);
 			metrics = jobRunner.call();
+			jobRunner.close();
 			logger.info(Log.FINISH, metrics.toString());
 			metrics.write(output);
-		} catch (SQLException | IOException | InterruptedException | JobCancelledException e) {
+		} catch (JobCancelledException e) {
 			// Throw an unchecked exception which should abort the process.
 			// (We are done anyway)
 			throw new RuntimeException(e);
