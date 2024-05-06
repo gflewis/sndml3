@@ -26,7 +26,7 @@ import sndml.util.PropertySet;
  * and a JDBC database as read from Properties file.</p>
  * 
  * <p>When this object is initialized,
- * and value which is enclosed in backticks will be passed to <tt>Runtime.exec()</tt>
+ * and value which is enclosed in backticks will be passed to <code>Runtime.exec()</code>
  * for evaluation.</p>
  *
  */

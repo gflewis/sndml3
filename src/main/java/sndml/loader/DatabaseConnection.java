@@ -19,12 +19,12 @@ import sndml.servicenow.*;
 import sndml.util.Log;
 
 /**
- * <p>Encapsulates a connection to a JDCB database (<tt>javasql.Connection</tt>).
+ * <p>Encapsulates a connection to a JDCB database (<code>javasql.Connection</code>).
  * </p>
  * <p>When this object is instantiated, it will execute any SQL statements
- * from the <tt>&lt;initialize&gt;</tt> section of <tt>sqltemplates.xml</tt>.
+ * from the <code>&lt;initialize&gt;</code> section of <code>sqltemplates.xml</code>.
  * These statements should be used to ensure that the session time zone is GMT
- * and the date format is <tt>YYYY-MM-DD HH24:MI:SS</tt>.
+ * and the date format is <code>YYYY-MM-DD HH24:MI:SS</code>.
  * </p>
  * 
  */

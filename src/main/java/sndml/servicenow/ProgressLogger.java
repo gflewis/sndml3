@@ -35,6 +35,7 @@ public abstract class ProgressLogger {
 
 	/**
 	 * We are starting the actual processing of records.
+	 * @throws JobCancelledException
 	 */
 	public abstract void logStart() throws JobCancelledException;
 	

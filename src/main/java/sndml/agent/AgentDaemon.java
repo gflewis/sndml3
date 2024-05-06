@@ -67,7 +67,7 @@ public class AgentDaemon implements Daemon {
 	}
 	
 	/**
-	 * Return the Daemon thread, which is the main thread.
+	 * @return the Daemon thread, which is the main thread.
 	 */
 	public static Thread getThread() {
 		return daemonThread;
@@ -93,6 +93,9 @@ public class AgentDaemon implements Daemon {
 	 * Run the {@link AgentScanner} a single time. 
 	 * Wait for all jobs to complete.
 	 * Shut down the worker pool.
+	 * 
+	 * @throws DaemonInitException
+	 * @throws InterruptedException
 	 */
 	public void scanOnce() throws DaemonInitException, InterruptedException {
 		assert Thread.currentThread() == daemonThread;

@@ -72,7 +72,8 @@ public final class Metrics {
 	}
 
 	/**
-	 * Set the number of rows that the reader is expected to return (expected input)
+	 * Set the number of rows that the reader is expected to return
+	 * @param value number of rows that the reader is expected to return
 	 */
 	public synchronized void setExpected(Integer value) {
 		expected = value;
@@ -83,14 +84,15 @@ public final class Metrics {
 	}
 			
 	/**
-	 * Return the number of rows that the reader is expected to return (expected input)
+	 * @return the number of rows that the reader is expected to return 
+	 * as previously set by {@link #setExpected(Integer)} 
 	 */
 	public synchronized Integer getExpected() {
 		return expected;
 	}
 		
 	/**
-	 * Return the number of rows read from the reader
+	 * @return the number of rows read from the reader
 	 */
 	public int getInput() {
 		return this.input;

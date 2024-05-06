@@ -14,7 +14,7 @@ import sndml.util.Log;
 
 /**
  * A class which knows how to generate SQL statements (as strings)
- * based on the ServiceNow schema and information in the <tt>templates.xml</tt> file.
+ * based on the ServiceNow schema and information in the <code>templates.xml</code> file.
  *
  */
 public class Generator {

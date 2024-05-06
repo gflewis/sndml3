@@ -45,9 +45,9 @@ public class Synchronizer extends TableReader {
 	 * <p>This method will do the following.</p>
 	 * <ol>
 	 * <li>Read all the keys and sys_updated_on values from the SQL table 
-	 * (within the specified sys_created_on range).</li>
+	 * (within the given created range and filter).</li>
 	 * <li>Retrieve all keys and sys_updated_on from ServiceNow
-	 * (within the specified sys_created_on range).</li>
+	 * (within the given created range and filter).</li>
 	 * <li>Compare the two lists, and generate the following three new lists:
 	 * <ul>
 	 * <li>Records to be inserted</li>
@@ -55,7 +55,6 @@ public class Synchronizer extends TableReader {
 	 * <li>Records to be deleted</li>
 	 * </ul>
 	 * </ol>
-	 * @param createdRange If not null then processing will be limited to records created in this range 
 	 * @throws IOException
 	 * @throws SQLException
 	 * @throws InterruptedException

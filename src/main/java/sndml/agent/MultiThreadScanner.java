@@ -46,7 +46,6 @@ public class MultiThreadScanner extends AgentScanner {
 	 * Submit for execution all jobs that are ready.
 	 * Return the number of jobs run or submitted.
 	 * Note that this function does NOT necessarily wait for all jobs to complete.
-	 * @throws SQLException 
 	 */
 	public int scan() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);		
@@ -67,7 +66,6 @@ public class MultiThreadScanner extends AgentScanner {
 	/**
 	 * This function is called by {@link AppJobRunner} whenever a job completes.
 	 * When a job completes it may cause other jobs to move to a "ready" state.
-	 * @throws SQLException 
 	 */	
 	@Override
 	public void rescan() throws ConfigParseException, IOException, SQLException {

@@ -146,6 +146,14 @@
     
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>mavan-javadoc-plugin</artifactId>
+        <version>3.6.3</version>
+        <configuration>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
@@ -384,10 +392,10 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
+      </plugin>      
     </plugins>
   </build>
-
+  
   <profiles>
     <profile>
       <!-- To run api tests mvn surefire:test -P test.api -->
