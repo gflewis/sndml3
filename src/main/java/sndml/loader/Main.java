@@ -34,7 +34,7 @@ public class Main {
 				desc("Table name").build());
 		options.addOption(Option.builder("y").longOpt("yaml").required(false).hasArg(true).
 				desc("YAML config file (required)").build());
-		options.addOption(Option.builder("job").longOpt("job").required(false).hasArg(true).
+		options.addOption(Option.builder("jobrun").longOpt("jobrun").required(false).hasArg(true).
 				desc("sys_id of job").build());
 		options.addOption(Option.builder("daemon").longOpt("daemon").required(false).hasArg(false).
 				desc("Run as daemon/service").build());
@@ -95,7 +95,7 @@ public class Main {
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
 			daemon.scanOnce();
 		}
-		if (cmd.hasOption("job")) {
+		if (cmd.hasOption("jobrun")) {
 			// Run a single job
 			agent_mode = true;
 			String sys_id = cmd.getOptionValue("job");

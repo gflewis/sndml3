@@ -22,11 +22,13 @@ import sndml.util.Log;
 import sndml.util.PropertySet;
 
 /**
- * <p>A {@link ConnectionProfile} holds connection credentials for a ServiceNow instance
- * and a JDBC database as read from Properties file.</p>
+ * <p>A {@link ConnectionProfile} holds connection credentials 
+ * which have been read from Properties file.
+ * The properties are split among several {@link PropertySet} collections.
+ * </p>
  * 
  * <p>When this object is initialized,
- * and value which is enclosed in backticks will be passed to <code>Runtime.exec()</code>
+ * any value which is enclosed in backticks will be passed to <code>Runtime.exec()</code>
  * for evaluation.</p>
  *
  */

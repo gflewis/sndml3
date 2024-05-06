@@ -2,11 +2,11 @@ package sndml.util;
 
 import java.util.Properties;
 
-@SuppressWarnings("serial")
 /**
  * A subset of properties with a given prefix (with the prefix removed)
  *
  */
+@SuppressWarnings("serial")
 public class PropertySet extends java.util.Properties {
 
 	private final Properties parent;
