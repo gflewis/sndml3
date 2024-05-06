@@ -56,6 +56,7 @@ public class SingleJobRunner implements Runnable {
 	ObjectNode getRun() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
 		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
+		logger.info(uriGetRun.toString());
 		ObjectNode response = request.execute();
 		logger.debug(Log.RESPONSE, response.toPrettyString());
 		ObjectNode objResult = (ObjectNode) response.get("result");

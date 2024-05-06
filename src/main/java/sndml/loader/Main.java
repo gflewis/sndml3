@@ -51,12 +51,12 @@ public class Main {
 		int cmdCount = 0;
 		if (cmd.hasOption("y")) cmdCount += 1;
 		if (cmd.hasOption("t")) cmdCount += 1;
-		if (cmd.hasOption("job")) cmdCount += 1;
+		if (cmd.hasOption("jobrun")) cmdCount += 1;
 		if (cmd.hasOption("daemon")) cmdCount += 1;
 		if (cmd.hasOption("scan")) cmdCount += 1;		
 		if (cmdCount != 1) 
 			throw new CommandOptionsException(
-				"Must specify exactly one of: --yaml, --table, --job, --daemon or --scan");
+				"Must specify exactly one of: --yaml, --table, --jobrun, --scan or --daemon");
 		String profileName = cmd.getOptionValue("p");
 		profile = new ConnectionProfile(new File(profileName));
 
@@ -98,7 +98,7 @@ public class Main {
 		if (cmd.hasOption("jobrun")) {
 			// Run a single job
 			agent_mode = true;
-			String sys_id = cmd.getOptionValue("job");
+			String sys_id = cmd.getOptionValue("jobrun");
 			RecordKey jobkey = new RecordKey(sys_id);
 			SingleJobRunner jobRunner = new SingleJobRunner(profile, jobkey);
 			jobRunner.run();			

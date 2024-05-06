@@ -11,4 +11,4 @@ if [ "$SNDML_DEBUG" = "TRUE" ]; then
   options="$options -Dlog4j2.configurationFile=log4j2-debug.xml"
   options="$options -Dsndml.logFolder=$SNDML_CONFIG/log -Dsndml.logPrefix=jobrun"    
 fi
-java -ea $options -jar $SNDML_JAR -p $SNDML_PROFILE -jobrun $2
+java -ea $options -jar $SNDML_JAR -p $SNDML_PROFILE --jobrun $2
