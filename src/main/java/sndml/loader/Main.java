@@ -17,10 +17,10 @@ import sndml.util.Log;
 public class Main {
 
 	static final Logger logger = LoggerFactory.getLogger(Main.class);
-	static Options options;
 	static ConnectionProfile profile;
 	static boolean agent_mode = false;
-	
+
+	static Options options = new Options();	
 	static final Option optProfile = 
 			Option.builder("p").longOpt("profile").required(true).hasArg(true).
 			desc("Property file (required)").build();
@@ -51,9 +51,6 @@ public class Main {
 	 */
 	public static void main(String[] args) throws Exception {
 		Log.setGlobalContext();
-		
-		options = new Options();
-		
 		options.addOption(optProfile);
 		options.addOption(optTable);
 		options.addOption(optFilter);
@@ -79,7 +76,7 @@ public class Main {
 		String profileName = cmd.getOptionValue("p");
 		profile = new ConnectionProfile(new File(profileName));
 
-		if (cmd.hasOption("t")) {
+		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
 			String tableName = cmd.getOptionValue("t");
 			String filter = cmd.getOptionValue("f");
@@ -88,10 +85,10 @@ public class Main {
 			tableLoader.call();
 		}
 		else {
-			if (cmd.hasOption("f"))
+			if (cmd.hasOption(optFilter))
 				throw new CommandOptionsException("--filter only valid when used with --table");
 		}		
-		if (cmd.hasOption("y")) {
+		if (cmd.hasOption(optYaml)) {
 			// YAML File Loader
 			String yamlFileName = cmd.getOptionValue("y");
 			File yamlFile = new File(yamlFileName);
