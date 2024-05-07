@@ -10,6 +10,7 @@ import sndml.loader.YamlLoader;
 import sndml.loader.YamlLoaderConfig;
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 import static org.junit.Assert.*;
 

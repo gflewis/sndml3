@@ -11,6 +11,7 @@ import org.junit.Test;
 import sndml.loader.DatabaseConnection;
 import sndml.loader.YamlLoader;
 import sndml.servicenow.*;
+import sndml.util.Metrics;
 
 public class ColumnsTest {
 	

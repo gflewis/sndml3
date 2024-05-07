@@ -13,10 +13,10 @@ import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
 import sndml.servicenow.HttpMethod;
 import sndml.servicenow.JsonRequest;
-import sndml.servicenow.Metrics;
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.Session;
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 /**
  * A class to execute a single agent job and then terminates.

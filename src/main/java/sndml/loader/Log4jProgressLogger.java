@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 public class Log4jProgressLogger extends ProgressLogger {
 	

@@ -1,9 +1,7 @@
-package sndml.servicenow;
+package sndml.util;
 
 import java.io.PrintWriter;
 import java.util.Date;
-
-import sndml.util.DateTime;
 
 public final class Metrics {
 

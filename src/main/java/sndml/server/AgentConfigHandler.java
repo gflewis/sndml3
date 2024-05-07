@@ -1,4 +1,4 @@
-package sndml.agent;
+package sndml.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -14,7 +14,7 @@ import com.sun.net.httpserver.*;
 import sndml.loader.*;
 import sndml.util.Log;
 
-public class AppJobHandler implements HttpHandler {
+public class AgentConfigHandler implements HttpHandler {
 
 	private final ConnectionProfile profile;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -23,7 +23,7 @@ public class AppJobHandler implements HttpHandler {
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
-	public AppJobHandler(ConnectionProfile profile) {
+	public AgentConfigHandler(ConnectionProfile profile) {
 		this.profile = profile;
 	}
 	

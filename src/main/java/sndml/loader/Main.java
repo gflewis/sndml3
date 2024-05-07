@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.agent.*;
+import sndml.server.AgentHttpServer;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
@@ -121,7 +122,7 @@ public class Main {
 		}
 		if (cmd.hasOption(optServer)) {
 			// Server
-			AgentServer server = new AgentServer(profile);
+			AgentHttpServer server = new AgentHttpServer(profile);
 			server.start();
 		}
 	}

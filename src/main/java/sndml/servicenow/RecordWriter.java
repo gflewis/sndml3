@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.agent.JobCancelledException;
+import sndml.util.Metrics;
 
 /**
  * A class which knows how to process records retrieved from ServiceNow.

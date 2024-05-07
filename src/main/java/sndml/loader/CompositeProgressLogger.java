@@ -3,6 +3,7 @@ package sndml.loader;
 import sndml.agent.AppProgressLogger;
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
+import sndml.util.Metrics;
 
 public class CompositeProgressLogger extends ProgressLogger {
 

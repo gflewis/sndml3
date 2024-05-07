@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import sndml.util.Metrics;
+
 /**
  * Simple class to collect a bunch of records in a list.
  */

@@ -6,10 +6,10 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 
 import sndml.agent.JobCancelledException;
-import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;
 import sndml.util.Log;
+import sndml.util.Metrics;
 import sndml.util.ResourceException;
 import sndml.servicenow.RecordList;
 import sndml.servicenow.RecordWriter;

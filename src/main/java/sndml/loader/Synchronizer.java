@@ -7,6 +7,7 @@ import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 /**
  * A class which knows how to compare the keys and timestamps from a ServiceNow table

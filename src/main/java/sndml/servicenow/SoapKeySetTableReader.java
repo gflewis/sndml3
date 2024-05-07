@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import sndml.agent.JobCancelledException;
 import sndml.util.Log;
+import sndml.util.Metrics;
 import sndml.util.Parameters;
 
 /**

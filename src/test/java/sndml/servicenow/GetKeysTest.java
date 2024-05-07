@@ -3,6 +3,7 @@ package sndml.servicenow;
 import org.slf4j.Logger;
 
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 import static org.junit.Assert.*;
 

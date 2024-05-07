@@ -3,6 +3,8 @@ package sndml.servicenow;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.util.Metrics;
+
 /**
  * {@link RecordWriter} which discards all input.
  *

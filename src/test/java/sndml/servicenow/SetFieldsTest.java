@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 public class SetFieldsTest {
 

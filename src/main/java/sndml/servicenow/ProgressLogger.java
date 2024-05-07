@@ -2,6 +2,7 @@ package sndml.servicenow;
 
 import sndml.agent.JobCancelledException;
 import sndml.loader.DatePart;
+import sndml.util.Metrics;
 
 public abstract class ProgressLogger {
 

@@ -15,6 +15,7 @@ import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.FieldValues;
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 @RunWith(Parameterized.class)
 public class PruneTest {

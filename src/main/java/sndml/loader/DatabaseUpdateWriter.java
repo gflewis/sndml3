@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.servicenow.RecordKey;
-import sndml.servicenow.Metrics;
 import sndml.servicenow.TableRecord;
 import sndml.util.Log;
+import sndml.util.Metrics;
 import sndml.servicenow.Table;
 
 public class DatabaseUpdateWriter extends DatabaseTableWriter {

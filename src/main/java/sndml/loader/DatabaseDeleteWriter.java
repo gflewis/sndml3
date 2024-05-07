@@ -5,10 +5,10 @@ import java.sql.SQLException;
 
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.KeySet;
-import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;
 import sndml.util.Log;
+import sndml.util.Metrics;
 import sndml.servicenow.Table;
 
 public class DatabaseDeleteWriter extends DatabaseTableWriter {

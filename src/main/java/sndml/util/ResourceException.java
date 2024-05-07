@@ -1,7 +1,7 @@
 package sndml.util;
 
 /**
- * Exception thrown while trying to obtain a resource such as a database connection
+ * An exception thrown while trying to obtain a resource such as a database connection
  * or a ServiceNow session. These exceptions are generally not recoverable
  * and will cause the Server to abend.
  */

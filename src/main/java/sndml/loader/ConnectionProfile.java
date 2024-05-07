@@ -29,8 +29,12 @@ import sndml.util.ResourceException;
  * </p>
  * 
  * <p>When this object is initialized,
- * any value which is enclosed in backticks will be passed to <code>Runtime.exec()</code>
- * for evaluation.</p>
+ * <ul>
+ * <li><b>${name}</b> in a property value will be replaced with the the value of 
+ * the corresponding system property</li>
+ * <li>any value which is surrounded by backticks will be passed to <code>Runtime.exec()</code>
+ * for evaluation</li>
+ * </p>
  *
  */
 

@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import sndml.util.Metrics;
+
 public class RestTableReaderTest {
 
 	final Logger logger = TestManager.getLogger(this.getClass());

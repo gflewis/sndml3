@@ -17,6 +17,7 @@ import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTimeRange;
 import sndml.util.Log;
+import sndml.util.Metrics;
 
 public final class DatePartitionedTableReader extends TableReader {
 

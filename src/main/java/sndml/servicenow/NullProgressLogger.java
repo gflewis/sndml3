@@ -1,6 +1,7 @@
 package sndml.servicenow;
 
 import sndml.loader.DatePart;
+import sndml.util.Metrics;
 
 /**
  * {@link ProgressLogger} that discards metrics.
