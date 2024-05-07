@@ -5,6 +5,7 @@ import sndml.servicenow.Table;
 import sndml.servicenow.TableSchemaReader;
 import sndml.util.DateTime;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 public class SimpleTableLoader extends JobRunner implements Runnable {
 

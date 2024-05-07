@@ -10,6 +10,7 @@ import sndml.servicenow.Metrics;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 import sndml.servicenow.RecordList;
 import sndml.servicenow.RecordWriter;
 import sndml.servicenow.Table;

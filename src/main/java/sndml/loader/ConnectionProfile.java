@@ -20,6 +20,7 @@ import sndml.servicenow.Instance;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.PropertySet;
+import sndml.util.ResourceException;
 
 /**
  * <p>A {@link ConnectionProfile} holds connection credentials 
@@ -35,14 +36,9 @@ import sndml.util.PropertySet;
 
 public class ConnectionProfile {
 	
-	public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
-	public static final String DEFAULT_AGENT_NAME = "main";
+	// public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
+	// public static final String DEFAULT_AGENT_NAME = "main";
 
-	enum SchemaSource {
-		APP,    // Use app instance and {@link AppSchemaReader}
-		READER, // Use reader instance and {@link TableSchemaReader}
-		SCHEMA  // Use schema instance and {@link TableSchemaReader}
-	}
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final File file;
 	private final Properties allProperties;
@@ -52,7 +48,13 @@ public class ConnectionProfile {
 	public final PropertySet agent; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet loader;
 	// TODO Implement AgentServer
-	@Deprecated public final PropertySet httpserver;
+	public final PropertySet server;
+
+	enum SchemaSource {
+		APP,    // Use app instance and {@link AppSchemaReader}
+		READER, // Use reader instance and {@link TableSchemaReader}
+		SCHEMA  // Use schema instance and {@link TableSchemaReader}
+	}
 	public final SchemaSource schemaSource;
 	
 	public ConnectionProfile(File profile) throws IOException {
@@ -72,7 +74,7 @@ public class ConnectionProfile {
 		this.database = 
 			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
 		this.loader = getSubset("loader");
-		this.httpserver = getSubset("server");
+		this.server = getSubset("server");
 		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
@@ -195,7 +197,7 @@ public class ConnectionProfile {
 	}
 
 	public String getAgentName() {
-		return agent.getString("agent", DEFAULT_AGENT_NAME);
+		return agent.getNotEmpty("agent");
 	}
 	/**
 	 * Return the URI of an API. This will be dependent on the application scope
@@ -209,7 +211,7 @@ public class ConnectionProfile {
 		Instance instance = getAppInstance();
 		// ConnectionProfile profile = AgentDaemon.getConnectionProfile();
 		// assert profile != null;		
-		String appScope = agent.getString("scope", DEFAULT_APP_SCOPE);
+		String appScope = agent.getNotEmpty("scope");
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);		

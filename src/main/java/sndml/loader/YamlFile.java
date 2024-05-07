@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.util.DateTime;
+import sndml.util.ResourceException;
 
 /**
  * A file with YAML Loader Config instructions. 

@@ -1,4 +1,4 @@
-package sndml.server;
+package sndml.agent;
 
 
 import java.io.IOException;
@@ -12,7 +12,6 @@ import com.sun.net.httpserver.HttpServer;
 import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
-@Deprecated
 // TODO Implement AgentServer
 public class AgentServer {
 
@@ -22,11 +21,11 @@ public class AgentServer {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public AgentServer(ConnectionProfile profile) throws IOException {
-		this.port = profile.httpserver.getInt("port", 0);
+		this.port = profile.server.getInt("port", 0);
 		if (port == 0) throw new AssertionError("server.port not specified");
-		int backlog = profile.httpserver.getInt("backlog",  3);
+		int backlog = profile.server.getInt("backlog",  3);
 		this.server = HttpServer.create(new InetSocketAddress(port), backlog);
-		String context = profile.httpserver.getProperty("context", "/start");
+		String context = profile.server.getProperty("context", "/start");
 		handler = new AppJobHandler(profile);
 		server.createContext(context, handler);
 		server.setExecutor(null); // creates a default executor

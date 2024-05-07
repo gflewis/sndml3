@@ -3,6 +3,8 @@ package sndml.loader;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import sndml.util.ResourceException;
+
 /**
  * Used for JUnit Tests
  */

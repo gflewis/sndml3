@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.util.DateTime;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 /**
  * Class which knows how to retrieve a DateTime from the metrics file

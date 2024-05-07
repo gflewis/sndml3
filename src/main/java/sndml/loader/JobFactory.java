@@ -9,6 +9,7 @@ import java.sql.SQLException;
 
 import sndml.servicenow.Session;
 import sndml.util.DateTime;
+import sndml.util.ResourceException;
 
 public class JobFactory {
 

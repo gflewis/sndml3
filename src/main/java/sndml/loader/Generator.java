@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 /**
  * A class which knows how to generate SQL statements (as strings)

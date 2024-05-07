@@ -1,4 +1,4 @@
-package sndml.loader;
+package sndml.util;
 
 /**
  * Exception thrown while trying to obtain a resource such as a database connection

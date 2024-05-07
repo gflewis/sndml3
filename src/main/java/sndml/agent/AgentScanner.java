@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 public abstract class AgentScanner extends TimerTask {
 

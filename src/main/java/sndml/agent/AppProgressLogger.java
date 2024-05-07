@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import sndml.loader.ConnectionProfile;
 import sndml.loader.DatePart;
-import sndml.loader.ResourceException;
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 public class AppProgressLogger extends ProgressLogger {
 

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 /**
  * <p>Encapsulates a connection to a JDCB database (<code>javasql.Connection</code>).
