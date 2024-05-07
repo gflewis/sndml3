@@ -41,7 +41,7 @@ public class KeySet extends ArrayList<RecordKey> {
 	}
 	
 	/**
-	 * Returns the complete list as a comma separated list of sys_ids.
+	 * @return the complete list as a comma separated list of sys_ids.
 	 */
 	public String toString() {	
 		StringBuffer result = new StringBuffer();

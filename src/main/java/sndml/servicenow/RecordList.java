@@ -58,10 +58,11 @@ public class RecordList extends ArrayList<TableRecord> {
 	/**
 	 * Extract all the values of a reference field from a list of records.
 	 * Null keys are not included in the list.
+	 * This function is private since it does not remove duplicates.
 	 * @param fieldname Name of a reference field
 	 * @return A list keys
 	 */
-	public KeySet extractKeys(String fieldname) {
+	private KeySet extractKeys(String fieldname) {
 		KeySet result = new KeySet(this.size());
 		if (this.size() == 0) return result;
 		for (TableRecord rec : this) {
@@ -76,6 +77,7 @@ public class RecordList extends ArrayList<TableRecord> {
 
 	/**
 	 * Extract the primary keys (sys_ids) from this list.
+	 * @return list of values as a @{link KeySet}
 	 */
 	public KeySet extractKeys()  {
 		return extractKeys("sys_id");

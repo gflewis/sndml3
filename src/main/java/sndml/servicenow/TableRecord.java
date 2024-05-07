@@ -8,6 +8,10 @@ import sndml.util.DateTime;
 import sndml.util.InvalidDateTimeException;
 import sndml.util.Log;
 
+/**
+ * Holds a single record from a ServiceNow table.
+ * Note that there are two subclasses: {@link JsonRecord} and {@link XmlRecord}.
+ */
 public abstract class TableRecord implements InsertResponse {
 
 	static final Logger logger = Log.logger(TableRecord.class);
@@ -19,7 +23,7 @@ public abstract class TableRecord implements InsertResponse {
 	}
 	
 	/**
-	 * The table from which this record was retrieved.
+	 * @return the table from which this record was retrieved.
 	 */
 	public Table getTable() { 
 		return this.table; 
