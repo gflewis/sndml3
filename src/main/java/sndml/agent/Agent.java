@@ -4,11 +4,10 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.loader.Main;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
-public class Agent extends Main {
+public class Agent extends sndml.loader.Main {
 
 	static final Logger logger = LoggerFactory.getLogger(Agent.class);
 	

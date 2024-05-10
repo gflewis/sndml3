@@ -19,7 +19,7 @@ import sndml.util.ResourceException;
 public class AppProgressLogger extends ProgressLogger {
 
 	final ConnectionProfile profile;
-	final Session appSession;
+	final AppSession appSession;
 	final URI putRunStatusURI;
 	final String number;
 	final RecordKey runKey;
@@ -27,7 +27,7 @@ public class AppProgressLogger extends ProgressLogger {
 
 	AppProgressLogger(
 			ConnectionProfile profile, 
-			Session appSession,
+			AppSession appSession,
 			Metrics metrics,
 			String number, 
 			RecordKey runKey) {
@@ -38,7 +38,7 @@ public class AppProgressLogger extends ProgressLogger {
 	
 	AppProgressLogger(
 			ConnectionProfile profile, 
-			Session appSession,
+			AppSession appSession,
 			Metrics metrics,
 			String number, 
 			RecordKey runKey,
@@ -49,7 +49,8 @@ public class AppProgressLogger extends ProgressLogger {
 		this.appSession = appSession;
 		this.number = number;
 		this.runKey = runKey;
-		this.putRunStatusURI = profile.getAPI("putrunstatus");
+		// this.putRunStatusURI = profile.getAPI("putrunstatus");
+		this.putRunStatusURI = appSession.getAPI("putrunstatus");
 	}
 
 	@Override

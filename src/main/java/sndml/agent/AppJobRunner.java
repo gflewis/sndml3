@@ -14,6 +14,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	protected final AppJobConfig config;
 	
 	final ConnectionProfile profile;
+	final AppSession appSession;
 	final AgentScanner scanner; // my parent
 	final public RecordKey runKey;
 	final public String number;
@@ -23,6 +24,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
 		this.config = config;
 		this.profile = profile;
+		this.appSession = profile.newAppSession();
 		this.scanner = scanner;
 		this.runKey = config.getSysId();
 		this.number = config.getNumber();
@@ -44,7 +46,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		else {
 			textLogger =  new Log4jProgressLogger(this.getClass(), action, jobMetrics);
 		}
-		appLogger =	new AppProgressLogger(profile, readerSession, jobMetrics, number, runKey);
+		appLogger =	new AppProgressLogger(profile, appSession, jobMetrics, number, runKey);
 		assert appLogger.getMetrics() == jobMetrics;
 		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
 		return compositeLogger;
@@ -83,7 +85,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
-			statusLogger = new AppStatusLogger(profile, readerSession);		
+			statusLogger = new AppStatusLogger(profile, appSession);		
 			super.call();
 			if (scanner != null) scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {

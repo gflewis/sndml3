@@ -16,7 +16,7 @@ import sndml.util.Log;
 public class AppStatusLogger {
 
 	final ConnectionProfile profile;
-	final Session appSession;
+	final AppSession appSession;
 	final URI uriPutRunStatus;
 	final URI uriGetRun;
 	final Logger logger;
@@ -31,13 +31,13 @@ public class AppStatusLogger {
 	public static String CANCELLED = "cancelled";
 	*/
 		
-	public AppStatusLogger(ConnectionProfile profile, Session appSession) {
+	public AppStatusLogger(ConnectionProfile profile, AppSession appSession) {
 		assert profile != null;
 		assert appSession != null;
 		this.profile = profile;
 		this.appSession = appSession;
-		this.uriPutRunStatus = profile.getAPI("putrunstatus");
-		this.uriGetRun = profile.getAPI("getrun");
+		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
+		this.uriGetRun = appSession.getAPI("getrun");
 		this.logger = LoggerFactory.getLogger(this.getClass());		
 	}
 

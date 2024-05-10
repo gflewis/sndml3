@@ -16,6 +16,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.agent.AppSession;
 import sndml.servicenow.Instance;
 import sndml.servicenow.Session;
 import sndml.util.Log;
@@ -157,22 +158,21 @@ public class ConnectionProfile {
 	 * Opens and returns a new connection to the ServiceNow instance.
 	 * @return
 	 */
-	public synchronized Session newReaderSession() throws ResourceException {
-		Session session = new Session(reader);
+	public synchronized ReaderSession newReaderSession() throws ResourceException {
+		ReaderSession session = new ReaderSession(reader);
 		return session;
 	}
 	
-	public synchronized Session newAppSession() throws ResourceException {
-		Session session = null;
+	public synchronized AppSession newAppSession() throws ResourceException {
+		AppSession appSession = null;
 		if (agent.containsKey("instance"))
-			session = new Session(agent);
-		else if (reader.containsKey("instance"))
-			session = new Session(reader);
+			appSession = new AppSession(agent);
 		else
-			reader.missingProperty("instance");
-		return session;
+			agent.missingProperty("instance");
+		return appSession;
 	}
 	
+	@Deprecated
 	public Instance getAppInstance() throws ResourceException {
 		Instance instance = null;
 		if (agent.containsKey("instance"))
@@ -200,13 +200,16 @@ public class ConnectionProfile {
 		return database;
 	}
 
+	@Deprecated
 	public String getAgentName() {
 		return agent.getNotEmpty("agent");
 	}
+	
 	/**
 	 * Return the URI of an API. This will be dependent on the application scope
 	 * which is available from the property daemon.scope.
 	 */
+	@Deprecated	
 	public URI getAPI(String apiName) {
 		return getAPI(apiName, null);
 	}

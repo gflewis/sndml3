@@ -20,7 +20,7 @@ import sndml.util.ResourceException;
 public abstract class AgentScanner extends TimerTask {
 
 	final ConnectionProfile profile;
-	final Session appSession;
+	final AppSession appSession;
 	final AppStatusLogger statusLogger;
 	final String agentName;
 	final URI uriGetRunList;
@@ -47,7 +47,8 @@ public abstract class AgentScanner extends TimerTask {
 		this.appSession = profile.newAppSession();
 		assert agentName != null;
 		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
-		this.uriPutRunStatus = profile.getAPI("putrunstatus");
+//		this.uriPutRunStatus = profile.getAPI("putrunstatus");
+		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
 		this.statusLogger = new AppStatusLogger(profile, appSession);
 		SchemaFactory.setSchemaReader(new AppSchemaReader(appSession));		
 	}
