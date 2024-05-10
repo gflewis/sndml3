@@ -17,6 +17,7 @@ import sndml.servicenow.RecordKey;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.ResourceException;
 
 /**
  * A class to execute a single agent job and then terminates.
@@ -42,11 +43,13 @@ public class SingleJobRunner implements Runnable {
 		this.agentName = profile.getAgentName();
 		this.jobConfig = configFactory.jobConfig(profile, getRun());
 		logger.info(Log.INIT, jobConfig.toString());
+		logger.info(Log.INIT, String.format(
+				"%s status=%s",jobConfig.number, jobConfig.status.toString()));		
 		if (!jobConfig.status.equals(AppJobStatus.READY))
 			throw new IllegalStateException(String.format(
-					"%s has unexpected Status \"%s\" (expected \"READY\");", 
-					jobConfig.number, jobConfig.status.toString())); 
-		
+					"%s has unexpected Status \"%s\"", 
+					jobConfig.number, jobConfig.status.toString()));
+		logger.info(Log.INIT, "end constructor");		
 	}
 
 	static AppJobConfig getAgentJobRunnerConfig(ConnectionProfile profile, RecordKey jobKey) {
@@ -65,13 +68,11 @@ public class SingleJobRunner implements Runnable {
 
 	@Override
 	public void run() {
-		PrintWriter output = new PrintWriter(System.out);
 		try {
 			AppJobRunner jobRunner = new AppJobRunner(null, profile, jobConfig);
 			metrics = jobRunner.call();
 			jobRunner.close();
 			logger.info(Log.FINISH, metrics.toString());
-			metrics.write(output);
 		} catch (JobCancelledException e) {
 			// Throw an unchecked exception which should abort the process.
 			// (We are done anyway)

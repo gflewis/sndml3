@@ -56,7 +56,12 @@ public class AppJobRunner extends JobRunner implements Runnable {
 			this.call();
 		} catch (JobCancelledException e) {
 			logger.warn(Log.ERROR, "Job Cancellation Detected");
-			throw new ResourceException(e);
+		} catch (ResourceException e) {
+			logger.error(Log.ERROR, e.getMessage(), e);
+			e.printStackTrace(System.err);
+		} catch (Exception e) {
+			logger.error(Log.ERROR, e.getMessage(), e);			
+			e.printStackTrace(System.err);
 		}
 	}
 
