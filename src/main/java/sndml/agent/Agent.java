@@ -8,9 +8,9 @@ import sndml.loader.Main;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
-public class AgentMain extends Main {
+public class Agent extends Main {
 
-	static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
+	static final Logger logger = LoggerFactory.getLogger(Agent.class);
 	
 	public static void main (CommandLine cmd) throws Exception {
 		

@@ -10,7 +10,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.AgentMain;
+import sndml.agent.Agent;
 import sndml.util.Log;
 
 public class Main {
@@ -97,7 +97,7 @@ public class Main {
 			loader.loadTables();
 		}
 		if (requiresApp) {
-			AgentMain.main(cmd);
+			Agent.main(cmd);
 		}
 		/*
 		if (cmd.hasOption(optDaemon)) {
