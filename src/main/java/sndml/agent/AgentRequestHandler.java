@@ -1,4 +1,4 @@
-package sndml.server;
+package sndml.agent;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.*;
 
-import sndml.agent.SingleJobRunner;
-import sndml.agent.WorkerPool;
 import sndml.loader.*;
 import sndml.servicenow.NoContentException;
 import sndml.servicenow.RecordKey;
@@ -74,7 +72,7 @@ public class AgentRequestHandler implements HttpHandler {
 				}
 				catch (Exception e) {
 					logger.error(Log.ERROR, e.getMessage(), e);
-					Runtime.getRuntime().exit(-1);
+					Runtime.getRuntime().halt(-1);
 				}
 				// workerPool.submit(jobrunner);
 			}

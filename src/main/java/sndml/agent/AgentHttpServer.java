@@ -1,4 +1,4 @@
-package sndml.server;
+package sndml.agent;
 
 
 import java.io.IOException;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.net.httpserver.HttpServer;
 
-import sndml.agent.WorkerPool;
 import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
