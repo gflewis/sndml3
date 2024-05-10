@@ -10,40 +10,38 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.*;
-import sndml.server.AgentHttpServer;
-import sndml.servicenow.RecordKey;
+import sndml.agent.AgentMain;
 import sndml.util.Log;
 
 public class Main {
 
-	static final Logger logger = LoggerFactory.getLogger(Main.class);
-	static ConnectionProfile profile;
-	static boolean agent_mode = false;
+	static private final Logger logger = LoggerFactory.getLogger(Main.class);
+	static protected ConnectionProfile profile;
+	static protected boolean requiresApp = false;
 
 	static Options options = new Options();	
-	static final Option optProfile = 
+	static final protected Option optProfile = 
 			Option.builder("p").longOpt("profile").required(true).hasArg(true).
 			desc("Property file (required)").build();
-	static final Option optTable = 
+	static final protected Option optTable = 
 			Option.builder("t").longOpt("table").required(false).hasArg(true).
 			desc("Table name").build();
-	static final Option optFilter =
+	static final protected Option optFilter =
 			Option.builder("f").longOpt("filter").required(false).hasArg(true).
 			desc("Encoded query for use with --table").build();
-	static final Option optYaml = 
+	static final protected Option optYaml = 
 			Option.builder("y").longOpt("yaml").required(false).hasArg(true).
 			desc("YAML config file (required)").build();
-	static final Option optJobRun = 
+	static final protected Option optJobRun = 
 			Option.builder("jobrun").longOpt("jobrun").required(false).hasArg(true).
 			desc("sys_id of job").build();
-	static final Option optDaemon =
+	static final protected Option optDaemon =
 			Option.builder("daemon").longOpt("daemon").required(false).hasArg(false).
 			desc("Run as daemon/service").build();
-	static final Option optScan =
+	static final protected Option optScan =
 			Option.builder("scan").longOpt("scan").required(false).hasArg(false).
 			desc("Run the deamon scanner once").build();
-	static final Option optServer =
+	static final protected Option optServer =
 			Option.builder("server").longOpt("server").required(false).hasArg(false).
 			desc("Run as server").build();
 	
@@ -63,12 +61,12 @@ public class Main {
 				
 		CommandLine cmd = new DefaultParser().parse(options,  args);
 		int cmdCount = 0;
-		if (cmd.hasOption(optYaml)) cmdCount += 1;
-		if (cmd.hasOption(optTable)) cmdCount += 1;
-		if (cmd.hasOption(optJobRun)) cmdCount += 1;
-		if (cmd.hasOption(optScan)) cmdCount += 1;		
-		if (cmd.hasOption(optDaemon)) cmdCount += 1;
-		if (cmd.hasOption(optServer)) cmdCount += 1;
+		if (cmd.hasOption(optYaml))   cmdCount += 1;
+		if (cmd.hasOption(optTable))  cmdCount += 1;
+		if (cmd.hasOption(optJobRun)) { cmdCount += 1; requiresApp = true; }
+		if (cmd.hasOption(optScan))   { cmdCount += 1; requiresApp = true; }	
+		if (cmd.hasOption(optDaemon)) { cmdCount += 1; requiresApp = true; }
+		if (cmd.hasOption(optServer)) { cmdCount += 1; requiresApp = true; }
 		if (cmdCount != 1) 
 			throw new CommandOptionsException(
 				String.format("Must specify exactly one of: --%s, --%s, --%s or --%s",
@@ -98,23 +96,27 @@ public class Main {
 			YamlLoader loader = new YamlLoader(profile, yamlFile);
 			loader.loadTables();
 		}
+		if (requiresApp) {
+			AgentMain.main(cmd);
+		}
+		/*
 		if (cmd.hasOption(optDaemon)) {
 			// Daemon
-			agent_mode = true;
+			requiresApp = true;
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
 			daemon.runForever();
 		}
 		if (cmd.hasOption(optScan)) {
 			// Scan once
-			agent_mode = true;
+			requiresApp = true;
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
 			daemon.scanOnce();
 		}
 		if (cmd.hasOption(optJobRun)) {
 			// Run a single job
-			agent_mode = true;
+			requiresApp = true;
 			String sys_id = cmd.getOptionValue("jobrun");
 			RecordKey jobkey = new RecordKey(sys_id);
 			SingleJobRunner jobRunner = new SingleJobRunner(profile, jobkey);
@@ -125,6 +127,7 @@ public class Main {
 			AgentHttpServer server = new AgentHttpServer(profile);
 			server.start();
 		}
+		*/
 	}
 	
 	public static ConnectionProfile getProfile() {
@@ -138,10 +141,7 @@ public class Main {
 	 * @return true if using scoped app, otherwise false
 	 */
 	public static boolean isAgent() {
-		return agent_mode;
+		return requiresApp;
 	}
 	
-	public String getAgentName() {
-		return profile.getAgentName();
-	}
 }

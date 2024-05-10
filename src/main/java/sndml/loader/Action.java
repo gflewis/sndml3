@@ -2,6 +2,9 @@ package sndml.loader;
 
 import java.util.EnumSet;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_VALUES)
 public enum Action {
 	INSERT, 
 	UPDATE, 

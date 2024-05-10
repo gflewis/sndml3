@@ -1,7 +1,6 @@
 package sndml.agent;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URI;
 
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ import sndml.servicenow.RecordKey;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.Metrics;
-import sndml.util.ResourceException;
 
 /**
  * A class to execute a single agent job and then terminates.
