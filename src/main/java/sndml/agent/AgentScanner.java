@@ -46,8 +46,7 @@ public abstract class AgentScanner extends TimerTask {
 		Log.setJobContext(agentName);		
 		this.appSession = profile.newAppSession();
 		assert agentName != null;
-		this.uriGetRunList = profile.getAPI("getrunlist", agentName);
-//		this.uriPutRunStatus = profile.getAPI("putrunstatus");
+		this.uriGetRunList = appSession.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
 		this.statusLogger = new AppStatusLogger(profile, appSession);
 		SchemaFactory.setSchemaReader(new AppSchemaReader(appSession));		
@@ -64,7 +63,6 @@ public abstract class AgentScanner extends TimerTask {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		Log.setJobContext(agentName);		
 		try {
-//			profile.reloadIfChanged();
 			scan();
 		}
 		catch (NoContentException e) {
@@ -92,7 +90,8 @@ public abstract class AgentScanner extends TimerTask {
 		}
 	}
 	
-	public abstract void scanUntilDone() throws IOException, InterruptedException, ConfigParseException, SQLException;
+	public abstract void scanUntilDone() 
+			throws IOException, InterruptedException, ConfigParseException, SQLException;
 	
 	public abstract int scan() throws ConfigParseException, IOException, SQLException;
 

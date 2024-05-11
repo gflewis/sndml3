@@ -27,6 +27,7 @@ public class SchemaFactory {
 	public static TableSchema getSchema(String tablename) throws IOException, InterruptedException {
 		if (schemaCache.containsKey(tablename)) 
 			return schemaCache.get(tablename);
+		assert schemaReader != null : SchemaFactory.class.getSimpleName() + " not initialized";
 		String saveJob = Log.getJobContext();
 		Log.setJobContext(tablename + ".schema");		
 		TableSchema schema = schemaReader.getSchema(tablename);

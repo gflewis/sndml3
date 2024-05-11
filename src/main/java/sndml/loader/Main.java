@@ -13,11 +13,14 @@ import org.slf4j.LoggerFactory;
 import sndml.agent.Agent;
 import sndml.util.Log;
 
+/**
+ * This is the main class invoked from the JAR file. This is a singleton class.
+ */
 public class Main {
 
-	static private final Logger logger = LoggerFactory.getLogger(Main.class);
 	static protected ConnectionProfile profile;
-	static protected boolean requiresApp = false;
+	static private boolean requiresApp = false;
+	static private final Logger logger = LoggerFactory.getLogger(Main.class);
 
 	static Options options = new Options();	
 	static final protected Option optProfile = 
@@ -45,9 +48,6 @@ public class Main {
 			Option.builder("server").longOpt("server").required(false).hasArg(false).
 			desc("Run as server").build();
 	
-	/**
-	 * This is the main class invoked from the JAR file.
-	 */
 	public static void main(String[] args) throws Exception {
 		Log.setGlobalContext();
 		options.addOption(optProfile);

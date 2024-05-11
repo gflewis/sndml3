@@ -34,7 +34,7 @@ public class SingleThreadScanner extends AgentScanner {
 
 	/**
 	 * Run all jobs that are ready. Return the number of jobs run.
-	 * Note that this function there may be new jobs ready to run, 
+	 * Note that when this function exits there may be new jobs ready to run, 
 	 * but his function will not run them.  
 	 * @throws SQLException 
 	 */

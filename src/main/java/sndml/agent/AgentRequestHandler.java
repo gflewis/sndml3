@@ -26,7 +26,7 @@ public class AgentRequestHandler implements HttpHandler {
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
-	public AgentRequestHandler(ConnectionProfile profile, WorkerPool workerPool) {
+	public AgentRequestHandler(ConnectionProfile profile) {
 		this.profile = profile;
 //		this.workerPool = workerPool;
 	}

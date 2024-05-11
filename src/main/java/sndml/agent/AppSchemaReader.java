@@ -7,26 +7,26 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.loader.ConnectionProfile;
+//import sndml.loader.ConnectionProfile;
 import sndml.servicenow.*;
 
 public class AppSchemaReader implements SchemaReader {
 
-	private final Session session;
-	private final ConnectionProfile profile;
+	private final AppSession appSession;
+//	private final ConnectionProfile profile;
 	
-	public AppSchemaReader(Session session) {
-		this.profile = AgentDaemon.getConnectionProfile();
-		this.session = session;
+	public AppSchemaReader(AppSession session) {
+//		this.profile = AgentDaemon.getConnectionProfile();
+		this.appSession = session;
 	}
 	
 	@Override
 	public TableSchema getSchema(String tablename) throws IOException {
 		assert tablename != null;
-		Table table = session.table(tablename);
+		Table table = appSession.table(tablename);
 		TableSchema schema = new TableSchema(table);
-		URI apiTableSchema = profile.getAPI("gettableschema", tablename);
-		JsonRequest request = new JsonRequest(session, apiTableSchema);
+		URI apiTableSchema = appSession.getAPI("gettableschema", tablename);
+		JsonRequest request = new JsonRequest(appSession, apiTableSchema);
 		ObjectNode response = request.execute();
 		JsonNode result = response.get("result");
 		assert result.isArray();

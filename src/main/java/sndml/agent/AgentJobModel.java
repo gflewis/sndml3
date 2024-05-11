@@ -15,18 +15,18 @@ import sndml.util.Log;
 // TODO: Is this class even useful?
 class AgentJobModel {
 
-	final Session appSession;
+	final AppSession appSession;
 	final ConnectionProfile profile;
 	final ConfigFactory configFactory = new ConfigFactory();	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	public AgentJobModel(Session appSession) {
+	public AgentJobModel(AppSession appSession) {
 		this.appSession = appSession;
 		this.profile = Main.getProfile();		
 	}
 	
 	AppJobConfig fetch(RecordKey jobKey) throws IOException {
-		URI uriGetRun = profile.getAPI("getrun", jobKey.toString());		
+		URI uriGetRun = appSession.getAPI("getrun", jobKey.toString());		
 		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
 		ObjectNode response = request.execute();
 		logger.debug(Log.RESPONSE, response.toPrettyString());

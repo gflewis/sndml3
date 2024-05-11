@@ -17,10 +17,14 @@ import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
-public class AgentDaemon implements Daemon {
+/**
+ * A class which runs forever in a loop, periodically scanning the app
+ * for new jobs to run. Note that this is a singleton class.
+ */
+public class AgentDaemon implements Daemon, Runnable {
 		
-	static final Thread daemonThread = Thread.currentThread();
-	static AgentDaemon daemon;
+	static private final Thread daemonThread = Thread.currentThread();
+	static private AgentDaemon daemon;
 
 	private final ProcessHandle process;
 	private final ConnectionProfile profile;
@@ -28,28 +32,31 @@ public class AgentDaemon implements Daemon {
 	private final AgentScanner scanner;
 	private final int threadCount;	
 	private final int intervalSeconds;
-	private final WorkerPool workerPool; // null if threadCount < 2
+	private final WorkerPool executor; // null if threadCount < 2
 	private final Logger logger;
 	
 	private static volatile boolean isRunning = false;
 	DaemonContext context = null;	
 	private Timer timer;
 	
+	@SuppressWarnings("static-access")
 	public AgentDaemon(ConnectionProfile profile) throws SQLException {
+		// This is a singleton class, so save me as a static variable
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
-        daemon = this;
+        this.daemon = this;
         this.process = ProcessHandle.current();
 		this.profile = profile;
-		this.agentName = profile.agent.getString("agent", "main");
-		this.threadCount = profile.agent.getInt("threads", 3);
+		this.agentName = profile.getAgentName();
+		this.threadCount = profile.getThreadCount();
+		// TODO is this the correct propertyset for interval?
 		this.intervalSeconds = profile.agent.getInt("interval", 60);
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
-			this.workerPool = new WorkerPool(this, threadCount);
-			this.scanner = new MultiThreadScanner(profile, workerPool);
+			this.executor = new WorkerPool(profile);
+			this.scanner = new MultiThreadScanner(profile, executor);
 		}
 		else {
-			this.workerPool = null;
+			this.executor = null;
 			this.scanner = new SingleThreadScanner(profile);
 		}
 		this.logger = LoggerFactory.getLogger(this.getClass());
@@ -59,7 +66,8 @@ public class AgentDaemon implements Daemon {
 	}
 	
 	public static AgentDaemon getDaemon() {
-		return daemon;		
+		assert daemon != null: "Class not initialized";
+		return daemon;
 	}
 	
 	public static String getAgentName() {
@@ -89,31 +97,15 @@ public class AgentDaemon implements Daemon {
 		return isRunning;
 	}
 
-	/**
-	 * Run the {@link AgentScanner} a single time. 
-	 * Wait for all jobs to complete.
-	 * Shut down the worker pool.
-	 * 
-	 * @throws DaemonInitException
-	 * @throws InterruptedException
-	 */
-	public void scanOnce() throws DaemonInitException, InterruptedException {
-		assert Thread.currentThread() == daemonThread;
-		assert !isRunning;
-		init(null);		
-		Log.setJobContext(agentName);
-		logger.info(Log.INIT, String.format(
-			"runOnce agent=%s threads=%d", agentName, threadCount));
+	@Override
+	public void run() {
 		try {
-			scanner.scanUntilDone();
+			runForever();
 		} catch (Exception e) {
-			logger.error(Log.ERROR, "scanOnce caught " + e.getClass().getName());
 			e.printStackTrace();
-			Runtime.getRuntime().exit(-1);
-		}
-		this.stop();
+		}		
 	}
-			
+	
 	public void runForever() 
 			throws DaemonInitException, InterruptedException, ConfigParseException, IOException, SQLException {
 		init(null);
@@ -143,6 +135,31 @@ public class AgentDaemon implements Daemon {
 		}
 	}
 	
+	/**
+	 * Run the {@link AgentScanner} a single time. 
+	 * Wait for all jobs to complete.
+	 * Shut down the worker pool.
+	 * 
+	 * @throws DaemonInitException
+	 * @throws InterruptedException
+	 */
+	public void scanOnce() throws DaemonInitException, InterruptedException {
+		assert Thread.currentThread() == daemonThread;
+		assert !isRunning;
+		init(null);		
+		Log.setJobContext(agentName);
+		logger.info(Log.INIT, String.format(
+			"runOnce agent=%s threads=%d", agentName, threadCount));
+		try {
+			scanner.scanUntilDone();
+		} catch (Exception e) {
+			logger.error(Log.ERROR, "scanOnce caught " + e.getClass().getName());
+			e.printStackTrace();
+			Runtime.getRuntime().exit(-1);
+		}
+		this.stop();
+	}
+
 	@Override
 	public void init(DaemonContext context) throws DaemonInitException {
 		logger.debug(Log.INIT, "begin init");
@@ -170,14 +187,14 @@ public class AgentDaemon implements Daemon {
 	public void start() {
 		if (isRunning) 
 			throw new AssertionError("start already called");
-		if (workerPool == null)
+		if (executor == null)
 			throw new AssertionError("WorkerPool not created");
 		isRunning = true;
 		Log.setJobContext(agentName);
 		logger.info(Log.INIT, String.format(
 			"start agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer(AgentScanner.THREAD_NAME, true);
-		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, workerPool);
+		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, executor);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);
 		logger.debug(Log.INIT,"End start");		
@@ -189,23 +206,22 @@ public class AgentDaemon implements Daemon {
 		logger.debug(Log.FINISH, "Begin stop");
 		int waitSec = profile.agent.getInt("shutdown_seconds", 30);
 		// shutdownNow will send an interrupt to all threads
-		workerPool.shutdown();
+		executor.shutdown();
 		isRunning = false;
 		try { 
-			workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);
+			executor.awaitTermination(waitSec, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e) { 
 			logger.warn("Shutdown interrupted");
 		};
-		if (!workerPool.isTerminated()) {
+		if (!executor.isTerminated()) {
 			logger.warn("Some threads failed to terminate");
 		}
 		logger.info(Log.FINISH, "End stop");
 	}
 	
 	@Override
-	public void destroy() {
-		
+	public void destroy() {		
 	}
-	
+
 }

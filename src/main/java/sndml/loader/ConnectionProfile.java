@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.AppSession;
 import sndml.servicenow.Instance;
-import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.PropertySet;
 import sndml.util.ResourceException;
@@ -200,7 +199,12 @@ public class ConnectionProfile {
 		return database;
 	}
 
-	@Deprecated
+	// TODO getThreadCount: fix and move to a class in agent package
+	// Is agent the correct property set?
+	public int getThreadCount() {
+		return agent.getInt("threads", 3);
+	}
+	
 	public String getAgentName() {
 		return agent.getNotEmpty("agent");
 	}
@@ -214,6 +218,7 @@ public class ConnectionProfile {
 		return getAPI(apiName, null);
 	}
 	
+	@Deprecated
 	public URI getAPI(String apiName, String parameter) {
 		Instance instance = getAppInstance();
 		// ConnectionProfile profile = AgentDaemon.getConnectionProfile();

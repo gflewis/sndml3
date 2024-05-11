@@ -17,7 +17,7 @@ public class AgentHttpServer {
 	static HttpServer server;
 	final int port;
 	final AgentRequestHandler handler;
-	WorkerPool workerPool = new WorkerPool(null, 10);
+//	WorkerPool workerPool = new WorkerPool(null, 10);
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public AgentHttpServer(ConnectionProfile profile) throws IOException {
@@ -27,7 +27,7 @@ public class AgentHttpServer {
 		logger.info(Log.INIT, String.format(
 				"instantiate port=%d backlog=%d", port, backlog));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
-		handler = new AgentRequestHandler(profile, workerPool);
+		handler = new AgentRequestHandler(profile);
 		server.createContext("/", handler);
 		server.setExecutor(null); // creates a default executor
 	}

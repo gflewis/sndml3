@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import sndml.loader.DatabaseConnection;
-import sndml.loader.YamlLoader;
 import sndml.servicenow.*;
 import sndml.util.Metrics;
 

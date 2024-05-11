@@ -10,11 +10,10 @@ import sndml.util.Log;
 public class MultiThreadScanner extends AgentScanner {
 
 	final WorkerPool workerPool;
-
+	
 	public MultiThreadScanner(ConnectionProfile profile, WorkerPool workerPool) {
 		super(profile);
 		this.workerPool = workerPool;
-		logger.debug(Log.INIT, String.format("workerPool=%s", workerPool));
 	}
 	
 	@Override
@@ -44,8 +43,9 @@ public class MultiThreadScanner extends AgentScanner {
 
 	/**
 	 * Submit for execution all jobs that are ready.
-	 * Return the number of jobs run or submitted.
-	 * Note that this function does NOT necessarily wait for all jobs to complete.
+	 * Return the number of jobs run or submitted. 
+	 * <br/>
+	 * Note: This function does NOT necessarily wait for all jobs to complete.
 	 */
 	public int scan() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);		

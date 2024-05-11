@@ -13,7 +13,6 @@ import sndml.loader.ConnectionProfile;
 import sndml.servicenow.HttpMethod;
 import sndml.servicenow.JsonRequest;
 import sndml.servicenow.RecordKey;
-import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.Metrics;
 
@@ -23,7 +22,7 @@ import sndml.util.Metrics;
 public class SingleJobRunner implements Runnable {
 
 	final ConnectionProfile profile;
-	final Session appSession;
+	final AppSession appSession;
 	final String agentName;	
 	final RecordKey jobKey;
 	final AppJobConfig jobConfig;
@@ -37,8 +36,8 @@ public class SingleJobRunner implements Runnable {
 		this.profile = profile;
 		this.jobKey = jobKey;
 		this.appSession = profile.newAppSession();		
-		this.uriGetRun = profile.getAPI("getrun", jobKey.toString());
-		this.agentName = profile.getAgentName();
+		this.uriGetRun = appSession.getAPI("getrun", jobKey.toString());
+		this.agentName = appSession.getAgentName();
 		this.jobConfig = configFactory.jobConfig(profile, getRun());
 		logger.info(Log.INIT, jobConfig.toString());
 		logger.info(Log.INIT, String.format(

@@ -15,21 +15,18 @@ public class Agent extends sndml.loader.Main {
 		
 		if (cmd.hasOption(optDaemon)) {
 			// Daemon
-			requiresApp = true;
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
 			daemon.runForever();
 		}
 		if (cmd.hasOption(optScan)) {
 			// Scan once
-			requiresApp = true;
 			AgentDaemon daemon = new AgentDaemon(profile);
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
 			daemon.scanOnce();
 		}
 		if (cmd.hasOption(optJobRun)) {
 			// Run a single job
-			requiresApp = true;
 			String sys_id = cmd.getOptionValue("jobrun");
 			RecordKey jobkey = new RecordKey(sys_id);
 			SingleJobRunner jobRunner = new SingleJobRunner(profile, jobkey);
@@ -44,7 +41,7 @@ public class Agent extends sndml.loader.Main {
 	}
 
 	public String getAgentName() {
-		return profile.getAgentName();
+		return profile.agent.getNotEmpty("agent");
 	}
 
 }
