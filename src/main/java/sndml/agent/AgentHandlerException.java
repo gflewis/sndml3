@@ -6,6 +6,7 @@ import java.net.URI;
 public class AgentHandlerException extends Exception {
 
 	int returnCode;
+	
 	public AgentHandlerException(Throwable cause, int returnCode) {
 		super(cause);
 		this.returnCode = returnCode;

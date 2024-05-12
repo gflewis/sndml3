@@ -42,7 +42,7 @@ public class AgentRequestHandler implements HttpHandler {
 			String cmd = parts.length > 1 ? parts[1] : null;
 			String arg = parts.length > 2 ? parts[2] : null;
 			logger.debug(Log.REQUEST, String.format("len=%d %s %s", parts.length, cmd, arg));			
-			if ("jobrunstart".equals(cmd)) {
+			if ("startjobrun".equals(cmd)) {
 				doJobRunStart(uri, cmd, arg);
 			}
 			else {

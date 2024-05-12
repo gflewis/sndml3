@@ -8,7 +8,6 @@ public class AgentURLException extends AgentHandlerException {
 	
 	public AgentURLException(URI uri) {
 		super(uri, HttpURLConnection.HTTP_BAD_REQUEST);
-	}
-	
+	}	
 
 }
