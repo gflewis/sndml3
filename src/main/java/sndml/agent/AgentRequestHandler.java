@@ -56,14 +56,18 @@ public class AgentRequestHandler implements HttpHandler {
 			exchange.close();			
 		}
 		catch (AgentHandlerException e) {
-			logger.error(Log.ERROR, "Caught exception: " + e.getMessage());
+			logger.error(Log.ERROR, String.format( 
+				"Caught %s: %s (status=%d)", 
+				e.getClass().getName(), e.getMessage(), e.getReturnCode()));
 			exchange.sendResponseHeaders(e.getReturnCode(), 0);
 			exchange.close();
 		}
 		catch (Exception e) {
 			// If an unexpected error occurs then shut down the server
 			// What could it possibly be?
-			logger.error(Log.ERROR, e.getMessage(), e);
+			logger.error(Log.ERROR, String.format( 
+					"Caught %s: %s", 
+					e.getClass().getName(), e.getMessage()));
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0); // 500
 			exchange.close();
 			logger.error(Log.FINISH, "Halting the server due to unexpected error");
