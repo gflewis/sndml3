@@ -23,14 +23,17 @@ public class AgentHttpServer {
 
 	public AgentHttpServer(ConnectionProfile profile) throws IOException {
 		this.port = profile.server.getInt("port", 0);
-		if (port == 0) throw new AssertionError("server.port not specified");
 		int backlog = profile.server.getInt("backlog",  0);
+		if (port == 0) throw new AssertionError("server.port not specified");
 		logger.info(Log.INIT, String.format(
 				"instantiate port=%d backlog=%d", port, backlog));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
 		handler = new AgentRequestHandler(profile);
 		server.createContext("/", handler);
-		// Note: WorkerPool is used for running jobs, not for HTTP executor.
+		
+		// Server executor is used for receiving HTTP requests.
+		// It is not used for running jobs.
+		// WorkerPool is used for running jobs, not for HTTP executor.
 		server.setExecutor(null); // creates a default executor
 	}
 			

@@ -27,16 +27,16 @@ public class PropertySet extends java.util.Properties {
 		}		
 	}
 	
-	public void assertNotEmpty(String name) throws ResourceException {
-		if (!hasProperty(name)) missingProperty(name);
+	public void assertNotEmpty(String name) throws MissingPropertyException {
+		if (!hasProperty(name)) alertMissingProperty(name);
 		String value = getString(name);
-		if (value == null) missingProperty(name);
-		if (value.length() == 0) missingProperty(name);
+		if (value == null) alertMissingProperty(name);
+		if (value.length() == 0) alertMissingProperty(name);
 	}
 	
-	public void missingProperty(String name) throws ResourceException {
+	public void alertMissingProperty(String name) throws MissingPropertyException {
 		String errmsg = String.format("missing property: %s.%s", prefix, name); 
-		throw new ResourceException(errmsg);		
+		throw new MissingPropertyException(errmsg);		
 	}
 	
 	public Properties getParent() {
@@ -55,7 +55,7 @@ public class PropertySet extends java.util.Properties {
 		return getProperty(name);
 	}
 	
-	public String getNotEmpty(String name) throws ResourceException {
+	public String getNotEmpty(String name) throws MissingPropertyException {
 		assertNotEmpty(name);
 		return getProperty(name);
 	}

@@ -51,9 +51,8 @@ public class ConnectionProfile {
 	public final PropertySet dict; // Properties for ServiceNow instance used for schema
 	public final PropertySet database; // Properties for SQL Database
 	public final PropertySet agent; // Properties for ServiceNow instance that contains scopped app
-	public final PropertySet loader;
-	// TODO Implement AgentServer
-	public final PropertySet server;
+	public final PropertySet loader; // Is this still used for anything?
+	public final PropertySet server; // Properties for HTTP Server
 
 	enum SchemaSource {
 		APP,    // Use app instance and {@link AppSchemaReader}
@@ -86,7 +85,7 @@ public class ConnectionProfile {
 		else if (hasProperty("schema.instance"))
 			this.schemaSource = SchemaSource.SCHEMA;
 		else 
-			this.schemaSource = SchemaSource.READER;				
+			this.schemaSource = SchemaSource.READER;	
 	}
 
 	public String getPathName() {
@@ -168,7 +167,7 @@ public class ConnectionProfile {
 		if (agent.containsKey("instance"))
 			appSession = new AppSession(agent);
 		else
-			agent.missingProperty("instance");
+			agent.alertMissingProperty("instance");
 		return appSession;
 	}
 	
@@ -180,7 +179,7 @@ public class ConnectionProfile {
 		else if (reader.containsKey("instance"))
 			instance = new Instance(reader);
 		else
-			reader.missingProperty("instance");
+			reader.alertMissingProperty("instance");
 		return instance;		
 	}
 
@@ -200,10 +199,8 @@ public class ConnectionProfile {
 		return database;
 	}
 
-	// TODO getThreadCount: fix and move to a class in agent package
-	// Is agent the correct property set?
 	public int getThreadCount() {
-		return agent.getInt("threads", 3);
+		return server.getInt("threads", 3);
 	}
 	
 	public String getAgentName() {

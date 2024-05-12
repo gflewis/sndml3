@@ -23,7 +23,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 			new LinkedBlockingQueue<Runnable>());
 		INSTANCE = this;
 	}
-	
+		
 	@Deprecated
 	public WorkerPool getWorkerPool() {
 		assert INSTANCE != null: "Class not initialized";
