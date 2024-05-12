@@ -35,12 +35,11 @@ public class AgentDaemon implements Daemon, Runnable {
 	private final WorkerPool executor; // null if threadCount < 2
 	private final int DEFAULT_THREAD_COUNT = 3;
 	private final int DEFAULT_INTERVAL = 60;
-
-	private final Logger logger;
 	
 	private static volatile boolean isRunning = false;
 	DaemonContext context = null;	
 	private Timer timer;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@SuppressWarnings("static-access")
 	public AgentDaemon(ConnectionProfile profile) throws SQLException {
@@ -61,7 +60,6 @@ public class AgentDaemon implements Daemon, Runnable {
 			this.executor = null;
 			this.scanner = new SingleThreadScanner(profile);
 		}
-		this.logger = LoggerFactory.getLogger(this.getClass());
 		assert agentName != null;
 		assert agentName != "";
 		Log.setJobContext(agentName);
