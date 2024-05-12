@@ -4,7 +4,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import sndml.loader.ConnectionProfile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sndml.util.Log;
 
 /**
  * Wrapper class for a ThreadPoolExecutor. This is a singleton class.
@@ -12,7 +15,8 @@ import sndml.loader.ConnectionProfile;
 public class WorkerPool extends ThreadPoolExecutor {
 
 	private static WorkerPool INSTANCE;
-	private static final long KEEP_ALIVE_SECONDS = 60;	
+	private static final long KEEP_ALIVE_SECONDS = 60;
+	private static final Logger logger = LoggerFactory.getLogger(WorkerPool.class);
 
 	public WorkerPool(int threadCount) {
 		super(
@@ -22,6 +26,8 @@ public class WorkerPool extends ThreadPoolExecutor {
 			TimeUnit.SECONDS,
 			new LinkedBlockingQueue<Runnable>());
 		INSTANCE = this;
+		logger.info(
+			Log.INIT, String.format("instantiate threads=%d", threadCount));
 	}
 		
 	@Deprecated
