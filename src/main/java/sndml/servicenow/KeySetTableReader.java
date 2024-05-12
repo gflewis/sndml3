@@ -9,12 +9,12 @@ import sndml.util.Metrics;
 import sndml.util.Parameters;
 
 /**
- * A {@link TableReader} which attempts to read records using a {@link KeySet}.
+ * A {@link TableReader} which attempts to read records using a {@link RecordKeySet}.
  */
 public class KeySetTableReader extends TableReader {
 
 	protected final JsonTableAPI jsonAPI;
-	protected KeySet allKeys;
+	protected RecordKeySet allKeys;
 
 	public KeySetTableReader(Table table) {
 		super(table);
@@ -41,7 +41,7 @@ public class KeySetTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format("expected=%d", getExpected()));
 	}
 
-	public void prepare(KeySet keys, RecordWriter writer, Metrics metrics, ProgressLogger progress) 
+	public void prepare(RecordKeySet keys, RecordWriter writer, Metrics metrics, ProgressLogger progress) 
 			throws IOException {
 		beginPrepare(writer, metrics, progress);					
 		logger.debug(Log.INIT, String.format("prepare numkeys=%d", keys.size()));
@@ -67,7 +67,7 @@ public class KeySetTableReader extends TableReader {
 		while (fromIndex < totalRows) {
 			int toIndex = fromIndex + pageSize;
 			if (toIndex > totalRows) toIndex = totalRows;
-			KeySet slice = allKeys.getSlice(fromIndex, toIndex);
+			RecordKeySet slice = allKeys.getSlice(fromIndex, toIndex);
 			EncodedQuery sliceQuery = new EncodedQuery(table, slice);
 			Parameters params = new Parameters();
 			if (this.viewName != null) params.add("sysparm_view", this.viewName);

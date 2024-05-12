@@ -62,8 +62,8 @@ public class RecordList extends ArrayList<TableRecord> {
 	 * @param fieldname Name of a reference field
 	 * @return A list keys
 	 */
-	private KeySet extractKeys(String fieldname) {
-		KeySet result = new KeySet(this.size());
+	private RecordKeySet extractKeys(String fieldname) {
+		RecordKeySet result = new RecordKeySet(this.size());
 		if (this.size() == 0) return result;
 		for (TableRecord rec : this) {
 			String value = rec.getValue(fieldname);
@@ -79,7 +79,7 @@ public class RecordList extends ArrayList<TableRecord> {
 	 * Extract the primary keys (sys_ids) from this list.
 	 * @return list of values as a @{link KeySet}
 	 */
-	public KeySet extractKeys()  {
+	public RecordKeySet extractKeys()  {
 		return extractKeys("sys_id");
 	}
 	

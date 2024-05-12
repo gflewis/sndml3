@@ -85,7 +85,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
-			statusLogger = new AppStatusLogger(profile, appSession);		
+			statusLogger = new AppStatusLogger(appSession);		
 			super.call();
 			if (scanner != null) scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {

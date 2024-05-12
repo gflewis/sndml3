@@ -9,6 +9,10 @@ import sndml.agent.JobCancelledException;
 import sndml.util.Log;
 import sndml.util.ResourceException;
 
+/**
+ * {@link SchemaReader} implementation which uses the Table API to read
+ * sys_db_object and sys_dictionary.
+ */
 public class TableSchemaReader implements SchemaReader {
 
 	private final Session session;

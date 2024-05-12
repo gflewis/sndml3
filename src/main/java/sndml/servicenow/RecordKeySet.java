@@ -9,23 +9,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /**
- * Holds a list of <b>sys_id</b>s (GUIDs) 
- * as returned from a <b>getKeys</b> Web Services call. 
+ * Holds a list of {@link RecordKey} (<i>i.e.</i> <b>sys_id</b>) values 
+ * as returned from a <b>getKeys</b> SOAP Web Services call. 
  * 
  */
-public class KeySet extends ArrayList<RecordKey> {
+public class RecordKeySet extends ArrayList<RecordKey> {
 
 	private static final long serialVersionUID = 1L;
 
-	public KeySet() {
+	public RecordKeySet() {
 		super();
 	}
 	
-	public KeySet(int size) {
+	public RecordKeySet(int size) {
 		super(size);
 	}
 	
-	public KeySet(ArrayNode array) {		
+	public RecordKeySet(ArrayNode array) {		
 		this(array.size());		
 		for (int i = 0; i < array.size(); ++i) {
 			JsonNode ele = array.get(i);
@@ -33,7 +33,7 @@ public class KeySet extends ArrayList<RecordKey> {
 		}		
 	}
 		
-	public KeySet(Set<RecordKey> set) {
+	public RecordKeySet(Set<RecordKey> set) {
 		super(set.size());
 		for (RecordKey key : set) {
 			this.add(key);
@@ -62,8 +62,8 @@ public class KeySet extends ArrayList<RecordKey> {
 	 * @param endIndex Zero based ending index (exclusive).
 	 * @return A list of keys.
 	 */
-	public KeySet getSlice(int startIndex, int endIndex) {
-		KeySet result = new KeySet(endIndex - startIndex);
+	public RecordKeySet getSlice(int startIndex, int endIndex) {
+		RecordKeySet result = new RecordKeySet(endIndex - startIndex);
 		int size = size();
 		for (int i = startIndex; i < endIndex && i < size; ++i) {
 			result.add(get(i));

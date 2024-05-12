@@ -119,6 +119,7 @@ public class JsonRequest extends ServiceNowRequest {
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
 					statusLine, responseContentType, responseLen));
+		// 204 No Content
 		if (statusCode == 204) {
 			// Success - No Content
 			executed = true;
@@ -126,21 +127,29 @@ public class JsonRequest extends ServiceNowRequest {
 		}
 		if (logger.isTraceEnabled())
 			logger.trace(Log.RESPONSE, responseText);
+		// 401 Unauthorized
+		// 403 Forbidden 
 		if (statusCode == 401 || statusCode == 403) {
 			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);
 		}
-		if (responseText == null || responseContentType == null) {
+		// 404 Not Found
+		else if (statusCode == 404 /* Not Found */) {
+			this.logResponseError(logger);
+			throw new NoContentException(this);
+		}
+		// 400 Bad Request
+		else if (statusCode == 400 ) {
+			this.logResponseError(logger);
+			throw new NoContentException(this);
+		}
+		else if (responseText == null || responseContentType == null) {
 			// should have gotten an HTTP 204 for No Content
 			// this.logResponseError(logger);
 			throw new NoContentException(this);
 		}		
-		if ("text/html".equals(responseContentType)) {
+		else if ("text/html".equals(responseContentType)) {
 			throw new InstanceUnavailableException(this);			
-		}
-		if (statusCode == 400) {
-			this.logResponseError(logger);
-			throw new NoContentException(this);
 		}
 		executed = true;
 	}

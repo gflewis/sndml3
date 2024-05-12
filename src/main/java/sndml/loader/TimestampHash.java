@@ -8,8 +8,8 @@ import sndml.util.DateTime;
 @SuppressWarnings("serial")
 public class TimestampHash extends Hashtable<RecordKey, DateTime> {
 
-	KeySet getKeys() {
-		return new KeySet(this.keySet());
+	RecordKeySet getKeys() {
+		return new RecordKeySet(this.keySet());
 	}
 
 }

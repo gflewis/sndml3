@@ -48,7 +48,7 @@ public abstract class AgentScanner extends TimerTask {
 		assert agentName != null;
 		this.uriGetRunList = appSession.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
-		this.statusLogger = new AppStatusLogger(profile, appSession);
+		this.statusLogger = new AppStatusLogger(appSession);
 		SchemaFactory.setSchemaReader(new AppSchemaReader(appSession));		
 	}
 		

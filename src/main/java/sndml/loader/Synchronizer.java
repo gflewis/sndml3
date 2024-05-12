@@ -24,10 +24,10 @@ public class Synchronizer extends TableReader {
 	
 	TimestampHash dbTimestamps;
 	RecordList snTimestamps;	
-	KeySet insertSet;
-	KeySet updateSet;
-	KeySet deleteSet;
-	KeySet skipSet;
+	RecordKeySet insertSet;
+	RecordKeySet updateSet;
+	RecordKeySet deleteSet;
+	RecordKeySet skipSet;
 	
 	public Synchronizer(Table table, DatabaseConnection db, String sqlTableName, String writerName) {
 		super(table);
@@ -81,7 +81,7 @@ public class Synchronizer extends TableReader {
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName);
 		else
 			dbTimestamps = dbtsr.getTimestamps(sqlTableName, createdRange);		
-		KeySet dbKeys = dbTimestamps.getKeys(); // for debug
+		RecordKeySet dbKeys = dbTimestamps.getKeys(); // for debug
 		RecordKey dbMinKey = dbKeys.minValue(); // for debug
 		RecordKey dbMaxKey = dbKeys.maxValue(); // for debug
 		logger.debug(Log.INIT, String.format("database rows=%d", dbTimestamps.size()));
@@ -115,10 +115,10 @@ public class Synchronizer extends TableReader {
 		RecordKey snMinKey = snTimestamps.minKey(); // for debug
 		RecordKey snMaxKey = snTimestamps.maxKey(); // for debug
 		TimestampHash examined = new TimestampHash();
-		insertSet = new KeySet();
-		updateSet = new KeySet();
-		deleteSet = new KeySet();
-		skipSet = new KeySet();
+		insertSet = new RecordKeySet();
+		updateSet = new RecordKeySet();
+		deleteSet = new RecordKeySet();
+		skipSet = new RecordKeySet();
 		for (TableRecord rec : snTimestamps) {
 			RecordKey key = rec.getKey();
 			assert key != null;

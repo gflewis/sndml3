@@ -17,7 +17,7 @@ import sndml.util.Parameters;
 public class SoapKeySetTableReader extends TableReader {
 
 	protected final SoapTableAPI soapAPI;
-	private KeySet allKeys;
+	private RecordKeySet allKeys;
 
 	static final int DEFAULT_PAGE_SIZE = 200;
 		
@@ -57,7 +57,7 @@ public class SoapKeySetTableReader extends TableReader {
 		while (fromIndex < totalRows) {
 			int toIndex = fromIndex + pageSize;
 			if (toIndex > totalRows) toIndex = totalRows;
-			KeySet slice = allKeys.getSlice(fromIndex, toIndex);
+			RecordKeySet slice = allKeys.getSlice(fromIndex, toIndex);
 			EncodedQuery sliceQuery = new EncodedQuery(table, slice);
 			Parameters params = new Parameters();
 			params.add("__encoded_query", sliceQuery.toString());

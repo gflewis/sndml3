@@ -30,11 +30,11 @@ public class SoapTableAPI extends TableAPI {
 		return wsdl;
 	}
 
-	public KeySet getKeys() throws IOException {
+	public RecordKeySet getKeys() throws IOException {
 		return getKeys((Parameters) null);
 	}
 	
-	public KeySet getKeys(EncodedQuery query) throws IOException {
+	public RecordKeySet getKeys(EncodedQuery query) throws IOException {
 		Parameters params = new Parameters();
 		if (query != null) params.add("__encoded_query", query.toString());
 		params.add("__order_by", "sys_id");
@@ -47,13 +47,13 @@ public class SoapTableAPI extends TableAPI {
 	 * 
 	 * This method is called by {@link KeySetTableReader}.
 	 */
-	public KeySet getKeys(Parameters params) throws IOException {
+	public RecordKeySet getKeys(Parameters params) throws IOException {
 		Log.setMethodContext(table, "getKeys");
 		Element responseElement = client.executeRequest("getKeys", params, null, "getKeysResponse");
 		Namespace ns = responseElement.getNamespace();
 		int size = Integer.parseInt(responseElement.getChildText("count", ns));
 		logger.trace(Log.RESPONSE, "getKeys returned " + size + " keys");
-		KeySet result = new KeySet();
+		RecordKeySet result = new RecordKeySet();
 		if (size > 0) {
 			result.ensureCapacity(size);
 			String listStr = responseElement.getChildText("sys_id", ns);

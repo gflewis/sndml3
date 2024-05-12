@@ -1,6 +1,5 @@
 package sndml.agent;
 
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -12,12 +11,14 @@ import com.sun.net.httpserver.HttpServer;
 import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
+/**
+ * Implements the Java built-in HttpServer class.
+ */
 public class AgentHttpServer {
 
 	static HttpServer server;
 	final int port;
 	final AgentRequestHandler handler;
-//	WorkerPool workerPool = new WorkerPool(null, 10);
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public AgentHttpServer(ConnectionProfile profile) throws IOException {
@@ -29,6 +30,7 @@ public class AgentHttpServer {
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
 		handler = new AgentRequestHandler(profile);
 		server.createContext("/", handler);
+		// Note: WorkerPool is used for running jobs, not for HTTP executor.
 		server.setExecutor(null); // creates a default executor
 	}
 			

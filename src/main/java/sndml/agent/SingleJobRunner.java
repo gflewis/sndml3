@@ -31,8 +31,16 @@ public class SingleJobRunner implements Runnable {
 	final Logger logger = LoggerFactory.getLogger(SingleJobRunner.class);
 	Metrics metrics;
 	
+	/**
+	 * 
+	 * @param profile
+	 * @param jobKey
+	 * @throws ConfigParseException
+	 * @throws IOException
+	 * @throws IllegalStateException Job was found but the state was not READY
+	 */
 	public SingleJobRunner(ConnectionProfile profile, RecordKey jobKey) 
-			throws ConfigParseException, IOException {
+			throws ConfigParseException, IOException, IllegalStateException {
 		this.profile = profile;
 		this.jobKey = jobKey;
 		this.appSession = profile.newAppSession();		
@@ -51,6 +59,10 @@ public class SingleJobRunner implements Runnable {
 
 	static AppJobConfig getAgentJobRunnerConfig(ConnectionProfile profile, RecordKey jobKey) {
 		throw new UnsupportedOperationException("not yet implemented");	
+	}
+	
+	AppSession getAppSession() {
+		return appSession;
 	}
 	
 	ObjectNode getRun() throws IOException, ConfigParseException {
@@ -75,8 +87,7 @@ public class SingleJobRunner implements Runnable {
 			// (We are done anyway)
 			throw new RuntimeException(e);
 		}
-		
-		
+				
 	}
 	
 	

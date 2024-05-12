@@ -34,6 +34,7 @@ import sndml.util.ResourceException;
  * the corresponding system property</li>
  * <li>any value which is surrounded by backticks will be passed to <code>Runtime.exec()</code>
  * for evaluation</li>
+ * </ul>
  * </p>
  *
  */

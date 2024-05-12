@@ -106,7 +106,7 @@ public class TimestampTest {
 		TimestampHash timestamps = reader.getTimestamps(tablename);
 		logger.debug(Log.TEST, String.format("Hash size = %d", timestamps.size()));
 		assertTrue(timestamps.size() > 0);
-		KeySet keys = timestamps.getKeys();
+		RecordKeySet keys = timestamps.getKeys();
 		assertEquals(timestamps.size(), keys.size());
 		RecordKey firstKey = keys.get(0);
 		DateTime firstTimestamp = timestamps.get(firstKey);

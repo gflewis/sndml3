@@ -12,6 +12,7 @@ import com.sun.net.httpserver.*;
 
 import sndml.loader.*;
 import sndml.servicenow.NoContentException;
+import sndml.servicenow.NoSuchRecordException;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 import sndml.util.ResourceException;
@@ -19,22 +20,20 @@ import sndml.util.ResourceException;
 public class AgentRequestHandler implements HttpHandler {
 
 	private final ConnectionProfile profile;
+	private final WorkerPool workerPool;
 	private final Logger logger = LoggerFactory.getLogger(AgentRequestHandler.class);
-//	private final WorkerPool workerPool;
-//	private final ConfigFactory configFactory = new ConfigFactory();
-//	private final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
 	public AgentRequestHandler(ConnectionProfile profile) {
 		this.profile = profile;
-//		this.workerPool = workerPool;
+		this.workerPool = new WorkerPool(profile);
 	}
 	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		int returnCode = HttpURLConnection.HTTP_OK;
-		String responseText = "okay";		
+//		String responseText = "okay";
 		try {
 			URI uri = exchange.getRequestURI();
 			String path = uri.getPath();
@@ -51,24 +50,21 @@ public class AgentRequestHandler implements HttpHandler {
 				RecordKey sys_id = new RecordKey(parts[2]);
 				logger.info(Log.REQUEST, "creating jobrunner");
 				try {
-					SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);					
+					SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
+					AppStatusLogger statusLogger = new AppStatusLogger(jobrunner.getAppSession());
 					logger.info(Log.REQUEST, "created jobrunner");
-					jobrunner.run();
+					statusLogger.setStatus(sys_id, AppJobStatus.PREPARE);
+					workerPool.submit(jobrunner);
 				}
-				catch (IllegalStateException e) {
-					returnCode = HttpURLConnection.HTTP_NOT_FOUND;
-					responseText = e.getMessage();
-					logger.error(Log.ERROR, e.getMessage(), e);					
-				}
-				catch (NoContentException e) {
-					returnCode = HttpURLConnection.HTTP_NOT_FOUND;
-					responseText = "Not Found";
-					logger.error(Log.ERROR, e.getMessage(), e);										
+				catch (NoContentException | NoSuchRecordException | IllegalStateException e) {
+					returnCode = HttpURLConnection.HTTP_NOT_FOUND; // 404
+//					responseText = "Not Found";
+					logger.error(Log.ERROR, e.getMessage());										
 				}
 				catch (ResourceException e) {
-					returnCode = HttpURLConnection.HTTP_NOT_FOUND;
-					responseText = e.getMessage();
-					logger.error(Log.ERROR, e.getMessage(), e);
+					returnCode = HttpURLConnection.HTTP_UNAVAILABLE; // 503
+//					responseText = e.getMessage();
+					logger.error(Log.ERROR, e.getMessage());
 				}
 				catch (Exception e) {
 					logger.error(Log.ERROR, e.getMessage(), e);
@@ -76,14 +72,16 @@ public class AgentRequestHandler implements HttpHandler {
 				}
 				// workerPool.submit(jobrunner);
 			}
-			logger.info(Log.RESPONSE, responseText);
-			byte[] responseBytes = responseText.getBytes();
-			exchange.sendResponseHeaders(returnCode, responseBytes.length);
+			else {
+				returnCode = HttpURLConnection.HTTP_BAD_REQUEST; // 400
+				
+			}
+//			byte[] responseBytes = responseText.getBytes();
+			exchange.sendResponseHeaders(returnCode, 0);
 			OutputStream stream = exchange.getResponseBody();
-			stream.write(responseBytes);
+//			stream.write(responseBytes);
 			stream.close();
-			exchange.close();
-			
+			exchange.close();			
 		}
 		catch (Exception e) {
 			logger.error(e.getMessage(), e);

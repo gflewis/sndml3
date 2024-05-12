@@ -87,7 +87,7 @@ public class SoapClient {
 			if (StringUtils.containsIgnoreCase(faultString, "insufficient rights"))
 				throw new InsufficientRightsException(xmlRequest);
 			if (StringUtils.containsIgnoreCase(faultString,  "missing record"))
-				throw new NoSuchRecordException(faultString);
+				throw new NoSuchRecordException(xmlRequest, faultString);
 			throw new SoapResponseException(tablename, faultString);			
 		}
 		if (responseElementName != null && !responseElementName.equals(responseElement.getName()))

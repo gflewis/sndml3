@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.servicenow.RecordKey;
-import sndml.servicenow.KeySet;
+import sndml.servicenow.RecordKeySet;
 import sndml.servicenow.ProgressLogger;
 import sndml.servicenow.TableRecord;
 import sndml.util.Log;
@@ -36,7 +36,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 		deleteRecord(key, writerMetrics);
 	}
 	
-	void  deleteRecords(KeySet keys, Metrics writerMetrics, ProgressLogger progressLogger) 
+	void  deleteRecords(RecordKeySet keys, Metrics writerMetrics, ProgressLogger progressLogger) 
 			throws SQLException {
 		for (RecordKey key : keys) {
 			deleteRecord(key, writerMetrics);

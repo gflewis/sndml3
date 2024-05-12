@@ -25,6 +25,18 @@ public abstract class ServiceNowRequest {
 		this.method = method;
 	}
 
+	public URI getURI() {
+		return uri;
+	}
+	
+	public StatusLine getStatusLine() {
+		return statusLine;
+	}
+	
+	public int getStatusCode() {
+		return statusLine.getStatusCode();
+	}
+	
 	public String dumpRequestText() {
 		return requestText;
 	}
@@ -42,11 +54,11 @@ public abstract class ServiceNowRequest {
 			text.append("\n");
 			text.append(statusLine);
 		}
-		if (requestText != null) {
+		if (requestText != null && requestText.length() > 0) {
 			text.append("\nREQUEST:\n");
 			text.append(dumpRequestText());
 		}
-		if (responseText != null) {
+		if (responseText != null && responseText.length() > 0) {
 			text.append("\nRESPONSE:\n");
 			text.append(dumpResponseText());
 		}

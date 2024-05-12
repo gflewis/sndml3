@@ -23,11 +23,11 @@ public class JsonTableAPI extends TableAPI {
 		logger.debug(Log.INIT, this.uri.toString());
 	}
 
-	public KeySet getKeys() throws IOException {
+	public RecordKeySet getKeys() throws IOException {
 		return getKeys(null);
 	}
 		
-	public KeySet getKeys(EncodedQuery query) throws IOException {
+	public RecordKeySet getKeys(EncodedQuery query) throws IOException {
 		Log.setMethodContext(table, "getKeys");
 		Parameters params = new Parameters();
 		params.put("sysparm_action",  "getKeys");
@@ -36,7 +36,7 @@ public class JsonTableAPI extends TableAPI {
 		JsonRequest request = new JsonRequest(session, uri, HttpMethod.POST, requestObj);		
 		ObjectNode responseObj = request.execute();
 		ArrayNode recordsObj = (ArrayNode) responseObj.get("records");
-		KeySet keys = new KeySet(recordsObj);
+		RecordKeySet keys = new RecordKeySet(recordsObj);
 		return keys;
 	}
 
@@ -57,7 +57,7 @@ public class JsonTableAPI extends TableAPI {
 		return recs.get(0);
 	}
 
-	public RecordList getRecords(KeySet keys, boolean displayValue) throws IOException {
+	public RecordList getRecords(RecordKeySet keys, boolean displayValue) throws IOException {
 		EncodedQuery query = new EncodedQuery(table, keys);
 		return getRecords(query, displayValue);
 	}

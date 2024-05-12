@@ -25,7 +25,7 @@ class AgentJobModel {
 		this.profile = Main.getProfile();		
 	}
 	
-	AppJobConfig fetch(RecordKey jobKey) throws IOException {
+	AppJobConfig getConfig(RecordKey jobKey) throws IOException {
 		URI uriGetRun = appSession.getAPI("getrun", jobKey.toString());		
 		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
 		ObjectNode response = request.execute();

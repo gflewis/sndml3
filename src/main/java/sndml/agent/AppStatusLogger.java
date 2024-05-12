@@ -15,7 +15,7 @@ import sndml.util.Log;
 
 public class AppStatusLogger {
 
-	final ConnectionProfile profile;
+//	final ConnectionProfile profile;
 	final AppSession appSession;
 	final URI uriPutRunStatus;
 	final URI uriGetRun;
@@ -30,15 +30,24 @@ public class AppStatusLogger {
 	public static String FAILED = "failed";
 	public static String CANCELLED = "cancelled";
 	*/
-		
+
+	@Deprecated
 	public AppStatusLogger(ConnectionProfile profile, AppSession appSession) {
 		assert profile != null;
 		assert appSession != null;
-		this.profile = profile;
+//		this.profile = profile;
 		this.appSession = appSession;
 		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
 		this.uriGetRun = appSession.getAPI("getrun");
 		this.logger = LoggerFactory.getLogger(this.getClass());		
+	}
+	
+	public AppStatusLogger(AppSession appSession) {
+		this.appSession = appSession;
+		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
+		this.uriGetRun = appSession.getAPI("getrun");
+		this.logger = LoggerFactory.getLogger(this.getClass());		
+		
 	}
 
 	public void setStatus(RecordKey runKey, AppJobStatus status) 
@@ -63,19 +72,6 @@ public class AppStatusLogger {
 			throw new IllegalStateException("Failed to update status. Is there an ACL problem?");
 		Log.setGlobalContext();
 	}	
-
-//	String getStatus(RecordKey runKey) throws IOException {
-//		ObjectNode result = getRun();
-//		return result.get("status").asText();
-//	}
-	
-//	ObjectNode getRun() throws IOException, ConfigParseException {
-//		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
-//		ObjectNode response = request.execute();
-//		ObjectNode objResult = (ObjectNode) response.get("result");
-//		return objResult;
-//	}
-
 
 	public void logError(RecordKey runKey, Exception e) {
 		assert appSession != null;

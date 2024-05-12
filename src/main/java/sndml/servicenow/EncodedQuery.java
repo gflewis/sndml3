@@ -49,7 +49,7 @@ public class EncodedQuery implements Cloneable {
 		this.buf = str == null ? new StringBuffer() : new StringBuffer(str);
 	}
 
-	public EncodedQuery(Table table, KeySet keys) {
+	public EncodedQuery(Table table, RecordKeySet keys) {
 		this.table = table;
 		this.buf = new StringBuffer();
 		this.addQuery(keys);
@@ -157,7 +157,7 @@ public class EncodedQuery implements Cloneable {
 	/**
 	 * Add a list of keys to a query filter.
 	 */
-	public EncodedQuery addQuery(KeySet keys) {
+	public EncodedQuery addQuery(RecordKeySet keys) {
 		assert keys != null;
 		return addQuery("sys_id", EncodedQuery.IN, keys.toString());
 	}
