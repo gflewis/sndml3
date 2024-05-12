@@ -56,13 +56,19 @@ public class AgentRequestHandler implements HttpHandler {
 			exchange.close();			
 		}
 		catch (AgentHandlerException e) {
+			logger.error(Log.ERROR, "Caught exception: " + e.getMessage());
 			exchange.sendResponseHeaders(e.getReturnCode(), 0);
+			exchange.close();
 		}
 		catch (Exception e) {
 			// If an unexpected error occurs then shut down the server
-			logger.error(e.getMessage(), e);
+			// What could it possibly be?
+			logger.error(Log.ERROR, e.getMessage(), e);
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0); // 500
+			exchange.close();
+			logger.error(Log.FINISH, "Halting the server due to unexpected error");
 			Runtime.getRuntime().halt(-1);
-		}		
+		}
 	}
 	
 	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
@@ -77,18 +83,13 @@ public class AgentRequestHandler implements HttpHandler {
 			workerPool.submit(jobrunner);
 		}
 		catch (NoContentException | NoSuchRecordException | IllegalStateException e) {
-			logger.error(Log.ERROR, e.getMessage());										
 			throw new AgentHandlerException(e, HttpURLConnection.HTTP_NOT_FOUND); // 404
 		}
-		catch (ResourceException e) {
-			logger.error(Log.ERROR, e.getMessage());
+		catch (ResourceException | JobCancelledException e) {
 			throw new AgentHandlerException(e, HttpURLConnection.HTTP_UNAVAILABLE); // 503
-		}
-		catch (Exception e) {
-			logger.error(Log.ERROR, e.getMessage(), e);
-			Runtime.getRuntime().halt(-1);
-		}
-		
+		} catch (IOException e) {
+			throw new AgentHandlerException(e, HttpURLConnection.HTTP_INTERNAL_ERROR); // 500
+		}		
 	}
 
 }
