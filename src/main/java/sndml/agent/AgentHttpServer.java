@@ -10,6 +10,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
+import sndml.util.MissingPropertyException;
 
 /**
  * Implements the Java built-in HttpServer class.
@@ -24,7 +25,7 @@ public class AgentHttpServer {
 	public AgentHttpServer(ConnectionProfile profile) throws IOException {
 		this.port = profile.server.getInt("port", 0);
 		int backlog = profile.server.getInt("backlog",  0);
-		if (port == 0) throw new AssertionError("server.port not specified");
+		if (port == 0) throw new MissingPropertyException("server.port not specified");
 		logger.info(Log.INIT, String.format(
 				"instantiate port=%d backlog=%d", port, backlog));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
