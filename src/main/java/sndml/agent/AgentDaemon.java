@@ -33,6 +33,9 @@ public class AgentDaemon implements Daemon, Runnable {
 	private final int threadCount;	
 	private final int intervalSeconds;
 	private final WorkerPool executor; // null if threadCount < 2
+	private final int DEFAULT_THREAD_COUNT = 3;
+	private final int DEFAULT_INTERVAL = 60;
+
 	private final Logger logger;
 	
 	private static volatile boolean isRunning = false;
@@ -47,12 +50,11 @@ public class AgentDaemon implements Daemon, Runnable {
         this.process = ProcessHandle.current();
 		this.profile = profile;
 		this.agentName = profile.getAgentName();
-		this.threadCount = profile.getThreadCount();
-		// TODO is this the correct propertyset for interval?
-		this.intervalSeconds = profile.agent.getInt("interval", 60);
+		this.threadCount = profile.daemon.getInt("threads", DEFAULT_THREAD_COUNT);
+		this.intervalSeconds = profile.daemon.getInt("interval", DEFAULT_INTERVAL);
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
-			this.executor = new WorkerPool(profile);
+			this.executor = new WorkerPool(threadCount);
 			this.scanner = new MultiThreadScanner(profile, executor);
 		}
 		else {

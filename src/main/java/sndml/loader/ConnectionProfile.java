@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
+//import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -53,6 +53,7 @@ public class ConnectionProfile {
 	public final PropertySet agent; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet loader; // Is this still used for anything?
 	public final PropertySet server; // Properties for HTTP Server
+	public final PropertySet daemon; // Properties for Agent Daemon
 
 	enum SchemaSource {
 		APP,    // Use app instance and {@link AppSchemaReader}
@@ -67,18 +68,21 @@ public class ConnectionProfile {
 		FileInputStream stream = new FileInputStream(profile);
 		this.loadWithSubstitutions(stream);
 		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
+
+		// This code is for backward compatiblity with old connection profiles
 		this.reader = 
 			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
-		this.dict =
-			hasProperty("dict.instance") ? getSubset("dict") : this.reader;
 		this.agent =
 			hasProperty("app.agent") ? getSubset("app") :
 			hasProperty("daemon.agent") ? getSubset("daemon") :
 			this.reader;
+		this.dict =
+			hasProperty("dict.instance") ? getSubset("dict") : this.reader;		
 		this.database = 
 			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
 		this.loader = getSubset("loader");
 		this.server = getSubset("server");
+		this.daemon = getSubset("daemon");
 		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
@@ -199,9 +203,9 @@ public class ConnectionProfile {
 		return database;
 	}
 
-	public int getThreadCount() {
-		return server.getInt("threads", 3);
-	}
+//	public int getThreadCount() {
+//		return server.getInt("threads", 3);
+//	}
 	
 	public String getAgentName() {
 		return agent.getNotEmpty("agent");
@@ -211,21 +215,21 @@ public class ConnectionProfile {
 	 * Return the URI of an API. This will be dependent on the application scope
 	 * which is available from the property daemon.scope.
 	 */
-	@Deprecated	
-	public URI getAPI(String apiName) {
-		return getAPI(apiName, null);
-	}
-	
-	@Deprecated
-	public URI getAPI(String apiName, String parameter) {
-		Instance instance = getAppInstance();
-		// ConnectionProfile profile = AgentDaemon.getConnectionProfile();
-		// assert profile != null;		
-		String appScope = agent.getNotEmpty("scope");
-		String apiPath = "api/" + appScope + "/" + apiName;
-		if (parameter != null) apiPath += "/" + parameter;
-		return instance.getURI(apiPath);		
-	}
+//	@Deprecated	
+//	public URI getAPI(String apiName) {
+//		return getAPI(apiName, null);
+//	}
+//	
+//	@Deprecated
+//	public URI getAPI(String apiName, String parameter) {
+//		Instance instance = getAppInstance();
+//		// ConnectionProfile profile = AgentDaemon.getConnectionProfile();
+//		// assert profile != null;		
+//		String appScope = agent.getNotEmpty("scope");
+//		String apiPath = "api/" + appScope + "/" + apiName;
+//		if (parameter != null) apiPath += "/" + parameter;
+//		return instance.getURI(apiPath);		
+//	}
 	
 	/**
 	 * Return true if this process is connected to a scoped app 

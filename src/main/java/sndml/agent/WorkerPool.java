@@ -14,10 +14,10 @@ public class WorkerPool extends ThreadPoolExecutor {
 	private static WorkerPool INSTANCE;
 	private static final long KEEP_ALIVE_SECONDS = 60;	
 
-	public WorkerPool(ConnectionProfile profile) {
+	public WorkerPool(int threadCount) {
 		super(
-			profile.getThreadCount(), 
-			profile.getThreadCount(),
+			threadCount, 
+			threadCount,
 			KEEP_ALIVE_SECONDS,
 			TimeUnit.SECONDS,
 			new LinkedBlockingQueue<Runnable>());

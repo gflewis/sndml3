@@ -22,69 +22,70 @@ public class AgentRequestHandler implements HttpHandler {
 	private final ConnectionProfile profile;
 	private final WorkerPool workerPool;
 	private final Logger logger = LoggerFactory.getLogger(AgentRequestHandler.class);
+	private final int DEFAULT_THREAD_COUNT = 3;
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
 	public AgentRequestHandler(ConnectionProfile profile) {
 		this.profile = profile;
-		this.workerPool = new WorkerPool(profile);
+		int threadCount = profile.agent.getInt("threads", DEFAULT_THREAD_COUNT);
+		this.workerPool = new WorkerPool(threadCount);
 	}
 	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-		int returnCode = HttpURLConnection.HTTP_OK;
-//		String responseText = "okay";
 		try {
 			URI uri = exchange.getRequestURI();
-			String path = uri.getPath();
-			String[] parts = path.split("/");
-			String requestBody = new String(exchange.getRequestBody().readAllBytes());
 			logger.info(Log.REQUEST, "Path: " + uri.getPath());
-			if (requestBody.length() > 0)
-				logger.info(Log.REQUEST, "Body:\n" + requestBody);
-			else 
-				logger.info(Log.REQUEST, "Body is empty");
-			logger.info(Log.REQUEST, String.format("len=%d %s %s", parts.length, parts[0], parts[1]));
-			String command = parts[1];
-			if ("jobrun".equals(command)) {
-				RecordKey sys_id = new RecordKey(parts[2]);
-				logger.info(Log.REQUEST, "creating jobrunner");
-				try {
-					SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
-					AppStatusLogger statusLogger = new AppStatusLogger(jobrunner.getAppSession());
-					logger.info(Log.REQUEST, "created jobrunner");
-					statusLogger.setStatus(sys_id, AppJobStatus.PREPARE);
-					workerPool.submit(jobrunner);
-				}
-				catch (NoContentException | NoSuchRecordException | IllegalStateException e) {
-					returnCode = HttpURLConnection.HTTP_NOT_FOUND; // 404
-//					responseText = "Not Found";
-					logger.error(Log.ERROR, e.getMessage());										
-				}
-				catch (ResourceException e) {
-					returnCode = HttpURLConnection.HTTP_UNAVAILABLE; // 503
-//					responseText = e.getMessage();
-					logger.error(Log.ERROR, e.getMessage());
-				}
-				catch (Exception e) {
-					logger.error(Log.ERROR, e.getMessage(), e);
-					Runtime.getRuntime().halt(-1);
-				}
-				// workerPool.submit(jobrunner);
+			String[] parts = uri.getPath().split("/");
+			if (parts.length < 2) throw new AgentURLException(uri);
+			String cmd = parts.length > 1 ? parts[1] : null;
+			String arg = parts.length > 2 ? parts[2] : null;
+			logger.debug(Log.REQUEST, String.format("len=%d %s %s", parts.length, cmd, arg));			
+			if ("jobrunstart".equals(cmd)) {
+				doJobRunStart(uri, cmd, arg);
 			}
 			else {
-				returnCode = HttpURLConnection.HTTP_BAD_REQUEST; // 400
-				
+				throw new AgentURLException(uri);				
 			}
-//			byte[] responseBytes = responseText.getBytes();
-			exchange.sendResponseHeaders(returnCode, 0);
-			OutputStream stream = exchange.getResponseBody();
-//			stream.write(responseBytes);
+			// Response length is zero
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+			// TODO Is this required if there is no response?
+			OutputStream stream = exchange.getResponseBody(); 
 			stream.close();
 			exchange.close();			
 		}
+		catch (AgentHandlerException e) {
+			exchange.sendResponseHeaders(e.getReturnCode(), 0);
+		}
 		catch (Exception e) {
+			// If an unexpected error occurs then shut down the server
 			logger.error(e.getMessage(), e);
+			Runtime.getRuntime().halt(-1);
+		}		
+	}
+	
+	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
+		if (arg == null) throw new AgentURLException(uri);
+		RecordKey sys_id = new RecordKey(arg);
+		logger.info(Log.REQUEST, "creating jobrunner");
+		try {
+			SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
+			AppStatusLogger statusLogger = new AppStatusLogger(jobrunner.getAppSession());
+			logger.info(Log.REQUEST, "created jobrunner");
+			statusLogger.setStatus(sys_id, AppJobStatus.PREPARE);
+			workerPool.submit(jobrunner);
+		}
+		catch (NoContentException | NoSuchRecordException | IllegalStateException e) {
+			logger.error(Log.ERROR, e.getMessage());										
+			throw new AgentHandlerException(e, HttpURLConnection.HTTP_NOT_FOUND); // 404
+		}
+		catch (ResourceException e) {
+			logger.error(Log.ERROR, e.getMessage());
+			throw new AgentHandlerException(e, HttpURLConnection.HTTP_UNAVAILABLE); // 503
+		}
+		catch (Exception e) {
+			logger.error(Log.ERROR, e.getMessage(), e);
 			Runtime.getRuntime().halt(-1);
 		}
 		
