@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Run a job from x_108443_sndml_action_run
+# $1 is config directory
+# $2 is table name
+# $3 is sys_id of the record
+#
+source sndml-setup $1
+env | grep SNDML | sort
+options=""
+if [ "$SNDML_DEBUG" = "TRUE" ]; then
+  options="$options -Dlog4j2.configurationFile=log4j2-debug.xml"
+  options="$options -Dsndml.logFolder=$SNDML_CONFIG/log"    
+fi
+java -ea $options -jar $SNDML_JAR -p $SNDML_PROFILE --table $2 --sys_id $3

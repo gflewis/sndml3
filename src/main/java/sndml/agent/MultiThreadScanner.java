@@ -42,10 +42,10 @@ public class MultiThreadScanner extends AgentScanner {
 	}
 
 	/**
-	 * Submit for execution all jobs that are ready.
-	 * Return the number of jobs run or submitted. 
-	 * <br/>
-	 * Note: This function does NOT necessarily wait for all jobs to complete.
+	 * <p>Submit for execution all jobs that are ready.
+	 * Return the number of jobs run or submitted.</p> 
+	 * 
+	 * <p>Note: This function does NOT necessarily wait for all jobs to complete.</p>
 	 */
 	public int scan() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);		

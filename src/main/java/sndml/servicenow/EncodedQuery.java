@@ -9,6 +9,9 @@ import sndml.util.DateTimeRange;
  * <p>Most of the methods in the class will return the modified object
  * to support chaining.</p>
  * 
+ * <p>Constructors for this class require a reference for the {@link Table}
+ * due to Domain Separation.</p> 
+ * 
  * <p><b>Warning:</b>
  * This class does NOT check the syntax of the encoded query string.
  * If you construct an encoded query with an invalid field name or
@@ -33,33 +36,53 @@ public class EncodedQuery implements Cloneable {
 	final public static String ORDER_BY               = "ORDERBY";
 	final public static String ORDER_BY_DESC          = "ORDERBYDESC";
 	
-	private final Table table;
+//	private final Table table;
+	private final Domain domain;
 	private final StringBuffer buf;
 	
 	private static enum OrderBy {NONE, FIELDS, KEYS}; 
 	private OrderBy orderBy = OrderBy.NONE;
 		
-	public EncodedQuery(Table table) {
-		this.table = table;
+	public EncodedQuery(Domain domain) {
+		this.domain = domain;
 		this.buf = new StringBuffer();
 	}
 	
-	public EncodedQuery(Table table, String str) {
-		this.table = table;
+	public EncodedQuery(Domain domain, String str) {
+		this.domain = domain;
 		this.buf = str == null ? new StringBuffer() : new StringBuffer(str);
+	}
+	
+	public EncodedQuery(Table table) {
+		this(table.getDomain());
+//		this.table = table;
+//		this.domain = table.getDomain();
+//		this.buf = new StringBuffer();
+	}
+	
+	public EncodedQuery(Table table, String str) {
+		this(table.getDomain(), str);
+//		this.table = table;
+//		this.domain = table.getDomain();
+//		this.buf = str == null ? new StringBuffer() : new StringBuffer(str);
 	}
 
 	public EncodedQuery(Table table, RecordKeySet keys) {
-		this.table = table;
-		this.buf = new StringBuffer();
+		this(table);
 		this.addQuery(keys);
 	}
-		
+	
+	public EncodedQuery(Table table, RecordKey key) {
+		this(table);
+		this.addQuery(key);
+	}
+	
 	/**
 	 * Make a copy of an EncodedQuery.
 	 */
 	public EncodedQuery(EncodedQuery other) {
-		this.table = other.table;
+//		this.table = other.table;
+		this.domain = other.domain;
 		this.buf = new StringBuffer(other.buf);
 	}
 	
@@ -89,8 +112,7 @@ public class EncodedQuery implements Cloneable {
 	}
 
 	public String toString() {
-		Domain domain = this.table.getDomain();
-		if (domain == null) {
+		if (this.domain == null) {
 			return this.buf.toString();
 		}
 		else {
@@ -160,6 +182,14 @@ public class EncodedQuery implements Cloneable {
 	public EncodedQuery addQuery(RecordKeySet keys) {
 		assert keys != null;
 		return addQuery("sys_id", EncodedQuery.IN, keys.toString());
+	}
+	
+	/**
+	 * Add a single key to a query filter.
+	 */
+	public EncodedQuery addQuery(RecordKey key) {
+		assert key != null;
+		return addQuery("sys_id", EncodedQuery.EQUALS, key.toString());
 	}
 	
 	/**

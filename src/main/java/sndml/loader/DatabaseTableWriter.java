@@ -34,7 +34,16 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	protected ColumnDefinitions columns;
 	
 	final Logger logger = Log.logger(this.getClass());
-	
+	/**
+	 * Abstract class which knows how to write records to a SQL database 
+	 * using the {@link processRecords} method.
+	 * Implementations must override the {@link writeRecord} method.
+	 *  
+	 * @param db Database connection
+	 * @param table ServiceNow table
+	 * @param sqlTableName name of the table in the SQL database
+	 * @param writerName used only for logging
+	 */
 	public DatabaseTableWriter(DatabaseConnection db, Table table, String sqlTableName, String writerName) 
 			throws IOException, SQLException {
 		super();
@@ -49,6 +58,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		
 	@Override
 	public DatabaseTableWriter open(Metrics metrics) throws SQLException, IOException {
+		assert metrics != null;
 		super.open(metrics);
 		columns = new ColumnDefinitions(this.db, this.table, this.sqlTableName);
 		metrics.start();

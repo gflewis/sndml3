@@ -58,6 +58,19 @@ public class JobRunner implements Callable<Metrics> {
 		// {@Link AppJobRunner} will override this method
 	}
 	
+	/**
+	 * This method calls one of several different private "run" functions based on the action. 
+	 * The general format of each of these functions is as follows:
+	 * <ol>
+	 * <li>TableReader reader = config.createReader(table, database); </li>
+	 * <li>DatabaseTableWriter writer = new DatabaseTableWriter(); </li>
+	 * <li>ProgressLogger progressLogger = createJobProgressLogger(reader); </li>
+	 * <li>writer.open(jobMetrics); </li>
+	 * <li>reader.prepare(writer, jobMetrics, progressLogger</li>
+	 * <li>reader.call(); </li>
+	 * <li>writer.close(jobMetrics)</li>
+	 * </ol>
+	 */
 	@Override
 	public Metrics call() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		assert config != null;
@@ -95,6 +108,9 @@ public class JobRunner implements Callable<Metrics> {
 			break;
 		case SYNC:
 			runSync();
+			break;
+		case SINGLE:
+			runSingleRecordSync();
 			break;
 		default:
 			runLoad();
@@ -162,7 +178,7 @@ public class JobRunner implements Callable<Metrics> {
 	private void runSync() throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
-		logger.debug(Log.INIT, "runLoad " + config.toString());
+		logger.debug(Log.INIT, "runSync " + config.toString());
 		if (config.getAutoCreate()) 
 			database.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
@@ -181,9 +197,32 @@ public class JobRunner implements Callable<Metrics> {
 			DatePartition partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 		}
-		assert(synchronizer instanceof Synchronizer);
+		assert(synchronizer instanceof TableSynchronizer);
 		Log.setTableContext(table, config.getName());
 		synchronizer.call();
+	}
+	
+	private void runSingleRecordSync() 
+			throws SQLException, IOException, InterruptedException, JobCancelledException {
+		String sqlTableName = config.getTarget();
+		assert sqlTableName != null;
+		RecordKey recordKey = config.getDocKey();
+		logger.debug(Log.INIT, "runSingle " + config.toString());
+		if (config.getAutoCreate()) 
+			database.createMissingTable(table, sqlTableName, config.getColumns());
+		TableReader reader = new RestPetitTableReader(table);
+		config.configureReader(reader);
+		reader.setPageSize(100); // page size needs to be at least 2
+		Log.setTableContext(table, config.getName());					
+				DatabaseRecordSyncWriter writer = 
+			new DatabaseRecordSyncWriter(database, table, sqlTableName, recordKey, config.getName());				
+		ProgressLogger progressLogger = createJobProgressLogger(reader);		
+		writer.open(jobMetrics);
+		reader.prepare(writer, jobMetrics, progressLogger);
+		Log.setTableContext(table, config.getName());
+		assert reader.getMetrics() != null;
+		reader.call();
+		writer.close(jobMetrics);
 	}
 	
 	private void runLoad() throws SQLException, IOException, InterruptedException, JobCancelledException {

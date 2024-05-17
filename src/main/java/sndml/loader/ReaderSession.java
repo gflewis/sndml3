@@ -13,5 +13,5 @@ public class ReaderSession extends Session {
 	public ReaderSession(PropertySet propset) {
 		super(propset);
 	}
-
+	
 }

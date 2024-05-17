@@ -25,17 +25,15 @@ import sndml.util.ResourceException;
 /**
  * <p>A {@link ConnectionProfile} holds connection credentials 
  * which have been read from Properties file.
- * The properties are split among several {@link PropertySet} collections.
- * </p>
+ * The properties are split among several {@link PropertySet} collections.</p>
  * 
- * <p>When this object is initialized,
+ * <p>When this object is initialized,</p>
  * <ul>
  * <li><b>${name}</b> in a property value will be replaced with the the value of 
  * the corresponding system property</li>
  * <li>any value which is surrounded by backticks will be passed to <code>Runtime.exec()</code>
  * for evaluation</li>
  * </ul>
- * </p>
  *
  */
 
@@ -54,6 +52,8 @@ public class ConnectionProfile {
 	public final PropertySet loader; // Is this still used for anything?
 	public final PropertySet server; // Properties for HTTP Server
 	public final PropertySet daemon; // Properties for Agent Daemon
+	static AppSession lastAppSession = null; // Last AppSession obtained
+	static ReaderSession lastReaderSession = null; // last ReaderSession obtained
 
 	enum SchemaSource {
 		APP,    // Use app instance and {@link AppSchemaReader}
@@ -163,7 +163,14 @@ public class ConnectionProfile {
 	 */
 	public synchronized ReaderSession newReaderSession() throws ResourceException {
 		ReaderSession session = new ReaderSession(reader);
+		lastReaderSession = session;
 		return session;
+	}
+	
+	public synchronized ReaderSession getReaderSession() throws ResourceException {
+		if (lastReaderSession == null) newReaderSession();
+		assert lastReaderSession != null;
+		return lastReaderSession;		
 	}
 	
 	public synchronized AppSession newAppSession() throws ResourceException {
@@ -172,7 +179,14 @@ public class ConnectionProfile {
 			appSession = new AppSession(agent);
 		else
 			agent.alertMissingProperty("instance");
+		lastAppSession = appSession;
 		return appSession;
+	}
+	
+	public synchronized AppSession getAppSession() throws ResourceException {
+		if (lastAppSession == null) newAppSession();
+		assert lastAppSession != null;
+		return lastAppSession;
 	}
 	
 	@Deprecated

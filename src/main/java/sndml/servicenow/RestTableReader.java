@@ -9,26 +9,26 @@ import sndml.util.Metrics;
 import sndml.util.Parameters;
 
 /**
- * This class is designed to reliably read a large number of records from a ServiceNow table.
+ * <p>This class is designed to reliably read a large number of records from a ServiceNow table.
  * The records are read in chunks as defined by the page size.
  * Each chunk is read into a {@link RecordList} object 
- * and passed to a {@link RecordWriter} for processing.
- * </p>
- * This class does <b>not</b> use ServiceNow pagination (<i>i.e.</i> <code>sysparm_offset</code>).
+ * and passed to a {@link RecordWriter} for processing.</p>
+ * 
+ * <p>This class does <b>not</b> use ServiceNow pagination (<i>i.e.</i> <code>sysparm_offset</code>).
  * This is because of the risk of a record getting inserted into the table
  * before all records have been read. 
  * If <code>sysparm_offset</code> is used and new records are inserted into the table
  * while the process is running, then there is a possibility of records getting skipped.
  * Instead, the records are read in <code>sys_id</code> order.
  * With each chunk the <code>sysparm_query</code> is modified to only include records
- * with <code>sys_id</code> greater than the highest value from the previous chunk.  
- * </p>
- * Prior to starting, this class used the ServiceNow Aggregate API to count 
+ * with <code>sys_id</code> greater than the highest value from the previous chunk.</p>
+ * 
+ * <p>Prior to starting, this class used the ServiceNow Aggregate API to count 
  * the number of expected records. If the number of records retrieved
  * does not match the expected number, then a warning is generated.
  * The {@link RestPetitTableReader} class can be used to eliminate the overhead
  * of this checking in cases where the number of records is small 
- * or known in advance to be immutable.
+ * or known in advance to be immutable.</p>
  */
 public class RestTableReader extends TableReader {
 

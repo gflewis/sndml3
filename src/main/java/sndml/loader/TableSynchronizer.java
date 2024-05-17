@@ -16,7 +16,7 @@ import sndml.util.Metrics;
  * and which ones need to be deleted in the database table.
  *
  */
-public class Synchronizer extends TableReader {
+public class TableSynchronizer extends TableReader {
 
 	final DatabaseConnection db;
 	final String sqlTableName;
@@ -29,7 +29,7 @@ public class Synchronizer extends TableReader {
 	RecordKeySet deleteSet;
 	RecordKeySet skipSet;
 	
-	public Synchronizer(Table table, DatabaseConnection db, String sqlTableName, String writerName) {
+	public TableSynchronizer(Table table, DatabaseConnection db, String sqlTableName, String writerName) {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;

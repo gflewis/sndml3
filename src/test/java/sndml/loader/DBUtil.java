@@ -1,6 +1,5 @@
 package sndml.loader;
 
-import sndml.loader.DatabaseConnection;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
@@ -20,7 +19,7 @@ public class DBUtil {
 	Logger logger = TestManager.getLogger(DBUtil.class);
 
 	DBUtil(DatabaseConnection database) {
-		this.db = database;
+		this.db = database;		
 	}
 	
 	DBUtil(TestingProfile profile) throws SQLException, URISyntaxException {
@@ -83,7 +82,7 @@ public class DBUtil {
 	
 
 	int sqlCount(String tablename, String where) throws SQLException {
-		String query = "select count(*) from " + tablename;
+		String query = "select count(*) from " + db.qualifiedName(tablename);
 		if (where != null) query += " where " + where;
 		return sqlCount(query);
 	}

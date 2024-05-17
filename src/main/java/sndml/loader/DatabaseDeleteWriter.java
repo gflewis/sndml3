@@ -36,7 +36,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 		deleteRecord(key, writerMetrics);
 	}
 	
-	void  deleteRecords(RecordKeySet keys, Metrics writerMetrics, ProgressLogger progressLogger) 
+	void deleteRecords(RecordKeySet keys, Metrics writerMetrics, ProgressLogger progressLogger) 
 			throws SQLException {
 		for (RecordKey key : keys) {
 			deleteRecord(key, writerMetrics);
@@ -44,7 +44,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 		db.commit();		
 	}
 	
-	private void deleteRecord(RecordKey key, Metrics writerMetrics) throws SQLException {
+	void deleteRecord(RecordKey key, Metrics writerMetrics) throws SQLException {
 		logger.info(Log.PROCESS, "Delete " + key);		
 		if (deleteStmt.deleteRecord(key)) {
 			writerMetrics.incrementDeleted();			

@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+import sndml.servicenow.EncodedQuery;
+import sndml.servicenow.RecordKey;
 import sndml.servicenow.Table;
 import sndml.util.DateTime;
 import sndml.util.Log;
@@ -117,20 +119,32 @@ public class ConfigFactory {
 	}
 
 	JobConfig tableLoader(ConnectionProfile profile, Table table) {
-		return tableLoader(profile, table, null);
+		EncodedQuery query = null;
+		return tableLoader(profile, table, query);
 	}
 	
-	JobConfig tableLoader(ConnectionProfile profile, Table table, String filter) throws ConfigParseException {
+	JobConfig tableLoader(ConnectionProfile profile, Table table, EncodedQuery query) throws ConfigParseException {
 		DateCalculator dateFactory = new DateCalculator();
 		JobConfig job = new JobConfig();
 		job.source = table.getName();
-		if (filter != null) job.filter = filter;
+		if (query != null) job.filter = query.toString();
 		job.initialize(profile, dateFactory);
 		job.validate();
-		logger.debug(Log.INIT, "tableLoader: " + job.toString());
+		logger.info(Log.INIT, "tableLoader: " + job.toString());
 		return job;
 	}
 
+	JobConfig singleRecordSync(ConnectionProfile profile, Table table, RecordKey docKey) {
+		DateCalculator dateFactory = new DateCalculator();
+		JobConfig job = new JobConfig();
+		job.action = Action.SINGLE;
+		job.source = table.getName();
+		job.docKey = docKey;
+		job.initialize(profile, dateFactory);
+		job.validate();
+		logger.info(Log.INIT, "singleRecordSync: " + job.toString());
+		return job;		
+	}
 
 	static void configError(String msg) {
 		throw new ConfigParseException(msg);

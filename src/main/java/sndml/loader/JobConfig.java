@@ -33,7 +33,7 @@ public class JobConfig {
 	public String source;
 	public String target;
 	public Action action;
-	public RecordKey doc_id; // Action SINGLE only
+	@JsonProperty("sys_id") public RecordKey docKey; // Action SINGLE only
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
 	@JsonProperty("created") public JsonNode createdExpr;
@@ -61,7 +61,6 @@ public class JobConfig {
 	
 	public Action getAction() { return action; }
 	public AppJobStatus getStatus() { return status; }
-	public RecordKey getDocID() { return doc_id; }
 	boolean getTruncate() {	return this.truncate == null ? false : this.truncate.booleanValue(); }
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }
@@ -78,6 +77,11 @@ public class JobConfig {
 	}
 	
 	EncodedQuery getFilter(Table table) {
+		if (docKey != null) {
+			// Single Record
+			// ignore everything else
+			return new EncodedQuery(table, docKey);
+		}
 		if (filter == null) return null;
 		return new EncodedQuery(table, filter);		
 	}
@@ -86,6 +90,7 @@ public class JobConfig {
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
 	
+	RecordKey getDocKey() { return this.docKey; }
 	String getSql() { return this.sql; }
 	String getSqlBefore() {	return this.sqlBefore; }
 	String getSqlAfter() { return this.sqlAfter; }
@@ -236,13 +241,13 @@ public class JobConfig {
 		validForActions("Filter", filter, Action.INSERT_UPDATE_SYNC);
 		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
 		validForActions("SQL", sql, Action.EXECUTE_ONLY);
-		validForActions("Doc_ID", doc_id, Action.SINGLE_ONLY);
+		validForActions("sys_id", docKey, Action.SINGLE_ONLY);
 		
 		if (sinceExpr != null && sinceDate == null)
 			configError("Missing Since Date");
 		if (createdExpr != null && createdRange == null)
 			configError("Missing Created Range");
-		if (action == Action.SINGLE && doc_id == null)
+		if (action == Action.SINGLE && docKey == null)
 			configError("Missing doc_id");
 		
 		if (threads != null && partition == null)
@@ -277,10 +282,10 @@ public class JobConfig {
 	}	
 	
 	public TableReader createReader(Table table, DatabaseConnection db) throws IOException {
-		return createReader(table, db, null, false);
+		return createReader(table, db, table.getSession(), null);
 	}
 	
-	public TableReader createReader(Table table, DatabaseConnection db, DatePart datePart, boolean createNewSession) 
+	public TableReader createReader(Table table, DatabaseConnection db, Session session, DatePart datePart) 
 			throws IOException {
 
 		assert table != null;
@@ -288,34 +293,46 @@ public class JobConfig {
 		String jobName = getName();
 		validate();
 		assert jobName != null;
-		String partName = Objects.isNull(datePart) ? null : datePart.getName();
-		String readerName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
-		
-		Table myTable = table;
-		if (createNewSession) {
-			Session newSession = table.getSession().duplicate();
-			myTable = newSession.table(table.getName());
-		}
+//		String partName = datePart == null ? null : datePart.getName();
+//		String readerName = partName == null ? jobName : jobName + "." + partName;
+//		String readerName = getReaderName(datePart);
 		TableReader reader;
 		if (action == Action.SYNC) {
 			// Database connection is required for Synchronizer only
 			assert db != null;
-			reader = new Synchronizer(myTable, db, sqlTableName, readerName);
+			reader = new TableSynchronizer(table, db, sqlTableName, getReaderName(datePart));
 		}
 		else {
-			reader = new RestTableReader(myTable);
+			reader = new RestTableReader(table);
 		}
+		configureReader(reader, datePart);
+		return reader;
+	}
+	
+	public void configureReader(TableReader reader) {
+		configureReader(reader, null);
+	}
+	
+	public void configureReader(TableReader reader, DatePart datePart) {
+		Table table = reader.table;
+		String partName = datePart == null ? null : datePart.getName();
+		String readerName = getReaderName(datePart);
 		reader.setReaderName(readerName);
 		reader.setPartName(partName);
 		reader.setCreatedRange(getCreatedRange(datePart));		
 		reader.setUpdatedRange(getUpdatedRange());
-		reader.setFilter(getFilter(myTable));
+		reader.setFilter(getFilter(table));
 		reader.setFields(getColumns());
 		reader.setPageSize(getPageSize());
-		reader.setMaxRows(getMaxRows());
-		return reader;
+		reader.setMaxRows(getMaxRows());	
 	}
 	
+	private String getReaderName(DatePart datePart) {
+		String partName = datePart == null ? null : datePart.getName();
+		String readerName = partName == null ? jobName : jobName + "." + partName;
+		return readerName;		
+	}
+		
 	public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
@@ -337,7 +354,7 @@ public class JobConfig {
 		node.put("source", this.source);
 		node.put("target", this.target);
 		node.put("action", this.action.toString());
-		if (doc_id != null) node.put("doc_id", doc_id.toString());
+		if (docKey != null) node.put("sys_id", docKey.toString());
 		if (getTruncate()) node.put("truncate", true);
 		if (getDropTable()) node.put("drop", true);
 		if (getAutoCreate()) node.put("autocreate", getAutoCreate());

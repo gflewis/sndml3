@@ -115,7 +115,10 @@ public final class DatePartitionedTableReader extends TableReader {
 			throws IOException, SQLException, InterruptedException, JobCancelledException {
 		String partName = datePart.getName();
 		boolean createNewSession = (threads > 1) ? true : false;
-		TableReader partReader = config.createReader(table, db, datePart, createNewSession);
+		Session mySession = createNewSession ? table.getSession().duplicate() : table.getSession();
+		Table myTable = createNewSession ? mySession.table(table.getName()) : table;
+		 
+		TableReader partReader = config.createReader(myTable, db, mySession, datePart);
 		String jobName = config.getName();
 		String partReaderName = Objects.isNull(partName) ? jobName : jobName + "." + partName;
 		assert partReaderName != null;

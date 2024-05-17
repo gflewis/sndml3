@@ -70,7 +70,7 @@ public class Log4jProgressLogger extends ProgressLogger {
 	
 	@Override
 	public void logStart() {
-		int expected = metrics.getExpected();
+		Integer expected = metrics.getExpected();
 		if (hasPart()) {
 			assert metrics.hasParent();			
 			Integer parentExpected = metrics.getParent().getExpected();
@@ -78,8 +78,11 @@ public class Log4jProgressLogger extends ProgressLogger {
 				"Starting %s (%d / %d rows)", datePart,	expected, parentExpected));			
 		}
 		else {
-			logger.info(Log.INIT, String.format(
-				"Starting (%d rows)", expected));
+			if (expected == null)
+				logger.info(Log.INIT, "Starting");
+			else			
+				logger.info(Log.INIT, String.format(
+					"Starting (%d rows)", expected));
 		}		
 }
 	@Override
@@ -97,9 +100,9 @@ public class Log4jProgressLogger extends ProgressLogger {
 
 	@Override
 	public void logComplete() {
-		int processed = metrics.getProcessed();
-		int expected = metrics.getExpected();
-		if (processed != expected) {
+		Integer processed = metrics.getProcessed();
+		Integer expected = metrics.getExpected();
+		if (expected != null && processed != expected) {
 			logger.warn(Log.FINISH, String.format(
 				"Expected %d rows but only processed %d rows", expected, processed));
 		}

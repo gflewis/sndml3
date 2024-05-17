@@ -16,6 +16,11 @@ import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.Log;
 
+/**
+ * Class to read values of sys_id, sys_created_on and sys_updated_on 
+ * from an SQL table.
+ *
+ */
 public class DatabaseTimestampReader {
 
 	final DatabaseConnection database;
@@ -23,12 +28,15 @@ public class DatabaseTimestampReader {
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	final Calendar tzGMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
-	DatabaseTimestampReader(DatabaseConnection database) {
+	public DatabaseTimestampReader(DatabaseConnection database) {
 		this.database = database;
 		this.dbc = database.getConnection();
 	}
 	
-	DateTime getTimestampUpdated(String tableName, RecordKey key) throws SQLException {
+	/** 
+	 * Returns sys_updated_on value for a specific record or null if record not found
+	 */
+	public DateTime getTimestampUpdated(String tableName, RecordKey key) throws SQLException {
 		assert tableName != null;
 		assert key != null;
 		DateTime result = null;
@@ -49,7 +57,10 @@ public class DatabaseTimestampReader {
 		return result;
 	}
 
-	DateTime getTimestampCreated(String tableName, RecordKey key) throws SQLException {
+	/** 
+	 * Returns sys_created_on value for a specific record or null if record not found
+	 */
+	public DateTime getTimestampCreated(String tableName, RecordKey key) throws SQLException {
 		assert tableName != null;
 		assert key != null;
 		DateTime result = null;
@@ -70,7 +81,7 @@ public class DatabaseTimestampReader {
 		return result;
 	}
 	
-	TimestampHash getTimestamps(String tableName) throws SQLException {
+	public TimestampHash getTimestamps(String tableName) throws SQLException {
 		assert tableName != null;
 		Generator generator = database.getGenerator();
 		String stmtText = generator.getTemplate("select_updated", tableName);
@@ -78,7 +89,7 @@ public class DatabaseTimestampReader {
 		return getQueryResult(stmt);
 	}
 	
-	TimestampHash getTimestamps(String tableName, DateTimeRange created) throws SQLException {
+	public TimestampHash getTimestamps(String tableName, DateTimeRange created) throws SQLException {
 		assert tableName != null;
 		Generator generator = database.getGenerator();
 		String stmtText = generator.getTemplate("select_updated", tableName);

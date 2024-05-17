@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.agent.Agent;
+import sndml.servicenow.EncodedQuery;
+import sndml.servicenow.RecordKey;
+import sndml.servicenow.Table;
 import sndml.util.Log;
 
 /**
@@ -32,6 +35,9 @@ public class Main {
 	static final protected Option optFilter =
 			Option.builder("f").longOpt("filter").required(false).hasArg(true).
 			desc("Encoded query for use with --table").build();
+	static final protected Option optSysID =
+			Option.builder("sys_id").longOpt("sys_id").required(false).hasArg(true).
+			desc("sys_id of record for use with --table").build();
 	static final protected Option optYaml = 
 			Option.builder("y").longOpt("yaml").required(false).hasArg(true).
 			desc("YAML config file (required)").build();
@@ -53,6 +59,7 @@ public class Main {
 		options.addOption(optProfile);
 		options.addOption(optTable);
 		options.addOption(optFilter);
+		options.addOption(optSysID);
 		options.addOption(optYaml);
 		options.addOption(optJobRun);
 		options.addOption(optScan);
@@ -72,24 +79,35 @@ public class Main {
 				String.format("Must specify exactly one of: --%s, --%s, --%s or --%s",
 						optYaml.getLongOpt(),optTable.getLongOpt(),
 						optScan.getLongOpt(), optDaemon.getLongOpt()));
-		String profileName = cmd.getOptionValue("p");
+		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
 
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
-			String tableName = cmd.getOptionValue("t");
-			String filter = cmd.getOptionValue("f");
+			ReaderSession session = profile.getReaderSession();
 			DatabaseConnection database = profile.newDatabaseConnection();
-			SimpleTableLoader tableLoader = new SimpleTableLoader(profile, database, tableName, filter);
+			String tableName = cmd.getOptionValue(optTable);
+			String filter = cmd.getOptionValue(optFilter);
+			String sys_id = cmd.getOptionValue(optSysID);
+			Table table = session.table(tableName);
+			EncodedQuery query = new EncodedQuery(table, filter);
+//			logger.info(Log.INIT, "table=" + cmd.getOptionValue(optTable));
+//			logger.info(Log.INIT, "sys_id=" + cmd.getOptionValue(optSysID));
+			RecordKey docKey = cmd.hasOption(optSysID) ? new RecordKey(sys_id) : null;
+			SimpleTableLoader tableLoader = (docKey == null) ?
+					new SimpleTableLoader(profile, database, table, query) : 
+					new SimpleTableLoader(profile, database, table, docKey);			
 			tableLoader.call();
 		}
 		else {
 			if (cmd.hasOption(optFilter))
 				throw new CommandOptionsException("--filter only valid when used with --table");
+			if (cmd.hasOption(optSysID))
+				throw new CommandOptionsException("--sys_id only valid when used with --table");
 		}		
 		if (cmd.hasOption(optYaml)) {
 			// YAML File Loader
-			String yamlFileName = cmd.getOptionValue("y");
+			String yamlFileName = cmd.getOptionValue(optYaml);
 			File yamlFile = new File(yamlFileName);
 			String yamlText = Files.readString(yamlFile.toPath());
 			logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
@@ -99,35 +117,6 @@ public class Main {
 		if (requiresApp) {
 			Agent.main(cmd);
 		}
-		/*
-		if (cmd.hasOption(optDaemon)) {
-			// Daemon
-			requiresApp = true;
-			AgentDaemon daemon = new AgentDaemon(profile);
-			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
-			daemon.runForever();
-		}
-		if (cmd.hasOption(optScan)) {
-			// Scan once
-			requiresApp = true;
-			AgentDaemon daemon = new AgentDaemon(profile);
-			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
-			daemon.scanOnce();
-		}
-		if (cmd.hasOption(optJobRun)) {
-			// Run a single job
-			requiresApp = true;
-			String sys_id = cmd.getOptionValue("jobrun");
-			RecordKey jobkey = new RecordKey(sys_id);
-			SingleJobRunner jobRunner = new SingleJobRunner(profile, jobkey);
-			jobRunner.run();			
-		}
-		if (cmd.hasOption(optServer)) {
-			// Server
-			AgentHttpServer server = new AgentHttpServer(profile);
-			server.start();
-		}
-		*/
 	}
 	
 	public static ConnectionProfile getProfile() {

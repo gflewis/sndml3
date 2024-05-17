@@ -75,7 +75,7 @@ public class TestManager {
 	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
 		_initialize();
 		manager.classUnderTest = myclass;
-		manager.currentProfile = profile;
+		manager.currentProfile = profile;		
 		// ResourceManager.setSession(profile.getSession());
 		// ResourceManager.setDatabase(profile.getDatabase());
 		return profile;
