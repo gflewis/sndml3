@@ -81,6 +81,7 @@ public class Main {
 						optScan.getLongOpt(), optDaemon.getLongOpt()));
 		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
+		ResourceManager.init(profile);
 
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
