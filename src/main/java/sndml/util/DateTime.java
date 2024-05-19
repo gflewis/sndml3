@@ -49,7 +49,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		};
 
 	private final String str;
-	private final Date dt;
+	private Date dt = null; // initialized by toDate()
 
 	/**
 	 * Construct a {@link DateTime} from a string.
@@ -58,7 +58,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * @throws InvalidDateTimeException if length is not 10 or 19
 	 * or if argument cannot be converted to a Date.
 	 */
-	public DateTime(String value) throws InvalidDateTimeException {
+	public DateTime(String value) {
 		this(value, value.length());
 	}
 
@@ -71,6 +71,10 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * or if argument cannot be converted to a Date.
 	 */
 	public DateTime(String value, int fmtlen) throws InvalidDateTimeException {
+		if (fmtlen != DATE_ONLY && fmtlen != DATE_TIME)
+			throw new InvalidDateTimeException(String.format("\"%s\" len=%d", value, fmtlen));
+		this.str = value;
+		/*
 		DateFormat df;
 		switch (fmtlen) {
 		case DATE_ONLY : // 10
@@ -82,13 +86,13 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		default :
 			throw new InvalidDateTimeException(String.format("\"%s\" len=%d", value, fmtlen));
 		}
-		this.str = value;
 		try {
 			this.dt = df.parse(this.str);
 		}
 		catch (ParseException e) {
 			throw new InvalidDateTimeException(value);
 		}
+		*/
 	}
 
 	/**
@@ -136,8 +140,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * Make a copy of a DateTime
 	 */
 	public DateTime(DateTime orig) {
-		this.dt = orig.dt;
 		this.str = orig.str;
+		this.dt = orig.dt;
 	}
 
 	public String toFullString() {
@@ -152,8 +156,27 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return str;
 	}
 
-	public Date toDate() {
-		return dt;
+	public Date toDate() throws InvalidDateTimeException {
+		if (this.dt == null) {
+			DateFormat df;		
+			switch (this.str.length()) {
+			case DATE_ONLY : // 10
+				df = dateOnlyFormat.get();
+				break;
+			case DATE_TIME : // 19
+				df = dateTimeFormat.get();
+				break;
+			default :
+				throw new InvalidDateTimeException(this.str);
+			}
+			try {
+				this.dt = df.parse(this.str);
+			}
+			catch (ParseException e) {
+				throw new InvalidDateTimeException(this.str);
+			}			
+		}
+		return this.dt;
 	}
 
 	@Override
@@ -171,14 +194,14 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * @return
 	 */
 	public long getMillisec() {
-		return dt.getTime();
+		return toDate().getTime();
 	}
 
 	/**
 	 * Return the number of seconds since 1970-01-01 00:00:00 GMT
 	 */
 	public long getSeconds() {
-		return dt.getTime() / 1000;
+		return toDate().getTime() / 1000;
 	}
 
 	public java.sql.Timestamp toTimestamp() {
@@ -405,10 +428,6 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 */
 	public static DateTime today() {
 		return now().truncate();
-//		DateTime now = new DateTime(new Date());
-//		String trunc = now.toString().substring(0, 11)  + "00:00:00";
-//		DateTime result = new DateTime(trunc);
-//		return result;
 	}
 
 }
