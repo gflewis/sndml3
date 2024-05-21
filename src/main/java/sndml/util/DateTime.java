@@ -3,6 +3,8 @@ package sndml.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+//import java.time.ZoneOffset;
+//import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.TimeZone;
@@ -30,6 +32,12 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static final int SEC_PER_WEEK = 7 * SEC_PER_DAY;
 	public static final int MILLISEC_PER_DAY = 1000 * SEC_PER_DAY;
 
+	// TODO: Switch parser to use DateTimeFormatter which is thread safe	
+//	public static final DateTimeFormatter dateOnlyFormatter =
+//		DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC);
+//	public static final DateTimeFormatter dateTimeFormatter =
+//		DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
+	
 	static ThreadLocal<DateFormat> dateOnlyFormat =
 		new ThreadLocal<DateFormat>() {
 			protected DateFormat initialValue() {
@@ -53,10 +61,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
 	/**
 	 * Construct a {@link DateTime} from a string.
-	 * InvalidDateTimeException will be thrown unless the value is
-	 * "yyyy-MM-dd" or "yyyy-MM-dd HH:mm:ss".
+	 * Format of the string must be "yyyy-MM-dd" or "yyyy-MM-dd HH:mm:ss".
 	 * @throws InvalidDateTimeException if length is not 10 or 19
-	 * or if argument cannot be converted to a Date.
 	 */
 	public DateTime(String value) {
 		this(value, value.length());
@@ -65,14 +71,14 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	/**
 	 * Construct a {@link DateTime} from a string.
 	 * @param value String value to be converted
-	 * @param fmtlen Specify 10 if value is "yyyy-MM-DD".
+	 * @param len Specify 10 if value is "yyyy-MM-DD".
 	 * Specify 19 if value is "yyyy-MM-dd HH:mm:ss".
 	 * @throws InvalidDateTimeException if length is not 10 or 19
 	 * or if argument cannot be converted to a Date.
 	 */
-	public DateTime(String value, int fmtlen) throws InvalidDateTimeException {
-		if (fmtlen != DATE_ONLY && fmtlen != DATE_TIME)
-			throw new InvalidDateTimeException(String.format("\"%s\" len=%d", value, fmtlen));
+	public DateTime(String value, int len) throws InvalidDateTimeException {
+		if (len != DATE_ONLY && len != DATE_TIME)
+			throw new InvalidDateTimeException(String.format("\"%s\" len=%d", value, len));
 		this.str = value;
 		/*
 		DateFormat df;
@@ -212,12 +218,12 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public boolean equals(Object other) {
 		if (other == null) return false;
 		if (other instanceof DateTime) {
-			DateTime d = (DateTime) other;
-			return getMillisec() == d.getMillisec();
+			DateTime otherDateTime = (DateTime) other;
+			return this.getMillisec() == otherDateTime.getMillisec();
 		}
 		if (other instanceof Date) {
-			Date d = (Date) other;
-			return getMillisec() == d.getTime();
+			Date otherDate = (Date) other;
+			return this.getMillisec() == otherDate.getTime();
 		}
 		return this.toString().equals(other.toString());
 	}
