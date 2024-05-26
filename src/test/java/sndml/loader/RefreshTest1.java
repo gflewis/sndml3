@@ -49,7 +49,7 @@ public class RefreshTest1 {
 		DBUtil db = new DBUtil(profile);
 		JobFactory jf = new JobFactory(profile, session, db.getDatabase(), DateTime.now());
 		TableAPI api = profile.newReaderSession().table(tableName).api();
-		SchemaFactory.setSchemaReader(new TableSchemaReader(profile.getReaderSession()));
+//		SchemaFactory.setSchemaReader(new TableSchemaReader(profile.getReaderSession()));
 	    TestManager.banner(logger, "Load");
 		db.dropTable(tableName);
 		JobRunner create = jf.yamlJob("{source: incident, action: create}");

@@ -5,6 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import sndml.util.Log;
 
+/**
+ * A class that maintains a cache of {@link TableSchema} objects that have been read 
+ * from the instance, and reuses them if they are required a second time.
+ *
+ */
 public class SchemaFactory {
 
 	private final SchemaReader schemaReader;
@@ -16,15 +21,6 @@ public class SchemaFactory {
 		this.schemaReader = r;
 	}
 	
-//	public static void setSchemaReader(SchemaReader r) {
-//		schemaReader = r;
-//	}
-	
-//	public static SchemaReader getSchemaReader() {
-//		assert schemaReader != null;
-//		return schemaReader;
-//	}
-
 	/**
 	 * Generate {@link TableSchema} or retrieve from cache.
 	 */	
