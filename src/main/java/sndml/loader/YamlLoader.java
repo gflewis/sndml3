@@ -48,7 +48,7 @@ public class YamlLoader {
 		this.database = profile.newDatabaseConnection();
 		this.config = config;
 		this.metricsFile = config.getMetricsFile();
-		SchemaFactory.setSchemaReader(new TableSchemaReader(this.session));
+//		SchemaFactory.setSchemaReader(new TableSchemaReader(this.session));
 		for (JobConfig jobConfig : config.getJobs()) {
 			JobRunner runner = new JobRunner(session, database, jobConfig);
 			jobs.add(runner);

@@ -77,12 +77,23 @@ public class SingleJobRunner implements Runnable {
 
 	@Override
 	public void run() {
+		AppJobRunner jobRunner = null;
 		try {
-			AppJobRunner jobRunner = new AppJobRunner(null, profile, jobConfig);
+			jobRunner = new AppJobRunner(null, profile, jobConfig);
 			metrics = jobRunner.call();
 			jobRunner.close();
 			logger.info(Log.FINISH, metrics.toString());
-		} catch (JobCancelledException e) {
+		} catch (Exception e) {
+			logger.error(Log.ERROR, e.getMessage(), e);
+			if (jobRunner != null) {
+				try {
+					AppStatusLogger statusLogger = jobRunner.getStatusLogger();
+					statusLogger.logError(this.jobKey, e);
+				}
+				catch (Exception e1) {
+					logger.error(Log.ERROR, e1.getMessage(), e1);
+				}
+			}
 			// Throw an unchecked exception which should abort the process.
 			// (We are done anyway)
 			throw new RuntimeException(e);

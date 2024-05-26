@@ -7,10 +7,9 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.AppSession;
-import sndml.util.Log;
-import sndml.util.PropertySet;
-import sndml.util.ResourceException;
+import sndml.agent.*;
+import sndml.servicenow.*;
+import sndml.util.*;
 
 public class ResourceManager {
 
@@ -24,6 +23,8 @@ public class ResourceManager {
 	private ReaderSession lastReaderSession = null; 
 	private ReaderSession firstReaderSession = null;
 	private DatabaseConnection lastDBC = null;
+	private SchemaReader schemaReader = null;
+	private SchemaFactory schemaFactory = null;
 	
 	
 	public static void  setProfile(ConnectionProfile profile) {
@@ -118,5 +119,20 @@ public class ResourceManager {
 		return instance.lastDBC;
 	}
 	
+	public static SchemaReader getSchemaReader() {
+		if (instance.schemaReader == null) {
+			instance.schemaReader = isAppAgent() ?
+				new AppSchemaReader(getAppSession()) :
+				new TableSchemaReader(getReaderSession());
+		}
+		return instance.schemaReader;
+		
+	}
 	
+	public static SchemaFactory getSchemaFactory() {
+		if (instance.schemaFactory == null) {
+			instance.schemaFactory = new SchemaFactory(getSchemaReader());			
+		}
+		return instance.schemaFactory;
+	}
 }

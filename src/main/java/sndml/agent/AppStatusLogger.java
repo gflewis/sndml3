@@ -21,16 +21,6 @@ public class AppStatusLogger {
 	final URI uriGetRun;
 	final Logger logger;
 	
-	/*
-	public static String SCHEDULED = "scheduled";
-	public static String READY = "ready";
-	public static String PREPARE = "prepare";
-	public static String RUNNING = "running";
-	public static String COMPLETE = "complete";
-	public static String FAILED = "failed";
-	public static String CANCELLED = "cancelled";
-	*/
-
 	@Deprecated
 	public AppStatusLogger(ConnectionProfile profile, AppSession appSession) {
 		assert profile != null;

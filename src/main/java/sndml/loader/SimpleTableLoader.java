@@ -2,9 +2,7 @@ package sndml.loader;
 
 import sndml.servicenow.EncodedQuery;
 import sndml.servicenow.RecordKey;
-import sndml.servicenow.SchemaFactory;
 import sndml.servicenow.Table;
-import sndml.servicenow.TableSchemaReader;
 import sndml.util.DateTime;
 import sndml.util.Log;
 import sndml.util.ResourceException;
@@ -22,13 +20,13 @@ public class SimpleTableLoader extends JobRunner implements Runnable {
 	}
 	
 	private static JobConfig jobConfig(ConnectionProfile profile, Table table, EncodedQuery query) {
-		SchemaFactory.setSchemaReader(new TableSchemaReader(table.getSession()));
+//		SchemaFactory.setSchemaReader(new TableSchemaReader(table.getSession()));
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		return configFactory.tableLoader(profile, table, query);		
 	}
 	
 	private static JobConfig jobConfig(ConnectionProfile profile, Table table, RecordKey docKey) {
-		SchemaFactory.setSchemaReader(new TableSchemaReader(table.getSession()));
+//		SchemaFactory.setSchemaReader(new TableSchemaReader(table.getSession()));
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());
 		return configFactory.singleRecordSync(profile, table, docKey);		
 	}

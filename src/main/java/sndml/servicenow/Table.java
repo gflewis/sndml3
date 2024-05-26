@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import sndml.loader.ResourceManager;
+
 public class Table {
 
 	protected final Instance instance;
@@ -94,14 +96,6 @@ public class Table {
 		assert api != null;
 		return api;
 	}
-	
-//	@Deprecated
-//	public TableReader getDefaultReader() throws IOException {
-//		if (api == apiJSON) return apiJSON.getDefaultReader();
-//		if (api == apiREST) return apiREST.getDefaultReader();
-//		if (api == apiSOAP) return apiSOAP.getDefaultReader();
-//		throw new IllegalStateException();
-//	}
 			
 	public TableRecord getRecord(RecordKey key) throws IOException {
 		return api.getRecord(key);
@@ -113,8 +107,10 @@ public class Table {
 	
 	public TableSchema getSchema() throws IOException, InterruptedException {
 //		return session.getSchema(getName());
-		return SchemaFactory.getSchema(getName());
+//		return SchemaFactory.getSchema(getName());
+		SchemaFactory schemaFactory = ResourceManager.getSchemaFactory();
+		return schemaFactory.getSchema(getName());
 	}
-		
+
 }
 

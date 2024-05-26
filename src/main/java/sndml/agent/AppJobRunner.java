@@ -18,13 +18,14 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	final AgentScanner scanner; // my parent
 	final public RecordKey runKey;
 	final public String number;
-	AppStatusLogger statusLogger;
+	final AppStatusLogger statusLogger;
 	
 	AppJobRunner(AgentScanner scanner, ConnectionProfile profile, AppJobConfig config) {
 		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
 		this.config = config;
 		this.profile = profile;
 		this.appSession = profile.newAppSession();
+		this.statusLogger = new AppStatusLogger(appSession);				
 		this.scanner = scanner;
 		this.runKey = config.getSysId();
 		this.number = config.getNumber();
@@ -32,6 +33,10 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		assert runKey.isGUID();
 		assert number != null;
 		assert number.length() > 0;
+	}
+	
+	AppStatusLogger getStatusLogger() {
+		return this.statusLogger;
 	}
 		
 	@Override
@@ -85,7 +90,6 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
 		setThreadName();
 		try {
-			statusLogger = new AppStatusLogger(appSession);		
 			super.call();
 			if (scanner != null) scanner.rescan();
 		} catch (SQLException | IOException | InterruptedException e) {
