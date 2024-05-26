@@ -14,19 +14,19 @@ import sndml.util.ResourceException;
 
 public class ResourceManager {
 
-	static final ResourceManager instance = new ResourceManager();
 	static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
+	static final ResourceManager instance = new ResourceManager();
 	
-	private ConnectionProfile profile;
+	private ConnectionProfile profile = null;
 	private AppSession firstAppSession = null;  
 	private AppSession lastAppSession = null; 
 	private ReaderSession lastReaderSession = null; 
 	private ReaderSession firstReaderSession = null;
 	private DatabaseConnection lastDBC = null;
 	
-		
+	
 	static void  setProfile(ConnectionProfile profile) {
-		if (profile != null) {
+		if (instance.profile != null) {
 			logger.warn(Log.INIT, "Profile already set");
 		}
 		instance.profile = profile;
