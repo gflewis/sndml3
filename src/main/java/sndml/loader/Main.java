@@ -92,8 +92,8 @@ public class Main {
 			String sys_id = cmd.getOptionValue(optSysID);
 			Table table = session.table(tableName);
 			EncodedQuery query = new EncodedQuery(table, filter);
-//			logger.info(Log.INIT, "table=" + cmd.getOptionValue(optTable));
-//			logger.info(Log.INIT, "sys_id=" + cmd.getOptionValue(optSysID));
+			logger.debug(Log.INIT, "table=" + cmd.getOptionValue(optTable));
+			logger.debug(Log.INIT, "sys_id=" + cmd.getOptionValue(optSysID));
 			RecordKey docKey = cmd.hasOption(optSysID) ? new RecordKey(sys_id) : null;
 			SimpleTableLoader tableLoader = (docKey == null) ?
 					new SimpleTableLoader(profile, database, table, query) : 
