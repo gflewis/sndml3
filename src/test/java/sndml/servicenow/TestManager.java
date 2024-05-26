@@ -20,7 +20,8 @@ import sndml.util.Log;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
- 
+
+// TODO Can this class be extended from ResourceManager? Maybe not.
 public class TestManager {
 		
 	static TestManager manager = null;

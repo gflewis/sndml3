@@ -224,37 +224,7 @@ public class ConnectionProfile {
 	public String getAgentName() {
 		return agent.getNotEmpty("agent");
 	}
-	
-	/**
-	 * Return the URI of an API. This will be dependent on the application scope
-	 * which is available from the property daemon.scope.
-	 */
-//	@Deprecated	
-//	public URI getAPI(String apiName) {
-//		return getAPI(apiName, null);
-//	}
-//	
-//	@Deprecated
-//	public URI getAPI(String apiName, String parameter) {
-//		Instance instance = getAppInstance();
-//		// ConnectionProfile profile = AgentDaemon.getConnectionProfile();
-//		// assert profile != null;		
-//		String appScope = agent.getNotEmpty("scope");
-//		String apiPath = "api/" + appScope + "/" + apiName;
-//		if (parameter != null) apiPath += "/" + parameter;
-//		return instance.getURI(apiPath);		
-//	}
-	
-	/**
-	 * Return true if this process is connected to a scoped app 
-	 * in the ServiceNow instance. 
-	 * 
-	 * @return true if using scoped app, otherwise false
-	 */	
-	public boolean isAgent() {
-		return Main.isAgent();
-	}
-	
+		
 	@Override
 	/**
 	 * Returns the absolute path of the properties file used to initialize this object.

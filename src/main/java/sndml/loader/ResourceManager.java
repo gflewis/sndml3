@@ -18,6 +18,7 @@ public class ResourceManager {
 	static final ResourceManager instance = new ResourceManager();
 	
 	private ConnectionProfile profile = null;
+	private boolean app_agent = false;
 	private AppSession firstAppSession = null;  
 	private AppSession lastAppSession = null; 
 	private ReaderSession lastReaderSession = null; 
@@ -25,23 +26,37 @@ public class ResourceManager {
 	private DatabaseConnection lastDBC = null;
 	
 	
-	static void  setProfile(ConnectionProfile profile) {
+	public static void  setProfile(ConnectionProfile profile) {
 		if (instance.profile != null) {
 			logger.warn(Log.INIT, "Profile already set");
 		}
 		instance.profile = profile;
 	}
 	
+	public static ConnectionProfile getProfile() {
+		assert instance.profile != null;
+		return instance.profile;
+	}
+	
+	public static void setAppAgent(boolean value) {
+		instance.app_agent = value;		
+	}
+	
+	/**
+	 * Return true if this process is connected to a scoped app 
+	 * in the ServiceNow instance. 
+	 * 
+	 * @return true if using scoped app, otherwise false
+	 */	
+	public static boolean isAppAgent() {
+		return instance.app_agent;
+	}
+
 	public static ResourceManager getManager() {
 		assert instance != null;
 		return instance;
 	}
 	
-	public static ConnectionProfile getProfile() {
-		assert instance.profile != null;
-		return instance.profile;
-	}
-
 	/** 
 	 * Opens and returns a new connection to the ServiceNow instance.
 	 * @return

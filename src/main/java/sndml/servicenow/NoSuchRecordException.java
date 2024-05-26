@@ -11,5 +11,8 @@ public class NoSuchRecordException extends ServiceNowException {
 		super(request);
 	}
 	
+	public NoSuchRecordException(String message) {
+		super(message);
+	}
 	
 }

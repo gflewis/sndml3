@@ -116,22 +116,9 @@ public class Main {
 			loader.loadTables();
 		}
 		if (requiresApp) {
+			ResourceManager.setAppAgent(true);
 			Agent.main(cmd);
 		}
 	}
-	
-	public static ConnectionProfile getProfile() {
-		return profile;
-	}
-	
-	/**
-	 * Return true if this process is connected to a scoped app 
-	 * in the ServiceNow instance. 
-	 * 
-	 * @return true if using scoped app, otherwise false
-	 */
-	public static boolean isAgent() {
-		return requiresApp;
-	}
-	
+		
 }

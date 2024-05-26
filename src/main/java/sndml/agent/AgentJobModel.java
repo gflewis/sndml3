@@ -22,7 +22,7 @@ class AgentJobModel {
 	
 	public AgentJobModel(AppSession appSession) {
 		this.appSession = appSession;
-		this.profile = Main.getProfile();		
+		this.profile = ResourceManager.getProfile();		
 	}
 	
 	AppJobConfig getConfig(RecordKey jobKey) throws IOException {
