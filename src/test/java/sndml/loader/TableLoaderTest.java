@@ -10,8 +10,6 @@ import org.junit.runners.Parameterized.Parameters;
 import sndml.servicenow.TestManager;
 import sndml.servicenow.TestingProfile;
 import sndml.util.Metrics;
-import sndml.loader.YamlFile;
-import sndml.loader.YamlLoader;
 
 @RunWith(Parameterized.class)
 public class TableLoaderTest {

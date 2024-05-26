@@ -3,8 +3,6 @@ package sndml.loader;
 import java.io.File;
 import java.io.FilenameFilter;
 
-import sndml.loader.YamlFile;
-
 /**
  * A folder in src/test/resources which contains files for JUnit tests.
  *

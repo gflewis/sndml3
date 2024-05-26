@@ -10,8 +10,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import sndml.loader.DatabaseConnection;
-import sndml.loader.Generator;
 import sndml.servicenow.*;
 import sndml.util.Log;
 

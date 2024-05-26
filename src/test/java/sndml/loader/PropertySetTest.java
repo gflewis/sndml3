@@ -10,8 +10,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.loader.ConnectionProfile;
-
 public class PropertySetTest {
 
 	static private Logger logger = LoggerFactory.getLogger(PropertySetTest.class);

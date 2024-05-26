@@ -1,6 +1,5 @@
 package sndml.loader;
 
-import sndml.loader.TimestampHash;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 
