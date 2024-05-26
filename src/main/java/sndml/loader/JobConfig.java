@@ -33,7 +33,7 @@ public class JobConfig {
 	public String source;
 	public String target;
 	public Action action;
-	@JsonProperty("sys_id") public RecordKey docKey; // Action SINGLE only
+	@JsonProperty("document") public RecordKey docKey; // Action SINGLE only
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
 	@JsonProperty("created") public JsonNode createdExpr;
