@@ -170,12 +170,12 @@ public class Session {
 	 * If the time zone is not GMT then an exception will be thrown.
 	 */
 	public Session verifyUser() throws IOException {
-		Table user;
-		try {
-			user = verifyTable("sys_user");
-		} catch (InterruptedException e) {
-			throw new IOException(e);
-		}
+		Table user = this.table("sys_user");
+//		try {
+//			user = verifyTable("sys_user");
+//		} catch (InterruptedException e) {
+//			throw new IOException(e);
+//		}
 		assert this.username != null;
 		TableRecord userProfile = user.api().getRecord("user_name", this.username);
 		String timezone = userProfile.getValue("time_zone");
