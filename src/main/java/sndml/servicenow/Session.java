@@ -36,24 +36,12 @@ public class Session {
 	private final CredentialsProvider credsProvider;
 	final private BasicCookieStore cookieStore = new BasicCookieStore();
 	final private PoolingHttpClientConnectionManager connectionManager;	
-//	private final ConcurrentHashMap<String,TableSchema> schemaCache = 
-//			new ConcurrentHashMap<String,TableSchema>();
 	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
 	private CloseableHttpClient client = null; // created on request
-//	private SchemaFactory schemaFactory;
 
 	final private Logger logger = Log.logger(this.getClass());
 
-//	@Deprecated
-//	public Session(Properties props) throws IOException {
-//		this(props, false);
-//	}
-//	
-//	@Deprecated
-//	public Session(Properties properties, boolean agentApp) throws IOException  {
-//		this(agentApp ? new PropertySet(properties, "app") : new PropertySet(properties, "servicenow"));
-//	}
 		
 	public Session(PropertySet propset) {
 		this.propset = propset;
@@ -189,8 +177,8 @@ public class Session {
 			throw new IOException(e);
 		}
 		assert this.username != null;
-		TableRecord profile = user.api().getRecord("user_name", this.username);
-		String timezone = profile.getValue("time_zone");
+		TableRecord userProfile = user.api().getRecord("user_name", this.username);
+		String timezone = userProfile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;
 			if (propset.getBoolean("verify_timezone", false)) {

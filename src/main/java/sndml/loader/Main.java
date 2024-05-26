@@ -81,12 +81,12 @@ public class Main {
 						optScan.getLongOpt(), optDaemon.getLongOpt()));
 		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
-		ResourceManager.init(profile);
+		ResourceManager.setProfile(profile);
 
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
-			ReaderSession session = profile.getReaderSession();
-			DatabaseConnection database = profile.newDatabaseConnection();
+			ReaderSession session = ResourceManager.getReaderSession();
+			DatabaseConnection database = ResourceManager.newDatabaseConnection();
 			String tableName = cmd.getOptionValue(optTable);
 			String filter = cmd.getOptionValue(optFilter);
 			String sys_id = cmd.getOptionValue(optSysID);

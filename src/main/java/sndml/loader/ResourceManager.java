@@ -1,14 +1,21 @@
 package sndml.loader;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import sndml.agent.AppSession;
+import sndml.util.Log;
+import sndml.util.PropertySet;
 import sndml.util.ResourceException;
 
 public class ResourceManager {
 
-	static ResourceManager instance;
+	static final ResourceManager instance = new ResourceManager();
+	static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
 	
 	private ConnectionProfile profile;
 	private AppSession firstAppSession = null;  
@@ -17,16 +24,12 @@ public class ResourceManager {
 	private ReaderSession firstReaderSession = null;
 	private DatabaseConnection lastDBC = null;
 	
-	private ResourceManager(ConnectionProfile profile) {
-		instance = this;
-		this.profile = profile;
-	}
-	
-	static ResourceManager init(ConnectionProfile profile) {
-		if (instance != null)
-			throw new IllegalStateException("ResourceManager already initialized");
-		instance = new ResourceManager(profile);
-		return instance;
+		
+	static void  setProfile(ConnectionProfile profile) {
+		if (profile != null) {
+			logger.warn(Log.INIT, "Profile already set");
+		}
+		instance.profile = profile;
 	}
 	
 	public static ResourceManager getManager() {
@@ -44,7 +47,18 @@ public class ResourceManager {
 	 * @return
 	 */
 	public static synchronized ReaderSession newReaderSession() throws ResourceException {
-		instance.lastReaderSession = new ReaderSession(instance.profile.reader);
+		PropertySet propset = instance.profile.reader;
+		ReaderSession session;
+		try {
+			session = new ReaderSession(propset);
+			if (propset.hasProperty("verify_user") || propset.hasProperty("verify_timezone"))
+				session.verifyUser();
+			
+		} catch (IOException e) {
+			// verifyUser has failed
+			throw new ResourceException(e);
+		}
+		instance.lastReaderSession = session;
 		if (instance.firstReaderSession == null)
 			instance.firstReaderSession = instance.lastReaderSession;
 		return instance.lastReaderSession;

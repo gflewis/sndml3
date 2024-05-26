@@ -43,5 +43,4 @@ public class SimpleTableLoader extends JobRunner implements Runnable {
 		}
 	}
 
-
 }
