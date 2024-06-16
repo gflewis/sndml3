@@ -36,6 +36,11 @@ public class AgentHttpServer {
 		// It is not used for running jobs.
 		// WorkerPool is used for running jobs, not for HTTP executor.
 		server.setExecutor(null); // creates a default executor
+
+		// This session is not reused. Each AppJobRunner will have their own session.
+		// We are just making sure that we can connect.
+		AppSession appSession = profile.newAppSession();
+		appSession.verifyUser();
 	}
 			
 	public void start() {

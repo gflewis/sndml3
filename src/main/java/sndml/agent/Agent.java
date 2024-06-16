@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
+//Q: Why does this class exist? 
+//A: Because many of the classes in the package are not public. 
+
 public class Agent extends sndml.loader.Main {
 
 	static final Logger logger = LoggerFactory.getLogger(Agent.class);
