@@ -68,7 +68,7 @@ public abstract class AgentScanner extends TimerTask {
 		catch (NoContentException e) {
 			logger.error(Log.ERROR, "run: " + e.getClass().getName());
 			logger.error(Log.ERROR, String.format(
-				"%s encountered %s. Is daemon.agent \"%s\" correct?", 
+				"%s encountered %s. Is agent \"%s\" correct?", 
 				uriGetRunList.toString(), e.getClass().getName(), agentName));
 			if (!onExceptionContinue) AgentDaemon.abort();
 		}		
@@ -154,20 +154,14 @@ public abstract class AgentScanner extends TimerTask {
 	
 	ArrayNode getRunList() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
-		ArrayNode runlist = null;	
-		JsonRequest request = new JsonRequest(appSession, uriGetRunList, HttpMethod.GET, null);
-		ObjectNode response = request.execute();
-		logger.debug(Log.RESPONSE, response.toPrettyString());
-		ObjectNode objResult = (ObjectNode) response.get("result");
-		if (objResult.has("runs")) {
-			runlist = (ArrayNode) objResult.get("runs");
-			if (runlist.size() == 0) { 
-				logger.info(Log.INIT, "Nothing ready");
-			}
-			else { 
-				logger.info(Log.INIT, "Runlist=" + getNumbers(runlist));
-			}
+		GetRunListRequest request = new GetRunListRequest(appSession, agentName);
+		ArrayNode runlist = request.getRunList();
+		if (runlist == null || runlist.size() == 0) {
+			logger.info(Log.INIT, "Nothing ready");			
 		}
+		else {
+			logger.info(Log.INIT, "Runlist=" + getNumbers(runlist));			
+		}		
 		return runlist;		
 	}
 	

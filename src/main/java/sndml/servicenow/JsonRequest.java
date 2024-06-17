@@ -26,11 +26,12 @@ import sndml.util.Log;
 public class JsonRequest extends ServiceNowRequest {
 
 	static final ObjectMapper mapper = new ObjectMapper();
-	final ObjectNode requestObj;
-	ObjectNode responseObj;
-	boolean executed = false;
+	final protected ObjectNode requestObj;
+	protected ObjectNode responseObj = null;
+	protected ObjectNode resultObj = null;
+	protected boolean executed = false;
 	
-	final private Logger logger = LoggerFactory.getLogger(this.getClass());
+	final protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public JsonRequest(Session session, URI uri) {
 		this(session, uri, HttpMethod.GET, null);
@@ -41,6 +42,13 @@ public class JsonRequest extends ServiceNowRequest {
 		this.requestObj = body;
 	}
 
+	public ObjectNode getResult() throws IOException {
+		if (resultObj != null) return resultObj;
+		if (!executed) execute();
+		resultObj = (ObjectNode) responseObj.get("result");
+		return resultObj;		
+	}
+	
 	public ObjectNode execute() throws IOException {
 		assert executed == false;
 		executeRequest();		

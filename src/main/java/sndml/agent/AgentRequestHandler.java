@@ -75,6 +75,7 @@ public class AgentRequestHandler implements HttpHandler {
 		}
 	}
 	
+	// TODO: Why is this using SingleJobRunner and not AppJobRunner?
 	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
 		if (arg == null) throw new AgentURLException(uri);
 		RecordKey sys_id = new RecordKey(arg);

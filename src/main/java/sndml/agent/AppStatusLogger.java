@@ -9,35 +9,19 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.loader.ConnectionProfile;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
 public class AppStatusLogger {
 
-//	final ConnectionProfile profile;
 	final AppSession appSession;
 	final URI uriPutRunStatus;
-	final URI uriGetRun;
 	final Logger logger;
-	
-	@Deprecated
-	public AppStatusLogger(ConnectionProfile profile, AppSession appSession) {
-		assert profile != null;
-		assert appSession != null;
-//		this.profile = profile;
-		this.appSession = appSession;
-		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
-		this.uriGetRun = appSession.getAPI("getrun");
-		this.logger = LoggerFactory.getLogger(this.getClass());		
-	}
 	
 	public AppStatusLogger(AppSession appSession) {
 		this.appSession = appSession;
 		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
-		this.uriGetRun = appSession.getAPI("getrun");
-		this.logger = LoggerFactory.getLogger(this.getClass());		
-		
+		this.logger = LoggerFactory.getLogger(this.getClass());				
 	}
 
 	public void setStatus(RecordKey runKey, AppJobStatus status) 
