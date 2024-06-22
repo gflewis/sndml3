@@ -27,17 +27,27 @@ public class DateTimeTest {
 	}
 
 	@Test (expected = InvalidDateTimeException.class)
-	public void testBadDate() {
+	public void testBadDate1() {
 		DateTime d1 = new DateTime("2014-01-15 abcd");
 		assertNull(d1);
 	}
 
 	@Test (expected = InvalidDateTimeException.class)
+	public void testBadDate2() {
+		new DateTime("2014-02-30 10:15:00");
+	}
+	
+	@Test (expected = InvalidDateTimeException.class)
+	public void testBadDate3() {
+		new DateTime("2014-02-20 10:61:00");
+	}
+	
+	
+	@Test (expected = InvalidDateTimeException.class)
 	public void testEmptyDate() {
 		DateTime d1 = new DateTime("");
 		assertNull(d1);
 	}
-
 
 	@Test
 	public void testCompareTo() throws InvalidDateTimeException {
