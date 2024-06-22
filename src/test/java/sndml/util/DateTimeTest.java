@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.util;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -9,10 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import sndml.loader.DatePartition;
 import sndml.loader.Interval;
-import sndml.util.DateTime;
-import sndml.util.DateTimeRange;
-import sndml.util.InvalidDateTimeException;
-import sndml.util.Log;
 
 public class DateTimeTest {
 
@@ -91,7 +87,7 @@ public class DateTimeTest {
 		DateTime d2 = new DateTime("2014-05-10 23:58:12");
 //		logger.info("d1=" + d1);
 //		logger.info("d2=" + d2.toDate().toString());
-		assertEquals(d1.toString(), d2.toDate().toString());
+		assertEquals(d1.getTime(), d2.toDate().getTime());
 	}
 
 	@Test 
@@ -118,10 +114,12 @@ public class DateTimeTest {
 	public void testTruncate() throws Exception {
 		DateTime start;
 		start = new DateTime("2014-05-10");
+		assertEquals("2014-05-01", start.truncate(Interval.MONTH).toString());
 		assertEquals(new DateTime("2014-05-01"), start.truncate(Interval.MONTH));
 		assertEquals(new DateTime("2014-04-01"), start.truncate(Interval.QUARTER));
 		assertEquals(new DateTime("2014-01-01"), start.truncate(Interval.YEAR));	
 		start = new DateTime("2016-10-04 17:18:18");
+		assertEquals("2016-10-01", start.truncate(Interval.MONTH).toString());
 		assertEquals(new DateTime("2016-10-01"), start.truncate(Interval.MONTH));
 		assertEquals(new DateTime("2016-10-01"), start.truncate(Interval.QUARTER));
 		assertEquals(new DateTime("2016-01-01"), start.truncate(Interval.YEAR));					
@@ -131,7 +129,9 @@ public class DateTimeTest {
 	public void testTruncateWeek() throws Exception {
 		// Week should be truncated to Sunday morning
 		DateTime start = new DateTime("2021-02-10 14:30:00");
-		assertEquals(new DateTime("2021-02-07"), start.truncate(Interval.WEEK));				
+		DateTime trunc = start.truncate(Interval.WEEK);
+		assertEquals(new DateTime("2021-02-07"), trunc);
+		assertEquals("2021-02-07", trunc.toString());
 	}
 	
 	@Test

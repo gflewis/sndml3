@@ -4,6 +4,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import sndml.util.DateTimeTest;
+import sndml.util.ParametersTest;
+
 @RunWith(Suite.class)
 @SuiteClasses({ 
 	DateTimeTest.class, 

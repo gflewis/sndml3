@@ -1,8 +1,5 @@
 package sndml.util;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.TimeZone;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -19,8 +15,8 @@ import sndml.loader.Interval;
 
 /**
  * An immutable thread-safe DateTime field in ServiceNow format.
- * This class can convert the value to or from a Java Date.
  * All DateTime fields are represented in GMT.
+ * Can be converted to an SQL Date or an SQL Timestamp.
  */
 @JsonSerialize(using = DateTimeSerializer.class)
 public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
@@ -36,7 +32,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static final int SEC_PER_WEEK = 7 * SEC_PER_DAY;
 	public static final int MILLISEC_PER_DAY = 1000 * SEC_PER_DAY;
 	
-	// TODO: Remove these ThreadLocal variables (only used in deprecated methods)
+	/*
 	static ThreadLocal<DateFormat> dateOnlyFormat =
 		new ThreadLocal<DateFormat>() {
 			protected DateFormat initialValue() {
@@ -54,6 +50,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 				return df;
 			}
 		};
+	*/
 
 	private final String str;
 	private final Long sec;
@@ -86,12 +83,13 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	}
 
 	/**
-	 * <p>Construct a {@link DateTime} which is the number of seconds since 1970-01-01 00:00:00.</p>
+	 * <p>Construct a {@link DateTime} which is the number of seconds since 1970-01-01 00:00:00.
+	 * Remove the time portion if not needed.</p>
 	 * <p><b>Warning:</b> This constructor expects seconds, <b>not</b> milliseconds.</p>
 	 */
 	private DateTime(Long seconds) {
 		this.sec = seconds;
-		this.str = fromSeconds(seconds);
+		this.str = fromSeconds(seconds, seconds % SEC_PER_DAY == 0);
 	}
 	
 	/**
@@ -144,30 +142,6 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return str;
 	}
 
-	@Deprecated
-	public Date toDate() throws InvalidDateTimeException {
-		Date result;
-		DateFormat df;		
-		switch (this.str.length()) {
-		case DATE_ONLY : // 10
-			df = dateOnlyFormat.get();
-			break;
-		case DATE_TIME : // 19
-			df = dateTimeFormat.get();
-			break;
-		default :
-			throw new InvalidDateTimeException(this.str);
-		}
-		try {
-			result = df.parse(this.str);
-		}
-		catch (ParseException e) {
-			throw new InvalidDateTimeException(this.str);
-		}	
-		return result;
-
-	}
-
 	@Override
 	public int compare(DateTime d1, DateTime d2) {
 		return d1.compareTo(d2);
@@ -200,6 +174,13 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return new java.sql.Timestamp(getMillisec());
 	}
 
+	/**
+	 * Can be used to convert to java.util.Date or java.sql.Date.
+	 */
+	public java.sql.Date toDate() {
+		return new java.sql.Date(getMillisec());
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) return false;
@@ -236,7 +217,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	}
 
 	private DateTime truncate(int sec) {
-		return new DateTime(sec * (this.getSeconds() / sec));
+		Long newsec = sec * (this.getSeconds() / sec);
+		return new DateTime(newsec);
 	}
 
 	public DateTime truncate(Interval interval) {
@@ -453,9 +435,10 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return sec;
 	}
 		
-	private static String fromSeconds(Long sec) {
-		String str = Instant.ofEpochSecond(sec).toString().replace('T', ' ').substring(0, DATE_TIME);
-		return str;
+	private static String fromSeconds(Long sec, boolean truncate) {
+		String fulldate = Instant.ofEpochSecond(sec).toString().replace('T', ' ');
+		String result = truncate ? fulldate.substring(0, DATE_ONLY) : fulldate.substring(0, DATE_TIME);
+		return result;		
 	}
 	
 }

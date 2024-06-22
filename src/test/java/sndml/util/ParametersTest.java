@@ -1,10 +1,8 @@
-package sndml.servicenow;
+package sndml.util;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-
-import sndml.util.Parameters;
 
 public class ParametersTest {
 

@@ -1,7 +1,9 @@
 package sndml.util;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * <p>This object contains a collection of name/value pairs.
@@ -48,13 +50,22 @@ public class FieldValues extends Parameters {
 	
 	final static int SECONDS_PER_DAY = 24*60*60;
 
+	static ThreadLocal<DateFormat> dateTimeFormat =
+			new ThreadLocal<DateFormat>() {
+				protected DateFormat initialValue() {
+					DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					df.setTimeZone(TimeZone.getTimeZone("GMT"));
+					return df;
+				}
+			};
+	
 	public FieldValues setDuration(String name, Integer seconds) {
 		if (seconds == null) return setNull(name);
 		int days = seconds.intValue() / SECONDS_PER_DAY;
 		int sec = seconds.intValue() - (days * SECONDS_PER_DAY);
 		long millisec = sec * 1000;
 		Date dt = new Date(millisec);
-		DateFormat tf = DateTime.dateTimeFormat.get();
+		DateFormat tf = dateTimeFormat.get();
 		String all = tf.format(dt);
 		String dur = String.valueOf(days) + " " + all.substring(11);
 		return set(name, dur);

@@ -129,7 +129,7 @@ public abstract class DatabaseStatement {
 			// so try to convert it to a number of seconds
 			if (dateTimePattern.matcher(value).matches()) {
 				try {
-					DateTime timestamp = new DateTime(value, DateTime.DATE_TIME);
+					DateTime timestamp = new DateTime(value);
 					long seconds = timestamp.toDate().getTime() / 1000L;
 					if (traceEnabled)
 						logger.trace(Log.BIND, "date " + fieldname + " " + value + "=" + seconds);
