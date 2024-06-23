@@ -21,7 +21,7 @@ public class SessionVerificationTest {
 		TableWSDL wsdl = user.getWSDL();
 		int wsdlCount = wsdl.getReadFieldNames().size();
 		logger.info("wsdl fields=" + wsdlCount);
-		TableSchema schema = user.getSchema();
+		TableSchema schema = session.getSchemaReader().getSchema(user);
 		int schemaCount = schema.getFieldNames().size();
 		logger.info("schema fields=" + schemaCount);
 		session.verifyUser();

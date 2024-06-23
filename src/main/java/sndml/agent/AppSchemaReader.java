@@ -21,6 +21,11 @@ public class AppSchemaReader implements SchemaReader {
 	}
 	
 	@Override
+	public TableSchema getSchema(Table table) throws IOException {
+		return getSchema(table.getName());		
+	}
+	
+	@Override
 	public TableSchema getSchema(String tablename) throws IOException {
 		assert tablename != null;
 		Table table = appSession.table(tablename);

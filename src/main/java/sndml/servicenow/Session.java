@@ -39,6 +39,7 @@ public class Session {
 	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
 	private CloseableHttpClient client = null; // created on request
+	protected SchemaReader schemaReader = null;
 
 	final private Logger logger = Log.logger(this.getClass());
 
@@ -71,6 +72,13 @@ public class Session {
 		logger.info(Log.INIT, msg);
 	}
 
+	public SchemaReader getSchemaReader() {
+		if (schemaReader == null) {
+			schemaReader = new TableSchemaReader(this);
+		}
+		return schemaReader;		
+	}
+	
 	/**
 	 * Create a new Session with the same properties as this one. 
 	 * The URL and credentials will be the same, but the Session ID will be different.
@@ -211,7 +219,7 @@ public class Session {
 			logger.error(Log.INIT, "Unable to access WSDL for table " + tablename);
 			throw e;
 		}
-		TableSchema schema = table.getSchema();
+		TableSchema schema = getSchemaReader().getSchema(tablename);
 		if (wsdl.getReadFieldNames().size() != schema.numFields())
 			throw new AssertionError("field count mismatch");
 		return table;

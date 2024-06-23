@@ -47,8 +47,12 @@ public class PropertySet extends java.util.Properties {
 		return this.prefix;
 	}
 	
+	/**
+	 * Return true if there is a non-blank property.
+	 */
 	public boolean hasProperty(String name) {
-		return containsKey(name);
+		String value = getProperty(name);
+		return (value != null && value != "");
 	}
 		
 	public String getString(String name) {

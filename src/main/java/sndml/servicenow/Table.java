@@ -104,13 +104,15 @@ public class Table {
 	public TableWSDL getWSDL() throws IOException {
 		return session.getWSDL(getName());
 	}
-	
+
+/*
 	public TableSchema getSchema() throws IOException, InterruptedException {
 //		return session.getSchema(getName());
 //		return SchemaFactory.getSchema(getName());
 		SchemaFactory schemaFactory = ResourceManager.getSchemaFactory();
 		return schemaFactory.getSchema(getName());
 	}
+*/
 
 }
 

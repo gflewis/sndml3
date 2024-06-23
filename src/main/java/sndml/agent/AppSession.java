@@ -13,6 +13,7 @@ import sndml.servicenow.HttpMethod;
 import sndml.servicenow.Instance;
 import sndml.servicenow.JsonRequest;
 import sndml.servicenow.RecordKey;
+import sndml.servicenow.SchemaReader;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.PropertySet;
@@ -40,6 +41,14 @@ public class AppSession extends Session {
 
 	public String getAgentName() {
 		return agentName;
+	}
+	
+	@Override
+	public SchemaReader getSchemaReader() {
+		if (this.schemaReader == null) {
+			this.schemaReader = new AppSchemaReader(this);			
+		}
+		return this.schemaReader;
 	}
 	
 	/**

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import sndml.loader.ConfigParseException;
+import sndml.loader.ResourceManager;
 import sndml.loader.YamlFile;
 import sndml.util.Log;
 
@@ -26,19 +27,19 @@ public class TestManager {
 		
 	static TestManager manager = null;
 	static final String TEST_PROPERTIES = "junit.properties";
-	
+	static final Logger logger = LoggerFactory.getLogger(TestManager.class);
+		
 	Session defaultSession;
 	Properties testProperties;
 	TestingProfile currentProfile;
 	ObjectMapper jsonMapper = new ObjectMapper();
 	ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());	
-	Logger logger;
 	
 	@SuppressWarnings("rawtypes")
 	Class classUnderTest;
 
 	TestManager() {
-		logger = LoggerFactory.getLogger(this.getClass());
+		logger.info(Log.INIT, "instantiate TestManager");
 		String propFileName = TEST_PROPERTIES;
 		testProperties = new Properties();
 		logger.info(Log.INIT, "loadProperties " + propFileName);
@@ -52,7 +53,8 @@ public class TestManager {
 	}
 	
 	private static void _initialize() {
-		if (manager == null) manager = new TestManager();		
+
+		if (manager == null) manager = new TestManager();
 	}
 	
 	/**
@@ -76,9 +78,8 @@ public class TestManager {
 	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
 		_initialize();
 		manager.classUnderTest = myclass;
-		manager.currentProfile = profile;		
-		// ResourceManager.setSession(profile.getSession());
-		// ResourceManager.setDatabase(profile.getDatabase());
+		manager.currentProfile = profile;
+		ResourceManager.setTestManagerProfile(manager.currentProfile);
 		return profile;
 	}
 		
@@ -144,7 +145,7 @@ public class TestManager {
 	 */
 	public static String getProperty(String name) throws TestingException {
 		_initialize();
-		manager.logger.info(Log.INIT, "getProperty " + name);
+		logger.info(Log.INIT, "getProperty " + name);
 		String propname = "junit." + name;
 		String value = manager.testProperties.getProperty(propname);
 		if (value == null) throw new IllegalArgumentException(propname);
@@ -243,7 +244,7 @@ public class TestManager {
 		assert seconds < 60;
 		long millisec = Math.round(1000 * seconds);
 		String msg = "Sleeping " + seconds + " sec...";
-		manager.logger.info(Log.TEST, msg);
+		logger.info(Log.TEST, msg);
 		Thread.sleep(millisec);
 	}
 	

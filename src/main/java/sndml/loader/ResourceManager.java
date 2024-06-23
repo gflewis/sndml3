@@ -27,10 +27,16 @@ public class ResourceManager {
 	private SchemaFactory schemaFactory = null;
 	
 	
-	public static void  setProfile(ConnectionProfile profile) {
+	public static void setProfile(ConnectionProfile profile) {
 		if (instance.profile != null) {
 			logger.warn(Log.INIT, "Profile already set");
 		}
+		instance.profile = profile;
+	}
+	
+	// Called from TestManager
+	public static void setTestManagerProfile(ConnectionProfile profile) {
+		logger.info(Log.TEST, "setTestManagerProfile");
 		instance.profile = profile;
 	}
 	
@@ -63,6 +69,8 @@ public class ResourceManager {
 	 * @return
 	 */
 	public static synchronized ReaderSession newReaderSession() throws ResourceException {
+		assert instance.profile != null;
+		assert instance.profile.reader != null;
 		PropertySet propset = instance.profile.reader;
 		ReaderSession session;
 		try {

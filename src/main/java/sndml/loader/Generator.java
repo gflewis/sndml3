@@ -29,7 +29,8 @@ public class Generator {
 	private final NameCase namecase; 
 	private final NameQuotes namequotes;
 	private final String schemaName;
-	private final NameMap namemap;	
+	private final NameMap namemap;
+	private final SchemaReader schemaReader;
 	
 	Logger logger = Log.logger(this.getClass());
 	
@@ -100,11 +101,13 @@ public class Generator {
 		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
 		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
 		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
+		schemaReader = profile.newSchemaReader();
 		
 		logger.info(Log.INIT, String.format(
-				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b", 
+				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b agent=%b", 
 				getDialectName(), getSchemaName(), namecase.toString(), 
-				namequotes.toString(), getAutoCommit()));
+				namequotes.toString(), getAutoCommit(), 
+				profile.hasAgent()));
 	}
 	
 	Element getProtocolTree(URI dbURI) {
@@ -259,7 +262,7 @@ public class Generator {
 			throws IOException, InterruptedException {
 		assert sqlTableName != null;
 		// We may be pulling the schema from a different ServiceNow instance
-		TableSchema tableSchema = table.getSchema();
+		TableSchema tableSchema = schemaReader.getSchema(table.getName());
 		TableWSDL tableWSDL = table.getWSDL();
 		final String fieldSeparator = ",\n";
 		StringBuilder fieldlist = new StringBuilder();

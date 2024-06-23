@@ -31,7 +31,7 @@ public class TableSchemaReader implements SchemaReader {
 		return getSchema(session.table(tablename));
 	}
 	
-	TableSchema getSchema(Table table) throws IOException, InterruptedException {
+	public TableSchema getSchema(Table table) throws IOException, InterruptedException {
 		String tablename = table.getName();
 		String saveJob = Log.getJobContext();
 		String myname = dictionary.getName() + "." + tablename;

@@ -143,15 +143,15 @@
 
   <build>
     <plugins>
-    
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>mavan-javadoc-plugin</artifactId>
+        <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.6.3</version>
         <configuration>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -160,7 +160,7 @@
           <release>11</release>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <!-- Skip Unit Tests -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -179,17 +179,19 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>fully.qualified.MainClass</mainClass>
+              <mainClass>${main.class}</mainClass>
             </manifest>
           </archive>
         </configuration>
       </plugin>
 
+      <!--
       <plugin>
-         <artifactId>maven-war-plugin</artifactId>
+        <artifactId>maven-war-plugin</artifactId>
         <version>3.3.2</version>
       </plugin>
-      
+      -->
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -347,7 +349,7 @@
               </artifactSet>
             </configuration>
           </execution>
-          <!--  SQLite JAR  -->
+          <!-- SQLite JAR -->
           <execution>
             <id>sqlite</id>
             <phase>package</phase>
@@ -392,10 +394,34 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>      
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>3.1.1</version>
+        <configuration>
+          <groupId>sndml</groupId>
+          <artifactId>sndml</artifactId>
+          <version>3.5.0</version>
+          <packaging>jar</packaging>
+          <file>target/sndml-3.5.0.jar</file>
+          <generatePom>true</generatePom>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install-jar-lib</id>
+            <goals>
+              <goal>install-file</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
-  
+
   <profiles>
     <profile>
       <!-- To run api tests mvn surefire:test -P test.api -->
@@ -460,7 +486,7 @@
                 <id>make-assembly</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>assembly</goal>
+                  <goal>single</goal>
                 </goals>
               </execution>
             </executions>

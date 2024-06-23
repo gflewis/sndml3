@@ -16,8 +16,11 @@ import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.agent.AppSchemaReader;
 import sndml.agent.AppSession;
 import sndml.servicenow.Instance;
+import sndml.servicenow.SchemaReader;
+import sndml.servicenow.TableSchemaReader;
 import sndml.util.Log;
 import sndml.util.PropertySet;
 import sndml.util.ResourceException;
@@ -42,8 +45,9 @@ public class ConnectionProfile {
 	// public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
 	// public static final String DEFAULT_AGENT_NAME = "main";
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private final File file;
+	private File file = null;
+	private String pathName = null;
+	
 	private final Properties allProperties;
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
 	public final PropertySet dict; // Properties for ServiceNow instance used for schema
@@ -55,6 +59,8 @@ public class ConnectionProfile {
 	static AppSession lastAppSession = null; // Last AppSession obtained
 	static ReaderSession lastReaderSession = null; // last ReaderSession obtained
 
+	private static final Logger logger = LoggerFactory.getLogger(ConnectionProfile.class);
+	
 	enum SchemaSource {
 		APP,    // Use app instance and {@link AppSchemaReader}
 		READER, // Use reader instance and {@link TableSchemaReader}
@@ -63,11 +69,14 @@ public class ConnectionProfile {
 	public final SchemaSource schemaSource;
 	
 	public ConnectionProfile(File profile) throws IOException {
+		this(propertiesWithSubstitutions(profile));
 		this.file = profile;
-		this.allProperties = new Properties();
-		FileInputStream stream = new FileInputStream(profile);
-		this.loadWithSubstitutions(stream);
-		logger.info(Log.INIT, "ConnectionProfile: " + getPathName());
+		this.pathName = file.getPath();
+		logger.info(Log.INIT, "ConnectionProfile: " + pathName);
+	}
+
+	public ConnectionProfile(Properties properties) {
+		this.allProperties = properties;
 
 		// This code is for backward compatiblity with old connection profiles
 		this.reader = 
@@ -89,13 +98,9 @@ public class ConnectionProfile {
 		else if (hasProperty("schema.instance"))
 			this.schemaSource = SchemaSource.SCHEMA;
 		else 
-			this.schemaSource = SchemaSource.READER;	
+			this.schemaSource = SchemaSource.READER;			
 	}
-
-	public String getPathName() {
-		return file.getPath();
-	}
-
+	
 	private PropertySet getSubset(String prefix) {
 		PropertySet result = new PropertySet(allProperties, prefix);
 		return result;
@@ -107,21 +112,34 @@ public class ConnectionProfile {
 	
 	public String getMetricsFolder() { return loader.getProperty("metrics_folder"); }
 	public boolean getWarnOnTruncate() { return loader.getBoolean("warn_on_truncate", true); }
+
+	private static Properties propertiesWithSubstitutions(File profile) throws IOException {
+		FileInputStream stream = new FileInputStream(profile);
+		Properties properties = propertiesWithSubstitutions(stream);
+		return properties; 		
+	}
+	
+	private static Properties propertiesWithSubstitutions(InputStream stream) throws IOException {
+		Properties properties = new Properties();
+		loadWithSubstitutions(properties, stream);
+		return properties;
+	}
+	
 	/**
 	 * Load properties from an InputStream.
 	 * Any value ${name} will be replaced with a system property.
 	 * Any value inclosed in backticks will be passed to Runtime.exec() for evaluation.
 	 */
-	public synchronized void loadWithSubstitutions(InputStream stream) throws IOException {
+	private static void loadWithSubstitutions(Properties properties, InputStream stream) throws IOException {
 		final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		assert stream != null;
+		StringSubstitutor envMap = 
+			new org.apache.commons.text.StringSubstitutor(System.getenv());
 		Properties raw = new Properties();
 		raw.load(stream);
 		for (String name : raw.stringPropertyNames()) {
 			String value = raw.getProperty(name);
 			// Replace any environment variables
-			StringSubstitutor envMap = 
-					new org.apache.commons.text.StringSubstitutor(System.getenv());
 			value = envMap.replace(value);
 			// If property is in backticks then evaluate as a command 
 			Matcher cmdMatcher = cmdPattern.matcher(value); 
@@ -133,7 +151,7 @@ public class ConnectionProfile {
 					throw new AssertionError(String.format("Failed to evaluate \"%s\"", command));
 				logger.debug(Log.INIT, value);
 			}
-			allProperties.setProperty(name, value);
+			properties.setProperty(name, value);
 		}
 	}
 	
@@ -189,6 +207,14 @@ public class ConnectionProfile {
 		return lastAppSession;
 	}
 	
+	public synchronized SchemaReader newSchemaReader() {
+		SchemaReader result;
+		result = hasAgent() ?
+			new AppSchemaReader(getAppSession()) :
+			new TableSchemaReader(getReaderSession());
+		return result;		
+	}
+
 	@Deprecated
 	public Instance getAppInstance() throws ResourceException {
 		Instance instance = null;
@@ -221,16 +247,13 @@ public class ConnectionProfile {
 //		return server.getInt("threads", 3);
 //	}
 	
+	public boolean hasAgent() {
+		return agent.hasProperty("agent");
+		
+	}
+	
 	public String getAgentName() {
-		return agent.getNotEmpty("agent");
+		return agent.getProperty("agent");
 	}
-		
-	@Override
-	/**
-	 * Returns the absolute path of the properties file used to initialize this object.
-	 */
-	public String toString() {
-		return getPathName();
-	}
-		
+				
 }
