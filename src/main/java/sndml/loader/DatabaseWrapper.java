@@ -147,6 +147,7 @@ public class DatabaseWrapper {
 		return this.warnOnTruncate;
 	}
 	
+	@Deprecated
 	URI getURI() {
 		return this.dbURI;
 	}

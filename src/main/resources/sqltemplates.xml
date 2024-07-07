@@ -440,7 +440,7 @@ WHERE sys_id = $keyvalue</update>
     </fieldnames>
   </sql>
 
-  <sql dialect="mssql">
+  <sql dialect="sqlserver">
     <!--
       ****************************
       *** Microsoft SQL Server ***
@@ -507,7 +507,7 @@ where [sys_id] = $keyvalue</update>
     <fieldnames/>
   </sql>  
   
-  <sql dialect="pg">
+  <sql dialect="postgresql">
     <!--
       ******************
       *** PostgreSQL ***
