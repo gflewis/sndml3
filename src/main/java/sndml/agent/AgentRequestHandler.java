@@ -77,6 +77,19 @@ public class AgentRequestHandler implements HttpHandler {
 		}
 	}
 	
+	/*
+	public void handle(String path) {
+		try {
+			String[] parts = path.split("/");
+			if (parts.length < 2) throw new AgentURLException(parts);
+			String action = parts.length > 1 ? parts[1] : null;
+			String param = parts.length > 2 ? parts[2] : null;
+			logger.debug(Log.REQUEST, String.format("len=%d %s %s", parts.length, action, param));
+		}
+	
+	}
+	*/
+	
 	// TODO: Why is this using SingleJobRunner and not AppJobRunner?
 	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
 		if (arg == null) throw new AgentURLException(uri);

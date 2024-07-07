@@ -3,7 +3,8 @@ package sndml.util;
 import java.util.Properties;
 
 /**
- * A subset of properties with a given prefix (with the prefix removed)
+ * A subset of properties with a given prefix.
+ * The prefix is removed when the properties are added by the constructor.
  *
  */
 @SuppressWarnings("serial")

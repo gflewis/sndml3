@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.loader.ConnectionProfile;
 import sndml.util.Log;
 
 /**
@@ -18,6 +19,12 @@ public class WorkerPool extends ThreadPoolExecutor {
 	private static final long KEEP_ALIVE_SECONDS = 60;
 	private static final Logger logger = LoggerFactory.getLogger(WorkerPool.class);
 
+	private final int threadCount; 
+	
+	public WorkerPool(ConnectionProfile profile) {
+		this(profile.getThreadCount());
+	}
+	
 	public WorkerPool(int threadCount) {
 		super(
 			threadCount, 
@@ -26,10 +33,22 @@ public class WorkerPool extends ThreadPoolExecutor {
 			TimeUnit.SECONDS,
 			new LinkedBlockingQueue<Runnable>());
 		INSTANCE = this;
+		this.threadCount = threadCount;
 		logger.info(
 			Log.INIT, String.format("instantiate threads=%d", threadCount));
 	}
 		
+	static public WorkerPool getWorkerPool(ConnectionProfile profile) {
+		if (INSTANCE == null) {
+			INSTANCE = new WorkerPool(profile);
+		}
+		return INSTANCE;		
+	}
+	
+	public int getThreadCount() {
+		return threadCount;
+	}
+	
 	@Deprecated
 	public WorkerPool getWorkerPool() {
 		assert INSTANCE != null: "Class not initialized";

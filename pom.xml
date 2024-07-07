@@ -44,7 +44,7 @@
       <version>2.17.1</version>
     </dependency>
 
-    <!-- Apache Components -->
+    <!-- Apache Components -->        
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -75,7 +75,7 @@
       <groupId>commons-daemon</groupId>
       <artifactId>commons-daemon</artifactId>
       <version>1.2.4</version>
-    </dependency>
+    </dependency>    
 
     <!-- Parsers -->
     <dependency>

@@ -22,7 +22,7 @@ public class DatabaseRecordSyncWriter extends DatabaseTableWriter {
 	private final DatabaseTimestampReader dbtsr = new DatabaseTimestampReader(db);	
 	private final Metrics metrics;
 	
-	public DatabaseRecordSyncWriter(DatabaseConnection db, 
+	public DatabaseRecordSyncWriter(DatabaseWrapper db, 
 			Table table, String sqlTableName, 
 			RecordKey key, String writerName)
 			throws IOException, SQLException {

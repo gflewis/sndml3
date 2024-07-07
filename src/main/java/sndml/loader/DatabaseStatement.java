@@ -26,7 +26,7 @@ import sndml.servicenow.RecordKey;
  */
 public abstract class DatabaseStatement {
 
-	final DatabaseConnection db;
+	final DatabaseWrapper db;
 	final Calendar calendar;
 	final String sqlTableName;
 	final Generator generator;
@@ -43,7 +43,7 @@ public abstract class DatabaseStatement {
 	final protected Logger logger = Log.logger(this.getClass());
 	final boolean traceEnabled;
 	
-	public DatabaseStatement(DatabaseConnection db, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
+	public DatabaseStatement(DatabaseWrapper db, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {
 		this.db = db;
 		this.calendar = db.getCalendar();
 		this.sqlTableName = sqlTableName;

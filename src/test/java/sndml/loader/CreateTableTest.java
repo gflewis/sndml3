@@ -25,7 +25,7 @@ public class CreateTableTest {
 
 	TestingProfile profile;
 	AppSession session;
-	DatabaseConnection database;
+	DatabaseWrapper database;
 	Logger logger = TestManager.getLogger(this.getClass());
 	
 	public CreateTableTest(TestingProfile profile) throws Exception {

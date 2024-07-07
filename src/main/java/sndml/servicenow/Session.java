@@ -174,24 +174,28 @@ public class Session {
 	}
 	
 	/**
-	 * Verify that this Session is valid by retrieving the users's record from sys_user.
-	 * If the time zone is not GMT then an exception will be thrown.
+	 * Get the sys_user record associated with this session.
+	 * We assume that the user can read their own sys_user record;
 	 */
-	public Session verifyUser() throws IOException, NoSuchRecordException {
-		Table user = this.table("sys_user");
-//		try {
-//			user = verifyTable("sys_user");
-//		} catch (InterruptedException e) {
-//			throw new IOException(e);
-//		}
+	public TableRecord getUserProfile() throws IOException {
 		assert this.username != null;
+		Table user = this.table("sys_user");
 		TableRecord userProfile = user.api().getRecord("user_name", this.username);
 		if (userProfile == null) 
 			// Should be impossible.
-			// If the user did not exist, then we would havel already thrown
-			// InsufficientRightsException.
+			// If the user did not exist, then we would have previously thrown
+			// InsufficientRightsException
 			throw new NoSuchRecordException(
 					String.format("user not found: %s", this.username));
+		return userProfile;
+	}
+	
+	/**
+	 * Verify that this Session is valid by retrieving the users's record from sys_user.
+	 * If the time zone is not GMT then an exception will be thrown.
+	 */
+	public Session verifyUser() throws IOException, ServiceNowException {
+		TableRecord userProfile = this.getUserProfile();
 		String timezone = userProfile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;

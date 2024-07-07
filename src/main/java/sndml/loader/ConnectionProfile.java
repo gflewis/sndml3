@@ -231,10 +231,10 @@ public class ConnectionProfile {
 	 * Opens and returns a new connection to the JDBC database.
 	 * Throw an unchecked ResourceException if unsuccessful.
 	 */
-	public synchronized DatabaseConnection newDatabaseConnection() {
-		DatabaseConnection database;
+	public synchronized DatabaseWrapper newDatabaseConnection() {
+		DatabaseWrapper database;
 		try {
-			database = new DatabaseConnection(this);
+			database = new DatabaseWrapper(this);
 		} catch (URISyntaxException e) {
 			throw new ResourceException(e);
 		} catch (SQLException e) {
@@ -243,9 +243,11 @@ public class ConnectionProfile {
 		return database;
 	}
 
-//	public int getThreadCount() {
-//		return server.getInt("threads", 3);
-//	}
+	private final int DEFAULT_THREAD_COUNT = 3;
+	
+	public int getThreadCount() {
+		return server.getInt("threads", DEFAULT_THREAD_COUNT);
+	}
 	
 	public boolean hasAgent() {
 		return agent.hasProperty("agent");

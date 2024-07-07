@@ -18,7 +18,7 @@ import sndml.util.Metrics;
  */
 public class TableSynchronizer extends TableReader {
 
-	final DatabaseConnection db;
+	final DatabaseWrapper db;
 	final String sqlTableName;
 	final String writerName;
 	
@@ -29,7 +29,7 @@ public class TableSynchronizer extends TableReader {
 	RecordKeySet deleteSet;
 	RecordKeySet skipSet;
 	
-	public TableSynchronizer(Table table, DatabaseConnection db, String sqlTableName, String writerName) {
+	public TableSynchronizer(Table table, DatabaseWrapper db, String sqlTableName, String writerName) {
 		super(table);
 		this.db = db;
 		this.sqlTableName = sqlTableName;

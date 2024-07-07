@@ -1,12 +1,10 @@
 package sndml.agent;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
-import sndml.util.Metrics;
 import sndml.util.ResourceException;
 
 public class AppJobRunner extends JobRunner implements Runnable {
@@ -15,24 +13,41 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	final ConnectionProfile profile;
 	final AppSession appSession;
-	final AgentScanner scanner; // my parent
 	final public RecordKey runKey;
 	final public String number;
 	final AppStatusLogger statusLogger;
+
+	public AppJobRunner(ConnectionProfile profile, AppSession appSession, ReaderSession readerSession, 
+			DatabaseWrapper databaseConnection, AppJobConfig config) {
+		super(readerSession, databaseConnection, config);
+		this.profile = profile;
+		this.appSession = appSession; 
+		this.config = config;
+		this.statusLogger = new AppStatusLogger(appSession);				
+		this.runKey = config.getSysId();
+		this.number = config.getNumber();
+		assert runKey != null;
+		assert runKey.isGUID();
+		assert number != null;
+		assert number.length() > 0;		
+	}
 	
-	AppJobRunner(AgentScanner scanner, ConnectionProfile profile, AppJobConfig config) {
+	AppJobRunner(ConnectionProfile profile, AppJobConfig config) {
+		this(profile, profile.newAppSession(), profile.newReaderSession(), 
+				profile.newDatabaseConnection(), config);
+		/*
 		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
 		this.config = config;
 		this.profile = profile;
 		this.appSession = profile.newAppSession();
 		this.statusLogger = new AppStatusLogger(appSession);				
-		this.scanner = scanner;
 		this.runKey = config.getSysId();
 		this.number = config.getNumber();
 		assert runKey != null;
 		assert runKey.isGUID();
 		assert number != null;
 		assert number.length() > 0;
+		*/
 	}
 	
 	AppStatusLogger getStatusLogger() {
@@ -71,7 +86,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 			e.printStackTrace(System.err);
 		}
 	}
-
+	
 	@Override
 	public void close() throws ResourceException {
 		// Close the database connection
@@ -82,6 +97,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		}
 	}
 	
+	/*
 	@Override
 	public Metrics call() throws JobCancelledException {
 		String myName = this.getClass().getName() + ".call";
@@ -91,7 +107,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		setThreadName();
 		try {
 			super.call();
-			if (scanner != null) scanner.rescan();
+			if (scanner != null) scanner.rescan();		
 		} catch (SQLException | IOException | InterruptedException e) {
 			Log.setJobContext(this.getName());
 			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
@@ -104,12 +120,15 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		}
 		return jobMetrics;
 	}
+	*/
+	
+	
 	
 	/**
 	 * If this is not the main thread and it is not the scanner thread
 	 * then change the thread name.
 	 */
-	private void setThreadName() {		
+	protected void setThreadName() {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
 		Thread myThread = Thread.currentThread();
 		if (!myThread.equals(AgentDaemon.getThread()) && !myThread.getName().equals("scanner")) {

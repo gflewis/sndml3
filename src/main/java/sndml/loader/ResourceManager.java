@@ -22,7 +22,7 @@ public class ResourceManager {
 	private AppSession lastAppSession = null; 
 	private ReaderSession lastReaderSession = null; 
 	private ReaderSession firstReaderSession = null;
-	private DatabaseConnection lastDBC = null;
+	private DatabaseWrapper lastDBC = null;
 	private SchemaReader schemaReader = null;
 	private SchemaFactory schemaFactory = null;
 	
@@ -109,10 +109,10 @@ public class ResourceManager {
 	 * Opens and returns a new connection to the JDBC database.
 	 * Throw an unchecked ResourceException if unsuccessful.
 	 */
-	public static synchronized DatabaseConnection newDatabaseConnection() throws ResourceException {
-		DatabaseConnection dbc;
+	public static synchronized DatabaseWrapper newDatabaseConnection() throws ResourceException {
+		DatabaseWrapper dbc;
 		try {
-			dbc = new DatabaseConnection(instance.profile);
+			dbc = new DatabaseWrapper(instance.profile);
 		} catch (URISyntaxException e) {
 			throw new ResourceException(e);
 		} catch (SQLException e) {
@@ -122,7 +122,7 @@ public class ResourceManager {
 		return dbc;
 	}
 	
-	public static synchronized DatabaseConnection getDatabaseConnection() throws ResourceException {
+	public static synchronized DatabaseWrapper getDatabaseConnection() throws ResourceException {
 		if (instance.lastDBC == null) newDatabaseConnection();
 		return instance.lastDBC;
 	}

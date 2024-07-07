@@ -15,7 +15,7 @@ public class DatabaseDeleteWriter extends DatabaseTableWriter {
 
 	protected DatabaseDeleteStatement deleteStmt;
 		
-	public DatabaseDeleteWriter(DatabaseConnection db, Table table, String sqlTableName, String writerName)
+	public DatabaseDeleteWriter(DatabaseWrapper db, Table table, String sqlTableName, String writerName)
 			throws IOException, SQLException {
 		super(db, table, sqlTableName, writerName);
 	}

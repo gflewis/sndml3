@@ -21,6 +21,7 @@ public abstract class AgentScanner extends TimerTask {
 
 	final ConnectionProfile profile;
 	final AppSession appSession;
+	final AppConfigFactory configFactory;	
 	final AppStatusLogger statusLogger;
 	final String agentName;
 	final URI uriGetRunList;
@@ -28,7 +29,6 @@ public abstract class AgentScanner extends TimerTask {
 	int errorCount = 0;
 	
 	final Logger logger = LoggerFactory.getLogger(AgentScanner.class);
-	final AppConfigFactory configFactory = new AppConfigFactory();
 	
 	final static public String THREAD_NAME = "scanner";
 	final static int ERROR_LIMIT = 3;
@@ -45,6 +45,7 @@ public abstract class AgentScanner extends TimerTask {
 		this.agentName = AgentDaemon.getAgentName();
 		Log.setJobContext(agentName);		
 		this.appSession = profile.newAppSession();
+		this.configFactory = new AppConfigFactory(appSession);
 		assert agentName != null;
 		this.uriGetRunList = appSession.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
@@ -100,7 +101,7 @@ public abstract class AgentScanner extends TimerTask {
 	protected abstract int getErrorLimit();
 	
 	public 	AppJobRunner createJob(AppJobConfig jobConfig) {
-		AppJobRunner job = new AppJobRunner(this, profile, jobConfig);
+		AppJobRunner job = new ScannerJobRunner(this, profile, jobConfig);
 		return job;
 	}	
 	
@@ -178,5 +179,14 @@ public abstract class AgentScanner extends TimerTask {
 		}
 		return String.join(",", numbers);		
 	}
+	
+	/**
+	 * This function can be called by any thread to abort the scanner.
+	 */
+	public void abort() {
+		logger.error(Log.FINISH, "Aborting the scanner");
+		Runtime.getRuntime().exit(-1);
+	}
+	
 		
 }

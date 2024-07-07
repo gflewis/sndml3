@@ -27,7 +27,7 @@ public class TimestampTest {
 	final String tablename = "incident";
 	final TestingProfile profile;
 	Session session;
-	DatabaseConnection database;
+	DatabaseWrapper database;
 	// Session session;
 	// Database database;
 	// DBUtil util;	

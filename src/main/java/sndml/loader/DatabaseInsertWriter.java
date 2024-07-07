@@ -15,7 +15,7 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 
 	protected DatabaseInsertStatement insertStmt;
 	
-	public DatabaseInsertWriter(DatabaseConnection db, Table table, String sqlTableName, String writerName) 
+	public DatabaseInsertWriter(DatabaseWrapper db, Table table, String sqlTableName, String writerName) 
 			throws IOException, SQLException {
 		super(db, table, sqlTableName, writerName);
 	}

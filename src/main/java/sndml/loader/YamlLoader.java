@@ -26,7 +26,7 @@ public class YamlLoader {
 
 	static ConfigFactory factory = new ConfigFactory();
 	final Session session;
-	final DatabaseConnection database;
+	final DatabaseWrapper database;
 	YamlLoaderConfig config;
 	File metricsFile = null;
 	PrintWriter statsWriter;

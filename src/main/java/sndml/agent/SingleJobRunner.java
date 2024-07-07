@@ -27,7 +27,7 @@ public class SingleJobRunner implements Runnable {
 	final RecordKey jobKey;
 	final AppJobConfig jobConfig;
 	final URI uriGetRun;
-	final AppConfigFactory configFactory = new AppConfigFactory();
+	final AppConfigFactory configFactory;
 	final Logger logger = LoggerFactory.getLogger(SingleJobRunner.class);
 	Metrics metrics;
 	
@@ -43,7 +43,8 @@ public class SingleJobRunner implements Runnable {
 			throws ConfigParseException, IOException, IllegalStateException {
 		this.profile = profile;
 		this.jobKey = jobKey;
-		this.appSession = profile.newAppSession();		
+		this.appSession = profile.newAppSession();
+		this.configFactory = new AppConfigFactory(appSession);
 		this.uriGetRun = appSession.getAPI("getrun", jobKey.toString());
 		this.agentName = appSession.getAgentName();
 		this.jobConfig = configFactory.jobConfig(profile, getRun());
@@ -79,7 +80,7 @@ public class SingleJobRunner implements Runnable {
 	public void run() {
 		AppJobRunner jobRunner = null;
 		try {
-			jobRunner = new AppJobRunner(null, profile, jobConfig);
+			jobRunner = new AppJobRunner(profile, jobConfig);
 			metrics = jobRunner.call();
 			jobRunner.close();
 			logger.info(Log.FINISH, metrics.toString());
@@ -97,8 +98,7 @@ public class SingleJobRunner implements Runnable {
 			// Throw an unchecked exception which should abort the process.
 			// (We are done anyway)
 			throw new RuntimeException(e);
-		}
-				
+		}				
 	}
 	
 	

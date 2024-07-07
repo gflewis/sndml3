@@ -15,10 +15,10 @@ import java.sql.Statement;
 
 public class DBUtil {
 		
-	DatabaseConnection db;
+	DatabaseWrapper db;
 	Logger logger = TestManager.getLogger(DBUtil.class);
 
-	DBUtil(DatabaseConnection database) {
+	DBUtil(DatabaseWrapper database) {
 		this.db = database;		
 	}
 	
@@ -30,7 +30,7 @@ public class DBUtil {
 		this(TestManager.getProfile());
 	}
 	
-	DatabaseConnection getDatabase() {
+	DatabaseWrapper getDatabase() {
 		return this.db;
 	}
 	

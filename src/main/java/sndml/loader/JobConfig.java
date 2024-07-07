@@ -281,11 +281,11 @@ public class JobConfig {
 		throw new ConfigParseException(msg);
 	}	
 	
-	public TableReader createReader(Table table, DatabaseConnection db) throws IOException {
+	public TableReader createReader(Table table, DatabaseWrapper db) throws IOException {
 		return createReader(table, db, table.getSession(), null);
 	}
 	
-	public TableReader createReader(Table table, DatabaseConnection db, Session session, DatePart datePart) 
+	public TableReader createReader(Table table, DatabaseWrapper db, Session session, DatePart datePart) 
 			throws IOException {
 
 		assert table != null;

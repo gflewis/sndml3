@@ -15,7 +15,7 @@ public class JobFactory {
 
 	final ConnectionProfile profile;
 	final Session session;
-	final DatabaseConnection database;	
+	final DatabaseWrapper database;	
 	final DateCalculator dateCalculator;
 	ConfigFactory configFactory = new ConfigFactory();
 	
@@ -24,7 +24,7 @@ public class JobFactory {
 		this(profile, profile.newReaderSession(), profile.newDatabaseConnection(),start);
 	}
 	
-	public JobFactory(ConnectionProfile profile, Session session, DatabaseConnection database, DateTime start) {
+	public JobFactory(ConnectionProfile profile, Session session, DatabaseWrapper database, DateTime start) {
 		this.profile = profile;
 		this.session = session;
 		this.database = database;		

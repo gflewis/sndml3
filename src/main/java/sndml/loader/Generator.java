@@ -60,13 +60,13 @@ public class Generator {
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
 		Session session = new Session(profile.reader);
 		Table table = session.table(tablename);
-		DatabaseConnection database = profile.newDatabaseConnection();
+		DatabaseWrapper database = profile.newDatabaseConnection();
 		Generator generator = new Generator(database, profile);
 		String sql = generator.getCreateTable(table);
 		output.print(sql);		
 	}
 	
-	public Generator(DatabaseConnection database, ConnectionProfile profile) {
+	public Generator(DatabaseWrapper database, ConnectionProfile profile) {
 		assert database != null;
 		String schemaName = profile.database.getProperty("schema");
 		String dialectName = profile.database.getProperty("dialect");
@@ -111,7 +111,7 @@ public class Generator {
 	}
 	
 	Element getProtocolTree(URI dbURI) {
-		String protocol = DatabaseConnection.getProtocol(dbURI);
+		String protocol = DatabaseWrapper.getProtocol(dbURI);
 		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
 			Element tree = children.next();

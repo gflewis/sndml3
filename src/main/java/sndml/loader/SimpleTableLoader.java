@@ -9,12 +9,12 @@ import sndml.util.ResourceException;
 
 public class SimpleTableLoader extends JobRunner implements Runnable {
 	
-	public SimpleTableLoader(ConnectionProfile profile, DatabaseConnection database, Table table, EncodedQuery filter) {
+	public SimpleTableLoader(ConnectionProfile profile, DatabaseWrapper database, Table table, EncodedQuery filter) {
 		super(table.getSession(), database, jobConfig(profile, table, filter));
 		this.table = table;
 	}
 	
-	public SimpleTableLoader(ConnectionProfile profile, DatabaseConnection database, Table table, RecordKey docKey) {
+	public SimpleTableLoader(ConnectionProfile profile, DatabaseWrapper database, Table table, RecordKey docKey) {
 		super(table.getSession(), database, jobConfig(profile, table, docKey));
 		this.table = table;
 	}

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ import sndml.util.ResourceException;
  * </p>
  * 
  */
-public class DatabaseConnection {
+public class DatabaseWrapper {
 
 	private final Logger logger = Log.logger(this.getClass());
 	private final ConnectionProfile profile;
@@ -48,7 +49,7 @@ public class DatabaseConnection {
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
-	public DatabaseConnection(ConnectionProfile profile) throws SQLException, URISyntaxException {
+	public DatabaseWrapper(ConnectionProfile profile) throws SQLException, URISyntaxException {
 		this.profile = profile;
 		this.dburl = databaseProperty("url", null);
 		assert this.dburl != null : "Property database.url not found";
@@ -80,7 +81,7 @@ public class DatabaseConnection {
 		this.open();
 		assert dbc != null;
 	}
-	
+		
 	private String databaseProperty(String name, String defaultValue) {
 		// Allow property to begin with old prefix "datamart." or new prefix "database."
 		String value = profile.database.getProperty(name, defaultValue);
@@ -111,12 +112,12 @@ public class DatabaseConnection {
 		logger.info(Log.FINISH, "Database connection closed");
 		this.dbc.close();
 		this.dbc = null;
-		assert this.isClosed();
+//		assert this.isClosed();
 	}
 
-	boolean isClosed() {
-		return (this.dbc == null);
-	}
+//	boolean isClosed() {
+//		return (this.dbc == null);
+//	}
 	
 	Generator getGenerator() {
 		return this.generator;

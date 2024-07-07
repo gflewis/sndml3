@@ -43,6 +43,10 @@ public class AppSession extends Session {
 		return agentName;
 	}
 	
+	public Instance getAppInstance() {
+		return new Instance(propset);
+	}
+	
 	@Override
 	public SchemaReader getSchemaReader() {
 		if (this.schemaReader == null) {

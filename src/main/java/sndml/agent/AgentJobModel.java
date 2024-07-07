@@ -12,8 +12,9 @@ import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 
-// TODO: Is this class even useful?
-class AgentJobModel {
+@Deprecated
+// Use AppConfigFactory
+public class AgentJobModel {
 
 	final AppSession appSession;
 	final ConnectionProfile profile;
@@ -25,7 +26,11 @@ class AgentJobModel {
 		this.profile = ResourceManager.getProfile();		
 	}
 	
-	AppJobConfig getConfig(RecordKey jobKey) throws IOException {
+	public AppJobConfig getConfig(String sys_id) throws IOException {
+		return getConfig(new RecordKey(sys_id));
+	}
+	
+	public AppJobConfig getConfig(RecordKey jobKey) throws IOException {
 		URI uriGetRun = appSession.getAPI("getrun", jobKey.toString());		
 		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
 		ObjectNode response = request.execute();

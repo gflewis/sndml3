@@ -27,9 +27,8 @@ public class AppJobConfig extends JobConfig {
 		super.updateCoreFields();
 		if (jobName == null && number != null) jobName = number;		
 	}
-	
-
-	
+		
+	@Override	
 	public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();

@@ -86,7 +86,7 @@ public class Main {
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
 			ReaderSession session = ResourceManager.getReaderSession();
-			DatabaseConnection database = ResourceManager.newDatabaseConnection();
+			DatabaseWrapper database = ResourceManager.newDatabaseConnection();
 			String tableName = cmd.getOptionValue(optTable);
 			String filter = cmd.getOptionValue(optFilter);
 			String sys_id = cmd.getOptionValue(optSysID);

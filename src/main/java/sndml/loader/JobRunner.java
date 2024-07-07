@@ -19,18 +19,18 @@ public class JobRunner implements Callable<Metrics> {
 	protected final JobConfig config;
 	
 	protected final Session readerSession;
-	protected final DatabaseConnection database;
+	protected final DatabaseWrapper database;
 	
 	protected Action action;
 	protected Table table;
 	protected Metrics jobMetrics;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 		
-	public JobRunner(Session session, DatabaseConnection db, JobConfig config) {
-		this.readerSession = session;
+	public JobRunner(Session readerSession, DatabaseWrapper db, JobConfig config) {
+		this.readerSession = readerSession;
 		this.database = db;
 		this.config = config;		
-		assert session!= null;
+		assert readerSession!= null;
 		assert db != null;
 		assert config != null;
 	}
@@ -53,10 +53,15 @@ public class JobRunner implements Callable<Metrics> {
 		}
 		return progressLogger;
 	}
-			
+
+	/**
+	 * Override this method to release all resources.
+	 * {@Link AppJobRunner} will override this method
+	 * @throws ResourceException
+	 */
 	public void close() throws ResourceException {
-		// {@Link AppJobRunner} will override this method
 	}
+
 	
 	/**
 	 * This method calls one of several different private "run" functions based on the action. 

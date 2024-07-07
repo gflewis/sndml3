@@ -23,12 +23,12 @@ import sndml.util.Log;
  */
 public class DatabaseTimestampReader {
 
-	final DatabaseConnection database;
+	final DatabaseWrapper database;
 	final Connection dbc;
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	final Calendar tzGMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
-	public DatabaseTimestampReader(DatabaseConnection database) {
+	public DatabaseTimestampReader(DatabaseWrapper database) {
 		this.database = database;
 		this.dbc = database.getConnection();
 	}

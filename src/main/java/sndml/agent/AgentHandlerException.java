@@ -11,14 +11,19 @@ public class AgentHandlerException extends Exception {
 		super(cause);
 		this.returnCode = returnCode;
 	}
-	
+
+	public AgentHandlerException(String path, int returnCode) {
+		super("Path=" + path);
+		this.returnCode = returnCode;
+	}
+
 	public AgentHandlerException(URI uri, int returnCode) {
-		super(uri.toString());
+		super("URI=" + uri.toString());
 		this.returnCode = returnCode;
 	}
 	
 	int getReturnCode() {
 		return this.returnCode;
 	}
-	
+		
 }
