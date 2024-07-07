@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class DatabaseWrapper {
 	private final String schema;
 	// private final File templates;
 	
-	private Connection dbc = null;
-	private Generator generator;
+	private final Connection dbc;
+	private final Generator generator;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	
@@ -58,7 +57,6 @@ public class DatabaseWrapper {
 		this.dbpass = databaseProperty("password", "");
 		schema = profile.database.getProperty("schema", null);
 		
-		assert dbc == null;
 		assert schema==null || schema.length() > 0;
 
 		// If timezone is not specified then use "GMT"
@@ -77,8 +75,10 @@ public class DatabaseWrapper {
 		logger.info(Log.INIT, logmsg);
 		this.warnOnTruncate = profile.loader.getBoolean("warn_on_truncate", true);
 				
-		this.open();
+		this.dbc = this.open();		
 		assert dbc != null;
+		
+		this.generator = new Generator(profile);
 	}
 		
 	private String databaseProperty(String name, String defaultValue) {
@@ -92,25 +92,31 @@ public class DatabaseWrapper {
 	 * Set the timezoneName to GMT.
 	 * Set the date format to YYYY-MM-DD
 	 */
-	void open() throws SQLException {		
-		dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		generator = new Generator(this.profile);
-		dbc.setAutoCommit(generator.getAutoCommit());
-		Statement stmt = dbc.createStatement();
-		Iterator<String> iter = generator.getInitializations().listIterator();
-		while (iter.hasNext()) {
-			String sql = iter.next();
-			logger.info(Log.INIT, sql);
-			stmt.execute(sql);
-		}
-		stmt.close();
-		commit();		
+	Connection open() throws SQLException {		
+		Connection dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
+		Generator generator = new Generator(this.profile);
+		generator.initialize(dbc);
+		return dbc;
 	}
-		
+	
+	public void initialize() throws SQLException {
+		generator.initialize(dbc);
+	}
+
+	@Override
+	public void finalize() {
+		try {
+			this.dbc.close();
+		} catch (SQLException e) {
+			// Ignore
+		}		
+	}
+	
+	@Deprecated
 	public void close() throws SQLException {
 		logger.info(Log.FINISH, "Database connection closed");
 		this.dbc.close();
-		this.dbc = null;
+//		this.dbc = null;
 //		assert this.isClosed();
 	}
 

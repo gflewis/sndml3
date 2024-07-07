@@ -3,6 +3,7 @@ package sndml.loader;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.*;
 
 import org.apache.commons.cli.*;
@@ -222,6 +223,23 @@ public class Generator {
 	
 	boolean getAutoCommit() {
 		return this.autocommit;
+	}
+	
+	/**
+	 * Initialize a Connection based on the "initialize" statements
+	 * in the template.
+	 */
+	public void initialize(java.sql.Connection dbc) throws SQLException {
+		dbc.setAutoCommit(this.getAutoCommit());
+		java.sql.Statement stmt = dbc.createStatement();
+		Iterator<String> iter = this.getInitializations().listIterator();
+		while (iter.hasNext()) {
+			String sql = iter.next();
+			logger.info(Log.INIT, sql);
+			stmt.execute(sql);
+		}
+		stmt.close();
+		dbc.commit();
 	}
 	
 	List<String> getInitializations() {
