@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -95,7 +94,7 @@ public class DatabaseWrapper {
 	 */
 	void open() throws SQLException {		
 		dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		generator = new Generator(this, this.profile);
+		generator = new Generator(this.profile);
 		dbc.setAutoCommit(generator.getAutoCommit());
 		Statement stmt = dbc.createStatement();
 		Iterator<String> iter = generator.getInitializations().listIterator();

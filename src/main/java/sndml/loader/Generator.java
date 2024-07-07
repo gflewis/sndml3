@@ -2,6 +2,7 @@ package sndml.loader;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import org.apache.commons.cli.*;
@@ -66,6 +67,53 @@ public class Generator {
 		output.print(sql);		
 	}
 	
+	public Generator(InputStream templatesStream, Properties properties, SchemaReader schemaReader) throws ResourceException {
+		
+		String dialectName = properties.getProperty("dialect", null);
+		String schemaName = properties.getProperty("schema", "");
+		
+		if (dialectName == null) {
+			String dburl = properties.getProperty("url", null);
+			// Infer dialect from the URL
+			URI dburi;
+			try {
+				dburi = new URI(dburl);
+			} catch (URISyntaxException e) {
+				throw new ResourceException(e);
+			}
+			this.dialectTree = getProtocolTree(dburi);				
+		}
+		else {
+			// Dialect was explicitly specified as a property
+			this.dialectTree = getDialectTree(dialectName);
+		}
+		
+		try {
+			SAXBuilder xmlbuilder = new SAXBuilder();
+			xmldocument = xmlbuilder.build(templatesStream);			
+		}
+		catch (IOException | JDOMException e) {
+			throw new ResourceException(e);
+		}
+		this.schemaName = schemaName;
+		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
+		
+		Element dialogProps = dialectTree.getChild("properties");
+				
+		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
+		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
+		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
+		
+		this.schemaReader = schemaReader;
+		
+	}
+	
+	public Generator(ConnectionProfile profile) throws ResourceException {
+		this(getTemplatesStream(profile.database), profile.database, profile.newSchemaReader());
+				
+	}
+	
+	@Deprecated
 	public Generator(DatabaseWrapper database, ConnectionProfile profile) {
 		assert database != null;
 		String schemaName = profile.database.getProperty("schema");
@@ -109,8 +157,33 @@ public class Generator {
 				namequotes.toString(), getAutoCommit(), 
 				profile.hasAgent()));
 	}
+
+	/**
+	 * Get an InputStream based on the name of the "templates" property.
+	 * @param properties
+	 * @return
+	 */
+	private static InputStream getTemplatesStream(Properties properties) {
+		String templatesPath = properties.getProperty("templates", "");
+		File templatesFile = null;
+		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
+		
+		try {
+			// if file not specified as property
+			// then use the default XML from the JAR
+			InputStream inputStream =
+				(templatesFile == null) ?
+				ClassLoader.getSystemResourceAsStream("sqltemplates.xml") :
+				new FileInputStream(templatesFile);
+			return inputStream;
+		} 
+		catch (IOException e) {
+			throw new ResourceException(e);
+		}
+		
+	}
 	
-	Element getProtocolTree(URI dbURI) {
+	private Element getProtocolTree(URI dbURI) {
 		String protocol = DatabaseWrapper.getProtocol(dbURI);
 		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
@@ -127,7 +200,7 @@ public class Generator {
 		return getDialectTree("default");
 	}
 	
-	Element getDialectTree(String dialectName) {
+	private Element getDialectTree(String dialectName) {
 		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
 			Element tree = children.next();
