@@ -36,7 +36,7 @@ public class CreateTableTest {
 	@Before
 	public void openDatabase() throws Exception {
 		session = profile.newAppSession();
-		database = profile.newDatabaseConnection();
+		database = profile.newDatabaseWrapper();
 	}
 	
 	@After

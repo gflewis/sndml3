@@ -1,7 +1,6 @@
 package sndml.loader;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 import org.slf4j.Logger;
@@ -113,8 +112,6 @@ public class ResourceManager {
 		DatabaseWrapper dbc;
 		try {
 			dbc = new DatabaseWrapper(instance.profile);
-		} catch (URISyntaxException e) {
-			throw new ResourceException(e);
 		} catch (SQLException e) {
 			throw new ResourceException(e);
 		}

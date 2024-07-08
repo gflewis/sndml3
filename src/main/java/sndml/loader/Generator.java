@@ -62,8 +62,9 @@ public class Generator {
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
 		Session session = new Session(profile.reader);
 		Table table = session.table(tablename);
-		DatabaseWrapper database = profile.newDatabaseConnection();
-		Generator generator = new Generator(database, profile);
+//		DatabaseWrapper database = profile.newDatabaseConnection();
+		DatabaseWrapper database = new DatabaseWrapper(profile);
+		Generator generator = database.getGenerator();
 		String sql = generator.getCreateTable(table);
 		output.print(sql);		
 	}
@@ -114,50 +115,50 @@ public class Generator {
 				
 	}
 	
-	@Deprecated
-	public Generator(DatabaseWrapper database, ConnectionProfile profile) {
-		assert database != null;
-		String schemaName = profile.database.getProperty("schema");
-		String dialectName = profile.database.getProperty("dialect");
-		String templatesPath = profile.database.getProperty("templates", "");
-		File templatesFile = null;
-		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
-		
-		try {
-			// if file not specified as property
-			// then use the default XML from the JAR
-			InputStream sqlConfigStream =
-				(templatesFile == null) ?
-				ClassLoader.getSystemResourceAsStream("sqltemplates.xml") :
-				new FileInputStream(templatesFile);	
-			SAXBuilder xmlbuilder = new SAXBuilder();
-			xmldocument = xmlbuilder.build(sqlConfigStream);
-		} 
-		catch (IOException | JDOMException e2) {
-			throw new ResourceException(e2);
-		}
-		
-		if (dialectName == null || dialectName.length() == 0) 
-			this.dialectTree = getProtocolTree(database.getURI());
-		else
-			this.dialectTree = getDialectTree(dialectName);
-		
-		this.schemaName = schemaName;
-		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
-		
-		Element dialogProps = dialectTree.getChild("properties");
-				
-		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
-		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
-		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
-		schemaReader = profile.newSchemaReader();
-		
-		logger.info(Log.INIT, String.format(
-				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b agent=%b", 
-				getDialectName(), getSchemaName(), namecase.toString(), 
-				namequotes.toString(), getAutoCommit(), 
-				profile.hasAgent()));
-	}
+//	@Deprecated
+//	public Generator(DatabaseWrapper database, ConnectionProfile profile) {
+//		assert database != null;
+//		String schemaName = profile.database.getProperty("schema");
+//		String dialectName = profile.database.getProperty("dialect");
+//		String templatesPath = profile.database.getProperty("templates", "");
+//		File templatesFile = null;
+//		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
+//		
+//		try {
+//			// if file not specified as property
+//			// then use the default XML from the JAR
+//			InputStream sqlConfigStream =
+//				(templatesFile == null) ?
+//				ClassLoader.getSystemResourceAsStream("sqltemplates.xml") :
+//				new FileInputStream(templatesFile);	
+//			SAXBuilder xmlbuilder = new SAXBuilder();
+//			xmldocument = xmlbuilder.build(sqlConfigStream);
+//		} 
+//		catch (IOException | JDOMException e2) {
+//			throw new ResourceException(e2);
+//		}
+//		
+//		if (dialectName == null || dialectName.length() == 0) 
+//			this.dialectTree = getProtocolTree(database.getURI());
+//		else
+//			this.dialectTree = getDialectTree(dialectName);
+//		
+//		this.schemaName = schemaName;
+//		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
+//		
+//		Element dialogProps = dialectTree.getChild("properties");
+//				
+//		autocommit = Boolean.parseBoolean(dialogProps.getChildText("autocommit").toLowerCase());
+//		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
+//		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
+//		schemaReader = profile.newSchemaReader();
+//		
+//		logger.info(Log.INIT, String.format(
+//				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b agent=%b", 
+//				getDialectName(), getSchemaName(), namecase.toString(), 
+//				namequotes.toString(), getAutoCommit(), 
+//				profile.hasAgent()));
+//	}
 
 	/**
 	 * Get an InputStream based on the name of the "templates" property.

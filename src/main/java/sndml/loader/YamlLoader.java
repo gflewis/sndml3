@@ -45,7 +45,8 @@ public class YamlLoader {
 	
 	YamlLoader(ConnectionProfile profile, YamlLoaderConfig config) throws ResourceException, SQLException {
 		this.session = profile.newReaderSession();
-		this.database = profile.newDatabaseConnection();
+//		this.database = profile.newDatabaseConnection();
+		this.database = new DatabaseWrapper(profile);
 		this.config = config;
 		this.metricsFile = config.getMetricsFile();
 //		SchemaFactory.setSchemaReader(new TableSchemaReader(this.session));

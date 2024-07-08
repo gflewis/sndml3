@@ -34,7 +34,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	AppJobRunner(ConnectionProfile profile, AppJobConfig config) {
 		this(profile, profile.newAppSession(), profile.newReaderSession(), 
-				profile.newDatabaseConnection(), config);
+				profile.newDatabaseWrapper(), config);
 		/*
 		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
 		this.config = config;
@@ -89,6 +89,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	@Override
 	public void close() throws ResourceException {
+		// TODO Not a good idea to close a connection pool database
 		// Close the database connection
 		try {
 			database.close();

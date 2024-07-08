@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-//import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -231,12 +229,12 @@ public class ConnectionProfile {
 	 * Opens and returns a new connection to the JDBC database.
 	 * Throw an unchecked ResourceException if unsuccessful.
 	 */
-	public synchronized DatabaseWrapper newDatabaseConnection() {
+	public synchronized DatabaseWrapper newDatabaseWrapper() {
 		DatabaseWrapper database;
 		try {
 			database = new DatabaseWrapper(this);
-		} catch (URISyntaxException e) {
-			throw new ResourceException(e);
+//		} catch (URISyntaxException e) {
+//			throw new ResourceException(e);
 		} catch (SQLException e) {
 			throw new ResourceException(e);
 		}

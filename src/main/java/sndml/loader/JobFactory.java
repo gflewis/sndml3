@@ -21,7 +21,7 @@ public class JobFactory {
 	
 	public JobFactory(ConnectionProfile profile, DateTime start)
 			throws ResourceException, SQLException {
-		this(profile, profile.newReaderSession(), profile.newDatabaseConnection(),start);
+		this(profile, profile.newReaderSession(), new DatabaseWrapper(profile), start);
 	}
 	
 	public JobFactory(ConnectionProfile profile, Session session, DatabaseWrapper database, DateTime start) {

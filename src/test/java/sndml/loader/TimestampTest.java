@@ -40,7 +40,7 @@ public class TimestampTest {
 	@Before
 	public void openDatabase() throws Exception {
 		session = profile.newReaderSession();
-		database = profile.newDatabaseConnection();
+		database = profile.newDatabaseWrapper();
 	}
 	
 	@After

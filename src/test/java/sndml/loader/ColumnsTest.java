@@ -28,7 +28,7 @@ public class ColumnsTest {
 	@Test
 	public void test() throws Exception {
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());
-		DatabaseWrapper database = profile.newDatabaseConnection();
+		DatabaseWrapper database = profile.newDatabaseWrapper();
 		DBUtil util = new DBUtil(database);
 		YamlLoader loader1 = folder.getYaml("incident-include-columns").getLoader(profile);
 		Metrics metrics1 = loader1.loadTables();

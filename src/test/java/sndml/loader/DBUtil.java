@@ -23,7 +23,7 @@ public class DBUtil {
 	}
 	
 	DBUtil(TestingProfile profile) throws SQLException, URISyntaxException {
-		this(profile.newDatabaseConnection());
+		this(profile.newDatabaseWrapper());
 	}
 	
 	DBUtil() throws SQLException, URISyntaxException {
