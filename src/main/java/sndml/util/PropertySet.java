@@ -15,6 +15,7 @@ public class PropertySet extends java.util.Properties {
 
 	public PropertySet(Properties parent, String prefix) {
 		super();
+		assert parent != null;
 		assert prefix != null && prefix.length() > 0;
 		this.parent = parent;
 		this.prefix = prefix;

@@ -22,6 +22,7 @@ import sndml.util.Log;
 public class Main {
 
 	static protected ConnectionProfile profile;
+	static protected Resources resources;
 	static private boolean requiresApp = false;
 	static private final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -81,12 +82,12 @@ public class Main {
 						optScan.getLongOpt(), optDaemon.getLongOpt()));
 		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
-		ResourceManager.setProfile(profile);
+		resources = new Resources(profile, requiresApp);
 
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
-			ReaderSession session = ResourceManager.getReaderSession();
-			DatabaseWrapper database = ResourceManager.newDatabaseConnection();
+			ReaderSession session = resources.getReaderSession();
+			DatabaseWrapper database = resources.getDatabaseWrapper();
 			String tableName = cmd.getOptionValue(optTable);
 			String filter = cmd.getOptionValue(optFilter);
 			String sys_id = cmd.getOptionValue(optSysID);
@@ -116,9 +117,12 @@ public class Main {
 			loader.loadTables();
 		}
 		if (requiresApp) {
-			ResourceManager.setAppAgent(true);
 			Agent.main(cmd);
 		}
+	}
+	
+	static Resources getResources() {
+		return resources;
 	}
 		
 }

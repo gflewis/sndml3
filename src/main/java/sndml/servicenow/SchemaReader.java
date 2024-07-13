@@ -3,9 +3,12 @@ package sndml.servicenow;
 import java.io.IOException;
 
 /**
- * An abstract class used to read table definitions from the ServiceNow instance. 
- * There are two implementations: {@link sndml.servicenow.TableSchemaReader} 
- * and {@link sndml.agent.AppSchemaReader}.
+ * <p>An abstract class used to read table definitions from the ServiceNow instance. 
+ * There are two implementations:</p> 
+ * <ul>
+ * <li>{@link sndml.servicenow.TableSchemaReader}</li> 
+ * <li>{@link sndml.agent.AppSchemaReader}</li>
+ * <ul>
  */
 public interface SchemaReader {
 

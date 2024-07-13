@@ -10,14 +10,14 @@ import sndml.util.Log;
  * from the instance, and reuses them if they are required a second time.
  *
  */
-public class SchemaFactory {
+public class SchemaCache {
 
 	private final SchemaReader schemaReader;
 	
-	private final static ConcurrentHashMap<String,TableSchema> schemaCache = 
+	private final ConcurrentHashMap<String,TableSchema> schemaCache = 
 			new ConcurrentHashMap<String,TableSchema>();
 
-	public SchemaFactory(SchemaReader r) {
+	public SchemaCache(SchemaReader r) {
 		this.schemaReader = r;
 	}
 	
@@ -27,7 +27,7 @@ public class SchemaFactory {
 	public TableSchema getSchema(String tablename) throws IOException, InterruptedException {
 		if (schemaCache.containsKey(tablename)) 
 			return schemaCache.get(tablename);
-		assert schemaReader != null : SchemaFactory.class.getSimpleName() + " not initialized";
+		assert schemaReader != null : SchemaCache.class.getSimpleName() + " not initialized";
 		String saveJob = Log.getJobContext();
 		Log.setJobContext(tablename + ".schema");		
 		TableSchema schema = schemaReader.getSchema(tablename);

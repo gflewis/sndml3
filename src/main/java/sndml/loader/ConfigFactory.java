@@ -33,6 +33,8 @@ public class ConfigFactory {
 		this(DateTime.now());
 	}
 	
+	// TODO Remove SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")
 	public ConfigFactory(DateTime start) {
 		jsonMapper = new ObjectMapper();
 		jsonMapper.setSerializationInclusion(Include.NON_NULL);		

@@ -10,6 +10,7 @@ import sndml.agent.*;
 import sndml.servicenow.*;
 import sndml.util.*;
 
+@Deprecated
 public class ResourceManager {
 
 	static final Logger logger = LoggerFactory.getLogger(ResourceManager.class);
@@ -23,7 +24,7 @@ public class ResourceManager {
 	private ReaderSession firstReaderSession = null;
 	private DatabaseWrapper lastDBC = null;
 	private SchemaReader schemaReader = null;
-	private SchemaFactory schemaFactory = null;
+	private SchemaCache schemaFactory = null;
 	
 	
 	public static void setProfile(ConnectionProfile profile) {
@@ -134,9 +135,9 @@ public class ResourceManager {
 		
 	}
 	
-	public static SchemaFactory getSchemaFactory() {
+	public static SchemaCache getSchemaFactory() {
 		if (instance.schemaFactory == null) {
-			instance.schemaFactory = new SchemaFactory(getSchemaReader());			
+			instance.schemaFactory = new SchemaCache(getSchemaReader());			
 		}
 		return instance.schemaFactory;
 	}

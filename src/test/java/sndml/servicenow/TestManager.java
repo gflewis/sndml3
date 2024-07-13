@@ -15,14 +15,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import sndml.loader.ConfigParseException;
-import sndml.loader.ResourceManager;
+//import sndml.loader.ResourceManager;
 import sndml.loader.YamlFile;
 import sndml.util.Log;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO Can this class be extended from ResourceManager? Maybe not.
+// TODO Modify this class to utilize sndml.loader.Resources
 public class TestManager {
 		
 	static TestManager manager = null;
@@ -79,7 +79,7 @@ public class TestManager {
 		_initialize();
 		manager.classUnderTest = myclass;
 		manager.currentProfile = profile;
-		ResourceManager.setTestManagerProfile(manager.currentProfile);
+//		ResourceManager.setTestManagerProfile(manager.currentProfile);
 		return profile;
 	}
 		
