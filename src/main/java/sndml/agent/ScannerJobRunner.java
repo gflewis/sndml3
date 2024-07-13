@@ -25,7 +25,7 @@ public class ScannerJobRunner extends AppJobRunner {
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
-		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
+		boolean onExceptionContinue = profile.app.getBoolean("continue", false);
 		setThreadName();
 		try {
 			super.call();

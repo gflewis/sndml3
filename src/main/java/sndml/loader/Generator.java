@@ -69,10 +69,21 @@ public class Generator {
 		output.print(sql);		
 	}
 	
-	public Generator(InputStream templatesStream, Properties properties, SchemaReader schemaReader) throws ResourceException {
+	public Generator(InputStream templatesStream, 
+			Properties properties, 
+			SchemaReader schemaReader) 
+					throws ResourceException {
 		
 		String dialectName = properties.getProperty("dialect", null);
 		String schemaName = properties.getProperty("schema", "");
+		
+		try {
+			SAXBuilder xmlbuilder = new SAXBuilder();
+			xmldocument = xmlbuilder.build(templatesStream);			
+		}
+		catch (IOException | JDOMException e) {
+			throw new ResourceException(e);
+		}
 		
 		if (dialectName == null) {
 			String dburl = properties.getProperty("url", null);
@@ -83,6 +94,7 @@ public class Generator {
 			} catch (URISyntaxException e) {
 				throw new ResourceException(e);
 			}
+			assert dburi != null;
 			this.dialectTree = getProtocolTree(dburi);				
 		}
 		else {
@@ -90,13 +102,6 @@ public class Generator {
 			this.dialectTree = getDialectTree(dialectName);
 		}
 		
-		try {
-			SAXBuilder xmlbuilder = new SAXBuilder();
-			xmldocument = xmlbuilder.build(templatesStream);			
-		}
-		catch (IOException | JDOMException e) {
-			throw new ResourceException(e);
-		}
 		this.schemaName = schemaName;
 		this.namemap = new NameMap(dialectTree.getChild("fieldnames"));
 		
@@ -106,12 +111,19 @@ public class Generator {
 		namecase = NameCase.valueOf(dialogProps.getChildText("namecase").toUpperCase());
 		namequotes = NameQuotes.valueOf(dialogProps.getChildText("namequotes").toUpperCase());
 		
-		this.schemaReader = schemaReader;
+		logger.info(Log.INIT, String.format(
+				"dialect=%s schema=%s namecase=%s namequotes=%s autocommit=%b", 
+				getDialectName(), getSchemaName(), namecase.toString(), 
+				namequotes.toString(), getAutoCommit()));
 		
+		this.schemaReader = schemaReader;
+		assert this.schemaReader != null;
 	}
 	
 	public Generator(ConnectionProfile profile) throws ResourceException {
-		this(getTemplatesStream(profile.database), profile.database, profile.newSchemaReader());
+		this(getTemplatesStream(profile.database), 
+				profile.databaseProperties(), 
+				profile.newSchemaReader());
 				
 	}
 	
@@ -185,9 +197,11 @@ public class Generator {
 		
 	}
 	
-	private Element getProtocolTree(URI dbURI) {
-		String protocol = DatabaseWrapper.getProtocol(dbURI);
+	private Element getProtocolTree(URI dbURI) {		
+		String protocol = getProtocol(dbURI);
+		assert protocol != null;
 		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
+		assert children != null;
 		while (children.hasNext()) {
 			Element tree = children.next();
 			if (tree.getName().equals("sql")) {
@@ -202,6 +216,11 @@ public class Generator {
 		return getDialectTree("default");
 	}
 	
+	static String getProtocol(URI dbURI) {
+		String urlPart[] = dbURI.toString().split(":");
+		return urlPart[1];		
+	}
+		
 	private Element getDialectTree(String dialectName) {
 		ListIterator<Element> children = xmldocument.getRootElement().getChildren().listIterator();
 		while (children.hasNext()) {
@@ -231,7 +250,7 @@ public class Generator {
 	 * in the template.
 	 */
 	public void initialize(java.sql.Connection dbc) throws SQLException {
-		dbc.setAutoCommit(this.getAutoCommit());
+		dbc.setAutoCommit(this.autocommit);
 		java.sql.Statement stmt = dbc.createStatement();
 		Iterator<String> iter = this.getInitializations().listIterator();
 		while (iter.hasNext()) {
@@ -240,7 +259,7 @@ public class Generator {
 			stmt.execute(sql);
 		}
 		stmt.close();
-		dbc.commit();
+		if (!this.autocommit) dbc.commit();
 	}
 	
 	List<String> getInitializations() {

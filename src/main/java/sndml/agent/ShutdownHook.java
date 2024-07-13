@@ -33,7 +33,7 @@ public class ShutdownHook extends Thread {
 			logger.info(Log.FINISH, "Shutting down workerPool");
 			// send interrupt to all workers
 			workerPool.shutdown();
-			int waitSec = profile.agent.getInt("shutdown_seconds", 30);
+			int waitSec = profile.app.getInt("shutdown_seconds", 30);
 			logger.info(Log.FINISH, "Awaiting worker pool termination");
 			try {
 				workerPool.awaitTermination(waitSec, TimeUnit.SECONDS);

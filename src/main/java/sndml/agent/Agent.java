@@ -47,7 +47,7 @@ public class Agent extends sndml.loader.Main {
 	}
 
 	public String getAgentName() {
-		return profile.agent.getNotEmpty("agent");
+		return profile.app.getNotEmpty("agent");
 	}
 
 }

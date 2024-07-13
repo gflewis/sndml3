@@ -39,8 +39,8 @@ public class AgentHttpServer {
 		getRunList.execute();
 		agentKey = getRunList.getAgentKey();				
 		
-		this.port = profile.server.getInt("port", 0);
-		int backlog = profile.server.getInt("backlog", 0);
+		this.port = profile.serverProperties().getInt("port", 0);
+		int backlog = profile.serverProperties().getInt("backlog", 0);
 		if (port == 0) throw new MissingPropertyException("server.port not specified");
 		logger.info(Log.INIT, String.format(
 				"instantiate port=%d backlog=%d", port, backlog));

@@ -32,7 +32,6 @@ import sndml.util.ResourceException;
  */
 public class DatabaseWrapper {
 
-	private final Logger logger = Log.logger(this.getClass());
 //	private final ConnectionProfile profile;
 //	private final String dburl;
 //	private final URI dbURI;
@@ -47,6 +46,7 @@ public class DatabaseWrapper {
 	private final Generator generator;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+	private final static Logger logger = Log.logger(DatabaseWrapper.class);
 
 	public DatabaseWrapper(Connection connection, Generator generator, Properties properties) {
 		this.protocol = properties.getProperty("dialect");
@@ -60,10 +60,13 @@ public class DatabaseWrapper {
 			Calendar.getInstance(TimeZone.getTimeZone(timezone));
 		this.warnOnTruncate = Boolean.parseBoolean(properties.getProperty("warn_on_truncate", "true"));
 		this.dbc = connection;
-		this.generator = generator;				
+		this.generator = generator;
+		assert this.generator != null;
+		assert this.dbc != null;
 	}
 	
 	public DatabaseWrapper(ConnectionProfile profile) throws SQLException {
+		assert profile != null;
 //		this.profile = profile;
 		PropertySet properties = profile.database;
 		String dburl = properties.getProperty("url", null);
@@ -95,20 +98,15 @@ public class DatabaseWrapper {
 		if (schema != null) logmsg += " schema=" + getSchema();
 				
 		logger.info(Log.INIT, logmsg);
-		this.warnOnTruncate = profile.loader.getBoolean("warn_on_truncate", true);
+		this.warnOnTruncate = profile.loaderProperties().getBoolean("warn_on_truncate", true);
 				
-		this.dbc = this.open(dburl, dbuser, dbpass);		
-		assert dbc != null;
-		
 		this.generator = new Generator(profile);
+		
+		this.dbc = this.open(dburl, dbuser, dbpass);		
+		assert this.generator != null;
+		assert this.dbc != null;
 	}
 		
-//	private String databaseProperty(String name, String defaultValue) {
-//		// Allow property to begin with old prefix "datamart." or new prefix "database."
-//		String value = profile.database.getProperty(name, defaultValue);
-//		return value;
-//	}
-//	
 	/**
 	 * Open the database connection.
 	 * Set the timezoneName to GMT.

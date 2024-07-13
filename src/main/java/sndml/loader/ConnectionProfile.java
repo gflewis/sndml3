@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringSubstitutor;
+import org.jdom2.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import sndml.servicenow.Instance;
 import sndml.servicenow.SchemaReader;
 import sndml.servicenow.TableSchemaReader;
 import sndml.util.Log;
+import sndml.util.PropertiesEditor;
 import sndml.util.PropertySet;
 import sndml.util.ResourceException;
 
@@ -43,17 +45,17 @@ public class ConnectionProfile {
 	// public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
 	// public static final String DEFAULT_AGENT_NAME = "main";
 
-	private File file = null;
+//	private File file = null;
 	private String pathName = null;
 	
 	private final Properties allProperties;
+	public final PropertySet app; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
 	public final PropertySet dict; // Properties for ServiceNow instance used for schema
 	public final PropertySet database; // Properties for SQL Database
-	public final PropertySet agent; // Properties for ServiceNow instance that contains scopped app
-	public final PropertySet loader; // Is this still used for anything?
-	public final PropertySet server; // Properties for HTTP Server
-	public final PropertySet daemon; // Properties for Agent Daemon
+	private final PropertySet loader; // Is this still used for anything?
+	private final PropertySet server; // Properties for HTTP Server
+	private final PropertySet daemon; // Properties for Agent Daemon
 	static AppSession lastAppSession = null; // Last AppSession obtained
 	static ReaderSession lastReaderSession = null; // last ReaderSession obtained
 
@@ -66,20 +68,48 @@ public class ConnectionProfile {
 	}
 	public final SchemaSource schemaSource;
 	
+	/*
 	public ConnectionProfile(File profile) throws IOException {
 		this(propertiesWithSubstitutions(profile));
 		this.file = profile;
 		this.pathName = file.getPath();
 		logger.info(Log.INIT, "ConnectionProfile: " + pathName);
 	}
+	*/
+	
+	public ConnectionProfile(File profile) throws ResourceException {
+		this(propertiesFromFile(profile));
+		this.pathName = profile.getPath();
+	}
 
+	private static Properties propertiesFromFile(File profile) throws ResourceException {
+		logger.info(Log.INIT, "ConnectionProfile: " + profile.getPath());
+		Properties newProperties;
+		try {
+			FileInputStream inputStream = new FileInputStream(profile);
+			Properties origProperties = new Properties();
+			origProperties.load(inputStream);				
+			newProperties = PropertiesEditor.replacePropertyNames(origProperties, true);
+			PropertiesEditor.replaceEnvVariables(newProperties);
+			PropertiesEditor.replaceCommands(newProperties);			
+		}
+		catch (IOException e) {
+			throw new ResourceException(e);
+		}
+		catch (JDOMException e) {
+			throw new ResourceException(e);
+		}
+		return newProperties;
+	}
+	
 	public ConnectionProfile(Properties properties) {
 		this.allProperties = properties;
 
 		// This code is for backward compatiblity with old connection profiles
+		/*
 		this.reader = 
 			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
-		this.agent =
+		this.app =
 			hasProperty("app.agent") ? getSubset("app") :
 			hasProperty("daemon.agent") ? getSubset("daemon") :
 			this.reader;
@@ -87,9 +117,14 @@ public class ConnectionProfile {
 			hasProperty("dict.instance") ? getSubset("dict") : this.reader;		
 		this.database = 
 			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
-		this.loader = getSubset("loader");
-		this.server = getSubset("server");
-		this.daemon = getSubset("daemon");
+		*/
+		this.app      = getSubset("app");
+		this.reader   = getSubset("reader");
+		this.database = getSubset("database");
+		this.dict     = getSubset("dict");
+		this.loader   = getSubset("loader");
+		this.server   = getSubset("server");
+		this.daemon   = getSubset("daemon");
 		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
@@ -97,6 +132,33 @@ public class ConnectionProfile {
 			this.schemaSource = SchemaSource.SCHEMA;
 		else 
 			this.schemaSource = SchemaSource.READER;			
+	}
+	
+	public PropertySet appProperties() {
+		return this.app; 
+	}
+	
+	public PropertySet daemonProperties() {
+		return this.daemon; 
+	}
+	public PropertySet databaseProperties() {
+		return this.database; 
+	}
+	
+	public PropertySet dictProperties() {
+		return this.dict; 
+	}
+	
+	public PropertySet loaderProperties() {
+		return this.loader; 	
+	}
+	
+	public PropertySet readerProperties() { 
+		return this.reader; 
+	}
+	
+	public PropertySet serverProperties() { 
+		return this.server; 
 	}
 	
 	private PropertySet getSubset(String prefix) {
@@ -110,7 +172,15 @@ public class ConnectionProfile {
 	
 	public String getMetricsFolder() { return loader.getProperty("metrics_folder"); }
 	public boolean getWarnOnTruncate() { return loader.getBoolean("warn_on_truncate", true); }
+	
+	/**
+	 * Return the profile name if it is known, otherwise null
+	 */
+	public String getFileName() {
+		return pathName;
+	}
 
+	/*
 	private static Properties propertiesWithSubstitutions(File profile) throws IOException {
 		FileInputStream stream = new FileInputStream(profile);
 		Properties properties = propertiesWithSubstitutions(stream);
@@ -123,11 +193,12 @@ public class ConnectionProfile {
 		return properties;
 	}
 	
+
 	/**
 	 * Load properties from an InputStream.
 	 * Any value ${name} will be replaced with a system property.
 	 * Any value inclosed in backticks will be passed to Runtime.exec() for evaluation.
-	 */
+	 *
 	private static void loadWithSubstitutions(Properties properties, InputStream stream) throws IOException {
 		final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
 		assert stream != null;
@@ -158,14 +229,14 @@ public class ConnectionProfile {
 	 * @param command - Command to be executed
 	 * @return Result of command with whitespace trimmed
 	 * @throws IOException
-	 */
+	 *
 	public static String evaluate(String command) throws IOException {
 		Process p = Runtime.getRuntime().exec(command);
 		String output = IOUtils.toString(p.getInputStream(), "UTF-8").trim();
 		return output;
 	}
-	
-	
+	*/
+		
 	/**
 	 * Return the URL of the ServiceNow
 	 */
@@ -191,10 +262,10 @@ public class ConnectionProfile {
 	
 	public synchronized AppSession newAppSession() throws ResourceException {
 		AppSession appSession = null;
-		if (agent.containsKey("instance"))
-			appSession = new AppSession(agent);
+		if (app.containsKey("instance"))
+			appSession = new AppSession(app);
 		else
-			agent.alertMissingProperty("instance");
+			app.alertMissingProperty("instance");
 		lastAppSession = appSession;
 		return appSession;
 	}
@@ -216,8 +287,8 @@ public class ConnectionProfile {
 	@Deprecated
 	public Instance getAppInstance() throws ResourceException {
 		Instance instance = null;
-		if (agent.containsKey("instance"))
-			instance = new Instance(agent);
+		if (app.containsKey("instance"))
+			instance = new Instance(app);
 		else if (reader.containsKey("instance"))
 			instance = new Instance(reader);
 		else
@@ -248,12 +319,12 @@ public class ConnectionProfile {
 	}
 	
 	public boolean hasAgent() {
-		return agent.hasProperty("agent");
+		return app.hasProperty("agent");
 		
 	}
 	
 	public String getAgentName() {
-		return agent.getProperty("agent");
+		return app.getProperty("agent");
 	}
 				
 }

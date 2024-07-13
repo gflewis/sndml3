@@ -30,7 +30,7 @@ public class AgentRequestHandler implements HttpHandler {
 	
 	public AgentRequestHandler(ConnectionProfile profile) {
 		this.profile = profile;
-		int threadCount = profile.agent.getInt("threads", DEFAULT_THREAD_COUNT);
+		int threadCount = profile.app.getInt("threads", DEFAULT_THREAD_COUNT);
 		this.workerPool = new WorkerPool(threadCount);
 	}
 	

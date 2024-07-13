@@ -1,11 +1,9 @@
 package sndml.util;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -64,7 +62,8 @@ public class PropertiesEditor {
 					cmdline.getOptionValue(optValidate) : null;
 			Properties properties = new Properties();
 			properties.load(new FileInputStream(filename));
-			properties.store(System.out, filename);			
+			properties = replacePropertyNames(properties, true, true);
+//			properties.store(System.out, filename);			
 		}
 		else 
 			throw new CommandOptionsException(
@@ -156,42 +155,76 @@ public class PropertiesEditor {
 		return "`" + name + "`";
 	}
 	
-	public static Properties scrubPropertyNames(Properties oldProps) throws JDOMException, IOException {
+	static Document xmldocument = null;
+	private static Document getXmlDocument() throws JDOMException, IOException {
+		if (xmldocument == null) {
+			InputStream xmlschema = ClassLoader.getSystemResourceAsStream("property_names.xml");
+			SAXBuilder xmlbuilder = new SAXBuilder();
+			xmldocument = xmlbuilder.build(xmlschema);			
+		}
+		return xmldocument;
+	}
+	
+	/**
+	 * Created to accomodate property renaming in release 3.5, this method converts
+	 * any old property names to the new names.
+	 * 
+	 * @param oldProps Properties object with either old or new names.
+	 * @param checkUnused Generates a warning if unused recognized property is detected.
+	 * @return A new Properties object with new names.
+	 * @throws JDOMException
+	 * @throws IOException
+	 */
+	public static Properties replacePropertyNames(Properties oldProps, boolean checkUnused) 
+			throws JDOMException, IOException {
+		return replacePropertyNames(oldProps, checkUnused, false);
+	}		
+	
+	public static Properties replacePropertyNames(Properties oldProps, boolean checkUnused, boolean print) 
+			throws JDOMException, IOException {
+		logger.debug(Log.INIT, "scrubPropertyNames");
+		Hashtable<String,Boolean> consumed = new Hashtable<String,Boolean>();
 		Properties newProps = new Properties();
-		HashMap<String,Boolean> processed = new HashMap<String,Boolean>();
-		InputStream xmlschema = ClassLoader.getSystemResourceAsStream("property_names.xml");
-		SAXBuilder xmlbuilder = new SAXBuilder();
-		Document xmldocument = xmlbuilder.build(xmlschema);
+		Document xmldocument = getXmlDocument();
 		ListIterator<Element> definitions = xmldocument.getRootElement().getChildren().listIterator();
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
 			String propname = definition.getChildTextTrim("name");
-			if (oldProps.contains(propname)) {
+			logger.debug(Log.INIT, "processing " + propname);
+			boolean found = false;
+			if (oldProps.containsKey(propname)) {
+				found = true;
 				newProps.setProperty(propname, oldProps.getProperty(propname));
-				processed.put(propname, Boolean.TRUE);
+				consumed.put(propname, Boolean.TRUE);
 			}
 			else {
 				// Look for it under an alternate name
-				boolean found = false;
-				ListIterator<Element> alternates = 
-						definition.getChild("alternates").getChildren().listIterator();
-				while (alternates.hasNext() && !found) {
-					Element alternate = alternates.next();
-					assert alternate.getName().equals("name");
-					String altname = alternate.getTextTrim();
-					if (oldProps.contains(altname)) {
-						found = true;
-						newProps.setProperty(propname, oldProps.getProperty(altname));
-						processed.put(altname, Boolean.TRUE);
+				Element alternate = definition.getChild("alternate");
+				if (alternate != null) {
+					ListIterator<Element> iter = alternate.getChildren().listIterator();
+					while (iter.hasNext() && !found) {
+						Element ele = iter.next();
+						assert ele.getName().equals("name");
+						String altname = ele.getTextTrim();
+						logger.debug(Log.INIT, "alternate " + altname);
+						if (oldProps.containsKey(altname)) {
+							found = true;
+							newProps.setProperty(propname, oldProps.getProperty(altname));
+							consumed.put(altname, Boolean.TRUE);
+						}
 					}
-				}				
+				}
 			}
-
+			if (found && print) 
+				System.out.println(String.format("%s=%s", propname, newProps.getProperty(propname)));
 		}
-		
-		
-		return newProps;
-		
+		if (checkUnused) {
+			for (String propname : oldProps.stringPropertyNames()) {
+				if (!consumed.containsKey(propname))
+					logger.warn("Unrecognized property: " + propname);
+			}
+		}
+		return newProps;		
 	}
 	
 }
