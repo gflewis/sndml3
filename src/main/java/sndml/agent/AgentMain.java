@@ -10,11 +10,15 @@ import sndml.util.Log;
 //Q: Why does this class exist? 
 //A: Because many of the classes in the package are not public. 
 
-public class Agent extends sndml.loader.Main {
+public class AgentMain extends sndml.loader.Main {
 
-	static final Logger logger = LoggerFactory.getLogger(Agent.class);
+	static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 	
 	public static void main(CommandLine cmd) throws Exception {
+		
+		// resources is inherited from sndml.loader.Main
+		assert resources != null;		
+		AppSession appSession = resources.getAppSession();
 		
 		if (cmd.hasOption(optScan)) {
 			// Scan once
@@ -32,12 +36,15 @@ public class Agent extends sndml.loader.Main {
 			// Run a single job
 			String sys_id = cmd.getOptionValue("jobrun");
 			RecordKey jobkey = new RecordKey(sys_id);
-			SingleJobRunner jobRunner = new SingleJobRunner(profile, jobkey);
-			jobRunner.run();			
+//			SingleJobRunner jobrunner = new SingleJobRunner(profile, jobkey);			
+			AppConfigFactory factory = new AppConfigFactory(appSession);
+			AppJobConfig jobconfig = factory.appJobConfig(jobkey);
+			AppJobRunner jobrunner = new AppJobRunner(resources, jobconfig);			
+			jobrunner.run();			
 		}
 		else if (cmd.hasOption(optServer)) {
 			// Run as an HTTP Server
-			AgentHttpServer server = new AgentHttpServer(profile);
+			AgentHttpServer server = new AgentHttpServer(resources);
 			server.start();
 		}
 		else {

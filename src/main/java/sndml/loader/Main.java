@@ -10,7 +10,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.Agent;
+import sndml.agent.AgentMain;
 import sndml.servicenow.EncodedQuery;
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.Table;
@@ -87,7 +87,6 @@ public class Main {
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
 			ReaderSession session = resources.getReaderSession();
-			DatabaseWrapper database = resources.getDatabaseWrapper();
 			String tableName = cmd.getOptionValue(optTable);
 			String filter = cmd.getOptionValue(optFilter);
 			String sys_id = cmd.getOptionValue(optSysID);
@@ -97,8 +96,8 @@ public class Main {
 			logger.debug(Log.INIT, "sys_id=" + cmd.getOptionValue(optSysID));
 			RecordKey docKey = cmd.hasOption(optSysID) ? new RecordKey(sys_id) : null;
 			SimpleTableLoader tableLoader = (docKey == null) ?
-					new SimpleTableLoader(profile, database, table, query) : 
-					new SimpleTableLoader(profile, database, table, docKey);			
+					new SimpleTableLoader(resources, table, query) : 
+					new SimpleTableLoader(resources, table, docKey);			
 			tableLoader.call();
 		}
 		else {
@@ -117,11 +116,11 @@ public class Main {
 			loader.loadTables();
 		}
 		if (requiresApp) {
-			Agent.main(cmd);
+			AgentMain.main(cmd);
 		}
 	}
 	
-	static Resources getResources() {
+	public static Resources getResources() {
 		return resources;
 	}
 		

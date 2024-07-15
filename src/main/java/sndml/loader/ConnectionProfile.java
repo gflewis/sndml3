@@ -3,14 +3,9 @@ package sndml.loader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.jdom2.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -300,6 +295,7 @@ public class ConnectionProfile {
 	 * Opens and returns a new connection to the JDBC database.
 	 * Throw an unchecked ResourceException if unsuccessful.
 	 */
+	@Deprecated
 	public synchronized DatabaseWrapper newDatabaseWrapper() {
 		DatabaseWrapper database;
 		try {

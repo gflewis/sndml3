@@ -19,6 +19,7 @@ import sndml.util.Metrics;
 /**
  * A class to execute a single agent job and then terminates.
  */
+@Deprecated
 public class SingleJobRunner implements Runnable {
 
 	final ConnectionProfile profile;

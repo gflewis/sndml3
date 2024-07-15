@@ -20,11 +20,7 @@ public class JobActionRequest {
 	public JobActionType action;
 	
 	static final ObjectMapper mapper = new ObjectMapper();
-	
-//	public JobActionRequest() {
-//		// TODO Auto-generated constructor stub
-//	}
-	
+		
 	static public JobActionRequest load(InputStream input) 
 			throws StreamReadException, DatabindException, IOException {
 		return mapper.readValue(input, JobActionRequest.class);		

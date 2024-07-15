@@ -13,11 +13,13 @@ import sndml.util.Metrics;
 public class ScannerJobRunner extends AppJobRunner {
 	
 	final AgentScanner scanner; // my parent
+	final boolean onExceptionContinue;
 	
 
 	public ScannerJobRunner(AgentScanner scanner, ConnectionProfile profile, AppJobConfig config) {
 		super(profile, config);
 		this.scanner = scanner;
+		onExceptionContinue = profile.appProperties().getBoolean("continue", false);
 	}
 
 	@Override
@@ -25,7 +27,6 @@ public class ScannerJobRunner extends AppJobRunner {
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
-		boolean onExceptionContinue = profile.app.getBoolean("continue", false);
 		setThreadName();
 		try {
 			super.call();

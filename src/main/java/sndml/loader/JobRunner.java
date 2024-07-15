@@ -25,7 +25,17 @@ public class JobRunner implements Callable<Metrics> {
 	protected Table table;
 	protected Metrics jobMetrics;
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-		
+
+	public JobRunner(Resources resources, JobConfig config) {
+		this.readerSession = resources.getReaderSession();
+		this.database = resources.getDatabaseWrapper();
+		this.config = config;
+		assert this.readerSession!= null;
+		assert this.database != null;
+		assert this.config != null;
+	}
+	
+	@Deprecated
 	public JobRunner(Session readerSession, DatabaseWrapper db, JobConfig config) {
 		this.readerSession = readerSession;
 		this.database = db;

@@ -212,7 +212,7 @@ public class JobConfig {
 		// AutoCreate defaults to True
 		if (autoCreate == null) {
 			if (anyLoadAction.contains(action))
-				autoCreate = profile.database.getBoolean("autocreate", true);
+				autoCreate = profile.databaseProperties().getBoolean("autocreate", true);
 			else
 				autoCreate = false;
 		}				

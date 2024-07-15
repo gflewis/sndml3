@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.net.httpserver.HttpServer;
 
 import sndml.loader.ConnectionProfile;
+import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 import sndml.util.MissingPropertyException;
@@ -25,7 +26,8 @@ public class AgentHttpServer {
 	final AgentRequestHandler handler;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	public AgentHttpServer(ConnectionProfile profile) throws IOException {
+	public AgentHttpServer(Resources resources) throws IOException {
+		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
 		// This scanner is not used. 
 		// We are just making sure that we can connect.
@@ -45,7 +47,7 @@ public class AgentHttpServer {
 		logger.info(Log.INIT, String.format(
 				"instantiate port=%d backlog=%d", port, backlog));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
-		handler = new AgentRequestHandler(profile);
+		handler = new AgentRequestHandler(resources);
 		server.createContext("/", handler);
 		
 		// Server executor is used for receiving HTTP requests.

@@ -12,55 +12,76 @@ import sndml.servicenow.TableSchemaReader;
 import sndml.util.Log;
 import sndml.util.PropertySet;
 import sndml.util.ResourceException;
+
 public class Resources {
 
 	protected final ConnectionProfile profile;
-	protected final boolean hasAppConnection;
-	protected final ReaderSession readerSession;
-	protected final AppSession appSession;
-	protected final SchemaReader schemaReader;
+	protected final boolean requiresAppSession;
+	protected final String agentName; // null if no agent
+	protected ReaderSession readerSession;
+	protected AppSession appSession;
+	protected SchemaReader schemaReader;
 	protected Generator generator;	
 	protected DatabaseWrapper dbWrapper;
 	protected java.sql.Connection sqlConnection;
 
 	private static final Logger logger = LoggerFactory.getLogger(Resources.class);
 	
-	public Resources(ConnectionProfile profile, boolean hasAppConnection) throws ResourceException {
+	public Resources(ConnectionProfile profile, boolean requiresAppSession) throws ResourceException {
 		assert profile != null;
 		this.profile = profile;
-		this.hasAppConnection = hasAppConnection;
-		this.readerSession = profile.newReaderSession();
-		this.appSession = profile.newAppSession();
-		this.schemaReader = hasAppConnection ?
-				new AppSchemaReader(appSession) :
-				new TableSchemaReader(readerSession);
-		logger.info(Log.INIT, String.format(
-				"profile=%s schemaReader=%s", 
-				profile.getFileName(), schemaReader.getClass().getSimpleName()));
+		this.agentName = profile.getAgentName();
+		this.requiresAppSession = requiresAppSession;
 	}
 	
-	public ReaderSession getReaderSession() {
-		return readerSession;
+	/**
+	 * Return app agent name as a string or null if there is no app.
+	 */
+	public String getAgentName() {
+		return this.agentName;
 	}
 	
-	public AppSession getAppSession() {
-		return appSession;	
+	public ConnectionProfile getProfile() {
+		return this.profile;
+	}
+	
+	public ReaderSession getReaderSession() throws ResourceException {
+		if (this.readerSession == null) {
+			this.readerSession = profile.newReaderSession();			
+		}
+		return this.readerSession;
+	}
+	
+	public AppSession getAppSession() throws ResourceException {
+		if (this.appSession == null) {
+			this.appSession = profile.newAppSession();			
+		}
+		return this.appSession;	
 	}
 	
 	public SchemaReader getSchemaReader() {
+		if (this.schemaReader == null) {
+			this.schemaReader = requiresAppSession ?
+					new AppSchemaReader(getAppSession()) :
+					new TableSchemaReader(getReaderSession());			
+			logger.info(Log.INIT, String.format(
+					"schemaReader=%s", 
+					schemaReader.getClass().getSimpleName()));
+		}
 		return schemaReader;
 	}
 	
 	public void setSqlConnection(java.sql.Connection connection) {
+		assert connection != null;
 		this.sqlConnection = connection;
 	}
 	
-	public java.sql.Connection getSqlConnection() {
+	public java.sql.Connection getSqlConnection() throws ResourceException {
 		assert this.sqlConnection != null;
 		return this.sqlConnection;
 	}
 	
-	public Generator getGenerator() {
+	public Generator getGenerator() throws ResourceException {
 		if (this.generator == null) {
 			this.generator = new Generator(profile);
 		}
@@ -85,6 +106,15 @@ public class Resources {
 			}
 		}
 		return dbWrapper;
-	}	
+	}
+	
+	/**
+	 * Make a copy of these resources for use by a worker thread.
+	 * Everything is set to null, so the worker has to create their own sessions.
+	 */
+	public Resources workerCopy() {
+		Resources copy = new Resources(profile, requiresAppSession);
+		return copy;
+	}
 
 }

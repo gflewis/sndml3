@@ -3,7 +3,7 @@ package sndml.loader;
 import static org.junit.Assert.*;
 
 import java.io.File;
-
+import sndml.util.PropertiesEditor;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class EvaluateTest {
 
 	@Test
 	public void testExecute() throws Exception {
-		String result = ConnectionProfile.evaluate("echo Lorem ipsum dolor");
+		String result = PropertiesEditor.evaluate("echo Lorem ipsum dolor");
 		logger.debug("result=" + result);
 		assertEquals("Lorem ipsum dolor", result);
 	}

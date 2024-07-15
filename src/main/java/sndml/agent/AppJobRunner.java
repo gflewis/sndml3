@@ -17,6 +17,21 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	final public String number;
 	final AppStatusLogger statusLogger;
 
+	public AppJobRunner(Resources resources, AppJobConfig config) {
+		super(resources, config);
+		this.profile = resources.getProfile();
+		this.appSession = resources.getAppSession();
+		this.config = config;
+		this.statusLogger = new AppStatusLogger(appSession);				
+		this.runKey = config.getSysId();
+		this.number = config.getNumber();
+		assert runKey != null;
+		assert runKey.isGUID();
+		assert number != null;
+		assert number.length() > 0;		
+	}
+		
+	@Deprecated
 	public AppJobRunner(ConnectionProfile profile, AppSession appSession, ReaderSession readerSession, 
 			DatabaseWrapper databaseConnection, AppJobConfig config) {
 		super(readerSession, databaseConnection, config);
@@ -32,22 +47,10 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		assert number.length() > 0;		
 	}
 	
+	@Deprecated
 	AppJobRunner(ConnectionProfile profile, AppJobConfig config) {
 		this(profile, profile.newAppSession(), profile.newReaderSession(), 
 				profile.newDatabaseWrapper(), config);
-		/*
-		super(profile.newReaderSession(), profile.newDatabaseConnection(), config);
-		this.config = config;
-		this.profile = profile;
-		this.appSession = profile.newAppSession();
-		this.statusLogger = new AppStatusLogger(appSession);				
-		this.runKey = config.getSysId();
-		this.number = config.getNumber();
-		assert runKey != null;
-		assert runKey.isGUID();
-		assert number != null;
-		assert number.length() > 0;
-		*/
 	}
 	
 	AppStatusLogger getStatusLogger() {
@@ -71,9 +74,22 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
 		return compositeLogger;
 	}
-		
+
+	/**
+	 * If this is not the main thread and it is not the scanner thread
+	 * then change the thread name.
+	 */
+	protected void setThreadName() {		
+		// If this is not the main thread and it is not the scanner thread then change the thread name
+		Thread myThread = Thread.currentThread();
+		if (!myThread.equals(AgentDaemon.getThread()) && !myThread.getName().equals("scanner")) {
+			myThread.setName(config.number);
+		}
+	}
+	
 	@Override
 	public void run() {
+		setThreadName();
 		try {
 			this.call();
 		} catch (JobCancelledException e) {
@@ -89,7 +105,6 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	@Override
 	public void close() throws ResourceException {
-		// TODO Not a good idea to close a connection pool database
 		// Close the database connection
 		try {
 			database.close();
@@ -125,16 +140,5 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	
 	
-	/**
-	 * If this is not the main thread and it is not the scanner thread
-	 * then change the thread name.
-	 */
-	protected void setThreadName() {		
-		// If this is not the main thread and it is not the scanner thread then change the thread name
-		Thread myThread = Thread.currentThread();
-		if (!myThread.equals(AgentDaemon.getThread()) && !myThread.getName().equals("scanner")) {
-			myThread.setName(config.number);
-		}
-	}
 		
 }

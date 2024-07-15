@@ -54,6 +54,15 @@ public class AppSession extends Session {
 		}
 		return this.schemaReader;
 	}
+
+	/**
+	 * Create a new Session with the same properties as this one. 
+	 * The URL and credentials will be the same, but the Session ID will be different.
+	 */
+	@Override
+	public AppSession duplicate() throws IOException {
+		return new AppSession(this.propset);
+	}
 	
 	/**
 	 * Return the URI of an API. This will be dependent on the application scope

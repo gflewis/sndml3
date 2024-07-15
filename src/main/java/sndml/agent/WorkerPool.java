@@ -49,6 +49,10 @@ public class WorkerPool extends ThreadPoolExecutor {
 		return threadCount;
 	}
 	
+	public void submit(AppJobRunner runner) {
+		super.submit((Runnable) runner);
+	}
+	
 	@Deprecated
 	public WorkerPool getWorkerPool() {
 		assert INSTANCE != null: "Class not initialized";

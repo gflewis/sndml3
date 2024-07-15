@@ -49,7 +49,6 @@ public class AgentDaemon implements Daemon, Runnable {
         this.process = ProcessHandle.current();
 		this.profile = profile;
 		this.agentName = profile.getAgentName();
-		// TODO Move to ResourceManager.getWorkerThreadCount()
 		this.threadCount = profile.daemonProperties().getInt("threads", DEFAULT_THREAD_COUNT);
 		this.intervalSeconds = profile.daemonProperties().getInt("interval", DEFAULT_INTERVAL);
 		assert intervalSeconds > 0;

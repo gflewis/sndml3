@@ -3,206 +3,162 @@
 <!-- This file describes all available properties in the connection profile -->
 
 <!DOCTYPE properties[
-<!ELEMENT properties (property*)>
-<!ELEMENT property (name, alternate?, description)>
-<!ELEMENT name (#PCDATA)>
-<!ELEMENT alternate (name*)>
-<!ELEMENT description (#PCDATA)>
+<!ELEMENT properties (property*) >
+<!ATTLIST property name CDATA #REQUIRED >
+<!ELEMENT property (alternate*, description) >
+<!ELEMENT alternate (#PCDATA) >
+<!ATTLIST alternate name CDATA #REQUIRED >
+<!ELEMENT description (#PCDATA) >
 ]>
 
 <properties>
-  <property>
-    <name>reader.instance</name>
-    <alternate>
-      <name>servicenow.instance</name>    
-    </alternate>
+  <property name="reader.instance">
+    <alternate name="servicenow.instance" />
     <description>
       Required. Name or URL of the ServiceNow instance from which data records will be retrieved. 
       You can specify an instance name (_e.g._ `dev12345`) or a URL (_e.g._ `https://dev12345.service-now.com`)
     </description>
   </property>
-  <property>
-    <name>reader.username</name>
-    <alternate>
-      <name>servicenow.username</name>
-    </alternate>
+  <property name="reader.username">
+    <alternate name="servicenow.username" />
     <description>Required.</description>
   </property>
-  <property>
-    <name>reader.password</name>
-    <alternate>
-      <name>servicenow.password</name>
-    </alternate>
+  <property name="reader.password">
+    <alternate name="servicenow.password" />
     <description>Required.</description>
   </property>
-  <property>
-    <name>reader.pagesize</name>
-    <alternate>
-      <name>servicenow.pagesize</name>      
-    </alternate>
+  <property name="reader.pagesize">
+    <alternate name="servicenow.pagesize" />
     <description>
       Number of records to be processed at a time if not overridden at the table level. 
       Default is 200.
     </description>
   </property>
-  <property>
-    <name>reader.verify_session</name>
-    <alternate>
-      <name>servicenow.verify_session</name>
-    </alternate>
+  <property name="reader.verify_session">
+    <alternate name="servicenow.verify_session" />
     <description>
       Causes the loader, at startup, to verify that it can connect to ServiceNow by reading 
       the **sys_user** record of the connecting user. Default is **true**.
     </description>
   </property>
-  <property>
-    <name>reader.verify_timezone</name>
-    <alternate>
-      <name>servicenow.verify_timezone</name>
-    </alternate>
+  <property name="reader.verify_timezone">
+    <alternate name="servicenow.verify_timezone" />
     <description>
       Causes an exception will be thrown if the ServiceNow user time zone is not "GMT". 
       Default is **false**.
     </description>
   </property>
-  <property>
-    <name>app.agent</name>
-    <alternate>
-      <name>daemon.agent</name>
-    </alternate>
+  <property name="app.agent">
+    <alternate name="daemon.agent" />
     <description>Required if using the **DataPump** app.</description>
   </property>
-  <property>
-    <name>app.scope</name>
-    <alternate>
-      <name>daemon.scope</name>
-    </alternate>
+  <property name="app.scope">
+    <alternate name="daemon.scope" />
     <description>
       Optional. Default is `x_108443_sndml`.
     </description>
   </property>
-  <property>
-    <name>app.instance</name>
-    <alternate>
-      <name>servicenow.instance</name>
-    </alternate>
+  <property name="app.instance">
+    <alternate name="servicenow.instance" />
     <description>
       Required if using the **DataPump** app. Name or URL of the instance where the app is installed.
     </description>
   </property>
-  <property>
-    <name>app.username</name>
-    <alternate>
-      <name>servicenow.username</name>      
-    </alternate>
+  <property name="app.username">
+    <alternate name="servicenow.username" />
     <description>
       Required if `app.instance` is specified.
     </description>
   </property>
-  <property>
-    <name>app.password</name>
-    <alternate>
-      <name>servicenow.password</name>
-    </alternate>
+  <property name="app.password">
+    <alternate name="servicenow.password" />
     <description>
       Required if `app.instance` is specified.
     </description>
   </property>
-  <property>
-    <name>dict.instance</name>
+  <property name="dict.instance">
     <description>
       Name or URL of the instance from which dictionary information will be obtained. This is optional and the default is to use `reader.instance`. 
       This property is not applicable if using the DataPump app (_i.e._ if `app.instance` is specified.)
     </description>
   </property>
-  <property>
-    <name>dict.username</name>
+  <property name="dict.username">
     <description>Required if `dict.instance` is specified.</description>
   </property>
-  <property>
-    <name>dict.password</name>
+  <property name="disct.password">
     <description>Required if `dict.instance` is specified.</description>
   </property>
-  <property>
-    <name>database.url</name>
-    <alternate><name>datamart.url</name></alternate>
+  <property name="database.url">
+    <alternate name="datamart.url" />
     <description>
       Required. JDBC URL for the target database. Refer to the documentation for your selected JDBC driver.
     </description>
   </property>
-  <property>
-    <name>database.username</name>
-    <alternate><name>datamart.username</name></alternate>
+  <property name="database.username">
+    <alternate name="datamart.username" />
     <description>Required unless database is SQLite. User name for the target database.</description>
   </property>
-  <property>
-    <name>database.password</name>
-    <alternate><name>datamart.password</name></alternate>
+  <property name="database.password">
+    <alternate name="datamart.password" />
     <description>Required unless database is SQLite.</description>
   </property>
-  <property>
-    <name>database.dialect</name>
-    <alternate><name>datamart.dialect</name></alternate>
+  <property name="database.dialect">
+    <alternate name="datamart.dialect" />
     <description>
       Specifies a section in the templates file. If not specified, the loader will infer the correct 
       section using the &lt;drivers&gt; element of the template and the JDBC prefix of the datamart URL.
     </description>
   </property>
-  <property>
-    <name>database.schema</name>
-    <alternate><name>datamart.schema</name></alternate>
+  <property name="database.schema">
+    <alternate name="datamart.schema" />
     <description>
       Recommended. See notes above.
     </description>
   </property>
-  <property>
-    <name>database.templates</name>
-    <alternate><name>datamart.templates</name></alternate>
+  <property name="database.templates">
+    <alternate name="datamart.templates" />
     <description>
       The name of an XML file to use for generating SQL statements. 
       If not specified, the loader will use `sqltemplates.xml` which is embedded in the JAR. 
       For information refer to [[Templates]].
     </description>
   </property>
-  <property>
-    <name>database.timezone</name>
+  <property name="database.autocreate">
+    <alternate name="datamart.autocreate" />
+    <description>Defaults to true.</description>
+  </property>
+  <property name="database.timezone">
     <description>
       This is normally **not** specified. If omitted then "GMT" will be used. 
       If set to "default" then the time zone of the Java VM will be used.
     </description>
   </property>
-  <property>
-    <name>loader.metrics_folder</name>
+  <property name="loader.metrics_folder">
     <description>
       The name of a directory where metrics files are located. 
       If not specified, metrics files are assumed to reside in the current working directory. 
       For information refer to [[Metrics]].    
     </description>
   </property> 
-  <property>
-    <name>loader.warn_on_truncate</name>
+  <property name="loader.warn_on_truncate">
     <description>
       Causes a warning will be written to the log whenever a field is truncated when written to the database.       
     </description>
   </property>
-  <property>
-    <name>daemon.threads</name>
+  <property name="daemon.threads">
     <description></description>
   </property>
-  <property>
-    <name>daemon.interval</name>
+  <property name="daemon.interval">
     <description>
       Required if using `--daemon`
     </description>
   </property>
-  <property>
-    <name>server.port</name>
+  <property name="server.port">
     <description>
       Required if using `--server`
     </description>
   </property>
-  <property>
-    <name>server.backlog</name>
+  <property name="server.backlog">
     <description></description>
   </property>
 

@@ -128,21 +128,20 @@ public class PropertiesEditor {
 		ListIterator<Element> definitions = xmldocument.getRootElement().getChildren().listIterator();
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
-			String propname = definition.getChildTextTrim("name");
+			String propname = definition.getAttributeValue("name");
 			String description = definition.getChildTextNormalize("description");
 			System.out.print("| ");
 			System.out.print(wrapVar(propname));
 			System.out.print(" | ");
-			Element alternates = definition.getChild("alternate");
-			if (alternates != null) {
-				boolean first = true;
-				ListIterator<Element> iter = alternates.getChildren().listIterator();
-				while (iter.hasNext()) {
-					Element altname = iter.next();
-					if (!first) System.out.print(" or ");
-					System.out.print(wrapVar(altname.getTextTrim()));
-					first = false;
-				}
+			ListIterator<Element> alternates = definition.getChildren("alternate").listIterator();
+			boolean first = true;
+
+			while (alternates.hasNext()) {
+				Element alternate = alternates.next();
+				String altname = alternate.getAttributeValue("name");
+				if (!first) System.out.print(" or ");
+				System.out.print(wrapVar(altname));
+				first = false;				
 			}
 			System.out.print(" | ");
 			System.out.print(description);
@@ -189,7 +188,7 @@ public class PropertiesEditor {
 		ListIterator<Element> definitions = xmldocument.getRootElement().getChildren().listIterator();
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
-			String propname = definition.getChildTextTrim("name");
+			String propname = definition.getAttributeValue("name");
 			logger.debug(Log.INIT, "processing " + propname);
 			boolean found = false;
 			if (oldProps.containsKey(propname)) {
@@ -199,20 +198,16 @@ public class PropertiesEditor {
 			}
 			else {
 				// Look for it under an alternate name
-				Element alternate = definition.getChild("alternate");
-				if (alternate != null) {
-					ListIterator<Element> iter = alternate.getChildren().listIterator();
-					while (iter.hasNext() && !found) {
-						Element ele = iter.next();
-						assert ele.getName().equals("name");
-						String altname = ele.getTextTrim();
-						logger.debug(Log.INIT, "alternate " + altname);
-						if (oldProps.containsKey(altname)) {
-							found = true;
-							newProps.setProperty(propname, oldProps.getProperty(altname));
-							consumed.put(altname, Boolean.TRUE);
-						}
-					}
+				ListIterator<Element> alternates = definition.getChildren("alternate").listIterator();
+				while (alternates.hasNext()) {
+					Element alternate = alternates.next();
+					String altname = alternate.getAttributeValue("name");
+					logger.debug(Log.INIT, "alternate " + altname);
+					if (oldProps.containsKey(altname)) {
+						found = true;
+						newProps.setProperty(propname, oldProps.getProperty(altname));
+						consumed.put(altname, Boolean.TRUE);
+					}				
 				}
 			}
 			if (found && print) 

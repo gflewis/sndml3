@@ -22,14 +22,18 @@ import sndml.util.ResourceException;
 public class AgentRequestHandler implements HttpHandler {
 
 	private final ConnectionProfile profile;
+	private final Resources resources;
+	private final AppSession appSession; 
 	private final WorkerPool workerPool;
 	private final Logger logger = LoggerFactory.getLogger(AgentRequestHandler.class);
 	private final int DEFAULT_THREAD_COUNT = 3;
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
-	public AgentRequestHandler(ConnectionProfile profile) {
-		this.profile = profile;
+	public AgentRequestHandler(Resources resources) {
+		this.resources = resources;
+		this.profile = resources.getProfile();
+		this.appSession = resources.getAppSession();
 		int threadCount = profile.app.getInt("threads", DEFAULT_THREAD_COUNT);
 		this.workerPool = new WorkerPool(threadCount);
 	}
@@ -76,28 +80,19 @@ public class AgentRequestHandler implements HttpHandler {
 			Runtime.getRuntime().halt(-1);
 		}
 	}
-	
-	/*
-	public void handle(String path) {
-		try {
-			String[] parts = path.split("/");
-			if (parts.length < 2) throw new AgentURLException(parts);
-			String action = parts.length > 1 ? parts[1] : null;
-			String param = parts.length > 2 ? parts[2] : null;
-			logger.debug(Log.REQUEST, String.format("len=%d %s %s", parts.length, action, param));
-		}
-	
-	}
-	*/
-	
+		
 	// TODO: Why is this using SingleJobRunner and not AppJobRunner?
 	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
 		if (arg == null) throw new AgentURLException(uri);
 		RecordKey sys_id = new RecordKey(arg);
 		logger.info(Log.REQUEST, "creating jobrunner");
 		try {
-			SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
-			AppStatusLogger statusLogger = new AppStatusLogger(jobrunner.getAppSession());
+//			SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
+			AppConfigFactory factory = new AppConfigFactory(appSession);
+			AppJobConfig jobconfig = factory.appJobConfig(sys_id);
+			Resources workerResources = resources.workerCopy();
+			AppJobRunner jobrunner = new AppJobRunner(workerResources, jobconfig);
+			AppStatusLogger statusLogger = new AppStatusLogger(appSession);
 			logger.info(Log.REQUEST, "created jobrunner");
 			statusLogger.setStatus(sys_id, AppJobStatus.PREPARE);
 			workerPool.submit(jobrunner);
