@@ -43,11 +43,17 @@ sndml_setup_args() {
 	  cd $SNDML_CONFIG
 	fi
   fi
+  # check for profile name with a dot
   export SNDML_PROFILE=$SNDML_CONFIG/.sndml_profile
   if [[ ! -r "$SNDML_PROFILE" ]]
   then
-    echo File not found: $SNDML_PROFILE
-    return 1
+    # check for profile name without a dot
+    export SNDML_PROFILE=$SNDML_CONFIG/sndml_profile
+    if [[ ! -r "$SNDML_PROFILE" ]]
+    then
+      echo File not found: $SNDML_PROFILE
+      return 1
+    fi
   fi
   if [[ -n "$2" ]]
   then
