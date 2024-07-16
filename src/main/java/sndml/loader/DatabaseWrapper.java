@@ -65,6 +65,48 @@ public class DatabaseWrapper {
 		assert this.dbc != null;
 	}
 	
+	public DatabaseWrapper(ConnectionProfile profile, Generator generator) throws SQLException {
+		PropertySet properties = profile.database;
+		String dburl = properties.getProperty("url", null);
+		assert dburl != null : "Property database.url not found";
+		URI dbURI;
+		try {
+			dbURI = new URI(dburl);
+		} catch (URISyntaxException e) {
+			throw new ResourceException(e);
+		}
+		this.protocol = getProtocol(dbURI);
+		this.dbuser = properties.getProperty("username", null);
+		String dbpass = properties.getProperty("password", "");
+		schema = profile.database.getProperty("schema", null);
+		
+		assert schema==null || schema.length() > 0;
+
+		// If timezone is not specified then use "GMT"
+		// If timezone is "default" then use time zone of virtual machine
+		String timezone = properties.getProperty("timezone", "GMT");
+		this.calendar = 
+			timezone.equalsIgnoreCase("default") ? null :
+			Calendar.getInstance(TimeZone.getTimeZone(timezone));
+		
+		String logmsg = "database=" + dburl;
+		logmsg += " " + timezone;
+		logmsg += " user=" + dbuser;
+		
+		if (schema != null) logmsg += " schema=" + getSchema();
+				
+		logger.info(Log.INIT, logmsg);
+		this.warnOnTruncate = profile.loaderProperties().getBoolean("warn_on_truncate", true);
+				
+		this.generator = generator;
+		
+		this.dbc = this.open(dburl, dbuser, dbpass);		
+		assert this.generator != null;
+		assert this.dbc != null;
+		
+	}
+	
+	@Deprecated
 	public DatabaseWrapper(ConnectionProfile profile) throws SQLException {
 		assert profile != null;
 //		this.profile = profile;

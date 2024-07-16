@@ -205,19 +205,23 @@ public class ConnectionProfile {
 	 * Opens and returns a new connection to the ServiceNow instance.
 	 * @return
 	 */
+	@Deprecated
 	public synchronized ReaderSession newReaderSession() throws ResourceException {
 		ReaderSession session = new ReaderSession(reader);
 		lastReaderSession = session;
 		return session;
 	}
 	
+	@Deprecated
 	public synchronized ReaderSession getReaderSession() throws ResourceException {
 		if (lastReaderSession == null) newReaderSession();
 		assert lastReaderSession != null;
 		return lastReaderSession;		
 	}
 	
+	@Deprecated
 	public synchronized AppSession newAppSession() throws ResourceException {
+		logger.info(Log.INIT, "newAppSession deprecated");		
 		AppSession appSession = null;
 		if (app.containsKey("instance"))
 			appSession = new AppSession(app);
@@ -227,12 +231,15 @@ public class ConnectionProfile {
 		return appSession;
 	}
 	
+	@Deprecated
 	public synchronized AppSession getAppSession() throws ResourceException {
+		logger.info(Log.INIT, "getAppSession deprecated");
 		if (lastAppSession == null) newAppSession();
 		assert lastAppSession != null;
 		return lastAppSession;
 	}
 	
+	@Deprecated
 	public synchronized SchemaReader newSchemaReader() {
 		SchemaReader result;
 		result = hasAgent() ?

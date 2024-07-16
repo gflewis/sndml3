@@ -46,6 +46,7 @@ public class Generator {
 	 * @param args -p <i>profile</i> -t <i>tablename</i>
 	 * @throws Exception
 	 */
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
 		Options options = new Options();
 		options.addOption(Option.builder("p").longOpt("profile").required(true).hasArg().
@@ -62,7 +63,6 @@ public class Generator {
 		ConnectionProfile profile = new ConnectionProfile(new File(profilename));
 		Session session = new Session(profile.reader);
 		Table table = session.table(tablename);
-//		DatabaseWrapper database = profile.newDatabaseConnection();
 		DatabaseWrapper database = new DatabaseWrapper(profile);
 		Generator generator = database.getGenerator();
 		String sql = generator.getCreateTable(table);
@@ -120,6 +120,7 @@ public class Generator {
 		assert this.schemaReader != null;
 	}
 	
+	@Deprecated
 	public Generator(ConnectionProfile profile) throws ResourceException {
 		this(getTemplatesStream(profile.database), 
 				profile.databaseProperties(), 
@@ -176,12 +177,13 @@ public class Generator {
 	 * Get an InputStream based on the name of the "templates" property.
 	 * @param properties
 	 * @return
-	 */
-	private static InputStream getTemplatesStream(Properties properties) {
+	 */	
+	public static InputStream getTemplatesStream(Properties properties) {
 		String templatesPath = properties.getProperty("templates", "");
 		File templatesFile = null;
 		if (templatesPath.length() > 0)	templatesFile = new File(templatesPath);			
 		
+		// TODO This code is problematic in a web app
 		try {
 			// if file not specified as property
 			// then use the default XML from the JAR
@@ -193,8 +195,7 @@ public class Generator {
 		} 
 		catch (IOException e) {
 			throw new ResourceException(e);
-		}
-		
+		}		
 	}
 	
 	private Element getProtocolTree(URI dbURI) {		

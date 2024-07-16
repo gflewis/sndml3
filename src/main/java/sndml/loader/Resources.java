@@ -1,5 +1,6 @@
 package sndml.loader;
 
+import java.io.InputStream;
 import java.sql.SQLException;
 
 import org.slf4j.Logger;
@@ -46,20 +47,25 @@ public class Resources {
 	}
 	
 	public ReaderSession getReaderSession() throws ResourceException {
+		logger.debug(Log.INIT, "getReaderSession");
 		if (this.readerSession == null) {
-			this.readerSession = profile.newReaderSession();			
+			// this.readerSession = profile.newReaderSession();
+			this.readerSession = new ReaderSession(profile.readerProperties());
 		}
 		return this.readerSession;
 	}
 	
 	public AppSession getAppSession() throws ResourceException {
+		logger.debug(Log.INIT, "getAppSession");
 		if (this.appSession == null) {
-			this.appSession = profile.newAppSession();			
+			// this.appSession = profile.newAppSession();
+			this.appSession = new AppSession(profile.appProperties());
 		}
 		return this.appSession;	
 	}
 	
 	public SchemaReader getSchemaReader() {
+		logger.debug(Log.INIT, "getSchemaReader");
 		if (this.schemaReader == null) {
 			this.schemaReader = requiresAppSession ?
 					new AppSchemaReader(getAppSession()) :
@@ -82,8 +88,12 @@ public class Resources {
 	}
 	
 	public Generator getGenerator() throws ResourceException {
+		logger.debug(Log.INIT, "getGenerator");	
+		
 		if (this.generator == null) {
-			this.generator = new Generator(profile);
+			PropertySet dbprops = profile.databaseProperties();
+			InputStream templatesStream = Generator.getTemplatesStream(dbprops);
+			this.generator = new Generator(templatesStream, dbprops, getSchemaReader());
 		}
 		return this.generator;
 	}
@@ -93,8 +103,7 @@ public class Resources {
 			PropertySet props = profile.databaseProperties();
 			try {
 				if (props.hasProperty("url")) {
-					dbWrapper = new DatabaseWrapper(profile);
-					generator = dbWrapper.getGenerator();
+					dbWrapper = new DatabaseWrapper(profile, getGenerator());
 					sqlConnection = dbWrapper.getConnection();
 				}
 				else {

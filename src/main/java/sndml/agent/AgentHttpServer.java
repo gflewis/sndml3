@@ -37,7 +37,7 @@ public class AgentHttpServer {
 		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
 		GetRunListRequest getRunList = 
-			new GetRunListRequest(profile.newAppSession(), agentName);
+			new GetRunListRequest(resources.getAppSession(), agentName);
 		getRunList.execute();
 		agentKey = getRunList.getAgentKey();				
 		

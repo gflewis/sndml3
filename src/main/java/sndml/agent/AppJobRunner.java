@@ -35,6 +35,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	public AppJobRunner(ConnectionProfile profile, AppSession appSession, ReaderSession readerSession, 
 			DatabaseWrapper databaseConnection, AppJobConfig config) {
 		super(readerSession, databaseConnection, config);
+		logger.warn(Log.INIT, "deprecated constructor 2");
 		this.profile = profile;
 		this.appSession = appSession; 
 		this.config = config;
@@ -51,6 +52,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	AppJobRunner(ConnectionProfile profile, AppJobConfig config) {
 		this(profile, profile.newAppSession(), profile.newReaderSession(), 
 				profile.newDatabaseWrapper(), config);
+		logger.warn(Log.INIT, "deprecated constructor 3");
 	}
 	
 	AppStatusLogger getStatusLogger() {
