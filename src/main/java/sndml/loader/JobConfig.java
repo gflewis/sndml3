@@ -219,8 +219,8 @@ public class JobConfig {
 	}
 		
 	public void validate() {
-		if (action == null) configError("Action not specified");
-		if (jobName == null) configError("Name not specified");
+		if (getAction() == null) configError("Action not specified");
+		if (getName() == null) configError("Name not specified");
 		
 		if (action == Action.EXECUTE) {
 			if (sql == null) configError("Missing SQL");

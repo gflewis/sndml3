@@ -44,7 +44,12 @@ public class AppJobConfig extends JobConfig {
 		return yaml;
 	}
 
-	public RecordKey getSysId() { return this.sys_id; }
+	public RecordKey getSysId() { return this.sys_id; }	
 	public String getNumber() { return this.number; }
+	
+	@Override
+	public String getName() { 
+		return getNumber(); 
+	}
 	
 }

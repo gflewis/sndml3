@@ -5,9 +5,10 @@
 <!DOCTYPE properties[
 <!ELEMENT properties (property*) >
 <!ATTLIST property name CDATA #REQUIRED >
-<!ELEMENT property (alternate*, description) >
+<!ELEMENT property (default?, alternate*, description) >
 <!ELEMENT alternate (#PCDATA) >
 <!ATTLIST alternate name CDATA #REQUIRED >
+<!ELEMENT default (#PCDATA) >
 <!ELEMENT description (#PCDATA) >
 ]>
 
@@ -142,16 +143,33 @@
   </property> 
   <property name="loader.warn_on_truncate">
     <description>
-      Causes a warning will be written to the log whenever a field is truncated when written to the database.       
+      Causes a warning will be written to the log whenever a field is truncated 
+      when written to the database.       
     </description>
   </property>
   <property name="daemon.threads">
-    <description></description>
+    <default>3</default>
+    <description>
+      Maximum number of jobs that the agent can process concurrently. 
+      Additional jobs will wait until a thread becomes available.
+    </description>
   </property>
   <property name="daemon.interval">
+    <default>60</default>
     <description>
       Required if using `--daemon`
     </description>
+  </property>
+  <property name="daemon.continue">
+    <description>
+      Controls whether or not the agent will continue running after encountering 
+      an IO error in communication with ServiceNow or the database. 
+      If “true” then it writes an error to the log and goes back to sleep. 
+      If “false” then it will immediately abort.
+    </description>
+  </property>
+  <property name="daemon.pidfile">
+    <description></description>
   </property>
   <property name="server.port">
     <description>
@@ -160,6 +178,14 @@
   </property>
   <property name="server.backlog">
     <description></description>
+  </property>
+  <property name="server.heartbeat">
+    <default>300</default>
+    <description>
+      Applicable if using `--server`. Interval in seconds that the HTTP server will send a
+      heartbeat message to the scoped app confirming that it is still listening and that
+      the `app` session is still active. Default is 300. Set to 0 to disable the heartbeat.
+    </description>
   </property>
 
 </properties>

@@ -40,6 +40,7 @@ public class AgentRequestHandler implements HttpHandler {
 	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
+		Log.setGlobalContext();
 		try {
 			URI uri = exchange.getRequestURI();
 			logger.info(Log.REQUEST, "Path: " + uri.getPath());
@@ -89,7 +90,12 @@ public class AgentRequestHandler implements HttpHandler {
 		try {
 //			SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
 			AppConfigFactory factory = new AppConfigFactory(appSession);
-			AppJobConfig jobconfig = factory.appJobConfig(sys_id);
+			AppJobConfig jobconfig = factory.appJobConfig(sys_id);			
+			if (jobconfig.getStatus() != AppJobStatus.READY) {
+				logger.error(Log.REQUEST, String.format(
+						"%s has invalid state: %s", jobconfig.getName(), jobconfig.getStatus()));
+				throw new AgentHandlerException(uri, HttpURLConnection.HTTP_NOT_FOUND);
+			}
 			Resources workerResources = resources.workerCopy();
 			AppJobRunner jobrunner = new AppJobRunner(workerResources, jobconfig);
 			AppStatusLogger statusLogger = new AppStatusLogger(appSession);

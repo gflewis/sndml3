@@ -4,6 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
@@ -14,9 +15,8 @@ public class AgentMain extends sndml.loader.Main {
 
 	static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 	
-	public static void main(CommandLine cmd) throws Exception {
+	public static void main(CommandLine cmd, Resources resources) throws Exception {
 		
-		// resources is inherited from sndml.loader.Main
 		assert resources != null;		
 		AppSession appSession = resources.getAppSession();
 		

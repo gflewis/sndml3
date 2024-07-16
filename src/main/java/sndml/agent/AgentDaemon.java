@@ -32,13 +32,17 @@ public class AgentDaemon implements Daemon, Runnable {
 	private final AgentScanner scanner;
 	private final int threadCount;	
 	private final int intervalSeconds;
+	private final String pidFileName;
 	private final WorkerPool executor; // null if threadCount < 2
-	private final int DEFAULT_THREAD_COUNT = 3;
-	private final int DEFAULT_INTERVAL = 60;
 	
 	private static volatile boolean isRunning = false;
-	DaemonContext context = null;	
+	DaemonContext context = null;
+	
 	private Timer timer;
+	
+	private final int DEFAULT_THREAD_COUNT = 3;
+	private final int DEFAULT_INTERVAL = 60;
+
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@SuppressWarnings("static-access")
@@ -51,6 +55,8 @@ public class AgentDaemon implements Daemon, Runnable {
 		this.agentName = profile.getAgentName();
 		this.threadCount = profile.daemonProperties().getInt("threads", DEFAULT_THREAD_COUNT);
 		this.intervalSeconds = profile.daemonProperties().getInt("interval", DEFAULT_INTERVAL);
+		this.pidFileName = profile.daemonProperties().getString("pidfile");
+		
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
 			// TODO Move WorkerPool constructor to ResourceManager
@@ -64,6 +70,7 @@ public class AgentDaemon implements Daemon, Runnable {
 		assert agentName != null;
 		assert agentName != "";
 		Log.setJobContext(agentName);
+		logger.info(String.format("instantiate agent=%s pidfile=%s", agentName, pidFileName));
 	}
 	
 	public static AgentDaemon getDaemon() {
@@ -163,14 +170,15 @@ public class AgentDaemon implements Daemon, Runnable {
 
 	@Override
 	public void init(DaemonContext context) throws DaemonInitException {
-		logger.debug(Log.INIT, "begin init");
+		long pid = process.pid();
 		this.context = context;
-		String pidFileName = profile.app.getString("pidfile");
-		if (pidFileName != null) {
+		if (pidFileName == null) {
+			logger.info(Log.INIT, String.format("init pid=%d", pid));			
+		}
+		else {
 			File pidFile = new File(pidFileName);
-			long pid = process.pid();
 			logger.info(Log.INIT, String.format(
-				"pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
+				"init pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
 			try {
 				PrintWriter pidWriter = new PrintWriter(pidFile);
 				pidWriter.println(pid);

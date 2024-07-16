@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.jdom2.JDOMException;
 import org.slf4j.Logger;
@@ -51,68 +53,25 @@ public class ConnectionProfile {
 	private final PropertySet loader; // Is this still used for anything?
 	private final PropertySet server; // Properties for HTTP Server
 	private final PropertySet daemon; // Properties for Agent Daemon
+	private final static PropertiesSchema schema = new PropertiesSchema();
+	private final static PropertiesEditor editor = new PropertiesEditor();
+
 	static AppSession lastAppSession = null; // Last AppSession obtained
 	static ReaderSession lastReaderSession = null; // last ReaderSession obtained
 
 	private static final Logger logger = LoggerFactory.getLogger(ConnectionProfile.class);
 	
+	// TODO move SchemaSource implementation to Resources
 	enum SchemaSource {
 		APP,    // Use app instance and {@link AppSchemaReader}
 		READER, // Use reader instance and {@link TableSchemaReader}
 		SCHEMA  // Use schema instance and {@link TableSchemaReader}
 	}
 	public final SchemaSource schemaSource;
-	
-	/*
-	public ConnectionProfile(File profile) throws IOException {
-		this(propertiesWithSubstitutions(profile));
-		this.file = profile;
-		this.pathName = file.getPath();
-		logger.info(Log.INIT, "ConnectionProfile: " + pathName);
-	}
-	*/
-	
-	public ConnectionProfile(File profile) throws ResourceException {
-		this(propertiesFromFile(profile));
-		this.pathName = profile.getPath();
-	}
-
-	private static Properties propertiesFromFile(File profile) throws ResourceException {
-		logger.info(Log.INIT, "ConnectionProfile: " + profile.getPath());
-		Properties newProperties;
-		try {
-			FileInputStream inputStream = new FileInputStream(profile);
-			Properties origProperties = new Properties();
-			origProperties.load(inputStream);				
-			newProperties = PropertiesEditor.replacePropertyNames(origProperties, true);
-			PropertiesEditor.replaceEnvVariables(newProperties);
-			PropertiesEditor.replaceCommands(newProperties);			
-		}
-		catch (IOException e) {
-			throw new ResourceException(e);
-		}
-		catch (JDOMException e) {
-			throw new ResourceException(e);
-		}
-		return newProperties;
-	}
-	
+		
 	public ConnectionProfile(Properties properties) {
 		this.allProperties = properties;
 
-		// This code is for backward compatiblity with old connection profiles
-		/*
-		this.reader = 
-			hasProperty("reader.instance") ? getSubset("reader") : getSubset("servicenow");
-		this.app =
-			hasProperty("app.agent") ? getSubset("app") :
-			hasProperty("daemon.agent") ? getSubset("daemon") :
-			this.reader;
-		this.dict =
-			hasProperty("dict.instance") ? getSubset("dict") : this.reader;		
-		this.database = 
-			hasProperty("database.url") ? getSubset("database") : getSubset("datamart");
-		*/
 		this.app      = getSubset("app");
 		this.reader   = getSubset("reader");
 		this.database = getSubset("database");
@@ -126,7 +85,31 @@ public class ConnectionProfile {
 		else if (hasProperty("schema.instance"))
 			this.schemaSource = SchemaSource.SCHEMA;
 		else 
-			this.schemaSource = SchemaSource.READER;			
+			this.schemaSource = SchemaSource.READER;
+		
+	}
+	
+	public ConnectionProfile(File profile) throws ResourceException {
+		this(propertiesFromFile(profile));
+		this.pathName = profile.getPath();
+	}
+
+	private static Properties propertiesFromFile(File profile) throws ResourceException {
+		logger.info(Log.INIT, "ConnectionProfile: " + profile.getPath());
+		Properties newProperties;
+		try {
+			FileInputStream inputStream = new FileInputStream(profile);
+			Properties origProperties = new Properties();
+			origProperties.load(inputStream);				
+			newProperties = schema.replacePropertyNames(origProperties, true);
+			editor.replaceEnvVariables(newProperties);
+			editor.replaceCommands(newProperties);			
+			if (logger.isDebugEnabled()) dump(newProperties, null);
+		}
+		catch (IOException | JDOMException e) {
+			throw new ResourceException(e);
+		}
+		return newProperties;
 	}
 	
 	public PropertySet appProperties() {
@@ -136,6 +119,7 @@ public class ConnectionProfile {
 	public PropertySet daemonProperties() {
 		return this.daemon; 
 	}
+	
 	public PropertySet databaseProperties() {
 		return this.database; 
 	}
@@ -175,62 +159,7 @@ public class ConnectionProfile {
 		return pathName;
 	}
 
-	/*
-	private static Properties propertiesWithSubstitutions(File profile) throws IOException {
-		FileInputStream stream = new FileInputStream(profile);
-		Properties properties = propertiesWithSubstitutions(stream);
-		return properties; 		
-	}
-	
-	private static Properties propertiesWithSubstitutions(InputStream stream) throws IOException {
-		Properties properties = new Properties();
-		loadWithSubstitutions(properties, stream);
-		return properties;
-	}
-	
 
-	/**
-	 * Load properties from an InputStream.
-	 * Any value ${name} will be replaced with a system property.
-	 * Any value inclosed in backticks will be passed to Runtime.exec() for evaluation.
-	 *
-	private static void loadWithSubstitutions(Properties properties, InputStream stream) throws IOException {
-		final Pattern cmdPattern = Pattern.compile("^`(.+)`$");
-		assert stream != null;
-		StringSubstitutor envMap = 
-			new org.apache.commons.text.StringSubstitutor(System.getenv());
-		Properties raw = new Properties();
-		raw.load(stream);
-		for (String name : raw.stringPropertyNames()) {
-			String value = raw.getProperty(name);
-			// Replace any environment variables
-			value = envMap.replace(value);
-			// If property is in backticks then evaluate as a command 
-			Matcher cmdMatcher = cmdPattern.matcher(value); 
-			if (cmdMatcher.matches()) {
-				logger.info(Log.INIT, "evaluate " + name);
-				String command = cmdMatcher.group(1);
-				value = evaluate(command);
-				if (value == null || value.length() == 0)
-					throw new AssertionError(String.format("Failed to evaluate \"%s\"", command));
-				logger.debug(Log.INIT, value);
-			}
-			properties.setProperty(name, value);
-		}
-	}
-	
-	/**
-	 * Pass a string to Runtime.exec() for evaluation
-	 * @param command - Command to be executed
-	 * @return Result of command with whitespace trimmed
-	 * @throws IOException
-	 *
-	public static String evaluate(String command) throws IOException {
-		Process p = Runtime.getRuntime().exec(command);
-		String output = IOUtils.toString(p.getInputStream(), "UTF-8").trim();
-		return output;
-	}
-	*/
 		
 	/**
 	 * Return the URL of the ServiceNow
@@ -322,5 +251,18 @@ public class ConnectionProfile {
 	public String getAgentName() {
 		return app.getProperty("agent");
 	}
-				
+	
+	/**
+	 * Print all property names and values to the logger.
+	 * Used for debugging.
+	 */
+	private static void dump(Properties props, String label) {
+		if (label != null) logger.debug(Log.INIT, label);
+		SortedSet<String> names = new TreeSet<String>(props.stringPropertyNames());
+		for (String name : names) {
+			String value = props.getProperty(name);
+			logger.debug(Log.INIT, name + "=" + value);
+		}
+	}
+
 }

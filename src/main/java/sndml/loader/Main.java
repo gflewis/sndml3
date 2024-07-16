@@ -116,7 +116,7 @@ public class Main {
 			loader.loadTables();
 		}
 		if (requiresApp) {
-			AgentMain.main(cmd);
+			AgentMain.main(cmd, resources);
 		}
 	}
 	

@@ -2,6 +2,7 @@ package sndml.agent;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Timer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,12 @@ public class AgentHttpServer {
 	final String agentName;
 	final RecordKey agentKey;
 	final AgentRequestHandler handler;
+	
+	private HeartbeatTask heartbeatTask;
+	private Timer heartbeatTimer;
+	// TODO Use property
+	private int heartbeatInterval = 30;
+	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public AgentHttpServer(Resources resources) throws IOException {
@@ -54,11 +61,14 @@ public class AgentHttpServer {
 		// It is not used for running jobs.
 		// WorkerPool is used for running jobs, not for HTTP executor.
 		server.setExecutor(null); // creates a default executor
+        this.heartbeatTimer = new Timer("heartbeat", true);
+		this.heartbeatTask = new HeartbeatTask(resources);
 	}
 			
 	public void start() {
-		logger.info(Log.INIT, String.format("start port=%d", port));
+		logger.info(Log.INIT, String.format("start port=%d", port));		
 		server.start();
+        heartbeatTimer.schedule(this.heartbeatTask, 0, 1000 * heartbeatInterval);		
 	}
 	
 	public void shutdown() {
