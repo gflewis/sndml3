@@ -30,6 +30,8 @@ public class Table {
 			this.domain = null;
 		else
 			this.domain = sessionDomain;
+		// TODO It is time to deprecate the use of alternate APIs
+		/*
 		String apiName = session.getProperty("api");
 		if (apiName == null)
 			this.api = rest();
@@ -42,6 +44,8 @@ public class Table {
 				throw new IllegalArgumentException(String.format("api=\"%s\"",  apiName));
 			}
 		}
+		*/
+		this.api = rest();
 	}
 
 	public Session getSession() {

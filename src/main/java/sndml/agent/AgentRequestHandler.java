@@ -26,7 +26,6 @@ public class AgentRequestHandler implements HttpHandler {
 	private final AppSession appSession; 
 	private final WorkerPool workerPool;
 	private final Logger logger = LoggerFactory.getLogger(AgentRequestHandler.class);
-	private final int DEFAULT_THREAD_COUNT = 3;
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
@@ -34,7 +33,7 @@ public class AgentRequestHandler implements HttpHandler {
 		this.resources = resources;
 		this.profile = resources.getProfile();
 		this.appSession = resources.getAppSession();
-		int threadCount = profile.app.getInt("threads", DEFAULT_THREAD_COUNT);
+		int threadCount = Integer.parseInt(profile.getProperty("server.threads"));
 		this.workerPool = new WorkerPool(threadCount);
 	}
 	

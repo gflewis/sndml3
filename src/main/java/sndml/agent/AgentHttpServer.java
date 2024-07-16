@@ -22,37 +22,35 @@ public class AgentHttpServer {
 
 	static HttpServer server;
 	final int port;
+	final int backlog;
 	final String agentName;
 	final RecordKey agentKey;
 	final AgentRequestHandler handler;
 	
 	private HeartbeatTask heartbeatTask;
 	private Timer heartbeatTimer;
-	// TODO Use property
-	private int heartbeatInterval = 30;
+	private final int heartbeatInterval;
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public AgentHttpServer(Resources resources) throws IOException {
 		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
-		// This scanner is not used. 
-		// We are just making sure that we can connect.
-		/*
-		AgentScanner scanner = new SingleThreadScanner(profile);
-		scanner.getAppSession().verifyUser();
-		agentKey = scanner.getAgentKey();
-		*/
 		GetRunListRequest getRunList = 
 			new GetRunListRequest(profile.newAppSession(), agentName);
 		getRunList.execute();
 		agentKey = getRunList.getAgentKey();				
 		
-		this.port = profile.serverProperties().getInt("port", 0);
-		int backlog = profile.serverProperties().getInt("backlog", 0);
-		if (port == 0) throw new MissingPropertyException("server.port not specified");
+		String portValue = profile.getProperty("server.port");
+		if (portValue == null) 
+			throw new MissingPropertyException("server.port not specified");
+		this.port = Integer.parseInt(portValue);
+		assert this.port != 0;
+		this.backlog = Integer.parseInt(profile.getProperty("server.backlog"));
+		this.heartbeatInterval = Integer.parseInt(profile.getProperty("server.heartbeat"));
+		
 		logger.info(Log.INIT, String.format(
-				"instantiate port=%d backlog=%d", port, backlog));
+				"instantiate port=%d backlog=%d heartbeat=%d", port, backlog, heartbeatInterval));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
 		handler = new AgentRequestHandler(resources);
 		server.createContext("/", handler);

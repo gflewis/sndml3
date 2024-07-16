@@ -38,14 +38,9 @@ import sndml.util.ResourceException;
  */
 
 public class ConnectionProfile {
-	
-	// public static final String DEFAULT_APP_SCOPE = "x_108443_sndml";
-	// public static final String DEFAULT_AGENT_NAME = "main";
-
-//	private File file = null;
-	private String pathName = null;
-	
+		
 	private final Properties allProperties;
+	private final String pathName; // null if unknown
 	public final PropertySet app; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
 	public final PropertySet dict; // Properties for ServiceNow instance used for schema
@@ -53,8 +48,7 @@ public class ConnectionProfile {
 	private final PropertySet loader; // Is this still used for anything?
 	private final PropertySet server; // Properties for HTTP Server
 	private final PropertySet daemon; // Properties for Agent Daemon
-	private final static PropertiesSchema schema = new PropertiesSchema();
-	private final static PropertiesEditor editor = new PropertiesEditor();
+	private final PropertiesSchema schema;
 
 	static AppSession lastAppSession = null; // Last AppSession obtained
 	static ReaderSession lastReaderSession = null; // last ReaderSession obtained
@@ -70,8 +64,10 @@ public class ConnectionProfile {
 	public final SchemaSource schemaSource;
 		
 	public ConnectionProfile(Properties properties) {
+		this.schema = new PropertiesSchema();
 		this.allProperties = properties;
-
+		this.pathName = null;
+		
 		this.app      = getSubset("app");
 		this.reader   = getSubset("reader");
 		this.database = getSubset("database");
@@ -89,16 +85,34 @@ public class ConnectionProfile {
 		
 	}
 	
-	public ConnectionProfile(File profile) throws ResourceException {
-		this(propertiesFromFile(profile));
-		this.pathName = profile.getPath();
+	public ConnectionProfile(File file) throws ResourceException {
+		this.schema = new PropertiesSchema();
+		this.allProperties = propertiesFromFile(file, schema);
+		this.pathName = file.getPath();
+		
+		this.app      = getSubset("app");
+		this.reader   = getSubset("reader");
+		this.database = getSubset("database");
+		this.dict     = getSubset("dict");
+		this.loader   = getSubset("loader");
+		this.server   = getSubset("server");
+		this.daemon   = getSubset("daemon");
+		
+		if (hasProperty("app.instance"))
+			this.schemaSource = SchemaSource.APP;
+		else if (hasProperty("schema.instance"))
+			this.schemaSource = SchemaSource.SCHEMA;
+		else 
+			this.schemaSource = SchemaSource.READER;
+		
 	}
 
-	private static Properties propertiesFromFile(File profile) throws ResourceException {
-		logger.info(Log.INIT, "ConnectionProfile: " + profile.getPath());
+	private static Properties propertiesFromFile(File file, PropertiesSchema schema) throws ResourceException {
+		logger.info(Log.INIT, "ConnectionProfile: " + file.getPath());
+		PropertiesEditor editor = new PropertiesEditor();
 		Properties newProperties;
 		try {
-			FileInputStream inputStream = new FileInputStream(profile);
+			FileInputStream inputStream = new FileInputStream(file);
 			Properties origProperties = new Properties();
 			origProperties.load(inputStream);				
 			newProperties = schema.replacePropertyNames(origProperties, true);
@@ -110,6 +124,28 @@ public class ConnectionProfile {
 			throw new ResourceException(e);
 		}
 		return newProperties;
+	}
+	
+	public boolean isValidName(String name) {
+		return schema.hasName(name);
+	}
+
+	/*
+	 * Return a property value from the profile.
+	 * If property is not found, then return default value from property_names.xml.
+	 * If property is not in property_names.xml then throw IllegalArgumentException.
+	 */
+	public String getProperty(String name) {
+		if (!isValidName(name)) 
+			throw new IllegalArgumentException("Invalid property name: " + name);
+		String value = allProperties.getProperty(name);
+		if (value == null)
+			if (schema.hasDefault(name)) value = schema.getDefault(name);
+		return value;
+	}
+		
+	private boolean hasProperty(String name) {
+		return allProperties.containsKey(name);
 	}
 	
 	public PropertySet appProperties() {
@@ -141,14 +177,11 @@ public class ConnectionProfile {
 	}
 	
 	private PropertySet getSubset(String prefix) {
-		PropertySet result = new PropertySet(allProperties, prefix);
+		PropertySet result = new PropertySet(
+				allProperties, prefix, schema.getValidNames(), schema.getDefaultValues());
 		return result;
 	}
 
-	private boolean hasProperty(String name) {
-		return allProperties.containsKey(name);
-	}
-	
 	public String getMetricsFolder() { return loader.getProperty("metrics_folder"); }
 	public boolean getWarnOnTruncate() { return loader.getBoolean("warn_on_truncate", true); }
 	

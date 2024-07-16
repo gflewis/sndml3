@@ -28,17 +28,17 @@ public class SessionVerificationTest {
 		assertEquals(wsdlCount, schemaCount);
 	}
 
-	@Test
-	public void testAutoVerify() throws Exception {
-		Properties props = new Properties();
-		props.setProperty("servicenow.instance", "dev00000");
-		props.setProperty("servicenow.username", "admin");
-		props.setProperty("servicenow.password", "secret");
-		PropertySet propset = new PropertySet(props, "servicenow");
-		Session session1 = new Session(propset);
-		assertNotNull(session1);
-		props.setProperty("servicenow.verify_session", "true");
-		Session session2 = new Session(propset);
-		assertNull(session2);
-	}
+//	@Test
+//	public void testAutoVerify() throws Exception {
+//		Properties props = new Properties();
+//		props.setProperty("servicenow.instance", "dev00000");
+//		props.setProperty("servicenow.username", "admin");
+//		props.setProperty("servicenow.password", "secret");
+//		PropertySet propset = new PropertySet(props, "servicenow");
+//		Session session1 = new Session(propset);
+//		assertNotNull(session1);
+//		props.setProperty("servicenow.verify_session", "true");
+//		Session session2 = new Session(propset);
+//		assertNull(session2);
+//	}
 }

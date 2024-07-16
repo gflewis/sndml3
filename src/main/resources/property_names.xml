@@ -28,7 +28,16 @@
     <alternate name="servicenow.password" />
     <description>Required.</description>
   </property>
+  <property name="reader.domain">
+    <alternate name="servicenow.domain" />
+    <description>
+      For use in domain separated instances. 
+      This can be a single **sys_id** or a comma separated list of domains.
+      Refer to [[Domain Separation]]. 
+     </description>
+  </property>
   <property name="reader.pagesize">
+    <default>200</default>
     <alternate name="servicenow.pagesize" />
     <description>
       Number of records to be processed at a time if not overridden at the table level. 
@@ -79,8 +88,10 @@
   </property>
   <property name="dict.instance">
     <description>
-      Name or URL of the instance from which dictionary information will be obtained. This is optional and the default is to use `reader.instance`. 
-      This property is not applicable if using the DataPump app (_i.e._ if `app.instance` is specified.)
+      Name or URL of the instance from which dictionary information will be obtained. 
+      This is optional and the default is to use `reader.instance`. 
+      This property is not applicable if using the DataPump app 
+      (_i.e._ if `app.instance` is specified.)
     </description>
   </property>
   <property name="dict.username">
@@ -92,12 +103,15 @@
   <property name="database.url">
     <alternate name="datamart.url" />
     <description>
-      Required. JDBC URL for the target database. Refer to the documentation for your selected JDBC driver.
+      Required. JDBC URL for the target database. 
+      Refer to the documentation for your selected JDBC driver.
     </description>
   </property>
   <property name="database.username">
     <alternate name="datamart.username" />
-    <description>Required unless database is SQLite. User name for the target database.</description>
+    <description>
+      Required unless database is SQLite. User name for the target database.
+    </description>
   </property>
   <property name="database.password">
     <alternate name="datamart.password" />
@@ -177,7 +191,15 @@
     </description>
   </property>
   <property name="server.backlog">
+    <default>0</default>
     <description></description>
+  </property>
+  <property name="server.threads">
+    <default>3</default>
+    <description>
+      Maximum number of jobs that the agent can process concurrently. 
+      Additional jobs will wait until a thread becomes available.
+    </description>
   </property>
   <property name="server.heartbeat">
     <default>300</default>

@@ -16,6 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 
+import sndml.agent.AppSession;
 import sndml.util.Log;
 import sndml.util.Parameters;
 import sndml.util.PropertySet;
@@ -51,8 +52,8 @@ public class Session {
 		propset.assertNotEmpty("password");
 		String instancename = propset.getProperty("instance");
 		String username = propset.getProperty("username");
-		String password = propset.getProperty("password");
-		String domainname = propset.getProperty("domain");		
+		String password = propset.getProperty("password");		
+		String domainname = this instanceof AppSession ? null : propset.getProperty("domain");
 		this.instance = new Instance(instancename);
 		this.username = username;
 		this.domain = (domainname == null || domainname.length() == 0) ? 

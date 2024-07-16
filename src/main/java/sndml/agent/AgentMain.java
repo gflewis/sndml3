@@ -13,6 +13,7 @@ import sndml.util.Log;
 
 public class AgentMain extends sndml.loader.Main {
 
+	static private final Thread mainThread = Thread.currentThread();	
 	static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 	
 	public static void main(CommandLine cmd, Resources resources) throws Exception {
@@ -57,4 +58,11 @@ public class AgentMain extends sndml.loader.Main {
 		return profile.app.getNotEmpty("agent");
 	}
 
+	/**
+	 * @return the main thread.
+	 */
+	public static Thread getThread() {
+		return mainThread;
+	}
+	
 }

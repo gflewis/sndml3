@@ -79,17 +79,17 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	 * If this is not the main thread and it is not the scanner thread
 	 * then change the thread name.
 	 */
-	protected void setThreadName() {		
+	protected void setThreadName(String threadName) {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
 		Thread myThread = Thread.currentThread();
-		if (!myThread.equals(AgentDaemon.getThread()) && !myThread.getName().equals("scanner")) {
-			myThread.setName(config.number);
+		if (!myThread.equals(AgentMain.getThread()) && !myThread.getName().equals("scanner")) {
+			myThread.setName(threadName);
 		}
 	}
 	
 	@Override
 	public void run() {
-		setThreadName();
+		setThreadName(this.number);
 		try {
 			this.call();
 		} catch (JobCancelledException e) {

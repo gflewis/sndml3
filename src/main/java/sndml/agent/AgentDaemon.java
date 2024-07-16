@@ -40,9 +40,6 @@ public class AgentDaemon implements Daemon, Runnable {
 	
 	private Timer timer;
 	
-	private final int DEFAULT_THREAD_COUNT = 3;
-	private final int DEFAULT_INTERVAL = 60;
-
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@SuppressWarnings("static-access")
@@ -53,9 +50,9 @@ public class AgentDaemon implements Daemon, Runnable {
         this.process = ProcessHandle.current();
 		this.profile = profile;
 		this.agentName = profile.getAgentName();
-		this.threadCount = profile.daemonProperties().getInt("threads", DEFAULT_THREAD_COUNT);
-		this.intervalSeconds = profile.daemonProperties().getInt("interval", DEFAULT_INTERVAL);
-		this.pidFileName = profile.daemonProperties().getString("pidfile");
+		this.threadCount = Integer.parseInt(profile.getProperty("daemon.threads"));
+		this.intervalSeconds = Integer.parseInt(profile.getProperty("daemon.interval"));
+		this.pidFileName = profile.getProperty("daemon.pidfile");
 		
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {

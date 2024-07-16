@@ -1,24 +1,24 @@
 package sndml.servicenow;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import sndml.loader.Action;
+import sndml.loader.ConnectionProfile;
 import sndml.loader.Log4jProgressLogger;
-import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.PropertySet;
 
+/**
+ * Write the contents of a ServiceNow query to a file.
+ * This class is not used for anything.
+ */
 public class FileWriter extends RecordWriter {
 
 	public enum Format {Import, List};
@@ -28,10 +28,7 @@ public class FileWriter extends RecordWriter {
 
 	Format format = Format.Import; 
 
-	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	public static void main(String[] args) throws Exception {
-		Log.setGlobalContext();
 		Options options = new Options();
 		options.addOption(Option.builder("p").longOpt("prop").required(true).hasArg(true).
 				desc("Profile file name (required)").build());
@@ -47,11 +44,9 @@ public class FileWriter extends RecordWriter {
 		String outfilename = cmdline.getOptionValue("o");
 		String tablename = cmdline.getOptionValue("t");
 		String querystring = cmdline.getOptionValue("q");
-		Properties properties = new Properties();
-		File propfile = new File(propfilename);
-		properties.load(new FileInputStream(propfile));
+		ConnectionProfile profile = new ConnectionProfile(new File(propfilename));
 		File outfile = (outfilename == null) ? null : new File(outfilename);
-		PropertySet props = new PropertySet(properties, "servicenow"); 
+		PropertySet props = profile.readerProperties(); 
 		Session session = new Session(props);
 		Table table = session.table(tablename);
 		TableReader reader = new RestTableReader(table);
@@ -104,7 +99,7 @@ public class FileWriter extends RecordWriter {
 	public void processRecord(TableRecord rec, Metrics writerMetrics) {	
 		assert writer != null;
 		assert rec != null;
-		assert rec instanceof JsonRecord;
+		assert rec instanceof sndml.servicenow.JsonRecord;
 		if (format == Format.Import) {			
 			writer.println(rec.asText(false));
 		}

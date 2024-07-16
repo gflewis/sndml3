@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.ListIterator;
 import java.util.Properties;
+import java.util.TreeSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -35,21 +36,12 @@ import sndml.util.ResourceException;
  */	
 public class PropertiesSchema {
 
-	final Document xmldocument;
+	final private Document xmlDocument;
+	final private Properties defaultValues;
+	final private TreeSet<String> validNames;	
 	
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesSchema.class);
-
 	
-	public PropertiesSchema() throws ResourceException {
-		try {
-			InputStream xmlschema = ClassLoader.getSystemResourceAsStream("property_names.xml");
-			SAXBuilder xmlbuilder = new SAXBuilder();
-			this.xmldocument = xmlbuilder.build(xmlschema);
-		} catch (JDOMException | IOException e) {
-			throw new ResourceException(e);
-		}
-	}
-
 	public static void main(String[] args) throws Exception {
 		Option optValidate = 
 			Option.builder("v").longOpt("validate").required(false).hasArg(true).
@@ -78,10 +70,59 @@ public class PropertiesSchema {
 					optHelp.getLongOpt(), optValidate.getLongOpt()));			
 	}
 	
+	public PropertiesSchema() throws ResourceException {
+		try {
+			InputStream xmlschema = ClassLoader.getSystemResourceAsStream("property_names.xml");
+			SAXBuilder xmlbuilder = new SAXBuilder();
+			this.xmlDocument = xmlbuilder.build(xmlschema);
+		} catch (JDOMException | IOException e) {
+			throw new ResourceException(e);
+		}
+
+		defaultValues = new Properties();
+		validNames = new TreeSet<String>();
+		ListIterator<Element> definitions = xmlDocument.getRootElement().getChildren().listIterator();
+		while (definitions.hasNext()) {
+			Element definition = definitions.next();
+			String propname = definition.getAttributeValue("name");
+			assert propname != null;
+			validNames.add(propname);
+			String defaultvalue = definition.getChildTextNormalize("default");
+			if (defaultvalue != null)
+				defaultValues.setProperty(propname, defaultvalue);
+		}				
+	}
+
+	/**
+	 * Returns the names of all properties
+	 */
+	public TreeSet<String> getValidNames() {
+		return this.validNames;
+	}
+	
+	/**
+	 * Returns default values for all properties defined in property_names.xml.
+	 */
+	public Properties getDefaultValues() {
+		return this.defaultValues;
+	}
+	
+	public boolean hasName(String name) {
+		return this.validNames.contains(name);
+	}
+	
+	public boolean hasDefault(String name) {
+		return this.defaultValues.containsKey(name);
+	}
+	
+	public String getDefault(String name) {
+		return hasDefault(name) ? defaultValues.getProperty(name) : null;
+	}
+	
 	public void printPropertiesTable() throws JDOMException, IOException {
 		System.out.println("| Property Name | Alternate Name | Notes / Description |");
 		System.out.println("| ------------- | -------------- | --------------------|");
-		ListIterator<Element> definitions = xmldocument.getRootElement().getChildren().listIterator();
+		ListIterator<Element> definitions = xmlDocument.getRootElement().getChildren().listIterator();
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
 			String propname = definition.getAttributeValue("name");
@@ -130,7 +171,7 @@ public class PropertiesSchema {
 		logger.debug(Log.INIT, "replacePropertyNames");
 		Hashtable<String,Boolean> consumed = new Hashtable<String,Boolean>();
 		Properties newProps = new Properties();
-		ListIterator<Element> definitions = xmldocument.getRootElement().getChildren().listIterator();
+		ListIterator<Element> definitions = xmlDocument.getRootElement().getChildren().listIterator();
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
 			String propname = definition.getAttributeValue("name");
