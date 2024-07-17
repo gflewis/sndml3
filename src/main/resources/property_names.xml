@@ -5,6 +5,7 @@
 <!DOCTYPE properties[
 <!ELEMENT properties (property*) >
 <!ATTLIST property name CDATA #REQUIRED >
+<!ATTLIST property hidden CDATA #IMPLIED >
 <!ELEMENT property (default?, alternate*, description) >
 <!ELEMENT alternate (#PCDATA) >
 <!ATTLIST alternate name CDATA #REQUIRED >
@@ -171,12 +172,13 @@
   <property name="daemon.interval">
     <default>60</default>
     <description>
-      Required if using `--daemon`
+      Recommended if using `--daemon`.
+      Default is 60.
     </description>
   </property>
   <property name="daemon.continue">
     <description>
-      Controls whether or not the agent will continue running after encountering 
+      Controls whether or not the daemon will continue running after encountering 
       an IO error in communication with ServiceNow or the database. 
       If “true” then it writes an error to the log and goes back to sleep. 
       If “false” then it will immediately abort.
@@ -184,6 +186,13 @@
   </property>
   <property name="daemon.pidfile">
     <description></description>
+  </property>
+  <property name="daemon.shutdown_seconds" hidden="true">
+    <default>30</default>
+    <description>
+      Seconds that the daemon will wait before aborting worker threads.
+      Default is 30.
+    </description>
   </property>
   <property name="server.port">
     <description>

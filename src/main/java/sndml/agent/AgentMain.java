@@ -23,13 +23,13 @@ public class AgentMain extends sndml.loader.Main {
 		
 		if (cmd.hasOption(optScan)) {
 			// Scan once
-			AgentDaemon daemon = new AgentDaemon(profile);
+			AgentDaemon daemon = new AgentDaemon(resources);
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
 			daemon.scanOnce();
 		}
 		else if (cmd.hasOption(optDaemon)) {
 			// Scan forever
-			AgentDaemon daemon = new AgentDaemon(profile);
+			AgentDaemon daemon = new AgentDaemon(resources);
 			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
 			daemon.runForever();
 		}

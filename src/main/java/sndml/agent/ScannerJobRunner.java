@@ -3,7 +3,7 @@ package sndml.agent;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import sndml.loader.ConnectionProfile;
+import sndml.loader.Resources;
 import sndml.util.Log;
 import sndml.util.Metrics;
 
@@ -16,10 +16,10 @@ public class ScannerJobRunner extends AppJobRunner {
 	final boolean onExceptionContinue;
 	
 
-	public ScannerJobRunner(AgentScanner scanner, ConnectionProfile profile, AppJobConfig config) {
-		super(profile, config);
+	public ScannerJobRunner(AgentScanner scanner, Resources resources, AppJobConfig config) {
+		super(resources, config);
 		this.scanner = scanner;
-		onExceptionContinue = profile.appProperties().getBoolean("continue", false);
+		onExceptionContinue = Boolean.parseBoolean(profile.getProperty("daemon.continue"));
 	}
 
 	@Override

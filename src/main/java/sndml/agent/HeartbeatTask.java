@@ -34,7 +34,7 @@ public class HeartbeatTask extends TimerTask {
 		} catch (IOException e) {
 			logger.error(Log.REQUEST, e.getMessage(), e);
 		}
-		logger.info(Log.PROCESS, "heartbeat okay");
+		logger.info(Log.PROCESS, "heartbeat sent");
 
 	}
 

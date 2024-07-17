@@ -19,6 +19,7 @@ import sndml.util.ResourceException;
 
 public abstract class AgentScanner extends TimerTask {
 
+	final Resources resources;
 	final ConnectionProfile profile;
 	final AppSession appSession;
 	final AppConfigFactory configFactory;	
@@ -40,17 +41,17 @@ public abstract class AgentScanner extends TimerTask {
 	 * @param profile - Used to establish ServiceNow and database connections.
 	 * @param workerPool - If null then jobs will be run sequentially in this thread.
 	 */
-	AgentScanner(ConnectionProfile profile) {
-		this.profile = profile;
+	AgentScanner(Resources resources) {
+		this.resources = resources;
+		this.profile = resources.getProfile();
 		this.agentName = AgentDaemon.getAgentName();
 		Log.setJobContext(agentName);		
-		this.appSession = profile.newAppSession();
+		this.appSession = resources.getAppSession();
 		this.configFactory = new AppConfigFactory(appSession);
 		assert agentName != null;
 		this.uriGetRunList = appSession.getAPI("getrunlist", agentName);
 		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
 		this.statusLogger = new AppStatusLogger(appSession);
-//		SchemaFactory.setSchemaReader(new AppSchemaReader(appSession));		
 	}
 		
 	@Override
@@ -61,7 +62,7 @@ public abstract class AgentScanner extends TimerTask {
 	 * as each job completes.
 	 */
 	public synchronized void run() {
-		boolean onExceptionContinue = profile.app.getBoolean("continue", false);
+		boolean onExceptionContinue = Boolean.parseBoolean(profile.getProperty("daemon.continue"));
 		Log.setJobContext(agentName);		
 		try {
 			scan();
@@ -101,7 +102,7 @@ public abstract class AgentScanner extends TimerTask {
 	protected abstract int getErrorLimit();
 	
 	public 	AppJobRunner createJob(AppJobConfig jobConfig) {
-		AppJobRunner job = new ScannerJobRunner(this, profile, jobConfig);
+		AppJobRunner job = new ScannerJobRunner(this, resources, jobConfig);
 		return job;
 	}	
 	

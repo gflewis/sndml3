@@ -11,8 +11,8 @@ public class MultiThreadScanner extends AgentScanner {
 
 	final WorkerPool workerPool;
 	
-	public MultiThreadScanner(ConnectionProfile profile, WorkerPool workerPool) {
-		super(profile);
+	public MultiThreadScanner(Resources resources, WorkerPool workerPool) {
+		super(resources);
 		this.workerPool = workerPool;
 	}
 	

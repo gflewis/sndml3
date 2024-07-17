@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import sndml.loader.ConfigParseException;
-import sndml.loader.ConnectionProfile;
+import sndml.loader.Resources;
 import sndml.util.Log;
 
 /**
@@ -13,8 +13,8 @@ import sndml.util.Log;
  */
 public class SingleThreadScanner extends AgentScanner {
 	
-	public SingleThreadScanner(ConnectionProfile profile) {
-		super(profile);
+	public SingleThreadScanner(Resources resources) {
+		super(resources);
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
+import sndml.loader.Resources;
 import sndml.util.Log;
 
 /**
@@ -26,6 +27,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	static private final Thread daemonThread = Thread.currentThread();
 	static private AgentDaemon daemon;
 
+	private final Resources resources;
 	private final ProcessHandle process;
 	private final ConnectionProfile profile;
 	private final String agentName;
@@ -43,12 +45,13 @@ public class AgentDaemon implements Daemon, Runnable {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@SuppressWarnings("static-access")
-	public AgentDaemon(ConnectionProfile profile) throws SQLException {
+	public AgentDaemon(Resources resources) throws SQLException {
+		this.resources = resources;
+		this.profile = resources.getProfile();
 		// This is a singleton class, so save me as a static variable
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
         this.daemon = this;
         this.process = ProcessHandle.current();
-		this.profile = profile;
 		this.agentName = profile.getAgentName();
 		this.threadCount = Integer.parseInt(profile.getProperty("daemon.threads"));
 		this.intervalSeconds = Integer.parseInt(profile.getProperty("daemon.interval"));
@@ -58,11 +61,11 @@ public class AgentDaemon implements Daemon, Runnable {
 		if (threadCount > 1) {
 			// TODO Move WorkerPool constructor to ResourceManager
 			this.executor = new WorkerPool(threadCount);
-			this.scanner = new MultiThreadScanner(profile, executor);
+			this.scanner = new MultiThreadScanner(resources, executor);
 		}
 		else {
 			this.executor = null;
-			this.scanner = new SingleThreadScanner(profile);
+			this.scanner = new SingleThreadScanner(resources);
 		}
 		assert agentName != null;
 		assert agentName != "";
@@ -87,7 +90,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	}
 	
 	public static ConnectionProfile getConnectionProfile() {
-		return getDaemon().profile;
+		return getDaemon().resources.getProfile();
 	}
 	
 	/**
