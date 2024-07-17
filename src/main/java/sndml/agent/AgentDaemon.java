@@ -213,7 +213,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	public void stop() {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.FINISH, "Begin stop");
-		int waitSec = profile.app.getInt("shutdown_seconds", 30);
+		int waitSec = Integer.parseInt(profile.getProperty("daemon.shutdown_seconds"));
 		// shutdownNow will send an interrupt to all threads
 		executor.shutdown();
 		isRunning = false;
