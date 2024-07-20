@@ -64,6 +64,7 @@
     <description>Required if using the **DataPump** app.</description>
   </property>
   <property name="app.scope">
+    <default>x_108443_sndml</default>
     <alternate name="daemon.scope" />
     <description>
       Optional. Default is `x_108443_sndml`.
