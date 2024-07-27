@@ -1,11 +1,9 @@
-package sndml.servicenow;
+package sndml.loader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import sndml.loader.ConnectionProfile;
 
 public class TestingProfile extends ConnectionProfile {
 
@@ -17,12 +15,18 @@ public class TestingProfile extends ConnectionProfile {
 	}
 	
 	/**
-	 * Get a file named ".sndml_profile" from the directory profiles/profileName/
-	 * Note that the profiles directory is NOT not stored in github it they may contain passwords.
+	 * Get a file named "sndml_profile" or ".sndml_profile" 
+	 * from the directory configs/profileName/
+	 * 
+	 * Note that the profiles directory is NOT not stored in github 
+	 * as it is likely to contain passwords.
 	 */
 	private static File getProfilePath(String profileName) {
+		File file;
 		Path directory = Paths.get("configs", profileName);
-		File file = directory.resolve(".sndml_profile").toFile();
+		file = directory.resolve("sndml_profile").toFile();
+		if (file.exists()) return file;
+		file = directory.resolve(".sndml_profile").toFile();		
 		return file;
 	}
 	

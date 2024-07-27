@@ -39,6 +39,7 @@ public class PruneTest {
 	@Test
 	public void testPrune() throws Exception {
 		TestManager.bannerStart("testPrune");
+		Resources resources = new Resources(profile);
 		String tableName = "incident";
 		Session session = TestManager.getProfile().newReaderSession();
 		Table tbl = session.table(tableName);
@@ -59,7 +60,7 @@ public class PruneTest {
 	    
 		TestManager.banner(logger, "Load");
 		DateTime testStarted = DateTime.now();
-		JobFactory jf = new JobFactory(profile, session, db.getDatabase(), testStarted);
+		JobFactory jf = new JobFactory(resources, testStarted);
 		assertTrue(db.tableExists(tableName));
 		JobRunner load = jf.yamlJob("{source: incident, action: load, truncate: true, created: 2020-01-01}");
 		Metrics loadMetrics = load.call();
@@ -71,7 +72,14 @@ public class PruneTest {
 			    
 	    TestManager.banner(logger,  "Delete");
 	    api.deleteRecord(key);
-		assertNull(api.getRecord(key));
+	    TableRecord deletedRecord = null;
+	    try {
+	    	deletedRecord = api.getRecord(key);
+	    }
+	    catch (NoContentException e) {
+	    	// No worries
+	    }
+		assertNull(deletedRecord);
 		logger.info(Log.TEST, "Deleted Incident " + key);
 	    TestManager.sleep(1.5);
 	    

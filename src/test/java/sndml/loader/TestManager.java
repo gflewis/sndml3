@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.loader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,15 +8,8 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import sndml.loader.ConfigParseException;
-//import sndml.loader.ResourceManager;
-import sndml.loader.YamlFile;
+import sndml.servicenow.Session;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 
 import org.slf4j.Logger;
@@ -28,12 +21,10 @@ public class TestManager {
 	static TestManager manager = null;
 	static final String TEST_PROPERTIES = "junit.properties";
 	static final Logger logger = LoggerFactory.getLogger(TestManager.class);
-		
-	Session defaultSession;
-	Properties testProperties;
-	TestingProfile currentProfile;
-	ObjectMapper jsonMapper = new ObjectMapper();
-	ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());	
+
+	private Properties testProperties;
+	private Resources currentResources;
+	private TestingProfile currentProfile;
 	
 	@SuppressWarnings("rawtypes")
 	Class classUnderTest;
@@ -53,7 +44,6 @@ public class TestManager {
 	}
 	
 	private static void _initialize() {
-
 		if (manager == null) manager = new TestManager();
 	}
 	
@@ -75,29 +65,47 @@ public class TestManager {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static TestingProfile setProfile(Class myclass, TestingProfile profile) {
+	public static Resources getDefaultResources(Class myclass) throws TestingException {
 		_initialize();
-		manager.classUnderTest = myclass;
-		manager.currentProfile = profile;
-//		ResourceManager.setTestManagerProfile(manager.currentProfile);
+		setDefaultProfile(myclass);
+		return manager.currentResources;		
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static TestingProfile setDefaultProfile(Class myclass) {
+		_initialize();
+		TestingProfile profile = getDefaultProfile();
+		setProfile(myclass, profile);
 		return profile;
 	}
 		
 	@SuppressWarnings("rawtypes")
-	public static TestingProfile setDefaultProfile(Class myclass) {
-		return setProfile(myclass, getDefaultProfile());
+	public static void setProfile(Class myclass, TestingProfile profile) {
+		_initialize();
+		manager.classUnderTest = myclass;
+		manager.currentProfile = profile;
+		manager.currentResources = new Resources(profile);
 	}
-	
+		
 	public static TestingProfile getProfile() {
 		_initialize();
 		return manager.currentProfile;
 	}
 	
-	public static void clearAll() {
+	public static Resources getResources() {
 		_initialize();
+		return manager.currentResources;
+	}
+	
+	public static Session getReaderSession() {
+		return getResources().getReaderSession();
+	}
+	
+	public static void clearAll() {
+		_initialize();		
 		manager.currentProfile = null;
+		manager.currentResources = null;
 		manager.classUnderTest = null;
-		manager.defaultSession = null;
 	}
 		
 	public static TestingProfile[] getProfiles(String names) {
@@ -191,29 +199,29 @@ public class TestManager {
 		bannerStart(cls, testName, null, config);
 	}
 	
-	@Deprecated
-	public static ObjectNode json(String text) throws ConfigParseException {
-		JsonNode node;
-		try {
-			node = manager.jsonMapper.readTree(text);
-		} catch (JsonProcessingException e) {
-			throw new ConfigParseException(e);
-		}
-		assert node.isObject();
-		return (ObjectNode) node;
-	}
+//	@Deprecated
+//	public static ObjectNode json(String text) throws ConfigParseException {
+//		JsonNode node;
+//		try {
+//			node = manager.jsonMapper.readTree(text);
+//		} catch (JsonProcessingException e) {
+//			throw new ConfigParseException(e);
+//		}
+//		assert node.isObject();
+//		return (ObjectNode) node;
+//	}
 	
-	@Deprecated
-	public static ObjectNode yaml(String text) throws ConfigParseException {		
-		JsonNode node;
-		try {
-			node = (ObjectNode) manager.yamlMapper.readTree(text);
-		} catch (JsonProcessingException e) {
-			throw new ConfigParseException(e);
-		}
-		assert node.isObject();
-		return (ObjectNode) node;
-	}
+//	@Deprecated
+//	public static ObjectNode yaml(String text) throws ConfigParseException {		
+//		JsonNode node;
+//		try {
+//			node = (ObjectNode) manager.yamlMapper.readTree(text);
+//		} catch (JsonProcessingException e) {
+//			throw new ConfigParseException(e);
+//		}
+//		assert node.isObject();
+//		return (ObjectNode) node;
+//	}
 	
 	public static String readFully(File file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));

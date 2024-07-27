@@ -1,6 +1,5 @@
 package sndml.loader;
 
-import sndml.servicenow.*;
 import sndml.util.Log;
 import sndml.util.Metrics;
 
@@ -78,7 +77,8 @@ public class InsertTest {
 		File metricsFile = new File("/tmp/load_twice.metrics");
 		TestManager.bannerStart(this.getClass(), "testInsertTwice", profile, yaml);
 		YamlLoaderConfig config = factory.loaderConfig(profile, yaml);
-		YamlLoader loader = new YamlLoader(profile, config);
+		Resources resources = new Resources(profile);
+		YamlLoader loader = new YamlLoader(resources, config);
 		loader.loadTables();
 		loadMetrics(metricsFile);
 		int rows = getMetric("load1.processed");

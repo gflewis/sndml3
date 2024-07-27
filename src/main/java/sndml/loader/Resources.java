@@ -16,23 +16,41 @@ import sndml.util.ResourceException;
 
 public class Resources {
 
-	protected final ConnectionProfile profile;
-	protected final boolean requiresAppSession;
-	protected final String agentName; // null if no agent
-	protected ReaderSession readerSession;
-	protected AppSession appSession;
-	protected SchemaReader schemaReader;
-	protected Generator generator;	
-	protected DatabaseWrapper dbWrapper;
-	protected java.sql.Connection sqlConnection;
+	private ConnectionProfile profile;
+	private boolean requiresAppSession;
+	private String agentName; // null if no agent
+	private ReaderSession readerSession;
+	private AppSession appSession;
+	private SchemaReader schemaReader;
+	private Generator generator;	
+	private DatabaseWrapper dbWrapper;
+	private java.sql.Connection sqlConnection;
 
 	private static final Logger logger = LoggerFactory.getLogger(Resources.class);
 	
 	public Resources(ConnectionProfile profile, boolean requiresAppSession) throws ResourceException {
 		assert profile != null;
 		this.profile = profile;
-		this.agentName = profile.getAgentName();
+		this.agentName = profile.getAgentName(); // null if no agent
 		this.requiresAppSession = requiresAppSession;
+	}
+	
+	public Resources(ConnectionProfile profile) throws ResourceException {
+		this.profile = profile;
+		this.agentName = profile.getAgentName();
+		this.requiresAppSession = profile.hasAgent();		
+	}
+	
+	void setProfile(ConnectionProfile profile) throws ResourceException {
+		this.profile = profile;
+		this.agentName = profile.getAgentName();
+		this.requiresAppSession = profile.hasAgent();
+		this.readerSession = null;
+		this.appSession = null;
+		this.schemaReader = null;
+		this.generator = null;
+		this.dbWrapper = null;
+		this.sqlConnection = null;
 	}
 	
 	/**
@@ -41,7 +59,7 @@ public class Resources {
 	public String getAgentName() {
 		return this.agentName;
 	}
-	
+		
 	public ConnectionProfile getProfile() {
 		return this.profile;
 	}

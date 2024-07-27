@@ -10,8 +10,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 
-import sndml.agent.*;
 import sndml.servicenow.*;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 
 @RunWith(Parameterized.class)
@@ -24,8 +24,9 @@ public class CreateTableTest {
 	}
 
 	TestingProfile profile;
-	AppSession session;
-	DatabaseWrapper database;
+	Session session;
+	DatabaseWrapper dbWrapper;
+	Resources resources;
 	Logger logger = TestManager.getLogger(this.getClass());
 	
 	public CreateTableTest(TestingProfile profile) throws Exception {
@@ -35,16 +36,17 @@ public class CreateTableTest {
 
 	@Before
 	public void openDatabase() throws Exception {
-		session = profile.newAppSession();
-		database = profile.newDatabaseWrapper();
+		resources = new Resources(profile);
+		session = resources.getReaderSession();
+		dbWrapper = resources.getDatabaseWrapper();				
 	}
 	
 	@After
 	public void closeDatabase() throws Exception {
 		if (session != null) session.close();
-		if (database != null) database.close();
+		if (dbWrapper != null) dbWrapper.close();
 		session = null;
-		database = null;
+		dbWrapper = null;
 	}
 	
 	@AfterClass
@@ -56,7 +58,9 @@ public class CreateTableTest {
 	public void testSchema_sys_template() throws Exception {
 		String tablename = "sys_template";
 		Table table = session.table(tablename);
-		TableSchema schema = session.getSchemaReader().getSchema(table.getName());
+		SchemaReader schemaReader = resources.getSchemaReader();
+		TableSchema schema = schemaReader.getSchema(table.getName());
+		
 		FieldNames schemaFields = schema.getFieldNames();
 		Log.setTableContext(table, "testSchema_sys_template");
 		FieldNames testFields = new FieldNames(
@@ -71,7 +75,7 @@ public class CreateTableTest {
 	public void testCreateTable_incident() throws Exception {
 		String tablename = "incident";
 		Table table = session.table(tablename);
-		Generator generator = database.getGenerator();		
+		Generator generator = dbWrapper.getGenerator();		
 		String sql = generator.getCreateTable(table);
 		logger.info(Log.TEST, sql);
 		Log.setTableContext(table, "testCreateTable_incident");
@@ -92,10 +96,10 @@ public class CreateTableTest {
 	public void testCreateTable_problem() throws Exception {				
 		String tablename = "problem";
 		Table table = session.table(tablename);
-		new DBUtil(database).dropTable(tablename);
-		assertFalse(database.tableExists(tablename));
-		database.createMissingTable(table, null);
-		assertTrue(database.tableExists(tablename));
+		new DBUtil(dbWrapper).dropTable(tablename);
+		assertFalse(dbWrapper.tableExists(tablename));
+		dbWrapper.createMissingTable(table, null);
+		assertTrue(dbWrapper.tableExists(tablename));
 		Log.setTableContext(table, "testCreateTable_problem");
 	}
 	
@@ -103,7 +107,7 @@ public class CreateTableTest {
 	public void testCreateTable_sys_template() throws Exception {
 		String tablename = "sys_template";
 		Table table = session.table(tablename);
-		Generator generator = database.getGenerator();		
+		Generator generator = dbWrapper.getGenerator();		
 		String sql = generator.getCreateTable(table);		
 		Log.setTableContext(table, "testCreateTable_sys_template");
 		logger.info(Log.TEST, sql);

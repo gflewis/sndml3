@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import sndml.loader.ConnectionProfile;
+import sndml.loader.TestManager;
 import sndml.util.Metrics;
 
 public class RestTableReaderTest {
@@ -14,7 +16,8 @@ public class RestTableReaderTest {
 	final Session session;
 	
 	public RestTableReaderTest() {
-		session = TestManager.getDefaultProfile().newReaderSession();
+		ConnectionProfile profile = TestManager.setDefaultProfile(this.getClass());
+		session = profile.newReaderSession();
 	}
 
 	@Test

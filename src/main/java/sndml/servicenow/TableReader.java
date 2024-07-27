@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.util.DateTimeRange;
+import sndml.util.FieldNames;
 import sndml.util.Metrics;
 
 public abstract class TableReader implements Callable<Metrics> {

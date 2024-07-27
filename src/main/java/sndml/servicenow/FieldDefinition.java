@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import sndml.util.FieldNames;
+
 /**
  * Contains data type information for a single field in a ServiceNow table.
  * @author Giles Lewis

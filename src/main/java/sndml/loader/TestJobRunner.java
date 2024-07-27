@@ -8,17 +8,17 @@ import sndml.util.ResourceException;
 /**
  * Used for JUnit Tests
  */
-public class TestJobRunner extends JobRunner {
 
+public class TestJobRunner extends JobRunner {
+	
 	public TestJobRunner(ConnectionProfile profile, JobConfig config) 
 			throws ResourceException, SQLException {
-		super(profile.newReaderSession(), profile.newDatabaseWrapper(), config);
+		super(new Resources(profile), config);
 	}
 	
 	public TestJobRunner(ConnectionProfile profile, YamlFile file) 
 			throws IOException, ConfigParseException, ResourceException, SQLException {
-		super(profile.newReaderSession(), profile.newDatabaseWrapper(), file.getJobConfig(profile));
+		super(new Resources(profile), file.getJobConfig(profile));
 	}
 	
-
 }

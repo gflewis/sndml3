@@ -1,4 +1,4 @@
-package sndml.servicenow;
+package sndml.loader;
 
 /**
  * An exception thrown by the unit testing framework.

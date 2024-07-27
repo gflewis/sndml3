@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import sndml.loader.TestManager;
+
 public class GetRecordTest {
 
 	Session session;

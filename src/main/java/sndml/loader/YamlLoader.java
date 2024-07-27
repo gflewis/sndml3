@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
-import sndml.servicenow.*;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ResourceException;
@@ -25,8 +24,7 @@ import sndml.util.ResourceException;
 public class YamlLoader {
 
 	static ConfigFactory factory = new ConfigFactory();
-	final Session session;
-	final DatabaseWrapper database;
+	final Resources resources;
 	YamlLoaderConfig config;
 	File metricsFile = null;
 	PrintWriter statsWriter;
@@ -35,27 +33,25 @@ public class YamlLoader {
 	
 	static final Logger logger = LoggerFactory.getLogger(YamlLoader.class);
 
-	YamlLoader(ConnectionProfile profile, File yamlFile) throws ResourceException, SQLException, IOException {
-		this(profile, new FileReader(yamlFile));
+	YamlLoader(Resources resources, File yamlFile) throws ResourceException, SQLException, IOException {
+		this(resources, new FileReader(yamlFile));
 	}
 	
-	YamlLoader(ConnectionProfile profile, FileReader reader) throws ResourceException, SQLException, IOException {
-		this(profile, factory.loaderConfig(profile, reader));
+	YamlLoader(Resources resources, FileReader reader) throws ResourceException, SQLException, IOException {
+		this(resources, factory.loaderConfig(resources.getProfile(), reader));
 	}
 	
-	YamlLoader(ConnectionProfile profile, YamlLoaderConfig config) throws ResourceException, SQLException {
-		this.session = profile.newReaderSession();
-//		this.database = profile.newDatabaseConnection();
-		this.database = new DatabaseWrapper(profile);
+	YamlLoader(Resources resources, YamlLoaderConfig config) {
+		this.resources = resources;
 		this.config = config;
 		this.metricsFile = config.getMetricsFile();
-//		SchemaFactory.setSchemaReader(new TableSchemaReader(this.session));
 		for (JobConfig jobConfig : config.getJobs()) {
-			JobRunner runner = new JobRunner(session, database, jobConfig);
+			JobRunner runner = new JobRunner(resources, jobConfig);
 			jobs.add(runner);
 		}
+		
 	}
-	
+		
 	JobRunner getJob(int index) {
 		return jobs.get(index);
 	}

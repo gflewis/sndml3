@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import sndml.util.FieldNames;
+
 public class TableSchema {
 
 	final protected Table table;

@@ -5,38 +5,46 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.sql.SQLException;
 
 import sndml.servicenow.Session;
-import sndml.util.DateTime;
-import sndml.util.ResourceException;
+import sndml.util.DateTime;;
 
 public class JobFactory {
-
+	
+	final Resources resources;
 	final ConnectionProfile profile;
 	final Session session;
 	final DatabaseWrapper database;	
 	final DateCalculator dateCalculator;
 	ConfigFactory configFactory = new ConfigFactory();
 	
-	public JobFactory(ConnectionProfile profile, DateTime start)
-			throws ResourceException, SQLException {
-		this(profile, profile.newReaderSession(), new DatabaseWrapper(profile), start);
+	public JobFactory(Resources resources, DateTime start) {
+		this.resources = resources;
+		this.profile = resources.getProfile();
+		this.session = resources.getReaderSession();
+		this.database = resources.getDatabaseWrapper();
+		this.dateCalculator = new DateCalculator(start);		
 	}
 	
-	public JobFactory(ConnectionProfile profile, Session session, DatabaseWrapper database, DateTime start) {
-		this.profile = profile;
-		this.session = session;
-		this.database = database;		
-		dateCalculator = new DateCalculator(start);
-	}
+//	@Deprecated
+//	public JobFactory(ConnectionProfile profile, DateTime start)
+//			throws ResourceException, SQLException {
+//		this(profile, profile.newReaderSession(), new DatabaseWrapper(profile), start);
+//	}
+//	
+//	public JobFactory(ConnectionProfile profile, Session session, DatabaseWrapper database, DateTime start) {
+//		this.profile = profile;
+//		this.session = session;
+//		this.database = database;		
+//		dateCalculator = new DateCalculator(start);
+//	}
 	
 	public JobRunner yamlJob(Reader yamlReader) 
 			throws ConfigParseException, IOException {
 		JobConfig config = configFactory.yamlJob(profile, yamlReader);
 		config.initialize(profile, dateCalculator);
 		config.validate();
-		return new JobRunner(session, database, config);
+		return new JobRunner(resources, config);
 	}
 	
 	public JobRunner yamlJob(File yamlFile) 

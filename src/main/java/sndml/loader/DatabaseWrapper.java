@@ -16,6 +16,7 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.PropertySet;
 import sndml.util.ResourceException;
@@ -32,13 +33,9 @@ import sndml.util.ResourceException;
  */
 public class DatabaseWrapper {
 
-//	private final ConnectionProfile profile;
-//	private final String dburl;
-//	private final URI dbURI;
 	private final String protocol;
 	private final Calendar calendar;
 	private final String dbuser;
-//	private final String dbpass;
 	private final boolean warnOnTruncate;
 	private final String schema;
 	
@@ -105,48 +102,12 @@ public class DatabaseWrapper {
 		assert this.dbc != null;
 		
 	}
-	
-	@Deprecated
-	public DatabaseWrapper(ConnectionProfile profile) throws SQLException {
-		assert profile != null;
-//		this.profile = profile;
-		PropertySet properties = profile.database;
-		String dburl = properties.getProperty("url", null);
-		assert dburl != null : "Property database.url not found";
-		URI dbURI;
-		try {
-			dbURI = new URI(dburl);
-		} catch (URISyntaxException e) {
-			throw new ResourceException(e);
-		}
-		this.protocol = getProtocol(dbURI);
-		this.dbuser = properties.getProperty("username", null);
-		String dbpass = properties.getProperty("password", "");
-		schema = profile.database.getProperty("schema", null);
-		
-		assert schema==null || schema.length() > 0;
 
-		// If timezone is not specified then use "GMT"
-		// If timezone is "default" then use time zone of virtual machine
-		String timezone = properties.getProperty("timezone", "GMT");
-		this.calendar = 
-			timezone.equalsIgnoreCase("default") ? null :
-			Calendar.getInstance(TimeZone.getTimeZone(timezone));
-		
-		String logmsg = "database=" + dburl;
-		logmsg += " " + timezone;
-		logmsg += " user=" + dbuser;
-		
-		if (schema != null) logmsg += " schema=" + getSchema();
-				
-		logger.info(Log.INIT, logmsg);
-		this.warnOnTruncate = profile.loaderProperties().getBoolean("warn_on_truncate", true);
-				
-		this.generator = new Generator(profile);
-		
-		this.dbc = this.open(dburl, dbuser, dbpass);		
-		assert this.generator != null;
-		assert this.dbc != null;
+	// Used for JUnit tests
+	@Deprecated
+	DatabaseWrapper(ConnectionProfile profile) 
+			throws ResourceException, SQLException {
+		this(profile, new Generator(profile));
 	}
 		
 	/**
@@ -201,6 +162,10 @@ public class DatabaseWrapper {
 	boolean isMySQL() {
 		return "mysql".equalsIgnoreCase(protocol);
 	}
+	
+	boolean isSQLite() {
+		return "sqlite".equalsIgnoreCase(protocol);
+	}
 		
 	boolean isAutoCommitEnabled() {
 		return generator.getAutoCommit();
@@ -209,12 +174,7 @@ public class DatabaseWrapper {
 	boolean getWarnOnTruncate() {
 		return this.warnOnTruncate;
 	}
-	
-//	@Deprecated
-//	URI getURI() {
-//		return this.dbURI;
-//	}
-	
+		
 	String getProtocol() {
 		return this.protocol;
 	}

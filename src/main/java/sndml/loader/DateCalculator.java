@@ -37,7 +37,7 @@ public class DateCalculator {
 	}
 	
 	public DateCalculator(DateTime start) {
-		this.start = start;
+		this.start = start==null ? DateTime.now() : start;;
 		this.last = null;
 	}
 	
@@ -128,33 +128,7 @@ public class DateCalculator {
 			return getLast();
 		}
 		throw new ConfigParseException("Invalid name: " + name);
-		/*
-		// Functionality removed in 3.4
-		if (name.toLowerCase().startsWith("last.")) {
-			name = name.substring(5);
-			return getLast(name);
-		}
-		return getLast(name);
-		*/
 	}
-
-	/*
-	 * Get a DateTime value from the metrics (properties) file.
-	 *
-	private DateTime getLast(String propName) throws ConfigParseException {
-		assert propName != null;
-		Properties values = getLastValues();
-		if (values == null) {
-			String message = String.format("No metrics file; unable to determine last \"%s\"", propName);
-			logger.error(Log.INIT, message);
-			throw new ConfigParseException(message);
-		}
-		String propValue = values.getProperty(propName);
-		if (propValue == null) 
-			throw new ConfigParseException("Property not found: " + propName);
-		return new DateTime(propValue);
-	}
-	*/
 	
 	private DateTime getExpr(String text) throws ConfigParseException {
 		Matcher m = exprPattern.matcher(text);

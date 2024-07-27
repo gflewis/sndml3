@@ -3,6 +3,8 @@ package sndml.servicenow;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+import sndml.loader.TestManager;
+
 public class SessionIDTest {
 
 	@Test

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.Metrics;
 

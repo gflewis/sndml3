@@ -27,18 +27,25 @@ public class YamlFile extends File {
 		JobConfig config = factory.yamlJob(profile, this);
 		return config;		
 	}
-	
-	public JobRunner getJobRunner(ConnectionProfile profile) 
-			throws ConfigParseException, IOException, ResourceException, SQLException {
-		JobFactory jf = new JobFactory(profile, DateTime.now());
+		
+	public JobRunner getJobRunner(Resources resources) 
+			throws ConfigParseException, IOException {
+		JobFactory jf = new JobFactory(resources, DateTime.now());
 		return jf.yamlJob(this);
+	}
+	
+	public YamlLoader getLoader(Resources resources) throws ConfigParseException, IOException {
+		ConfigFactory factory = new ConfigFactory();
+		YamlLoaderConfig config = factory.loaderConfig(null, this);
+		return new YamlLoader(resources, config);		
 	}
 	
 	public YamlLoader getLoader(ConnectionProfile profile) 
 			throws ConfigParseException, IOException, ResourceException, SQLException {
-		ConfigFactory factory = new ConfigFactory();
-		YamlLoaderConfig config = factory.loaderConfig(null, this);
-		return new YamlLoader(profile, config);
+//		ConfigFactory factory = new ConfigFactory();
+//		YamlLoaderConfig config = factory.loaderConfig(null, this);
+//		return new YamlLoader(new Resources(profile), config);
+		return getLoader(new Resources(profile));
 	}
 	
 	/**

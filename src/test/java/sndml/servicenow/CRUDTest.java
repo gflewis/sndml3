@@ -12,6 +12,8 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.loader.TestManager;
+import sndml.loader.TestingProfile;
 import sndml.util.DateTime;
 import sndml.util.FieldValues;
 import sndml.util.Log;
@@ -31,7 +33,7 @@ public class CRUDTest {
 	public CRUDTest(TestingProfile profile) throws IOException {
 		TestManager.setProfile(this.getClass(), profile);
 		this.profile = profile;
-		this.session = profile.newReaderSession();
+		this.session = profile.newReaderSession();		
 	}
 
 	@AfterClass

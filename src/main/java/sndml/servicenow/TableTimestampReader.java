@@ -1,5 +1,7 @@
 package sndml.servicenow;
 
+import sndml.util.FieldNames;
+
 /**
  * Class to read values of sys_id, sys_created_on and sys_updated_on
  * from a ServiceNow table.

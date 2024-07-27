@@ -2,6 +2,8 @@ package sndml.servicenow;
 
 import org.jdom2.*;
 
+import sndml.util.FieldNames;
+
 import java.util.*;
 
 

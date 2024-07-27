@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.loader.TestManager;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.Metrics;
 

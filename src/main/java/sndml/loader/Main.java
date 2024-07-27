@@ -112,7 +112,7 @@ public class Main {
 			File yamlFile = new File(yamlFileName);
 			String yamlText = Files.readString(yamlFile.toPath());
 			logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
-			YamlLoader loader = new YamlLoader(profile, yamlFile);
+			YamlLoader loader = new YamlLoader(resources, yamlFile);
 			loader.loadTables();
 		}
 		if (requiresApp) {

@@ -10,6 +10,7 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.slf4j.LoggerFactory;
 
+import sndml.util.FieldNames;
 import sndml.util.Log;
 
 import org.slf4j.Logger;

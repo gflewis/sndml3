@@ -253,8 +253,15 @@ public abstract class DatabaseStatement {
 			stmt.setShort(bindCol, Short.parseShort(value));
 			break;			
 		case Types.INTEGER :
-			value = truncate(fieldname, value);
-			stmt.setInt(bindCol, Integer.parseInt(value));
+			// SQLite uses Integer data type to hold Booleans
+			if (value.equalsIgnoreCase("true"))
+				stmt.setBoolean(bindCol, true);
+			else if (value.equalsIgnoreCase("false"))
+				stmt.setBoolean(bindCol,  false);
+			else {
+				value = truncate(fieldname, value);
+				stmt.setInt(bindCol, Integer.parseInt(value));				
+			}
 			break;
 		case Types.BIGINT:
 			stmt.setLong(bindCol, Long.parseLong(value));

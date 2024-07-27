@@ -68,11 +68,11 @@ public class AppSession extends Session {
 	 * Return the URI of an API. This will be dependent on the application scope
 	 * which is available from the property app.scope.
 	 */
-	public URI getAPI(String apiName) {
+	URI getAPI(String apiName) {
 		return getAPI(apiName, null);
 	}
 	
-	public URI getAPI(String apiName, String parameter) {
+	URI getAPI(String apiName, String parameter) {
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);

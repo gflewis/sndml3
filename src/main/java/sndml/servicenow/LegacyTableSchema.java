@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 
 /**

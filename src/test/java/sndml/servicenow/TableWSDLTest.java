@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
 
+import sndml.loader.TestManager;
+
 import static org.junit.Assert.*;
 
 public class TableWSDLTest {

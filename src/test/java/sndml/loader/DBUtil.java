@@ -1,6 +1,5 @@
 package sndml.loader;
 
-import sndml.servicenow.*;
 import sndml.util.Log;
 
 import static org.junit.Assert.*;
@@ -15,15 +14,19 @@ import java.sql.Statement;
 
 public class DBUtil {
 		
-	DatabaseWrapper db;
+	DatabaseWrapper dbWrapper;	
 	Logger logger = TestManager.getLogger(DBUtil.class);
 
-	DBUtil(DatabaseWrapper database) {
-		this.db = database;		
+	DBUtil(DatabaseWrapper dbWrapper) {
+		this.dbWrapper = dbWrapper;		
+	}
+	
+	DBUtil(Resources resources) {
+		this.dbWrapper = resources.getDatabaseWrapper();
 	}
 	
 	DBUtil(TestingProfile profile) throws SQLException, URISyntaxException {
-		this(profile.newDatabaseWrapper());
+		this(new Resources(profile));
 	}
 	
 	DBUtil() throws SQLException, URISyntaxException {
@@ -31,21 +34,21 @@ public class DBUtil {
 	}
 	
 	DatabaseWrapper getDatabase() {
-		return this.db;
+		return this.dbWrapper;
 	}
 	
 	/**
 	 * Execute an SQL statement
 	 */
 	int sqlUpdate(String sql) throws SQLException {
-		Connection dbc = db.getConnection();
+		Connection dbc = dbWrapper.getConnection();
 		assertNotNull(dbc);
 		logger.debug(Log.TEST, "sqlUpdate \"" + sql + "\"");
 		Statement stmt = dbc.createStatement();
 		int count = 0;
 		try {
 			count = stmt.executeUpdate(sql);
-			db.commit();
+			dbWrapper.commit();
 		} catch (SQLException e) {
 			logger.error(Log.TEST, sql, e);
 			throw e;
@@ -59,7 +62,7 @@ public class DBUtil {
 	 */
 	void truncateTable(String tablename) throws SQLException {		
 		logger.info(Log.TEST, "begin truncateTable " + tablename);
-		db.truncateTable(tablename);		
+		dbWrapper.truncateTable(tablename);		
 		logger.info(Log.TEST, "end truncateTable " + tablename);
 	}
 	
@@ -68,41 +71,41 @@ public class DBUtil {
 	 */
 	void dropTable(String tablename) throws SQLException {
 		logger.info(Log.TEST, "begin dropTable " + tablename);
-		db.dropTable(tablename, true);
+		dbWrapper.dropTable(tablename, true);
 		logger.info(Log.TEST, "end dropTable " + tablename);
 	}
 	
 	boolean tableExists(String tablename) throws SQLException {
-		return db.tableExists(tablename);
+		return dbWrapper.tableExists(tablename);
 	}
 	
 	void commit() throws SQLException {
-		db.commit();
+		dbWrapper.commit();
 	}
 	
 
 	int sqlCount(String tablename, String where) throws SQLException {
-		String query = "select count(*) from " + db.qualifiedName(tablename);
+		String query = "select count(*) from " + dbWrapper.qualifiedName(tablename);
 		if (where != null) query += " where " + where;
 		return sqlCount(query);
 	}
 	
 	int sqlCount(String query) throws SQLException {		
-		db.commit();
-		Statement stmt = db.getConnection().createStatement();
+		dbWrapper.commit();
+		Statement stmt = dbWrapper.getConnection().createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		rs.next();
 		int count = rs.getInt(1);
 		rs.close();
-		db.commit();
+		dbWrapper.commit();
 		logger.info(query + " (" + count + ")");
 		return count;
 	}
 
 	
 	ResultSet getRow(String query) throws SQLException {
-		db.commit();
-		Statement stmt = db.getConnection().createStatement();
+		dbWrapper.commit();
+		Statement stmt = dbWrapper.getConnection().createStatement();
 		ResultSet rs = stmt.executeQuery(query);
 		rs.next();
 		return rs;		

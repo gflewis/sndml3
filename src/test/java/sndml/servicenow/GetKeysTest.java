@@ -2,6 +2,8 @@ package sndml.servicenow;
 
 import org.slf4j.Logger;
 
+import sndml.loader.TestManager;
+import sndml.loader.TestingProfile;
 import sndml.util.Log;
 import sndml.util.Metrics;
 

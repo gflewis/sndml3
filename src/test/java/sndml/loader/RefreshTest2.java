@@ -19,7 +19,7 @@ import sndml.util.Metrics;
 @RunWith(Parameterized.class)
 public class RefreshTest2 {
 
-	final TestingProfile profile;
+	final Resources resources;	
 	final Logger logger = TestManager.getLogger(this.getClass());
 	
 	@Parameters(name = "{index}:{0}")
@@ -28,8 +28,9 @@ public class RefreshTest2 {
 	}
 	
 	public RefreshTest2(TestingProfile profile) throws Exception {
-		this.profile = profile;
 		TestManager.setProfile(this.getClass(), profile);
+		this.resources = TestManager.getResources();
+		
 	}
 	
 	@Before
@@ -43,10 +44,9 @@ public class RefreshTest2 {
 	@Test
 	public void testRefresh() throws Exception {
 		String tableName = "incident";
-		Session session = profile.newReaderSession();
-		DBUtil db = new DBUtil(profile);
-		JobFactory jf = new JobFactory(profile, session, db.getDatabase(), DateTime.now());		
-		TableAPI api = profile.newReaderSession().table(tableName).api();
+		DBUtil db = new DBUtil(resources);
+		JobFactory jf = new JobFactory(resources, DateTime.now());		
+		TableAPI api = resources.getReaderSession().table(tableName).api();
 	    TestManager.banner(logger, "Load");
 		db.dropTable(tableName);
 		JobRunner create = jf.yamlJob("{source: incident, action: create}");

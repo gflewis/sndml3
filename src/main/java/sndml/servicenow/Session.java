@@ -73,6 +73,8 @@ public class Session {
 		logger.info(Log.INIT, msg);
 	}
 
+	@Deprecated
+	// Use {@link Resources.getSchemaReader()}
 	public SchemaReader getSchemaReader() {
 		if (schemaReader == null) {
 			schemaReader = new TableSchemaReader(this);

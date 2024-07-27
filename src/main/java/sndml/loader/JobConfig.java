@@ -20,6 +20,7 @@ import sndml.agent.AppJobStatus;
 import sndml.servicenow.*;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 
 @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)

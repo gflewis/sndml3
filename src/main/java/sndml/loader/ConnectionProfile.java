@@ -203,9 +203,8 @@ public class ConnectionProfile {
 	
 	/** 
 	 * Opens and returns a new connection to the ServiceNow instance.
-	 * @return
+	 * Used for JUnit tests.
 	 */
-	@Deprecated
 	public synchronized ReaderSession newReaderSession() throws ResourceException {
 		ReaderSession session = new ReaderSession(reader);
 		lastReaderSession = session;
@@ -283,13 +282,15 @@ public class ConnectionProfile {
 		return server.getInt("threads", DEFAULT_THREAD_COUNT);
 	}
 	
+	private static final String APP_AGENT = "app.agent";
+	
 	public boolean hasAgent() {
-		return app.hasProperty("agent");
+		return hasProperty(APP_AGENT);
 		
 	}
 	
 	public String getAgentName() {
-		return app.getProperty("agent");
+		return hasProperty(APP_AGENT) ? getProperty(APP_AGENT) : null;
 	}
 	
 	/**

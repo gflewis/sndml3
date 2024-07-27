@@ -9,8 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import sndml.servicenow.TestManager;
-import sndml.servicenow.TestingProfile;
 import sndml.util.Log;
 
 public class YamlParseErrorTest {

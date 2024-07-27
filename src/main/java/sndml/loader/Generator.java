@@ -12,6 +12,7 @@ import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
+import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.ResourceException;
 
