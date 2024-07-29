@@ -31,7 +31,7 @@ public class AgentJobModel {
 	}
 	
 	public AppJobConfig getConfig(RecordKey jobKey) throws IOException {
-		URI uriGetRun = appSession.getAPI("getrun", jobKey.toString());		
+		URI uriGetRun = appSession.uriGetJobRun(jobKey);		
 		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
 		ObjectNode response = request.execute();
 		logger.debug(Log.RESPONSE, response.toPrettyString());

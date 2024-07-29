@@ -22,8 +22,7 @@ public class HeartbeatTask extends TimerTask {
 	public HeartbeatTask(Resources resources) {
 		this.appSession = resources.getAppSession();
 		this.agentName = resources.getAgentName();		
-		// this.uri = appSession.getAPI("getrunlist", agentName);
-		this.uri = appSession.getAPI("agent", agentName);
+		this.uri = appSession.uriGetAgent();
 	}
 
 	@Override

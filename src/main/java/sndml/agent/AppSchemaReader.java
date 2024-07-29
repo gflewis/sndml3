@@ -30,7 +30,7 @@ public class AppSchemaReader implements SchemaReader {
 		assert tablename != null;
 		Table table = appSession.table(tablename);
 		TableSchema schema = new TableSchema(table);
-		URI apiTableSchema = appSession.getAPI("gettableschema", tablename);
+		URI apiTableSchema = appSession.uriGetTableSchema(tablename);
 		JsonRequest request = new JsonRequest(appSession, apiTableSchema);
 		ObjectNode response = request.execute();
 		JsonNode result = response.get("result");

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.agent.request.GetJobRunList;
 import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
@@ -26,10 +27,9 @@ public abstract class AgentScanner extends TimerTask {
 	final AppStatusLogger statusLogger;
 	final String agentName;
 	final URI uriGetRunList;
-	final URI uriPutRunStatus;
 	int errorCount = 0;
 	
-	final Logger logger = LoggerFactory.getLogger(AgentScanner.class);
+	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	final static public String THREAD_NAME = "scanner";
 	final static int ERROR_LIMIT = 3;
@@ -49,8 +49,7 @@ public abstract class AgentScanner extends TimerTask {
 		this.appSession = resources.getAppSession();
 		this.configFactory = new AppConfigFactory(appSession);
 		assert agentName != null;
-		this.uriGetRunList = appSession.getAPI("getrunlist", agentName);
-		this.uriPutRunStatus = appSession.getAPI("putrunstatus");
+		this.uriGetRunList = appSession.uriGetJobRunList();
 		this.statusLogger = new AppStatusLogger(appSession);
 	}
 		
@@ -139,7 +138,7 @@ public abstract class AgentScanner extends TimerTask {
 				AppJobConfig jobConfig = configFactory.jobConfig(profile, obj);
 				logger.info(Log.INIT, jobConfig.toString());
 				try {
-					setStatus(runKey, AppJobStatus.PREPARE);
+					statusLogger.setStatus(runKey, AppJobStatus.PREPARE);
 				} catch (JobCancelledException e) {
 					logger.warn(Log.FINISH, "Job Cancel Detected");
 					cancelDetected = true;
@@ -156,7 +155,7 @@ public abstract class AgentScanner extends TimerTask {
 	
 	ArrayNode getRunList() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
-		GetRunListRequest request = new GetRunListRequest(appSession, agentName);
+		GetJobRunList request = new GetJobRunList(appSession, agentName);
 		ArrayNode runlist = request.getRunList();
 		if (runlist == null || runlist.size() == 0) {
 			logger.info(Log.INIT, "Nothing ready");			
@@ -166,11 +165,7 @@ public abstract class AgentScanner extends TimerTask {
 		}		
 		return runlist;		
 	}
-	
-	void setStatus(RecordKey runKey, AppJobStatus status) throws JobCancelledException, IOException {
-		statusLogger.setStatus(runKey, status);
-	}	
-	
+		
 	String getNumbers(ArrayNode runlist) {		
 		ArrayList<String> numbers = new ArrayList<String>();
 		for (JsonNode node : runlist) {

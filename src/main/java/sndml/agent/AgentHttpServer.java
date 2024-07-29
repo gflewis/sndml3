@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.net.httpserver.HttpServer;
 
+import sndml.agent.request.GetJobRunList;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
@@ -21,6 +22,7 @@ import sndml.util.MissingPropertyException;
 public class AgentHttpServer {
 
 	static HttpServer server;
+	final Resources resources;
 	final int port;
 	final int backlog;
 	final String agentName;
@@ -34,10 +36,11 @@ public class AgentHttpServer {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public AgentHttpServer(Resources resources) throws IOException {
+		this.resources = resources;
 		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
-		GetRunListRequest getRunList = 
-			new GetRunListRequest(resources.getAppSession(), agentName);
+		GetJobRunList getRunList = 
+			new GetJobRunList(resources.getAppSession(), agentName);
 		getRunList.execute();
 		agentKey = getRunList.getAgentKey();				
 		
@@ -66,6 +69,9 @@ public class AgentHttpServer {
 	public void start() {
 		logger.info(Log.INIT, String.format("start port=%d", port));		
 		server.start();
+		// TODO This is WRONG. The ShutdownHook needs to be in the handler.
+		ShutdownHook shutdownHook = new ShutdownHook(server, resources);
+		Runtime.getRuntime().addShutdownHook(shutdownHook);			
         heartbeatTimer.schedule(this.heartbeatTask, 0, 1000 * heartbeatInterval);		
 	}
 	

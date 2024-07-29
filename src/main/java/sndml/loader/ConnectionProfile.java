@@ -132,8 +132,8 @@ public class ConnectionProfile {
 
 	/*
 	 * Return a property value from the profile.
-	 * If property is not found, then return default value from property_names.xml.
-	 * If property is not in property_names.xml then throw IllegalArgumentException.
+	 * If name is not in property_names.xml then throw IllegalArgumentException.
+	 * If value is not found, then return default value from property_names.xml.
 	 */
 	public String getProperty(String name) {
 		if (!isValidName(name)) 
@@ -152,6 +152,7 @@ public class ConnectionProfile {
 		return this.app; 
 	}
 	
+	@Deprecated
 	public PropertySet daemonProperties() {
 		return this.daemon; 
 	}
@@ -172,6 +173,7 @@ public class ConnectionProfile {
 		return this.reader; 
 	}
 	
+	@Deprecated
 	public PropertySet serverProperties() { 
 		return this.server; 
 	}
@@ -191,9 +193,7 @@ public class ConnectionProfile {
 	public String getFileName() {
 		return pathName;
 	}
-
-
-		
+	
 	/**
 	 * Return the URL of the ServiceNow
 	 */
@@ -276,21 +276,35 @@ public class ConnectionProfile {
 		return database;
 	}
 
-	private final int DEFAULT_THREAD_COUNT = 3;
-	
-	public int getThreadCount() {
-		return server.getInt("threads", DEFAULT_THREAD_COUNT);
-	}
-	
-	private static final String APP_AGENT = "app.agent";
+	private final String APP_AGENT = "app.agent";
 	
 	public boolean hasAgent() {
-		return hasProperty(APP_AGENT);
-		
+		return hasProperty(APP_AGENT);		
 	}
 	
 	public String getAgentName() {
 		return hasProperty(APP_AGENT) ? getProperty(APP_AGENT) : null;
+	}
+
+	/**
+	 * Get the size of the worker pool.
+	 */
+	public int getThreadCount() {
+		return Integer.parseInt(getPropertyNotNull("server.threads"));
+	}
+	
+	public String getPidFileName() {
+		return getProperty("server.pidfile");
+	}
+	
+	public int getInterval() {
+		return Integer.parseInt(getPropertyNotNull("daemon.interval"));
+	}
+	
+	protected String getPropertyNotNull(String name) {
+		String value = getProperty(name);
+		assert value != null : "No default value for " + name;
+		return value;
 	}
 	
 	/**

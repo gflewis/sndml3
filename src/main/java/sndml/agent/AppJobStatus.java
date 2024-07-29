@@ -12,4 +12,5 @@ public enum AppJobStatus {
 	COMPLETE,
 	RENAME,
 	CANCELLED,
+	FAILED
 }

@@ -20,7 +20,6 @@ public class AppProgressLogger extends ProgressLogger {
 
 	final ConnectionProfile profile;
 	final AppSession appSession;
-	final URI putRunStatusURI;
 	final String number;
 	final RecordKey runKey;
 	final Logger logger = LoggerFactory.getLogger(this.getClass());	
@@ -33,7 +32,7 @@ public class AppProgressLogger extends ProgressLogger {
 			RecordKey runKey) {
 		this(profile, appSession, metrics, number, runKey, null);
 		logger.debug(Log.INIT, String.format(
-			"URI=%s sys_id=%s", putRunStatusURI, runKey));
+			"URI=%s sys_id=%s", appSession.uriPutJobRun().toString(), runKey));
 	}
 	
 	AppProgressLogger(
@@ -49,8 +48,6 @@ public class AppProgressLogger extends ProgressLogger {
 		this.appSession = appSession;
 		this.number = number;
 		this.runKey = runKey;
-		// this.putRunStatusURI = profile.getAPI("putrunstatus");
-		this.putRunStatusURI = appSession.getAPI("putrunstatus");
 	}
 
 	@Override
@@ -152,8 +149,9 @@ public class AppProgressLogger extends ProgressLogger {
 	}
 	
 	void putRunStatus(ObjectNode body) throws JobCancelledException {
-		logger.debug(Log.REQUEST, String.format(
+		logger.info(Log.REQUEST, String.format(
 			"putRunStatus %s", body.toString()));
+		URI putRunStatusURI = appSession.uriPutJobRun();
 		JsonRequest request = new JsonRequest(appSession, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
 		try {
@@ -162,8 +160,11 @@ public class AppProgressLogger extends ProgressLogger {
 			throw new ResourceException(e);
 		}
 		JsonNode responseResult = response.get("result");
+		logger.info(Log.REQUEST, String.format(
+				"putRunStatus response=%s", responseResult.toString()));
 		String responseStatus = responseResult.get("status").asText();
-		if ("cancelled".equals(responseStatus) || "failed".equals(responseStatus)) {
+		if (responseStatus.equalsIgnoreCase(AppJobStatus.CANCELLED.toString()) || 
+				responseStatus.equalsIgnoreCase(AppJobStatus.FAILED.toString())) {
 			logger.warn(Log.RESPONSE, String.format(
 					"putRunStatus Job Cancellation Detected %s %s", runKey, response.toString()));
 			throw new JobCancelledException(runKey);			

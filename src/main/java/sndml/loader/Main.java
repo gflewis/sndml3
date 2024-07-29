@@ -21,9 +21,11 @@ import sndml.util.Log;
  */
 public class Main {
 
+	static protected final Thread mainThread = Thread.currentThread();		
 	static protected ConnectionProfile profile;
 	static protected Resources resources;
 	static private boolean requiresApp = false;
+	
 	static private final Logger logger = LoggerFactory.getLogger(Main.class);
 
 	static Options options = new Options();	
@@ -116,12 +118,17 @@ public class Main {
 			loader.loadTables();
 		}
 		if (requiresApp) {
+			// Run as --scan or --daemon or --server
 			AgentMain.main(cmd, resources);
 		}
 	}
 	
 	public static Resources getResources() {
 		return resources;
+	}
+	
+	public static Thread getThread() {
+		return mainThread;
 	}
 		
 }

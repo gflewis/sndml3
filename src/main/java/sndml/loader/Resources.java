@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.AppSchemaReader;
 import sndml.agent.AppSession;
+import sndml.agent.WorkerPool;
 import sndml.servicenow.SchemaReader;
 import sndml.servicenow.TableSchemaReader;
 import sndml.util.Log;
@@ -25,6 +26,7 @@ public class Resources {
 	private Generator generator;	
 	private DatabaseWrapper dbWrapper;
 	private java.sql.Connection sqlConnection;
+	private WorkerPool workerPool;	
 
 	private static final Logger logger = LoggerFactory.getLogger(Resources.class);
 	
@@ -51,6 +53,7 @@ public class Resources {
 		this.generator = null;
 		this.dbWrapper = null;
 		this.sqlConnection = null;
+		this.workerPool = null;
 	}
 	
 	/**
@@ -133,6 +136,14 @@ public class Resources {
 			}
 		}
 		return dbWrapper;
+	}
+	
+	public WorkerPool getWorkerPool() throws ResourceException {
+		if (this.workerPool == null) {
+			int threadCount = Integer.parseInt(profile.getProperty("server.threads"));
+			this.workerPool = new WorkerPool(threadCount);			
+		}
+		return this.workerPool;
 	}
 	
 	/**

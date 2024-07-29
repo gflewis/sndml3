@@ -1,8 +1,6 @@
 package sndml.agent;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Timer;
 import java.util.concurrent.*;
@@ -17,6 +15,7 @@ import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.Resources;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 /**
  * A class which runs forever in a loop, periodically scanning the app
@@ -28,12 +27,12 @@ public class AgentDaemon implements Daemon, Runnable {
 	static private AgentDaemon daemon;
 
 	private final Resources resources;
-	private final ProcessHandle process;
 	private final ConnectionProfile profile;
 	private final String agentName;
 	private final AgentScanner scanner;
 	private final int threadCount;	
 	private final int intervalSeconds;
+	private final int shutdownSeconds;
 	private final String pidFileName;
 	private final WorkerPool executor; // null if threadCount < 2
 	
@@ -51,16 +50,16 @@ public class AgentDaemon implements Daemon, Runnable {
 		// This is a singleton class, so save me as a static variable
 		if (daemon != null) throw new AssertionError("Daemon already instantiated");
         this.daemon = this;
-        this.process = ProcessHandle.current();
 		this.agentName = profile.getAgentName();
-		this.threadCount = Integer.parseInt(profile.getProperty("daemon.threads"));
+		this.threadCount = profile.getThreadCount();
 		this.intervalSeconds = Integer.parseInt(profile.getProperty("daemon.interval"));
-		this.pidFileName = profile.getProperty("daemon.pidfile");
+		this.shutdownSeconds = Integer.parseInt(profile.getProperty("server.shutdown_seconds"));
+		
+		this.pidFileName = profile.getPidFileName();
 		
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
-			// TODO Move WorkerPool constructor to ResourceManager
-			this.executor = new WorkerPool(threadCount);
+			this.executor = resources.getWorkerPool();
 			this.scanner = new MultiThreadScanner(resources, executor);
 		}
 		else {
@@ -170,24 +169,12 @@ public class AgentDaemon implements Daemon, Runnable {
 
 	@Override
 	public void init(DaemonContext context) throws DaemonInitException {
-		long pid = process.pid();
 		this.context = context;
-		if (pidFileName == null) {
-			logger.info(Log.INIT, String.format("init pid=%d", pid));			
-		}
-		else {
-			File pidFile = new File(pidFileName);
-			logger.info(Log.INIT, String.format(
-				"init pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
-			try {
-				PrintWriter pidWriter = new PrintWriter(pidFile);
-				pidWriter.println(pid);
-				pidWriter.close();
-			}
-			catch (IOException e) {
-				throw new DaemonInitException(
-					"Unable to write pidfile: " + pidFileName, e);
-			}			
+		try {
+			AgentMain.writePidFile();
+		} catch (ResourceException e) {
+			throw new DaemonInitException(
+				"Unable to write pidfile: " + pidFileName);
 		}
 	}
 
@@ -213,12 +200,11 @@ public class AgentDaemon implements Daemon, Runnable {
 	public void stop() {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.FINISH, "Begin stop");
-		int waitSec = Integer.parseInt(profile.getProperty("daemon.shutdown_seconds"));
 		// shutdownNow will send an interrupt to all threads
 		executor.shutdown();
 		isRunning = false;
 		try { 
-			executor.awaitTermination(waitSec, TimeUnit.SECONDS);
+			executor.awaitTermination(shutdownSeconds, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e) { 
 			logger.warn("Shutdown interrupted");

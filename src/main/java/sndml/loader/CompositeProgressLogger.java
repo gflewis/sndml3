@@ -10,24 +10,25 @@ public class CompositeProgressLogger extends ProgressLogger {
 	public final Log4jProgressLogger textLogger;
 	public final AppProgressLogger appLogger;
 
-	public CompositeProgressLogger(TableReader reader, Action action, AppProgressLogger appLogger) {
-		this(reader, action, appLogger, null);
-	}
-	
-	@Deprecated
-	public CompositeProgressLogger(TableReader reader, Action action, 
-			AppProgressLogger appLogger, DatePart part) {
-		super(appLogger.getMetrics(), part);
-		this.textLogger = new Log4jProgressLogger(reader, action);
-		this.appLogger = appLogger; 		
-	}
-
 	public CompositeProgressLogger(Log4jProgressLogger textLogger, AppProgressLogger appLogger) {
 		super(textLogger.getMetrics(), textLogger.getPart());
 		this.textLogger = textLogger;
 		this.appLogger = appLogger;
 	}
 	
+//	@Deprecated
+//	public CompositeProgressLogger(TableReader reader, Action action, AppProgressLogger appLogger) {
+//		this(reader, action, appLogger, null);
+//	}
+//	
+//	@Deprecated
+//	public CompositeProgressLogger(TableReader reader, Action action, 
+//			AppProgressLogger appLogger, DatePart part) {
+//		super(appLogger.getMetrics(), part);
+//		this.textLogger = new Log4jProgressLogger(reader, action);
+//		this.appLogger = appLogger; 		
+//	}
+
 	@Override
 	public CompositeProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
 		Log4jProgressLogger newTextLogger =

@@ -68,14 +68,35 @@ public class AppSession extends Session {
 	 * Return the URI of an API. This will be dependent on the application scope
 	 * which is available from the property app.scope.
 	 */
-	URI getAPI(String apiName) {
+	private URI getAPI(String apiName) {
 		return getAPI(apiName, null);
 	}
 	
-	URI getAPI(String apiName, String parameter) {
+	private URI getAPI(String apiName, String parameter) {
 		String apiPath = "api/" + appScope + "/" + apiName;
 		if (parameter != null) apiPath += "/" + parameter;
 		return instance.getURI(apiPath);
+	}
+
+	public URI uriGetJobRunList() { 
+		return this.getAPI("jobrunlist", agentName); 
+	}	
+	
+	public URI uriGetAgent() { 
+		return this.getAPI("agent", agentName); 
+	}
+	
+	public URI uriGetJobRun(RecordKey jobKey) {
+		return this.getAPI("jobrun", jobKey.toString());
+	}
+	
+	public URI uriPutJobRun() {
+		// jobKey goes in the body, not the URL
+		return this.getAPI("jobrun");
+	}
+	
+	public URI uriGetTableSchema(String tablename) {
+		return this.getAPI("schema", tablename);
 	}
 	
 	ObjectNode httpGet(URI uri) throws IOException, ConfigParseException {

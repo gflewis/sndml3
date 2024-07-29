@@ -113,34 +113,6 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		} catch (SQLException e) {
 			throw new ResourceException(e);
 		}
-	}
-	
-	/*
-	@Override
-	public Metrics call() throws JobCancelledException {
-		String myName = this.getClass().getName() + ".call";
-		assert profile != null;
-		assert config.getNumber() != null;
-		boolean onExceptionContinue = profile.agent.getBoolean("continue", false);
-		setThreadName();
-		try {
-			super.call();
-			if (scanner != null) scanner.rescan();		
-		} catch (SQLException | IOException | InterruptedException e) {
-			Log.setJobContext(this.getName());
-			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
-			statusLogger.logError(runKey, e);
-			if (!onExceptionContinue) AgentDaemon.abort();			
-		} catch (Error e) {
-			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
-			logger.error(Log.ERROR, "Critical error detected. Halting JVM.");
-			Runtime.getRuntime().halt(-1);
-		}
-		return jobMetrics;
-	}
-	*/
-	
-	
-	
+	}		
 		
 }

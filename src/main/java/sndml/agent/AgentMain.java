@@ -1,23 +1,29 @@
 package sndml.agent;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sndml.loader.Main;
 import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 //Q: Why does this class exist? 
 //A: Because many of the classes in the package are not public. 
 
-public class AgentMain extends sndml.loader.Main {
+public class AgentMain extends Main {
 
-	static private final Thread mainThread = Thread.currentThread();	
 	static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 	
 	public static void main(CommandLine cmd, Resources resources) throws Exception {
-		
+		// Note: resources is actually a static protected variable in Main;
+		// thus we could access it even if it were not a parameter		
 		assert resources != null;		
 		AppSession appSession = resources.getAppSession();
 		
@@ -37,7 +43,6 @@ public class AgentMain extends sndml.loader.Main {
 			// Run a single job
 			String sys_id = cmd.getOptionValue("jobrun");
 			RecordKey jobkey = new RecordKey(sys_id);
-//			SingleJobRunner jobrunner = new SingleJobRunner(profile, jobkey);			
 			AppConfigFactory factory = new AppConfigFactory(appSession);
 			AppJobConfig jobconfig = factory.appJobConfig(jobkey);
 			AppJobRunner jobrunner = new AppJobRunner(resources, jobconfig);			
@@ -54,15 +59,32 @@ public class AgentMain extends sndml.loader.Main {
 		
 	}
 
-	public String getAgentName() {
-		return profile.app.getNotEmpty("agent");
+	String getAgentName() {		
+		return Main.profile.app.getNotEmpty("agent");
 	}
-
-	/**
-	 * @return the main thread.
-	 */
-	public static Thread getThread() {
-		return mainThread;
+	
+	static void writePidFile() throws ResourceException {
+        ProcessHandle processHandle = ProcessHandle.current();
+        String pidFileName = Main.profile.getPidFileName();
+		long pid = processHandle.pid();
+		if (pidFileName == null) {
+			logger.info(Log.INIT, String.format("writePidFile pid=%d", pid));			
+		}
+		else {
+			File pidFile = new File(pidFileName);
+			logger.info(Log.INIT, String.format(
+				"init pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
+			PrintWriter pidWriter;
+			try {
+				pidWriter = new PrintWriter(pidFile);
+				pidWriter.println(pid);
+				pidWriter.close();
+			} catch (IOException e) {
+				throw new ResourceException(
+					"Unable to write pidfile: " + pidFileName);
+				
+			}
+		}		
 	}
 	
 }

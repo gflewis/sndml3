@@ -163,13 +163,6 @@
       when written to the database.       
     </description>
   </property>
-  <property name="daemon.threads">
-    <default>3</default>
-    <description>
-      Maximum number of jobs that the agent can process concurrently. 
-      Additional jobs will wait until a thread becomes available.
-    </description>
-  </property>
   <property name="daemon.interval">
     <default>60</default>
     <description>
@@ -185,16 +178,6 @@
       If “false” then it will immediately abort.
     </description>
   </property>
-  <property name="daemon.pidfile">
-    <description></description>
-  </property>
-  <property name="daemon.shutdown_seconds" hidden="true">
-    <default>30</default>
-    <description>
-      Seconds that the daemon will wait before aborting worker threads.
-      Default is 30.
-    </description>
-  </property>
   <property name="server.port">
     <description>
       Required if using `--server`
@@ -206,9 +189,29 @@
   </property>
   <property name="server.threads">
     <default>3</default>
+    <alternate name="daemon.threads" />
     <description>
-      Maximum number of jobs that the agent can process concurrently. 
+      Maximum number of jobs that can be processed concurrently. 
       Additional jobs will wait until a thread becomes available.
+      Applicable for `--daemon` or `--server`.
+      Default is 3.
+    </description>
+  </property>
+  <property name="server.pidfile">
+    <alternate name="daemon.pidfile" />
+    <description>
+      If specified, then the process ID will be written to this file.
+      This is used in conjunction with a server or daemon.
+      If you want to shut down the server then read the PID number from this file
+      and send a `kill` signal to the PID.
+    </description>
+  </property>
+  <property name="server.shutdown_seconds">
+    <default>30</default>
+    <alternate name="daemon.shutdown_seconds" />
+    <description>
+      Seconds that the daemon or server will wait before aborting worker threads.
+      Default is 30.
     </description>
   </property>
   <property name="server.heartbeat">

@@ -21,7 +21,6 @@ import sndml.util.ResourceException;
 
 public class AgentRequestHandler implements HttpHandler {
 
-	private final ConnectionProfile profile;
 	private final Resources resources;
 	private final AppSession appSession; 
 	private final WorkerPool workerPool;
@@ -29,12 +28,13 @@ public class AgentRequestHandler implements HttpHandler {
 
 	static final ObjectMapper mapper = new ObjectMapper();
 	
-	public AgentRequestHandler(Resources resources) {
+	public AgentRequestHandler(Resources resources)  throws ResourceException {
 		this.resources = resources;
-		this.profile = resources.getProfile();
 		this.appSession = resources.getAppSession();
-		int threadCount = Integer.parseInt(profile.getProperty("server.threads"));
-		this.workerPool = new WorkerPool(threadCount);
+//		int threadCount = Integer.parseInt(profile.getProperty("server.threads"));
+//		this.workerPool = new WorkerPool(threadCount);
+		this.workerPool = resources.getWorkerPool();
+		AgentMain.writePidFile();
 	}
 	
 	@Override
@@ -81,15 +81,13 @@ public class AgentRequestHandler implements HttpHandler {
 		}
 	}
 		
-	// TODO: Why is this using SingleJobRunner and not AppJobRunner?
 	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
 		if (arg == null) throw new AgentURLException(uri);
-		RecordKey sys_id = new RecordKey(arg);
+		RecordKey jobKey = new RecordKey(arg);
 		logger.info(Log.REQUEST, "creating jobrunner");
 		try {
-//			SingleJobRunner jobrunner = new SingleJobRunner(profile, sys_id);
 			AppConfigFactory factory = new AppConfigFactory(appSession);
-			AppJobConfig jobconfig = factory.appJobConfig(sys_id);			
+			AppJobConfig jobconfig = factory.appJobConfig(jobKey);			
 			if (jobconfig.getStatus() != AppJobStatus.READY) {
 				logger.error(Log.REQUEST, String.format(
 						"%s has invalid state: %s", jobconfig.getName(), jobconfig.getStatus()));
@@ -99,7 +97,7 @@ public class AgentRequestHandler implements HttpHandler {
 			AppJobRunner jobrunner = new AppJobRunner(workerResources, jobconfig);
 			AppStatusLogger statusLogger = new AppStatusLogger(appSession);
 			logger.info(Log.REQUEST, "created jobrunner");
-			statusLogger.setStatus(sys_id, AppJobStatus.PREPARE);
+			statusLogger.setStatus(jobKey, AppJobStatus.PREPARE);
 			workerPool.submit(jobrunner);
 		}
 		catch (NoContentException | NoSuchRecordException | IllegalStateException e) {
