@@ -30,6 +30,7 @@ public class ShutdownHook extends Thread {
 		waitSec = Integer.parseInt(profile.getProperty("server.shutdown_seconds"));
 	}
 	
+	// TODO  This constructor is not used
 	ShutdownHook(AgentHttpServer server, Resources resources) {
 		this.profile = resources.getProfile();
 		this.scanner = null;
