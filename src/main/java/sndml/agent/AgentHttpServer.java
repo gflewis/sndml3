@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.net.httpserver.HttpServer;
 
-import sndml.agent.request.GetJobRunList;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
@@ -39,8 +38,8 @@ public class AgentHttpServer {
 		this.resources = resources;
 		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
-		GetJobRunList getRunList = 
-			new GetJobRunList(resources.getAppSession(), agentName);
+		GetRunListRequest getRunList = 
+			new GetRunListRequest(resources.getAppSession(), agentName);
 		getRunList.execute();
 		agentKey = getRunList.getAgentKey();				
 		

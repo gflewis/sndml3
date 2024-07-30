@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import sndml.servicenow.*;
 import sndml.util.Metrics;
 
 public class ColumnsTest {
@@ -28,7 +27,8 @@ public class ColumnsTest {
 	@Test
 	public void test() throws Exception {
 		TestFolder folder = new TestFolder(this.getClass().getSimpleName());
-		DatabaseWrapper database = profile.newDatabaseWrapper();
+		Resources resources = new Resources(profile);
+		DatabaseWrapper database = resources.getDatabaseWrapper();
 		DBUtil util = new DBUtil(database);
 		YamlLoader loader1 = folder.getYaml("incident-include-columns").getLoader(profile);
 		Metrics metrics1 = loader1.loadTables();

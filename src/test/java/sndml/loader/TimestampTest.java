@@ -26,12 +26,9 @@ public class TimestampTest {
 	final Logger logger = TestManager.getLogger(this.getClass());
 	final String tablename = "incident";
 	final TestingProfile profile;
+	Resources resources;
 	Session session;
 	DatabaseWrapper database;
-	// Session session;
-	// Database database;
-	// DBUtil util;	
-	// ConfigFactory factory = new ConfigFactory();
 	
 	public TimestampTest(TestingProfile profile) {
 		this.profile = profile;
@@ -39,8 +36,9 @@ public class TimestampTest {
 
 	@Before
 	public void openDatabase() throws Exception {
-		session = profile.newReaderSession();
-		database = profile.newDatabaseWrapper();
+		resources = new Resources(profile);
+		session = resources.getReaderSession();
+		database = resources.getDatabaseWrapper();
 	}
 	
 	@After

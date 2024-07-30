@@ -3,12 +3,10 @@ package sndml.servicenow;
 import org.junit.*;
 import org.slf4j.Logger;
 
+import sndml.loader.Resources;
 import sndml.loader.TestManager;
-import sndml.util.PropertySet;
 
 import static org.junit.Assert.*;
-
-import java.util.Properties;
 
 public class SessionVerificationTest {
 
@@ -16,13 +14,14 @@ public class SessionVerificationTest {
 	
 	@Test
 	public void testValidate() throws Exception {
-		Session session = TestManager.getDefaultProfile().newReaderSession();
+		Resources resources = new Resources(TestManager.getDefaultProfile());
+		Session session = resources.getReaderSession();
 		session.verifyUser();
 		Table user = session.table("sys_user");
 		TableWSDL wsdl = user.getWSDL();
 		int wsdlCount = wsdl.getReadFieldNames().size();
 		logger.info("wsdl fields=" + wsdlCount);
-		TableSchema schema = session.getSchemaReader().getSchema(user);
+		TableSchema schema = resources.getSchemaReader().getSchema(user);
 		int schemaCount = schema.getFieldNames().size();
 		logger.info("schema fields=" + schemaCount);
 		session.verifyUser();

@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.agent.request.GetJobRunList;
 import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
@@ -155,7 +154,7 @@ public abstract class AgentScanner extends TimerTask {
 	
 	ArrayNode getRunList() throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
-		GetJobRunList request = new GetJobRunList(appSession, agentName);
+		GetRunListRequest request = new GetRunListRequest(appSession, agentName);
 		ArrayNode runlist = request.getRunList();
 		if (runlist == null || runlist.size() == 0) {
 			logger.info(Log.INIT, "Nothing ready");			

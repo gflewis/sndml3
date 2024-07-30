@@ -1,4 +1,4 @@
-package sndml.agent.request;
+package sndml.agent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,19 +7,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import sndml.agent.AppSession;
 import sndml.loader.ConfigParseException;
 import sndml.servicenow.HttpMethod;
 import sndml.servicenow.JsonRequest;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
-public class GetJobRunList extends JsonRequest {
+public class GetRunListRequest extends JsonRequest {
 
 	final String agentName;
 	final AppSession appSession;
 	
-	public GetJobRunList(AppSession appSession, String agentName) {
+	public GetRunListRequest(AppSession appSession, String agentName) {
 		super(appSession, appSession.uriGetJobRunList(), HttpMethod.GET, null);
 		this.appSession = appSession;
 		this.agentName = agentName;		
