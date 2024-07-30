@@ -135,9 +135,14 @@ public class JsonRequest extends ServiceNowRequest {
 		}
 		if (logger.isTraceEnabled())
 			logger.trace(Log.RESPONSE, responseText);
+		// 409 Conflict
+		// Used to indicate that this resources has been cancelled
+		if (statusCode == 409 || statusCode == 410) {
+			logger.warn(Log.RESPONSE, String.format("Status=%s", statusLine));			
+		}
 		// 401 Unauthorized
 		// 403 Forbidden 
-		if (statusCode == 401 || statusCode == 403) {
+		else if (statusCode == 401 || statusCode == 403) {
 			logger.error(Log.RESPONSE, this.dump());
 			throw new InsufficientRightsException(this);
 		}

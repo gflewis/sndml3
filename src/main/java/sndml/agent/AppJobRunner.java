@@ -16,6 +16,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	final public RecordKey runKey;
 	final public String number;
 	final AppStatusLogger statusLogger;
+	Thread myThread;
 
 	public AppJobRunner(Resources resources, AppJobConfig config) {
 		super(resources, config);
@@ -83,7 +84,6 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	 */
 	protected void setThreadName(String threadName) {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
-		Thread myThread = Thread.currentThread();
 		if (!myThread.equals(AgentMain.getThread()) && !myThread.getName().equals("scanner")) {
 			myThread.setName(threadName);
 		}
@@ -91,6 +91,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	@Override
 	public void run() {
+		myThread = Thread.currentThread();
 		setThreadName(this.number);
 		try {
 			this.call();
