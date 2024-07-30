@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
+import sndml.loader.Resources;
 import sndml.servicenow.HttpMethod;
 import sndml.servicenow.JsonRequest;
 import sndml.servicenow.RecordKey;
@@ -22,6 +23,7 @@ import sndml.util.Metrics;
 @Deprecated
 public class SingleJobRunner implements Runnable {
 
+	final Resources resources;
 	final ConnectionProfile profile;
 	final AppSession appSession;
 	final String agentName;	
@@ -40,9 +42,10 @@ public class SingleJobRunner implements Runnable {
 	 * @throws IOException
 	 * @throws IllegalStateException Job was found but the state was not READY
 	 */
-	public SingleJobRunner(ConnectionProfile profile, RecordKey jobKey) 
+	public SingleJobRunner(Resources resources, RecordKey jobKey) 
 			throws ConfigParseException, IOException, IllegalStateException {
-		this.profile = profile;
+		this.resources = resources;
+		this.profile = resources.getProfile();
 		this.jobKey = jobKey;
 		this.appSession = profile.newAppSession();
 		this.configFactory = new AppConfigFactory(appSession);
@@ -81,7 +84,7 @@ public class SingleJobRunner implements Runnable {
 	public void run() {
 		AppJobRunner jobRunner = null;
 		try {
-			jobRunner = new AppJobRunner(profile, jobConfig);
+			jobRunner = new AppJobRunner(resources, jobConfig);
 			metrics = jobRunner.call();
 			jobRunner.close();
 			logger.info(Log.FINISH, metrics.toString());

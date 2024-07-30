@@ -69,12 +69,14 @@ public class AgentHttpServer {
 		logger.info(Log.INIT, String.format("start port=%d", port));		
 		server.start();
 		// TODO This is WRONG. The ShutdownHook needs to be in the handler.
-		ShutdownHook shutdownHook = new ShutdownHook(server, resources);
-		Runtime.getRuntime().addShutdownHook(shutdownHook);			
+//		ShutdownHook shutdownHook = new ShutdownHook(this, resources);
+//		Runtime.getRuntime().addShutdownHook(shutdownHook);			
         heartbeatTimer.schedule(this.heartbeatTask, 0, 1000 * heartbeatInterval);		
 	}
 	
-	public void shutdown() {
+	// TODO this is never called
+	void shutdown() {
+		logger.info(Log.FINISH, "shutdown");
 		server.stop(5);
 		Runtime.getRuntime().exit(0);
 	}

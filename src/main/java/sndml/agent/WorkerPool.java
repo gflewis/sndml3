@@ -1,5 +1,6 @@
 package sndml.agent;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -45,12 +46,23 @@ public class WorkerPool extends ThreadPoolExecutor {
 		return INSTANCE;		
 	}
 	
-	public int getThreadCount() {
+	int getThreadCount() {
 		return threadCount;
 	}
 	
 	public void submit(AppJobRunner runner) {
 		super.submit((Runnable) runner);
 	}
-		
+	
+	@Override
+	public void shutdown() {
+		logger.info(Log.FINISH, "shutdown");
+		super.shutdown();		
+	}
+	
+	@Override
+	public List<Runnable> shutdownNow() {
+		logger.info(Log.FINISH, "shutdownNow");
+		return super.shutdownNow();
+	}
 }

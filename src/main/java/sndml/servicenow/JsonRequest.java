@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import sndml.agent.JobCancelledException;
 import sndml.util.Log;
 
 public class JsonRequest extends ServiceNowRequest {
@@ -29,6 +30,7 @@ public class JsonRequest extends ServiceNowRequest {
 	final protected ObjectNode requestObj;
 	protected ObjectNode responseObj = null;
 	protected ObjectNode resultObj = null;
+	protected RecordKey jobKey = null;
 	protected boolean executed = false;
 	
 	final protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -42,6 +44,12 @@ public class JsonRequest extends ServiceNowRequest {
 		this.requestObj = body;
 	}
 
+	public JsonRequest(Session session, URI uri, HttpMethod method, ObjectNode body, RecordKey jobKey) {
+		super(session.getClient(), uri, method);
+		this.requestObj = body;
+		this.jobKey = jobKey;
+	}
+	
 	public ObjectNode getResult() throws IOException {
 		if (resultObj != null) return resultObj;
 		if (!executed) execute();
@@ -61,7 +69,7 @@ public class JsonRequest extends ServiceNowRequest {
 		return responseObj;
 	}
 	
-	private void executeRequest() throws IOException {
+	private void executeRequest() throws IOException, JobCancelledException {
 		assert client != null;
 		assert uri != null;
 		assert method != null;
@@ -127,18 +135,19 @@ public class JsonRequest extends ServiceNowRequest {
 		logger.debug(Log.RESPONSE,
 				String.format("status=\"%s\" contentType=%s len=%d", 
 					statusLine, responseContentType, responseLen));
+		executed = true;
 		// 204 No Content
 		if (statusCode == 204) {
 			// Success - No Content
-			executed = true;
 			return;
 		}
 		if (logger.isTraceEnabled())
 			logger.trace(Log.RESPONSE, responseText);
-		// 409 Conflict
-		// Used to indicate that this resources has been cancelled
-		if (statusCode == 409 || statusCode == 410) {
-			logger.warn(Log.RESPONSE, String.format("Status=%s", statusLine));			
+		// 410 Gone
+		if (statusCode == 410) {
+			//  used by app to indicate that this job has been cancelled
+			assert jobKey != null;
+			throw new JobCancelledException(jobKey);
 		}
 		// 401 Unauthorized
 		// 403 Forbidden 
@@ -162,9 +171,10 @@ public class JsonRequest extends ServiceNowRequest {
 			throw new NoContentException(this);
 		}		
 		else if ("text/html".equals(responseContentType)) {
+			// should have gotten json response
+			// html indicates an error message
 			throw new InstanceUnavailableException(this);			
 		}
-		executed = true;
 	}
 		
 	protected String errorMessageLowerCase() {

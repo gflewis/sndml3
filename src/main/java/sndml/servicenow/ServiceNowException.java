@@ -15,6 +15,10 @@ public class ServiceNowException extends IOException {
 		super(uri.toString());
 	}
 	
+	public ServiceNowException(RecordKey key) {
+		super("sys_id=" + key.toString());
+	}
+	
 	public ServiceNowException(URI uri, String requestText) {
 		super(Log.joinLines(uri.toString(), requestText));
 	}

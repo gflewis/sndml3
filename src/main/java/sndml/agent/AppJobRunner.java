@@ -31,29 +31,18 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		assert number != null;
 		assert number.length() > 0;		
 	}
-		
-	@Deprecated
-	public AppJobRunner(ConnectionProfile profile, AppSession appSession, ReaderSession readerSession, 
-			DatabaseWrapper databaseConnection, AppJobConfig config) {
-		super(readerSession, databaseConnection, config);
-		logger.warn(Log.INIT, "deprecated constructor 2");
-		this.profile = profile;
-		this.appSession = appSession; 
-		this.config = config;
-		this.statusLogger = new AppStatusLogger(appSession);				
-		this.runKey = config.getSysId();
-		this.number = config.getNumber();
-		assert runKey != null;
-		assert runKey.isGUID();
-		assert number != null;
-		assert number.length() > 0;		
+			
+	Thread getThread() {
+		return myThread;
 	}
 	
-	@Deprecated
-	AppJobRunner(ConnectionProfile profile, AppJobConfig config) {
-		this(profile, profile.newAppSession(), profile.newReaderSession(), 
-				profile.newDatabaseWrapper(), config);
-		logger.warn(Log.INIT, "deprecated constructor 3");
+	/**
+	 * Cancel this AppJobRunner
+	 */
+	void interrupt() {
+		assert myThread != null;
+		assert myThread != Thread.currentThread();
+		myThread.interrupt();
 	}
 	
 	AppStatusLogger getStatusLogger() {
