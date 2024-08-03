@@ -21,8 +21,8 @@ import sndml.loader.Interval;
 @JsonSerialize(using = DateTimeSerializer.class)
 public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
-	public static final int DATE_ONLY = 10; // length of yyyy-MM-dd
-	public static final int DATE_TIME = 19; // length of yyyy-MM-dd HH:mm:ss
+	public static final int DATE_ONLY_LEN = 10; // length of yyyy-MM-dd
+	public static final int DATE_TIME_LEN = 19; // length of yyyy-MM-dd HH:mm:ss
 
 	public static final int HOURS_PER_DAY = 24;
 	public static final int MIN_PER_DAY = 60 * HOURS_PER_DAY;
@@ -32,26 +32,6 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	public static final int SEC_PER_WEEK = 7 * SEC_PER_DAY;
 	public static final int MILLISEC_PER_DAY = 1000 * SEC_PER_DAY;
 	
-	/*
-	static ThreadLocal<DateFormat> dateOnlyFormat =
-		new ThreadLocal<DateFormat>() {
-			protected DateFormat initialValue() {
-				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				return df;
-			}
-		};
-
-	static ThreadLocal<DateFormat> dateTimeFormat =
-		new ThreadLocal<DateFormat>() {
-			protected DateFormat initialValue() {
-				DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				df.setTimeZone(TimeZone.getTimeZone("GMT"));
-				return df;
-			}
-		};
-	*/
-
 	private final String str;
 	private final Long sec;
 
@@ -76,7 +56,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 */
 	@Deprecated
 	public DateTime(String value, int len) throws InvalidDateTimeException {
-		if (len != DATE_ONLY && len != DATE_TIME)
+		if (len != DATE_ONLY_LEN && len != DATE_TIME_LEN)
 			throw new InvalidDateTimeException(String.format("\"%s\" len=%d", value, len));
 		this.str = value;
 		this.sec = toSeconds(value);
@@ -132,8 +112,8 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 
 	public String toFullString() {
 		String str = toString();
-		if (str.length() == DATE_ONLY) str += " 00:00:00";
-		assert str.length() == DATE_TIME;
+		if (str.length() == DATE_ONLY_LEN) str += " 00:00:00";
+		assert str.length() == DATE_TIME_LEN;
 		return str;		
 	}
 	
@@ -410,7 +390,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		LocalDateTime localDateTime;
 		assert str != null;
 		switch (str.length()) {
-		case DATE_ONLY:
+		case DATE_ONLY_LEN:
 			try {
 				LocalDate localDate = LocalDate.parse(str, DateTimeFormatter.ISO_LOCAL_DATE);				
 				localDateTime = localDate.atStartOfDay();			
@@ -419,7 +399,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 				throw new InvalidDateTimeException(str);
 			}
 			break;
-		case DATE_TIME:
+		case DATE_TIME_LEN:
 			str = str.replace(' ', 'T');
 			try {
 				localDateTime = LocalDateTime.parse(str, DateTimeFormatter.ISO_LOCAL_DATE_TIME);				
@@ -437,7 +417,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		
 	private static String fromSeconds(Long sec, boolean truncate) {
 		String fulldate = Instant.ofEpochSecond(sec).toString().replace('T', ' ');
-		String result = truncate ? fulldate.substring(0, DATE_ONLY) : fulldate.substring(0, DATE_TIME);
+		String result = truncate ? fulldate.substring(0, DATE_ONLY_LEN) : fulldate.substring(0, DATE_TIME_LEN);
 		return result;		
 	}
 	

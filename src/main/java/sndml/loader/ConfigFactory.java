@@ -33,7 +33,7 @@ public class ConfigFactory {
 		this(DateTime.now());
 	}
 	
-	// TODO Remove SuppressWarnings("deprecation")
+	// TODO Jackson ObjectMapper Remove SuppressWarnings deprecation 
 	@SuppressWarnings("deprecation")
 	public ConfigFactory(DateTime start) {
 		jsonMapper = new ObjectMapper();

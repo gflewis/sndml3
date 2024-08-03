@@ -111,7 +111,7 @@ public abstract class TableRecord implements InsertResponse {
 	public DateTime getDateTime(String fieldname) throws InvalidDateTimeException {
 		String value = getValue(fieldname);
 		if (value == null) return null;
-		assert value.length() == DateTime.DATE_TIME;
+		assert value.length() == DateTime.DATE_TIME_LEN;
 		DateTime result = new DateTime(value);
 		return result;
 	}
@@ -124,7 +124,7 @@ public abstract class TableRecord implements InsertResponse {
 	public DateTime getDate(String fieldname) throws InvalidDateTimeException {
 		String value = getValue(fieldname);
 		if (value == null) return null;
-		assert value.length() == DateTime.DATE_TIME;
+		assert value.length() == DateTime.DATE_TIME_LEN;
 		DateTime result = new DateTime(value);
 		return result;
 	}
@@ -158,7 +158,7 @@ public abstract class TableRecord implements InsertResponse {
 		String value = getValue(fieldname);
 		if (value == null) return null;
 		// value will be stored as yyyy-mm-dd hh:mm:ss
-		assert value.length() == DateTime.DATE_TIME;
+		assert value.length() == DateTime.DATE_TIME_LEN;
 		DateTime dt;
 		try {
 			dt = new DateTime(value);
