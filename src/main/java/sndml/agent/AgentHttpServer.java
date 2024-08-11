@@ -54,7 +54,7 @@ public class AgentHttpServer {
 		this.heartbeatInterval = Integer.parseInt(profile.getProperty("server.heartbeat"));
 		
 		logger.info(Log.INIT, String.format(
-				"agent=%s sys_id=%s port=%d backlog=%d heartbeat=%d", 
+				"agent=%s/%s port=%d backlog=%d heartbeat=%d", 
 				agentName, agentKey, port, backlog, heartbeatInterval, agentKey));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
 		handler = new AgentRequestHandler(resources);

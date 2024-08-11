@@ -24,6 +24,7 @@ public class AgentRequestHandler implements HttpHandler {
 	private final Resources resources;
 	private final AppSession appSession; 
 	private final WorkerPool workerPool;
+	private final String agentKey;
 	private final Logger logger = LoggerFactory.getLogger(AgentRequestHandler.class);
 
 	static final ObjectMapper mapper = new ObjectMapper();
@@ -31,8 +32,7 @@ public class AgentRequestHandler implements HttpHandler {
 	public AgentRequestHandler(Resources resources)  throws ResourceException {
 		this.resources = resources;
 		this.appSession = resources.getAppSession();
-//		int threadCount = Integer.parseInt(profile.getProperty("server.threads"));
-//		this.workerPool = new WorkerPool(threadCount);
+		this.agentKey = appSession.getAgentKey().toString();
 		this.workerPool = resources.getWorkerPool();
 		AgentMain.writePidFile();
 	}
@@ -44,12 +44,17 @@ public class AgentRequestHandler implements HttpHandler {
 			URI uri = exchange.getRequestURI();
 			logger.info(Log.REQUEST, "Path: " + uri.getPath());
 			String[] parts = uri.getPath().split("/");
-			if (parts.length < 2) throw new AgentURLException(uri);
+			if (parts.length < 3) throw new AgentURLException(uri);
 			String cmd = parts.length > 1 ? parts[1] : null;
-			String arg = parts.length > 2 ? parts[2] : null;
-			logger.debug(Log.REQUEST, String.format("len=%d %s %s", parts.length, cmd, arg));			
+			String arg1 = parts.length > 2 ? parts[2] : null;
+			String arg2 = parts.length > 3 ? parts[3] : null;
+			if (!RecordKey.isGUID(arg1)) throw new AgentURLException(uri);
+			if (!RecordKey.isGUID(arg2)) throw new AgentURLException(uri);
+			logger.debug(Log.REQUEST, String.format("len=%d %s %s %s", parts.length, cmd, arg1, arg2));
+			if (!agentKey.equals(arg1)) throw new AgentURLException(uri);
+			RecordKey runKey = new RecordKey(arg2);
 			if ("startjobrun".equals(cmd)) {
-				doJobRunStart(uri, cmd, arg);
+				doJobRunStart(uri, runKey);
 			}
 			else {
 				throw new AgentURLException(uri);				
@@ -64,7 +69,7 @@ public class AgentRequestHandler implements HttpHandler {
 		catch (AgentHandlerException e) {
 			logger.error(Log.ERROR, String.format( 
 				"Caught %s: %s (status=%d)", 
-				e.getClass().getName(), e.getMessage(), e.getReturnCode()));
+				e.getClass().getName(), e.getMessage(), e.getReturnCode()), e);
 			exchange.sendResponseHeaders(e.getReturnCode(), 0);
 			exchange.close();
 		}
@@ -80,14 +85,12 @@ public class AgentRequestHandler implements HttpHandler {
 			Runtime.getRuntime().halt(-1);
 		}
 	}
-		
-	void doJobRunStart(URI uri, String cmd, String arg) throws AgentHandlerException {
-		if (arg == null) throw new AgentURLException(uri);
-		RecordKey jobKey = new RecordKey(arg);
+
+	void doJobRunStart(URI uri, RecordKey runKey) throws AgentHandlerException {
 		logger.info(Log.REQUEST, "creating jobrunner");
 		try {
 			AppConfigFactory factory = new AppConfigFactory(appSession);
-			AppJobConfig jobconfig = factory.appJobConfig(jobKey);			
+			AppJobConfig jobconfig = factory.appJobConfig(runKey);			
 			if (jobconfig.getStatus() != AppJobStatus.READY) {
 				logger.error(Log.REQUEST, String.format(
 						"%s has invalid state: %s", jobconfig.getName(), jobconfig.getStatus()));
@@ -97,7 +100,7 @@ public class AgentRequestHandler implements HttpHandler {
 			AppJobRunner jobrunner = new AppJobRunner(workerResources, jobconfig);
 			AppStatusLogger statusLogger = new AppStatusLogger(appSession);
 			logger.info(Log.REQUEST, "created jobrunner");
-			statusLogger.setStatus(jobKey, AppJobStatus.PREPARE);
+			statusLogger.setStatus(runKey, AppJobStatus.PREPARE);
 			workerPool.submit(jobrunner);
 		}
 		catch (NoContentException | NoSuchRecordException | IllegalStateException e) {
@@ -109,5 +112,16 @@ public class AgentRequestHandler implements HttpHandler {
 			throw new AgentHandlerException(e, HttpURLConnection.HTTP_INTERNAL_ERROR); // 500
 		}		
 	}
+	
+//	void doJobRunCancel(URI uri, String sys_id) {
+//		throw new IllegalStateException("Not implemented");
+//		RecordKey runKey = new RecordKey(sys_id); 
+//			
+//		}
+//		catch (Exception e) {
+//			
+//		}
+//	}
+	
 
 }

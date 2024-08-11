@@ -28,6 +28,7 @@ public class AppSession extends Session {
 	final Instance instance;
 	final String agentName;
 	final String appScope;
+	private RecordKey agentKey;
 	final Logger logger = Log.getLogger(this.getClass());
 	
 
@@ -56,18 +57,22 @@ public class AppSession extends Session {
 	}
 
 	public RecordKey getAgentKey() throws ResourceException {
-		Log.setGlobalContext();
-		URI uri = this.uriGetAgent();		
-		ObjectNode json;
-		try {
-			json = httpGet(uri);
-		} catch (IOException e) {
-			throw new ResourceException(e);
-		}		
-		String sys_id = json.get("agent").asText();
-		assert sys_id != null;
-		assert RecordKey.isGUID(sys_id);
-		return new RecordKey(sys_id);
+		if (agentKey == null) {
+			Log.setGlobalContext();
+			URI uri = this.uriGetAgent();		
+			ObjectNode json;
+			try {
+				json = httpGet(uri);
+			} catch (IOException e) {
+				throw new ResourceException(e);
+			}		
+			String sys_id = json.get("agent").asText();
+			assert sys_id != null;
+			assert RecordKey.isGUID(sys_id);
+			agentKey = new RecordKey(sys_id);
+			assert agentKey != null;
+		}
+		return agentKey;
 	}
 	
 	/**
