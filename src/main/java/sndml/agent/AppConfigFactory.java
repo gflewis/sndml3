@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,7 +21,7 @@ import sndml.util.Log;
 public class AppConfigFactory extends ConfigFactory {
 
 	final AppSession appSession;
-	Logger logger = LoggerFactory.getLogger(AppConfigFactory.class);
+	Logger logger = Log.getLogger(AppConfigFactory.class);
 	
 	
 	public AppConfigFactory(AppSession appSession) {		

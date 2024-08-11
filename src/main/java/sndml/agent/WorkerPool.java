@@ -14,7 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -35,7 +34,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 	private static WorkerPool INSTANCE;
 	private static final int CORE_POOL_SIZE = 0;
 	private static final long KEEP_ALIVE_SECONDS = 60;
-	private static final Logger logger = LoggerFactory.getLogger(WorkerPool.class);
+	private static final Logger logger = Log.getLogger(WorkerPool.class);
 
 	private final int threadCount;
 			

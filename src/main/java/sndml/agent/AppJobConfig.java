@@ -1,7 +1,6 @@
 package sndml.agent;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import sndml.loader.ConfigParseException;
 import sndml.loader.JobConfig;
 import sndml.servicenow.RecordKey;
+import sndml.util.Log;
 
 public class AppJobConfig extends JobConfig {
 
@@ -17,7 +17,7 @@ public class AppJobConfig extends JobConfig {
 	public RecordKey sys_id;
 	public String number;
 	
-	static final Logger logger = LoggerFactory.getLogger(AppJobConfig.class);	
+	static final Logger logger = Log.getLogger(AppJobConfig.class);	
 	
 	public AppJobConfig() {
 		super();

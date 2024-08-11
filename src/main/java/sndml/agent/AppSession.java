@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -29,7 +28,7 @@ public class AppSession extends Session {
 	final Instance instance;
 	final String agentName;
 	final String appScope;
-	final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final Logger logger = Log.getLogger(this.getClass());
 	
 
 	public AppSession(PropertySet propset) {

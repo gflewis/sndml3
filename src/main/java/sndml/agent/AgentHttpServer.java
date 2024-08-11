@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.util.Timer;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -33,7 +32,7 @@ public class AgentHttpServer {
 	private Timer heartbeatTimer;
 	private final int heartbeatInterval;
 	
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = Log.getLogger(this.getClass());
 		
 	public AgentHttpServer(Resources resources) throws IOException {
 		this.resources = resources;

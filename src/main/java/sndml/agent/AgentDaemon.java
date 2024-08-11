@@ -9,7 +9,6 @@ import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
@@ -41,7 +40,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	
 	private Timer timer;
 	
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = Log.getLogger(this.getClass());
 	
 	@SuppressWarnings("static-access")
 	public AgentDaemon(Resources resources) throws SQLException {

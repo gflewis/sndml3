@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import sndml.loader.Main;
 import sndml.loader.Resources;
@@ -19,7 +18,7 @@ import sndml.util.ResourceException;
 
 public class AgentMain extends Main {
 
-	static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
+	static final Logger logger = Log.getLogger(AgentMain.class);
 	
 	public static void main(CommandLine cmd, Resources resources) throws Exception {
 		// Note: resources is actually a static protected variable in Main;

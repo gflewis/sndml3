@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.TimerTask;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import sndml.loader.Resources;
 import sndml.servicenow.JsonRequest;
@@ -17,7 +16,7 @@ public class HeartbeatTask extends TimerTask {
 	final String agentName;
 	final URI uri;
 	
-	final static Logger logger = LoggerFactory.getLogger(HeartbeatTask.class);
+	final static Logger logger = Log.getLogger(HeartbeatTask.class);
 	
 	public HeartbeatTask(Resources resources) {
 		this.appSession = resources.getAppSession();
