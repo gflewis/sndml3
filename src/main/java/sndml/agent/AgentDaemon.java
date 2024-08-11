@@ -190,7 +190,7 @@ public class AgentDaemon implements Daemon, Runnable {
 		logger.info(Log.INIT, String.format(
 			"start agent=%s interval=%ds", agentName, intervalSeconds));								
         this.timer = new Timer(AgentScanner.THREAD_NAME, true);
-		ShutdownHook shutdownHook = new ShutdownHook(profile, scanner, executor);
+		ShutdownHook shutdownHook = new ShutdownHook(resources);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);		
         timer.schedule(scanner, 0, 1000 * intervalSeconds);
 		logger.debug(Log.INIT,"End start");		

@@ -30,7 +30,7 @@ public class JsonRequest extends ServiceNowRequest {
 	final protected ObjectNode requestObj;
 	protected ObjectNode responseObj = null;
 	protected ObjectNode resultObj = null;
-	protected RecordKey jobKey = null;
+	protected RecordKey jobKey = null; // used for logging and/or exceptions
 	protected boolean executed = false;
 	
 	final protected Logger logger = LoggerFactory.getLogger(this.getClass());

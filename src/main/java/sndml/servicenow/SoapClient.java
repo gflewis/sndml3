@@ -21,7 +21,7 @@ public class SoapClient {
 	final String uriPath;
 	
 	final Namespace nsTNS;
-	final Logger logger = Log.logger(this.getClass());
+	final Logger logger = Log.getLogger(this.getClass());
 	
 	final static Namespace nsSoapEnv = 
 		Namespace.getNamespace("env", "http://schemas.xmlsoap.org/soap/envelope/");

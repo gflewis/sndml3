@@ -33,7 +33,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 	
 	protected ColumnDefinitions columns;
 	
-	final Logger logger = Log.logger(this.getClass());
+	final Logger logger = Log.getLogger(this.getClass());
 	/**
 	 * Abstract class which knows how to write records to a SQL database 
 	 * using the {@link processRecords} method.

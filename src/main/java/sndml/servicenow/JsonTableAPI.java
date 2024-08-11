@@ -14,7 +14,7 @@ public class JsonTableAPI extends TableAPI {
 
 	final URI uri;
 
-	final private Logger logger = Log.logger(this.getClass());
+	final private Logger logger = Log.getLogger(this.getClass());
 	
 	public JsonTableAPI(Table table) {
 		super(table);

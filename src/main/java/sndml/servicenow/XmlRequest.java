@@ -24,7 +24,7 @@ import sndml.util.Log;
 
 class XmlRequest extends ServiceNowRequest {
 
-	final Logger logger = Log.logger(this.getClass());
+	final Logger logger = Log.getLogger(this.getClass());
 
 	final Document requestDoc;
 	final HttpUriRequest request;

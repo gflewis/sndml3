@@ -13,6 +13,7 @@ import sndml.servicenow.RecordKey;
 
 public class AppJobConfig extends JobConfig {
 
+	// TODO Rename sys_id to runkey. sys_id is ambiguous.
 	public RecordKey sys_id;
 	public String number;
 	
@@ -44,8 +45,15 @@ public class AppJobConfig extends JobConfig {
 		return yaml;
 	}
 
-	public RecordKey getSysId() { return this.sys_id; }	
-	public String getNumber() { return this.number; }
+	public RecordKey getSysId() {
+		assert this.sys_id != null;
+		return this.sys_id; 
+	}	
+	
+	public String getNumber() {
+		assert this.number != null;
+		return this.number; 
+	}
 	
 	@Override
 	public String getName() { 

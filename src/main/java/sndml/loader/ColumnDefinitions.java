@@ -19,7 +19,7 @@ public class ColumnDefinitions extends ArrayList<DatabaseFieldDefinition> {
 
 	private static final long serialVersionUID = 1L;
 
-	final private Logger logger = Log.logger(this.getClass());
+	final private Logger logger = Log.getLogger(this.getClass());
 
 	/**
 	 * Generate SQL data type information for all columns in the table

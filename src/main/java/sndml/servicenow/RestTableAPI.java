@@ -15,7 +15,7 @@ import sndml.util.Parameters;
 
 public class RestTableAPI extends TableAPI {
 
-	final private Logger logger = Log.logger(this.getClass());
+	final private Logger logger = Log.getLogger(this.getClass());
 	
 	public RestTableAPI(Table table) {
 		super(table);

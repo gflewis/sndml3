@@ -17,6 +17,7 @@ import sndml.servicenow.SchemaReader;
 import sndml.servicenow.Session;
 import sndml.util.Log;
 import sndml.util.PropertySet;
+import sndml.util.ResourceException;
 
 /**
  * {@link AppSession} that is used to communicate with a scoped app in the instance,
@@ -55,6 +56,22 @@ public class AppSession extends Session {
 		return this.schemaReader;
 	}
 
+	public RecordKey getAgentKey() throws ResourceException {
+		Log.setGlobalContext();
+		URI uri = this.uriGetAgent();		
+		JsonRequest request = new JsonRequest(this, uri);
+		ObjectNode json;
+		try {
+			json = request.execute();
+		} catch (IOException e) {
+			throw new ResourceException(e);
+		}		
+		String sys_id = json.get("agent").asText();
+		assert sys_id != null;
+		assert RecordKey.isGUID(sys_id);
+		return new RecordKey(sys_id);
+	}
+	
 	/**
 	 * Create a new Session with the same properties as this one. 
 	 * The URL and credentials will be the same, but the Session ID will be different.

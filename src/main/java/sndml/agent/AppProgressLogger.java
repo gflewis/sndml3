@@ -17,7 +17,7 @@ import sndml.util.Metrics;
 import sndml.util.ResourceException;
 
 public class AppProgressLogger extends ProgressLogger {
-
+	
 	final ConnectionProfile profile;
 	final AppSession appSession;
 	final String number;
@@ -34,7 +34,8 @@ public class AppProgressLogger extends ProgressLogger {
 		logger.debug(Log.INIT, String.format(
 			"URI=%s sys_id=%s", appSession.uriPutJobRun().toString(), runKey));
 	}
-	
+
+	// TODO profile should not be required
 	AppProgressLogger(
 			ConnectionProfile profile, 
 			AppSession appSession,
@@ -148,6 +149,7 @@ public class AppProgressLogger extends ProgressLogger {
 		}		
 	}
 	
+	// TODO: Use the AppStatusLogger version of this method
 	void putRunStatus(ObjectNode body) throws JobCancelledException {
 		logger.info(Log.REQUEST, String.format(
 			"putRunStatus %s", body.toString()));
@@ -167,7 +169,7 @@ public class AppProgressLogger extends ProgressLogger {
 				responseStatus.equalsIgnoreCase(AppJobStatus.FAILED.toString())) {
 			logger.warn(Log.RESPONSE, String.format(
 					"putRunStatus Job Cancellation Detected %s %s", runKey, response.toString()));
-			throw new JobCancelledException(runKey);			
+			throw new JobCancelledException(runKey);	
 		}
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, String.format(

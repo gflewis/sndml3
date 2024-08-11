@@ -56,7 +56,7 @@ public class MultiThreadScanner extends AgentScanner {
 			// Do not wait for them to complete
 			// Each job will generate create its own Session and Database connection
 			for (AppJobRunner job : joblist) {
-				workerPool.execute(job);						
+				workerPool.submit(job);						
 			}				
 		}
 		Log.setGlobalContext();			

@@ -87,7 +87,8 @@ public class JobRunner implements Callable<Metrics> {
 	 * </ol>
 	 */
 	@Override
-	public Metrics call() throws SQLException, IOException, InterruptedException, JobCancelledException {
+	public Metrics call() 
+			throws SQLException, IOException, InterruptedException, JobCancelledException {
 		assert config != null;
 		assert readerSession != null;
 		assert database != null;
@@ -167,7 +168,8 @@ public class JobRunner implements Callable<Metrics> {
 		database.dropTable(config.getTarget(), true);
 	}
 	
-	private void runPrune() throws SQLException, IOException, InterruptedException, JobCancelledException {
+	private void runPrune() 
+			throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		Table audit = readerSession.table("sys_audit_delete");
@@ -190,7 +192,8 @@ public class JobRunner implements Callable<Metrics> {
 		deleteWriter.close(jobMetrics);
 	}
 	
-	private void runSync() throws SQLException, IOException, InterruptedException, JobCancelledException {
+	private void runSync() 
+			throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		logger.debug(Log.INIT, "runSync " + config.toString());
@@ -240,7 +243,8 @@ public class JobRunner implements Callable<Metrics> {
 		writer.close(jobMetrics);
 	}
 	
-	private void runLoad() throws SQLException, IOException, InterruptedException, JobCancelledException {
+	private void runLoad() 
+			throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;
 		Action action = config.getAction();	

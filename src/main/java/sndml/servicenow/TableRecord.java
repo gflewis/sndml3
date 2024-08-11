@@ -15,7 +15,7 @@ import sndml.util.Log;
  */
 public abstract class TableRecord implements InsertResponse {
 
-	static final Logger logger = Log.logger(TableRecord.class);
+	static final Logger logger = Log.getLogger(TableRecord.class);
 	
 	protected final Table table;
 

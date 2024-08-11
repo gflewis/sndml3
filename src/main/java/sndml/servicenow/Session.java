@@ -42,7 +42,7 @@ public class Session {
 	private CloseableHttpClient client = null; // created on request
 	protected SchemaReader schemaReader = null;
 
-	final private Logger logger = Log.logger(this.getClass());
+	final private Logger logger = Log.getLogger(this.getClass());
 
 		
 	public Session(PropertySet propset) {

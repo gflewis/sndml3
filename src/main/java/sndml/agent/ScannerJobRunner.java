@@ -24,14 +24,18 @@ public class ScannerJobRunner extends AppJobRunner {
 
 	@Override
 	public Metrics call() throws JobCancelledException {
+		logger.info(Log.INIT, "call");
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
 		setThreadName(config.getNumber());
 		try {
 			super.call();
-			if (scanner != null) scanner.rescan();		
-		} catch (SQLException | IOException | InterruptedException e) {
+			if (scanner != null) scanner.rescan();
+		} catch (JobCancelledException e) {
+			logger.error(Log.ERROR, e.getMessage());
+			statusLogger.cancelJob(runKey, e);			
+		} catch (SQLException | IOException e) {
 			Log.setJobContext(this.getName());
 			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
 			statusLogger.logError(runKey, e);

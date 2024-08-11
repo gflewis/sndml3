@@ -22,18 +22,31 @@ public class Log {
 	static public final Marker ERROR    = MarkerFactory.getMarker("ERROR");
 	static public final Marker TEST     = MarkerFactory.getMarker("TEST");
 	
+	static boolean isShutdown = false;
+	
 	@SuppressWarnings("rawtypes")
-	static public org.slf4j.Logger logger(Class cls) {
+	static public org.slf4j.Logger getLogger(Class cls) {
 		return org.slf4j.LoggerFactory.getLogger(cls);
 	}
 	
-	static public org.slf4j.Logger logger(String name) {
+	static public org.slf4j.Logger getLogger(String name) {
 		return org.slf4j.LoggerFactory.getLogger(name);
+	}
+	
+	static public void shutdown() {
+		if (isShutdown) 
+			throw new IllegalStateException("Already shutdown");
+		org.apache.logging.log4j.LogManager.shutdown();
+		isShutdown = true;
 	}
 	
 	static public void setGlobalContext() {
 		MDC.clear();
 		MDC.put("job", "GLOBAL");
+	}
+	
+	static public void setThreadName(String name) {
+		Thread.currentThread().setName(name);
 	}
 	
 	static public void setTableContext(Table table, String jobname) {

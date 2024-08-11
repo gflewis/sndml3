@@ -40,7 +40,7 @@ public abstract class DatabaseStatement {
         	Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d");
 
     
-	final protected Logger logger = Log.logger(this.getClass());
+	final protected Logger logger = Log.getLogger(this.getClass());
 	final boolean traceEnabled;
 	
 	public DatabaseStatement(DatabaseWrapper db, String templateName, String sqlTableName, ColumnDefinitions columns) throws SQLException {

@@ -11,35 +11,30 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 public class AppStatusLogger {
 
 	final AppSession appSession;
-	final Logger logger;
+	final Logger logger = LoggerFactory.getLogger(AppStatusLogger.class);
 	
 	public AppStatusLogger(AppSession appSession) {
 		this.appSession = appSession;
-		this.logger = LoggerFactory.getLogger(this.getClass());				
 	}
 
-	public void setStatus(RecordKey runKey, AppJobStatus status) 
+	public synchronized void setStatus(RecordKey runKey, AppJobStatus status) 
 			throws IOException, JobCancelledException, IllegalStateException {		
 		assert appSession != null;
 		assert runKey != null;
-		URI uriPutJobRun = appSession.uriPutJobRun();
 		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
 		body.put("status", status.toString().toLowerCase());
-		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body);
-		ObjectNode response = request.execute();
-		ObjectNode result = (ObjectNode) response.get("result");
-		if (!result.has("status")) {
-			logger.warn(Log.ERROR, response.toString());
-			throw new IllegalStateException("response is missing \"status\" field");
-		}		
+		ObjectNode result = putRunStatus(runKey, body);
+		
 		if (logger.isDebugEnabled())
 			logger.debug(Log.RESPONSE, "setStatus " + runKey + " " + result.toString());
+		// TODO Remove redundant code (next 2 statements appear in putRunStatus)
 		String newStatus = result.get("status").asText();
 		if (newStatus.equalsIgnoreCase(AppJobStatus.CANCELLED.toString())) {
 			logger.warn(Log.RESPONSE, "Cancel detected");
@@ -50,25 +45,81 @@ public class AppStatusLogger {
 		Log.setGlobalContext();
 	}	
 
+	void cancelJob(RecordKey jobKey, Exception sourceException) {
+		// Who cancelled me?
+		String sourceTag =
+			sourceException == null ? "shutdown" :
+			sourceException instanceof JobCancelledException ? "app" :
+			sourceException instanceof InterruptedException ? "server" :
+			sourceException.getClass().getSimpleName();
+		logger.warn(Log.FINISH, String.format(
+			"cancelJob %s from %s", 
+			jobKey.toString(), sourceTag));
+		ObjectNode body = JsonNodeFactory.instance.objectNode();
+		body.put("sys_id", jobKey.toString());		
+		body.put("status", AppJobStatus.CANCELLED.toString().toLowerCase());
+		URI uriPutJobRun = appSession.uriPutJobRun();
+		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, jobKey);		
+		try {
+			request.execute();
+		} catch (IOException e1) {
+			logger.warn(Log.FINISH, "cancelJob: " + e1.getMessage());
+		}
+	}
+
 	public void logError(RecordKey runKey, Exception e) {
 		assert appSession != null;
 		assert runKey != null;
 		logger.error(Log.PROCESS, "logError " + e.getClass().getSimpleName());
 		Log.setJobContext(runKey.toString());
-		URI uriPutJobRun = appSession.uriPutJobRun();
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", runKey.toString());		
-		body.put("status", "failed");
+		body.put("status", AppJobStatus.FAILED.toString().toLowerCase());
 		body.put("message", e.getMessage());
-		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body);
 		try {
-			request.execute();
+			putRunStatus(runKey, body);
 		} catch (IOException e1) {
 			logger.error(Log.FINISH, "Unable to log Error: " + e.getMessage());
 			logger.error(Log.FINISH, "Critical failure. Halting JVM.");
-			Runtime.getRuntime().halt(-1);			
-		}
+			Runtime.getRuntime().halt(-1);
+		}		
 		Log.setGlobalContext();
 	}
-		
+	
+	/**
+	 * Update status and/or metrics in the JobRun
+	 */
+	ObjectNode putRunStatus(RecordKey runKey, ObjectNode body) throws IOException, JobCancelledException {
+		// sys_id must also be in the body
+		String sys_id = body.get("sys_id").asText();
+		assert sys_id.equals(runKey.toString());
+		logger.info(Log.REQUEST, String.format(
+			"putRunStatus %s", body.toString()));
+		URI uriPutJobRun = appSession.uriPutJobRun();
+		JsonRequest requestObj = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		
+		ObjectNode responseObj;
+		try {
+			responseObj = requestObj.execute();
+		} catch (IOException e) {
+			throw new ResourceException(e);
+		}
+		ObjectNode responseResult = (ObjectNode) responseObj.get("result");
+		logger.info(Log.REQUEST, String.format(
+				"putRunStatus response=%s", responseResult.toString()));
+		if (!responseResult.has("status")) {
+			logger.warn(Log.ERROR, responseObj.toString());
+			throw new IllegalStateException("response is missing \"status\" field");
+		}		
+		String responseStatus = responseResult.get("status").asText();
+		if (responseStatus.equalsIgnoreCase(AppJobStatus.CANCELLED.toString())) {
+			logger.warn(Log.RESPONSE, String.format(
+					"putRunStatus detected CANCEL %s", runKey.toString()));
+			throw new JobCancelledException(runKey);
+		}
+		if (logger.isDebugEnabled())
+			logger.debug(Log.RESPONSE, String.format(
+				"putRunStatus %s %s", runKey, responseObj.toString()));
+		return responseResult;
+	}
+	
 }

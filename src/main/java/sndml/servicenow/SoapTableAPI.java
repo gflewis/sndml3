@@ -14,7 +14,7 @@ public class SoapTableAPI extends TableAPI {
 	final SoapClient client;
 	TableWSDL wsdl = null;
 	
-	final Logger logger = Log.logger(this.getClass());
+	final Logger logger = Log.getLogger(this.getClass());
 	
 	public SoapTableAPI(Table table) {
 		super(table);

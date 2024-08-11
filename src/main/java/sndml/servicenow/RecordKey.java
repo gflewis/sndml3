@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class RecordKey implements Comparable<RecordKey>, Comparator<RecordKey> {
 
 	static final Pattern pattern = Pattern.compile("[0-9a-f]{32}");
-	static final int LENGTH = 32;
+	static final public int LENGTH = 32;
 	
 	final String value;	
 	
@@ -64,6 +64,7 @@ public class RecordKey implements Comparable<RecordKey>, Comparator<RecordKey> {
 
 	static public boolean isGUID(String v) {
 		if (v == null) return false;
+		if (v.length() != LENGTH) return false;
 		return pattern.matcher(v).matches();
 	}
 	

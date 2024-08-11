@@ -27,21 +27,24 @@ public class AgentHttpServer {
 	final String agentName;
 	final RecordKey agentKey;
 	final AgentRequestHandler handler;
+	final WorkerPool workerPool;
 	
 	private HeartbeatTask heartbeatTask;
 	private Timer heartbeatTimer;
 	private final int heartbeatInterval;
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+		
 	public AgentHttpServer(Resources resources) throws IOException {
 		this.resources = resources;
 		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
+		this.workerPool = resources.getWorkerPool();
+		// TODO Not the best way to get agent sys_id
 		GetRunListRequest getRunList = 
 			new GetRunListRequest(resources.getAppSession(), agentName);
 		getRunList.execute();
-		agentKey = getRunList.getAgentKey();				
+		agentKey = getRunList.getAgentKey();
 		
 		String portValue = profile.getProperty("server.port");
 		if (portValue == null) 
@@ -52,7 +55,8 @@ public class AgentHttpServer {
 		this.heartbeatInterval = Integer.parseInt(profile.getProperty("server.heartbeat"));
 		
 		logger.info(Log.INIT, String.format(
-				"instantiate port=%d backlog=%d heartbeat=%d", port, backlog, heartbeatInterval));
+				"agent=%s sys_id=%s port=%d backlog=%d heartbeat=%d", 
+				agentName, agentKey, port, backlog, heartbeatInterval, agentKey));
 		server = HttpServer.create(new InetSocketAddress(port), backlog);		
 		handler = new AgentRequestHandler(resources);
 		server.createContext("/", handler);
@@ -68,17 +72,21 @@ public class AgentHttpServer {
 	public void start() {
 		logger.info(Log.INIT, String.format("start port=%d", port));		
 		server.start();
-		// TODO This is WRONG. The ShutdownHook needs to be in the handler.
-//		ShutdownHook shutdownHook = new ShutdownHook(this, resources);
-//		Runtime.getRuntime().addShutdownHook(shutdownHook);			
+		ShutdownHook shutdownHook = new ShutdownHook(resources);
+		Runtime.getRuntime().addShutdownHook(shutdownHook);			
         heartbeatTimer.schedule(this.heartbeatTask, 0, 1000 * heartbeatInterval);		
 	}
 	
-	// TODO this is never called
+	/*
+	 * Called from shutdownHook
 	void shutdown() {
 		logger.info(Log.FINISH, "shutdown");
-		server.stop(5);
-		Runtime.getRuntime().exit(0);
+		workerPool.shutdown();
+		logger.info(Log.FINISH, "shutting down LogManager");
+//		LogManager.shutdown();
+//		server.stop(1);
+		Main.interrupt();		
 	}
+	 */
 	
 }

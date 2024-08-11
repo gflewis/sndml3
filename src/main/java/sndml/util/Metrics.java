@@ -57,6 +57,10 @@ public final class Metrics {
 		return new DateTime(started);
 	}
 	
+	public boolean isFinished() {
+		return (finished != null);
+	}
+	
 	public DateTime getFinished() {
 		assert finished != null;
 		return new DateTime(finished);

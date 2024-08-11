@@ -101,6 +101,7 @@ public class Main {
 					new SimpleTableLoader(resources, table, query) : 
 					new SimpleTableLoader(resources, table, docKey);			
 			tableLoader.call();
+			shutdown();
 		}
 		else {
 			if (cmd.hasOption(optFilter))
@@ -116,6 +117,7 @@ public class Main {
 			logger.info(Log.INIT, yamlFileName + ":\n" + yamlText.trim());
 			YamlLoader loader = new YamlLoader(resources, yamlFile);
 			loader.loadTables();
+			shutdown();
 		}
 		if (requiresApp) {
 			// Run as --scan or --daemon or --server
@@ -127,8 +129,26 @@ public class Main {
 		return resources;
 	}
 	
+	public static void shutdown() {
+		Log.shutdown();
+	}
+	
 	public static Thread getThread() {
 		return mainThread;
+	}
+	
+	public static void interrupt() {
+		logger.info(Log.FINISH, "interrupt");
+		mainThread.interrupt();
+	}
+	
+	public static void sleep(int millisec) {
+		try {
+			logger.info(Log.FINISH, String.format("sleep %d", millisec));
+			Thread.sleep(millisec);
+		} catch (InterruptedException e) {
+			logger.warn(Log.ERROR, e.getMessage());
+		}		
 	}
 		
 }

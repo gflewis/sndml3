@@ -242,14 +242,14 @@ public class JobConfig {
 		validForActions("Filter", filter, Action.INSERT_UPDATE_SYNC);
 		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
 		validForActions("SQL", sql, Action.EXECUTE_ONLY);
-		validForActions("sys_id", docKey, Action.SINGLE_ONLY);
+		validForActions("Document", docKey, Action.SINGLE_ONLY);
 		
 		if (sinceExpr != null && sinceDate == null)
 			configError("Missing Since Date");
 		if (createdExpr != null && createdRange == null)
 			configError("Missing Created Range");
 		if (action == Action.SINGLE && docKey == null)
-			configError("Missing doc_id");
+			configError("Missing Document");
 		
 		if (threads != null && partition == null)
 			configError("Threads only valid with Partition");

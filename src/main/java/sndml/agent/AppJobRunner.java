@@ -1,10 +1,12 @@
 package sndml.agent;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
+import sndml.util.Metrics;
 import sndml.util.ResourceException;
 
 public class AppJobRunner extends JobRunner implements Runnable {
@@ -13,8 +15,8 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	
 	final ConnectionProfile profile;
 	final AppSession appSession;
-	final public RecordKey runKey;
-	final public String number;
+	final RecordKey runKey;
+	final String number;
 	final AppStatusLogger statusLogger;
 	Thread myThread;
 
@@ -31,7 +33,11 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		assert number != null;
 		assert number.length() > 0;		
 	}
-			
+	
+	String getNumber() {
+		return number;
+	}
+	
 	Thread getThread() {
 		return myThread;
 	}
@@ -71,17 +77,23 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	 * If this is not the main thread and it is not the scanner thread
 	 * then change the thread name.
 	 */
-	protected void setThreadName(String threadName) {		
+	
+	protected void setThreadName(String name) {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
-		if (!myThread.equals(AgentMain.getThread()) && !myThread.getName().equals("scanner")) {
-			myThread.setName(threadName);
+		if (myThread != null && !myThread.equals(AgentMain.getThread()) && 
+				!myThread.getName().equals("scanner")) {
+			myThread.setName(name);
 		}
 	}
+
+	protected void setThread() {
+		myThread = Thread.currentThread();
+		setThreadName(config.getName());		
+	}	
 	
 	@Override
 	public void run() {
-		myThread = Thread.currentThread();
-		setThreadName(this.number);
+		setThread();
 		try {
 			this.call();
 		} catch (JobCancelledException e) {
@@ -93,6 +105,27 @@ public class AppJobRunner extends JobRunner implements Runnable {
 			logger.error(Log.ERROR, e.getMessage(), e);			
 			e.printStackTrace(System.err);
 		}
+	}
+	
+	@Override
+	public Metrics call() 
+			throws SQLException, IOException, JobCancelledException {
+		Metrics metrics = null;
+		setThread();
+		// TODO Why are we unable to detect the interrupt?
+		try {
+			metrics = super.call();
+		}
+		catch (InterruptedException e) {
+			logger.error(Log.FINISH, String.format("%s Interrupt Detected", number));
+			System.out.println(String.format("%s Interrupt Detected", number));
+			System.out.flush();
+		}
+		if (Thread.interrupted()) {
+			System.out.println(String.format("%s Was Interrupted", number));
+			System.out.flush();			
+		}
+		return metrics;
 	}
 	
 	@Override

@@ -35,7 +35,7 @@ public class Generator {
 	private final NameMap namemap;
 	private final SchemaReader schemaReader;
 	
-	Logger logger = Log.logger(this.getClass());
+	Logger logger = Log.getLogger(this.getClass());
 	
 	@SuppressWarnings("serial")
 	class Variables extends HashMap<String,String> {		

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Default Log4j configuration writes INFO Messages to the console -->
-<Configuration>
+<Configuration shutdownHook="disable">
   <Appenders>
     <Console name="Console">
       <ThresholdFilter level="info" />

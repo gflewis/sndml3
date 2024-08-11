@@ -43,7 +43,7 @@ public class DatabaseWrapper {
 	private final Generator generator;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-	private final static Logger logger = Log.logger(DatabaseWrapper.class);
+	private final static Logger logger = Log.getLogger(DatabaseWrapper.class);
 
 	public DatabaseWrapper(Connection connection, Generator generator, Properties properties) {
 		this.protocol = properties.getProperty("dialect");
