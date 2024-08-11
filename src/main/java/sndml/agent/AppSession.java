@@ -58,10 +58,9 @@ public class AppSession extends Session {
 	public RecordKey getAgentKey() throws ResourceException {
 		Log.setGlobalContext();
 		URI uri = this.uriGetAgent();		
-		JsonRequest request = new JsonRequest(this, uri);
 		ObjectNode json;
 		try {
-			json = request.execute();
+			json = httpGet(uri);
 		} catch (IOException e) {
 			throw new ResourceException(e);
 		}		
