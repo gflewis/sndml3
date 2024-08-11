@@ -18,7 +18,7 @@ import sndml.util.ResourceException;
 public class Resources {
 
 	private ConnectionProfile profile;
-	private boolean requiresAppSession;
+	private boolean hasAppSession;
 	private String agentName; // null if no agent
 	private ReaderSession readerSession;
 	private AppSession appSession;
@@ -34,19 +34,20 @@ public class Resources {
 		assert profile != null;
 		this.profile = profile;
 		this.agentName = profile.getAgentName(); // null if no agent
-		this.requiresAppSession = requiresAppSession;
+		if (requiresAppSession) profile.app.assertNotEmpty("agent");
+		this.hasAppSession = profile.hasAgent();
 	}
 	
 	public Resources(ConnectionProfile profile) throws ResourceException {
 		this.profile = profile;
 		this.agentName = profile.getAgentName();
-		this.requiresAppSession = profile.hasAgent();		
+		this.hasAppSession = profile.hasAgent();		
 	}
 	
 	void setProfile(ConnectionProfile profile) throws ResourceException {
 		this.profile = profile;
 		this.agentName = profile.getAgentName();
-		this.requiresAppSession = profile.hasAgent();
+		this.hasAppSession = profile.hasAgent();
 		this.readerSession = null;
 		this.appSession = null;
 		this.schemaReader = null;
@@ -88,7 +89,7 @@ public class Resources {
 	public SchemaReader getSchemaReader() {
 		logger.debug(Log.INIT, "getSchemaReader");
 		if (this.schemaReader == null) {
-			this.schemaReader = requiresAppSession ?
+			this.schemaReader = hasAppSession ?
 					new AppSchemaReader(getAppSession()) :
 					new TableSchemaReader(getReaderSession());			
 			logger.info(Log.INIT, String.format(
@@ -151,7 +152,7 @@ public class Resources {
 	 * Everything is set to null, so the worker has to create their own sessions.
 	 */
 	public Resources workerCopy() {
-		Resources copy = new Resources(profile, requiresAppSession);
+		Resources copy = new Resources(profile, hasAppSession);
 		return copy;
 	}
 

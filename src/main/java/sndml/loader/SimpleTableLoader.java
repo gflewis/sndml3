@@ -16,18 +16,6 @@ public class SimpleTableLoader extends JobRunner implements Runnable {
 	public SimpleTableLoader(Resources resources, Table table, RecordKey docKey) {
 		super(resources, jobConfig(resources.getProfile(), table, docKey));		
 	}
-		
-	@Deprecated
-	public SimpleTableLoader(ConnectionProfile profile, DatabaseWrapper database, Table table, EncodedQuery filter) {
-		super(table.getSession(), database, jobConfig(profile, table, filter));
-		this.table = table;
-	}
-	
-	@Deprecated
-	public SimpleTableLoader(ConnectionProfile profile, DatabaseWrapper database, Table table, RecordKey docKey) {
-		super(table.getSession(), database, jobConfig(profile, table, docKey));
-		this.table = table;
-	}
 	
 	private static JobConfig jobConfig(ConnectionProfile profile, Table table, EncodedQuery query) {
 		ConfigFactory configFactory = new ConfigFactory(DateTime.now());

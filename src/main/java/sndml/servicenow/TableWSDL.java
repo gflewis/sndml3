@@ -45,6 +45,11 @@ public class TableWSDL {
 		XmlRequest request = new XmlRequest(session.getClient(), uri, null);
 		try {
 			doc = request.getDocument();
+		} catch (InsufficientRightsException e) {
+			logger.error(Log.WSDL, String.format(
+					"%s user=%s table=%s url=%s",
+					e.getClass().getSimpleName(), session.getUsername(), tablename, uri.toString()));
+			throw e;
 		} catch (NoContentException e) {
 			throw new InvalidTableNameException(tablename);
 		}
