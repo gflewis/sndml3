@@ -58,7 +58,7 @@ public class AppStatusLogger {
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("sys_id", jobKey.toString());		
 		body.put("status", AppJobStatus.CANCELLED.toString().toLowerCase());
-		URI uriPutJobRun = appSession.uriPutJobRun();
+		URI uriPutJobRun = appSession.uriPutJobRunStatus(jobKey);
 		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, jobKey);		
 		try {
 			request.execute();
@@ -90,12 +90,9 @@ public class AppStatusLogger {
 	 * Update status and/or metrics in the JobRun
 	 */
 	ObjectNode putRunStatus(RecordKey runKey, ObjectNode body) throws IOException, JobCancelledException {
-		// sys_id must also be in the body
-		String sys_id = body.get("sys_id").asText();
-		assert sys_id.equals(runKey.toString());
 		logger.info(Log.REQUEST, String.format(
 			"putRunStatus %s", body.toString()));
-		URI uriPutJobRun = appSession.uriPutJobRun();
+		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
 		JsonRequest requestObj = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		
 		ObjectNode responseObj;
 		try {

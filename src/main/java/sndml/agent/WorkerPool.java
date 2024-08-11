@@ -112,7 +112,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 			WorkerEntry entry = iter.next();
 			Future<Metrics> future = entry.future;
 			AppJobConfig config = entry.config;
-			if (config.getSysId().equals(jobKey)) {
+			if (config.getRunKey().equals(jobKey)) {
 				if (future.isCancelled() || future.isDone()) {
 					logger.info(Log.PROCESS, String.format("%s not active", config.getName()));
 				}
@@ -145,15 +145,15 @@ public class WorkerPool extends ThreadPoolExecutor {
 		}		
 	}
 
-	void setRunStatus(AppSession appSession, RecordKey jobKey, AppJobStatus status, String message) {
+	void setRunStatus(AppSession appSession, RecordKey runKey, AppJobStatus status, String message) {
 		logger.warn(Log.FINISH, String.format(
-			"setRunStatus %s %s", jobKey.toString(), status.toString()));
-		URI uriPutJobRun = appSession.uriPutJobRun();
+			"setRunStatus %s %s", runKey.toString(), status.toString()));
+		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", jobKey.toString());		
+		body.put("sys_id", runKey.toString());		
 		body.put("status", status.toString().toLowerCase());
 		if (message != null) body.put("message",  message);
-		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, jobKey);		
+		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		
 		try {
 			request.execute();
 		} catch (IOException e1) {

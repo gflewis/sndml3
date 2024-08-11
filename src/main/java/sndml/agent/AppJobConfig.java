@@ -14,7 +14,7 @@ import sndml.util.Log;
 public class AppJobConfig extends JobConfig {
 
 	// TODO Rename sys_id to runkey. sys_id is ambiguous.
-	public RecordKey sys_id;
+	public RecordKey runKey;
 	public String number;
 	
 	static final Logger logger = Log.getLogger(AppJobConfig.class);	
@@ -33,7 +33,7 @@ public class AppJobConfig extends JobConfig {
 	public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
-		if (sys_id != null) node.put("sys_id",  sys_id.toString());
+		if (runKey != null) node.put("sys_id",  runKey.toString());
 		if (number != null) node.put("number",  getNumber());
 		addFieldsToObject(node);
 		String yaml;
@@ -45,9 +45,9 @@ public class AppJobConfig extends JobConfig {
 		return yaml;
 	}
 
-	public RecordKey getSysId() {
-		assert this.sys_id != null;
-		return this.sys_id; 
+	public RecordKey getRunKey() {
+		assert this.runKey != null;
+		return this.runKey; 
 	}	
 	
 	public String getNumber() {

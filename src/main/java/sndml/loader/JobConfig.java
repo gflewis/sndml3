@@ -34,7 +34,7 @@ public class JobConfig {
 	public String source;
 	public String target;
 	public Action action;
-	@JsonProperty("document") public RecordKey docKey; // Action SINGLE only
+	@JsonProperty("dockey") public RecordKey docKey; // Action SINGLE only
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
 	@JsonProperty("created") public JsonNode createdExpr;
@@ -355,7 +355,7 @@ public class JobConfig {
 		node.put("source", this.source);
 		node.put("target", this.target);
 		node.put("action", this.action.toString());
-		if (docKey != null) node.put("sys_id", docKey.toString());
+		if (docKey != null) node.put("dockey", docKey.toString());
 		if (getTruncate()) node.put("truncate", true);
 		if (getDropTable()) node.put("drop", true);
 		if (getAutoCreate()) node.put("autocreate", getAutoCreate());

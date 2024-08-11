@@ -26,7 +26,7 @@ public class AppJobRunner extends JobRunner implements Runnable {
 		this.appSession = resources.getAppSession();
 		this.config = config;
 		this.statusLogger = new AppStatusLogger(appSession);				
-		this.runKey = config.getSysId();
+		this.runKey = config.getRunKey();
 		this.number = config.getNumber();
 		assert runKey != null;
 		assert runKey.isGUID();

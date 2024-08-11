@@ -18,14 +18,20 @@ import sndml.util.ResourceException;
 
 public class AgentMain extends Main {
 
+	static String agentName;
+	static RecordKey agentKey;
 	static final Logger logger = Log.getLogger(AgentMain.class);
 	
 	public static void main(CommandLine cmd, Resources resources) throws Exception {
 		// Note: resources is actually a static protected variable in Main;
 		// thus we could access it even if it were not a parameter		
-		assert resources != null;		
+		assert resources != null;
+		agentName = resources.getProfile().getAgentName();
+		assert agentName != null;
 		AppSession appSession = resources.getAppSession();
-		
+		agentKey = appSession.getAgentKey();
+		assert agentKey != null;
+				
 		if (cmd.hasOption(optScan)) {
 			// Scan once
 			AgentDaemon daemon = new AgentDaemon(resources);
@@ -58,6 +64,10 @@ public class AgentMain extends Main {
 		
 	}
 
+	RecordKey getAgentKey() {
+		return agentKey;
+	}
+	
 	String getAgentName() {		
 		return Main.profile.app.getNotEmpty("agent");
 	}

@@ -31,7 +31,7 @@ public class AppProgressLogger extends ProgressLogger {
 			RecordKey runKey) {
 		this(profile, appSession, metrics, number, runKey, null);
 		logger.debug(Log.INIT, String.format(
-			"URI=%s sys_id=%s", appSession.uriPutJobRun().toString(), runKey));
+			"URI=%s sys_id=%s", appSession.uriPutJobRunStatus(runKey).toString(), runKey));
 	}
 
 	// TODO profile should not be required
@@ -152,7 +152,7 @@ public class AppProgressLogger extends ProgressLogger {
 	void putRunStatus(ObjectNode body) throws JobCancelledException {
 		logger.info(Log.REQUEST, String.format(
 			"putRunStatus %s", body.toString()));
-		URI putRunStatusURI = appSession.uriPutJobRun();
+		URI putRunStatusURI = appSession.uriPutJobRunStatus(runKey);
 		JsonRequest request = new JsonRequest(appSession, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
 		try {

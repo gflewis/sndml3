@@ -49,7 +49,7 @@ public class SingleJobRunner implements Runnable {
 		this.jobKey = jobKey;
 		this.appSession = profile.newAppSession();
 		this.configFactory = new AppConfigFactory(appSession);
-		this.uriGetRun = appSession.uriGetJobRun(jobKey);
+		this.uriGetRun = appSession.uriGetJobRunConfig(jobKey);
 		this.agentName = appSession.getAgentName();
 		this.jobConfig = configFactory.jobConfig(profile, getRun());
 		logger.info(Log.INIT, jobConfig.toString());

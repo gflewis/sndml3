@@ -19,7 +19,7 @@ class WorkerEntry {
 		assert config != null;
 		this.number = config.getNumber();
 		assert number != null;
-		this.key = config.getSysId();
+		this.key = config.getRunKey();
 		this.future = future;
 	}
 

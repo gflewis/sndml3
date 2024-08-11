@@ -56,7 +56,7 @@ public class AppConfigFactory extends ConfigFactory {
 	
 	ObjectNode getRun(RecordKey jobKey) throws IOException, ConfigParseException {
 		Log.setJobContext(appSession.getAgentName());
-		URI uriGetRun = appSession.uriGetJobRun(jobKey);
+		URI uriGetRun = appSession.uriGetJobRunConfig(jobKey);
 		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
 		logger.info(uriGetRun.toString());
 		ObjectNode response = request.execute();

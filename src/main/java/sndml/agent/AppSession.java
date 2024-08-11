@@ -84,6 +84,7 @@ public class AppSession extends Session {
 	 * Return the URI of an API. This will be dependent on the application scope
 	 * which is available from the property app.scope.
 	 */
+	@SuppressWarnings("unused")
 	private URI getAPI(String apiName) {
 		return getAPI(apiName, null);
 	}
@@ -102,17 +103,16 @@ public class AppSession extends Session {
 		return this.getAPI("agent", agentName); 
 	}
 	
-	public URI uriGetJobRun(RecordKey jobKey) {
-		return this.getAPI("jobrun", jobKey.toString());
+	public URI uriGetJobRunConfig(RecordKey jobKey) {
+		return this.getAPI("jobrunconfig", jobKey.toString());
 	}
 	
-	public URI uriPutJobRun() {
-		// jobKey goes in the body, not the URL
-		return this.getAPI("jobrun");
+	public URI uriPutJobRunStatus(RecordKey jobKey) {
+		return this.getAPI("jobrunstatus", jobKey.toString());
 	}
 	
 	public URI uriGetTableSchema(String tablename) {
-		return this.getAPI("schema", tablename);
+		return this.getAPI("tableschema", tablename);
 	}
 	
 	ObjectNode httpGet(URI uri) throws IOException, ConfigParseException {
