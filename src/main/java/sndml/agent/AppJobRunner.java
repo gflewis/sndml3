@@ -78,22 +78,20 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	 * then change the thread name.
 	 */
 	
-	protected void setThreadName(String name) {		
+	protected void setThreadName() {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
+		myThread = Thread.currentThread();
+		String name = config.getName();
 		if (myThread != null && !myThread.equals(AgentMain.getThread()) && 
 				!myThread.getName().equals("scanner")) {
 			myThread.setName(name);
 		}
 	}
-
-	protected void setThread() {
-		myThread = Thread.currentThread();
-		setThreadName(config.getName());		
-	}	
 	
 	@Override
 	public void run() {
-		setThread();
+		setThreadName();
+		logger.info(Log.INIT, "run " + number);
 		try {
 			this.call();
 		} catch (JobCancelledException e) {
@@ -110,8 +108,9 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	@Override
 	public Metrics call() 
 			throws SQLException, IOException, JobCancelledException {
+		logger.info(Log.INIT, "call " + number);
 		Metrics metrics = null;
-		setThread();
+		setThreadName();
 		// TODO Why are we unable to detect the interrupt?
 		try {
 			metrics = super.call();

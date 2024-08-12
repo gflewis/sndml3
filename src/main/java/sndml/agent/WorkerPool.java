@@ -66,7 +66,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 		return threadCount;
 	}
 	
-	public Future<Metrics> submit(AppJobRunner runner) {
+	synchronized public Future<Metrics> submit(AppJobRunner runner) {
 		logger.info(Log.INIT, "submit " + runner.getNumber());
 		Future<Metrics> future = super.submit((Callable<Metrics>) runner);
 		WorkerEntry entry = new WorkerEntry(runner, future);
@@ -105,6 +105,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 	/**
 	 * Interrupt a single job
 	 */
+	// TODO finish cancelJob
 	synchronized void cancelJob(RecordKey jobKey) {
 		int count = 0;
 		Iterator<WorkerEntry> iter = jobList.iterator();
@@ -145,7 +146,8 @@ public class WorkerPool extends ThreadPoolExecutor {
 		}		
 	}
 
-	void setRunStatus(AppSession appSession, RecordKey runKey, AppJobStatus status, String message) {
+	@SuppressWarnings("unused")
+	private void setRunStatus(AppSession appSession, RecordKey runKey, AppJobStatus status, String message) {
 		logger.warn(Log.FINISH, String.format(
 			"setRunStatus %s %s", runKey.toString(), status.toString()));
 		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
@@ -160,19 +162,5 @@ public class WorkerPool extends ThreadPoolExecutor {
 			logger.warn(Log.FINISH, "setRunStatus: " + e1.getMessage());
 		}
 	}
-	
-//	@Deprecated
-//	void awaitTermination() {
-//		int active = activeTaskCount();
-//		logger.info(Log.FINISH, String.format("awaitTermination: %d active tasks", active));
-//		if (active > 0) {
-//			try {
-//				super.awaitTermination(5, TimeUnit.SECONDS);
-//			} catch (InterruptedException e) {			
-//				e.printStackTrace();
-//			}			
-//			logger.info(Log.FINISH, "termination complete");
-//		}
-//	}
-		
+
 }
