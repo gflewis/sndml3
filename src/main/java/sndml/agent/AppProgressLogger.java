@@ -150,8 +150,8 @@ public class AppProgressLogger extends ProgressLogger {
 	
 	// TODO: Use the AppStatusLogger version of this method
 	void putRunStatus(ObjectNode body) throws JobCancelledException {
-		logger.info(Log.REQUEST, String.format(
-			"putRunStatus %s", body.toString()));
+		logger.debug(Log.REQUEST, String.format(
+			"putRunStatus request=%s", body.toString()));
 		URI putRunStatusURI = appSession.uriPutJobRunStatus(runKey);
 		JsonRequest request = new JsonRequest(appSession, putRunStatusURI, HttpMethod.PUT, body);		
 		ObjectNode response;
@@ -161,7 +161,7 @@ public class AppProgressLogger extends ProgressLogger {
 			throw new ResourceException(e);
 		}
 		JsonNode responseResult = response.get("result");
-		logger.info(Log.REQUEST, String.format(
+		logger.debug(Log.REQUEST, String.format(
 				"putRunStatus response=%s", responseResult.toString()));
 		String responseStatus = responseResult.get("status").asText();
 		if (responseStatus.equalsIgnoreCase(AppJobStatus.CANCELLED.toString()) || 

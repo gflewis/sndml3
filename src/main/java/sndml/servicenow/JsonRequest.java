@@ -30,7 +30,7 @@ public class JsonRequest extends ServiceNowRequest {
 	final protected ObjectNode requestObj;
 	protected ObjectNode responseObj = null;
 	protected ObjectNode resultObj = null;
-	protected RecordKey jobKey = null; // used for logging and/or exceptions
+	protected RecordKey runKey = null; // used for logging and/or exceptions
 	protected boolean executed = false;
 	
 	final protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -44,10 +44,10 @@ public class JsonRequest extends ServiceNowRequest {
 		this.requestObj = body;
 	}
 
-	public JsonRequest(Session session, URI uri, HttpMethod method, ObjectNode body, RecordKey jobKey) {
+	public JsonRequest(Session session, URI uri, HttpMethod method, ObjectNode body, RecordKey runKey) {
 		super(session.getClient(), uri, method);
 		this.requestObj = body;
-		this.jobKey = jobKey;
+		this.runKey = runKey;
 	}
 	
 	public ObjectNode getResult() throws IOException {
@@ -146,8 +146,8 @@ public class JsonRequest extends ServiceNowRequest {
 		// 410 Gone
 		if (statusCode == 410) {
 			//  used by app to indicate that this job has been cancelled
-			assert jobKey != null;
-			throw new JobCancelledException(jobKey);
+			assert runKey != null;
+			throw new JobCancelledException(runKey);
 		}
 		// 401 Unauthorized
 		// 403 Forbidden 
