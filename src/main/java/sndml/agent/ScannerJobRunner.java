@@ -28,7 +28,7 @@ public class ScannerJobRunner extends AppJobRunner {
 		String myName = this.getClass().getName() + ".call";
 		assert profile != null;
 		assert config.getNumber() != null;
-		setThreadName(config.getNumber());
+		setThreadName();
 		try {
 			super.call();
 			if (scanner != null) scanner.rescan();
