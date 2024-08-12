@@ -13,16 +13,14 @@ import sndml.loader.ConfigFactory;
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.DateCalculator;
-import sndml.servicenow.HttpMethod;
-import sndml.servicenow.JsonRequest;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
 public class AppConfigFactory extends ConfigFactory {
 
 	final AppSession appSession;
-	Logger logger = Log.getLogger(AppConfigFactory.class);
 	
+	Logger logger = Log.getLogger(AppConfigFactory.class);	
 	
 	public AppConfigFactory(AppSession appSession) {		
 		super();
@@ -43,8 +41,9 @@ public class AppConfigFactory extends ConfigFactory {
 		return config;
 	}
 	
-	public AppJobConfig appJobConfig(RecordKey jobkey) throws ConfigParseException, IOException {
-		ObjectNode node = getRun(jobkey); 
+	public AppJobConfig appJobConfig(RecordKey runKey) throws ConfigParseException, IOException {
+		URI uriGetRun = appSession.uriGetJobRunConfig(runKey);
+		ObjectNode node = appSession.httpGet(uriGetRun);		
 		AppJobConfig config;
 		try {
 			config = jsonMapper.treeToValue(node, AppJobConfig.class);
@@ -55,15 +54,15 @@ public class AppConfigFactory extends ConfigFactory {
 	}
 	
 	// TODO can this procedure use AppSession.httpGet ?
-	ObjectNode getRun(RecordKey jobKey) throws IOException, ConfigParseException {
-		Log.setJobContext(appSession.getAgentName());
-		URI uriGetRun = appSession.uriGetJobRunConfig(jobKey);
-		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
-		logger.info(uriGetRun.toString());
-		ObjectNode response = request.execute();
-		logger.debug(Log.RESPONSE, response.toPrettyString());
-		ObjectNode objResult = (ObjectNode) response.get("result");
-		return objResult;
-	}
+//	private ObjectNode getRun(RecordKey jobKey) throws IOException, ConfigParseException {
+//		Log.setJobContext(appSession.getAgentName());
+//		URI uriGetRun = appSession.uriGetJobRunConfig(jobKey);
+//		JsonRequest request = new JsonRequest(appSession, uriGetRun, HttpMethod.GET, null);
+//		logger.info(Log.INIT, uriGetRun.toString());
+//		ObjectNode response = request.execute();
+//		logger.debug(Log.RESPONSE, response.toPrettyString());
+//		ObjectNode objResult = (ObjectNode) response.get("result");
+//		return objResult;
+//	}
 
 }

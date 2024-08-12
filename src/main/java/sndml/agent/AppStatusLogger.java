@@ -91,7 +91,7 @@ public class AppStatusLogger {
 	 */
 	ObjectNode putRunStatus(RecordKey runKey, ObjectNode body) throws IOException, JobCancelledException {
 		logger.info(Log.REQUEST, String.format(
-			"putRunStatus %s", body.toString()));
+			"putRunStatus request=%s", body.toString()));
 		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
 		JsonRequest requestObj = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		
 		ObjectNode responseObj;
@@ -101,7 +101,7 @@ public class AppStatusLogger {
 			throw new ResourceException(e);
 		}
 		ObjectNode responseResult = (ObjectNode) responseObj.get("result");
-		logger.info(Log.REQUEST, String.format(
+		logger.debug(Log.REQUEST, String.format(
 				"putRunStatus response=%s", responseResult.toString()));
 		if (!responseResult.has("status")) {
 			logger.warn(Log.ERROR, responseObj.toString());

@@ -87,7 +87,7 @@ public class AgentRequestHandler implements HttpHandler {
 	}
 
 	void doJobRunStart(URI uri, RecordKey runKey) throws AgentHandlerException {
-		logger.info(Log.REQUEST, "creating jobrunner");
+		logger.info(Log.REQUEST, String.format("doJobRunStart %s", runKey.toString()));
 		try {
 			AppConfigFactory factory = new AppConfigFactory(appSession);
 			AppJobConfig jobconfig = factory.appJobConfig(runKey);			
@@ -99,8 +99,8 @@ public class AgentRequestHandler implements HttpHandler {
 			Resources workerResources = resources.workerCopy();
 			AppJobRunner jobrunner = new AppJobRunner(workerResources, jobconfig);
 			AppStatusLogger statusLogger = new AppStatusLogger(appSession);
-			logger.info(Log.REQUEST, "created jobrunner");
 			statusLogger.setStatus(runKey, AppJobStatus.PREPARE);
+			logger.debug(Log.REQUEST, String.format("submit %s", runKey.toString()));
 			workerPool.submit(jobrunner);
 		}
 		catch (NoContentException | NoSuchRecordException | IllegalStateException e) {

@@ -115,7 +115,7 @@ public class AppSession extends Session {
 		return this.getAPI("tableschema", tablename);
 	}
 	
-	private ObjectNode httpGet(URI uri) throws IOException, ConfigParseException {
+	public ObjectNode httpGet(URI uri) throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
 		JsonRequest request = new JsonRequest(this, uri, HttpMethod.GET, null);
 		logger.info(Log.INIT, uri.toString());

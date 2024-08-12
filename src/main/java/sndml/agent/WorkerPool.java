@@ -31,7 +31,7 @@ import sndml.util.Metrics;
  */
 public class WorkerPool extends ThreadPoolExecutor {
 
-	private static WorkerPool INSTANCE;
+//	private static WorkerPool INSTANCE;
 	private static final int CORE_POOL_SIZE = 0;
 	private static final long KEEP_ALIVE_SECONDS = 60;
 	private static final Logger logger = Log.getLogger(WorkerPool.class);
@@ -48,19 +48,19 @@ public class WorkerPool extends ThreadPoolExecutor {
 		super(
 			CORE_POOL_SIZE, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
 			new LinkedBlockingQueue<Runnable>());
-		INSTANCE = this;
+//		INSTANCE = this;
 		this.threadCount = threadCount;
 		logger.info(
 			Log.INIT, String.format("instantiate threads=%d", threadCount));
 	}
 	
-	@Deprecated
-	static public WorkerPool getWorkerPool(ConnectionProfile profile) {
-		if (INSTANCE == null) {
-			INSTANCE = new WorkerPool(profile);
-		}
-		return INSTANCE;		
-	}
+//	@Deprecated
+//	static public WorkerPool getWorkerPool(ConnectionProfile profile) {
+//		if (INSTANCE == null) {
+//			INSTANCE = new WorkerPool(profile);
+//		}
+//		return INSTANCE;		
+//	}
 	
 	int getThreadCount() {
 		return threadCount;
@@ -161,18 +161,18 @@ public class WorkerPool extends ThreadPoolExecutor {
 		}
 	}
 	
-	@Deprecated
-	void awaitTermination() {
-		int active = activeTaskCount();
-		logger.info(Log.FINISH, String.format("awaitTermination: %d active tasks", active));
-		if (active > 0) {
-			try {
-				super.awaitTermination(5, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {			
-				e.printStackTrace();
-			}			
-			logger.info(Log.FINISH, "termination complete");
-		}
-	}
+//	@Deprecated
+//	void awaitTermination() {
+//		int active = activeTaskCount();
+//		logger.info(Log.FINISH, String.format("awaitTermination: %d active tasks", active));
+//		if (active > 0) {
+//			try {
+//				super.awaitTermination(5, TimeUnit.SECONDS);
+//			} catch (InterruptedException e) {			
+//				e.printStackTrace();
+//			}			
+//			logger.info(Log.FINISH, "termination complete");
+//		}
+//	}
 		
 }
