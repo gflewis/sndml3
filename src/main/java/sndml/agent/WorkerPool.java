@@ -150,7 +150,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 			"setRunStatus %s %s", runKey.toString(), status.toString()));
 		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", runKey.toString());		
+		body.put("runkey", runKey.toString());		
 		body.put("status", status.toString().toLowerCase());
 		if (message != null) body.put("message",  message);
 		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		

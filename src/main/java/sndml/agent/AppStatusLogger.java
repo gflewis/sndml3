@@ -28,7 +28,7 @@ public class AppStatusLogger {
 		assert runKey != null;
 		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", runKey.toString());		
+		body.put("runkey", runKey.toString());		
 		body.put("status", status.toString().toLowerCase());
 		ObjectNode result = putRunStatus(runKey, body);
 		
@@ -45,7 +45,7 @@ public class AppStatusLogger {
 		Log.setGlobalContext();
 	}	
 
-	void cancelJob(RecordKey jobKey, Exception sourceException) {
+	void cancelJob(RecordKey runKey, Exception sourceException) {
 		// Who cancelled me?
 		String sourceTag =
 			sourceException == null ? "shutdown" :
@@ -54,12 +54,12 @@ public class AppStatusLogger {
 			sourceException.getClass().getSimpleName();
 		logger.warn(Log.FINISH, String.format(
 			"cancelJob %s from %s", 
-			jobKey.toString(), sourceTag));
+			runKey.toString(), sourceTag));
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", jobKey.toString());		
+		body.put("runkey", runKey.toString());		
 		body.put("status", AppJobStatus.CANCELLED.toString().toLowerCase());
-		URI uriPutJobRun = appSession.uriPutJobRunStatus(jobKey);
-		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, jobKey);		
+		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
+		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		
 		try {
 			request.execute();
 		} catch (IOException e1) {
@@ -73,7 +73,7 @@ public class AppStatusLogger {
 		logger.error(Log.PROCESS, "logError " + e.getClass().getSimpleName());
 		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("sys_id", runKey.toString());		
+		body.put("runkey", runKey.toString());		
 		body.put("status", AppJobStatus.FAILED.toString().toLowerCase());
 		body.put("message", e.getMessage());
 		try {
