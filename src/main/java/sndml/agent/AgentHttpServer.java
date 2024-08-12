@@ -75,17 +75,5 @@ public class AgentHttpServer {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);			
         heartbeatTimer.schedule(this.heartbeatTask, 0, 1000 * heartbeatInterval);		
 	}
-	
-	/*
-	 * Called from shutdownHook
-	void shutdown() {
-		logger.info(Log.FINISH, "shutdown");
-		workerPool.shutdown();
-		logger.info(Log.FINISH, "shutting down LogManager");
-//		LogManager.shutdown();
-//		server.stop(1);
-		Main.interrupt();		
-	}
-	 */
-	
+		
 }

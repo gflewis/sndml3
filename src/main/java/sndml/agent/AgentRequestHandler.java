@@ -108,20 +108,10 @@ public class AgentRequestHandler implements HttpHandler {
 		}
 		catch (ResourceException | JobCancelledException e) {
 			throw new AgentHandlerException(e, HttpURLConnection.HTTP_UNAVAILABLE); // 503
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			throw new AgentHandlerException(e, HttpURLConnection.HTTP_INTERNAL_ERROR); // 500
 		}		
 	}
-	
-//	void doJobRunCancel(URI uri, String sys_id) {
-//		throw new IllegalStateException("Not implemented");
-//		RecordKey runKey = new RecordKey(sys_id); 
-//			
-//		}
-//		catch (Exception e) {
-//			
-//		}
-//	}
-	
 
 }

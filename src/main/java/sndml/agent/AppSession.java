@@ -3,8 +3,6 @@ package sndml.agent;
 import java.io.IOException;
 import java.net.URI;
 
-import org.slf4j.Logger;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.loader.ConfigParseException;
@@ -29,9 +27,7 @@ public class AppSession extends Session {
 	final String agentName;
 	final String appScope;
 	private RecordKey agentKey;
-	final Logger logger = Log.getLogger(this.getClass());
 	
-
 	public AppSession(PropertySet propset) {
 		super(propset);
 		this.propset = propset;
@@ -119,10 +115,10 @@ public class AppSession extends Session {
 		return this.getAPI("tableschema", tablename);
 	}
 	
-	ObjectNode httpGet(URI uri) throws IOException, ConfigParseException {
+	private ObjectNode httpGet(URI uri) throws IOException, ConfigParseException {
 		Log.setJobContext(agentName);
 		JsonRequest request = new JsonRequest(this, uri, HttpMethod.GET, null);
-		logger.info(uri.toString());
+		logger.info(Log.INIT, uri.toString());
 		ObjectNode response = request.execute();
 		logger.debug(Log.RESPONSE, response.toPrettyString());
 		ObjectNode objResult = (ObjectNode) response.get("result");

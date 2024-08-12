@@ -54,6 +54,7 @@ public class AppConfigFactory extends ConfigFactory {
 		return config;		
 	}
 	
+	// TODO can this procedure use AppSession.httpGet ?
 	ObjectNode getRun(RecordKey jobKey) throws IOException, ConfigParseException {
 		Log.setJobContext(appSession.getAgentName());
 		URI uriGetRun = appSession.uriGetJobRunConfig(jobKey);
@@ -65,6 +66,4 @@ public class AppConfigFactory extends ConfigFactory {
 		return objResult;
 	}
 
-	
-	
 }
