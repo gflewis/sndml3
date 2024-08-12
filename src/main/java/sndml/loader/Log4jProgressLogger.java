@@ -100,9 +100,9 @@ public class Log4jProgressLogger extends ProgressLogger {
 
 	@Override
 	public void logComplete() {
-		Integer processed = metrics.getProcessed();
-		Integer expected = metrics.getExpected();
-		if (expected != null && processed != expected) {
+		int processed = metrics.getProcessed();
+		int expected = metrics.getExpected();
+		if (metrics.hasExpected() && processed != expected) {
 			logger.warn(Log.FINISH, String.format(
 				"Expected %d rows but only processed %d rows", expected, processed));
 		}

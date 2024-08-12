@@ -77,7 +77,7 @@ public final class Metrics {
 	 * Set the number of rows that the reader is expected to return
 	 * @param value number of rows that the reader is expected to return
 	 */
-	public synchronized void setExpected(Integer value) {
+	public synchronized void setExpected(int value) {
 		expected = value;
 	}
 	

@@ -96,7 +96,11 @@ public abstract class TableReader implements Callable<Metrics> {
 		assert progress != null;
 		return progress;
 	}
-		
+	
+	public boolean hasExpected() {
+		return metrics.hasExpected();
+	}
+	
 	/**
 	 * Return number of expected rows, if available. 
 	 * Otherwise return null.
@@ -290,11 +294,6 @@ public abstract class TableReader implements Callable<Metrics> {
 		return this.metrics;
 	}
 	
-//	@Deprecated
-//	public void setMetrics(Metrics metrics) {
-//		this.metrics = metrics;
-//	}
-
 	public RecordList getAllRecords() throws IOException, InterruptedException, JobCancelledException {
 		assert !initialized;
 		if (this.metrics == null) {
@@ -311,7 +310,7 @@ public abstract class TableReader implements Callable<Metrics> {
 		} catch (SQLException e) {
 			// this should be impossible
 			// since RecordAccumulator does not throw SQLException
-			throw new ServiceNowError(e);
+			throw new IllegalStateException(e);
 		}
 		return accumulator.getRecords();
 	}

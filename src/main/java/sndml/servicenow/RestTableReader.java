@@ -113,12 +113,13 @@ public class RestTableReader extends TableReader {
 			if (maxRows != null && rowCount > maxRows)
 				throw new TooManyRowsException(table, maxRows, rowCount);
 		}
-		if (statsEnabled) {
-			if (rowCount != getExpected()) {
-				logger.warn(Log.PROCESS, 
-					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
-			}
-		}
+//      This code is found in Log4JProgressLogger.logComplete();		
+//		if (statsEnabled) {
+//			if (rowCount != getExpected().intValue()) {
+//				logger.warn(Log.PROCESS, 
+//					String.format("Expected %d rows but processed %d rows", getExpected(), rowCount));
+//			}
+//		}
 		progress.logComplete();
 		return metrics;
 	}
