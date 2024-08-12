@@ -13,18 +13,25 @@ import sndml.loader.ConfigFactory;
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.DateCalculator;
+import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 
 public class AppConfigFactory extends ConfigFactory {
 
+	final Resources resources;
 	final AppSession appSession;
+	final ConnectionProfile profile;
+	final DateCalculator dateCalculator;
 	
 	Logger logger = Log.getLogger(AppConfigFactory.class);	
 	
-	public AppConfigFactory(AppSession appSession) {		
+	public AppConfigFactory(Resources resources) {		
 		super();
-		this.appSession = appSession;
+		this.resources = resources;
+		this.appSession = resources.getAppSession();
+		this.profile = resources.getProfile();
+		this.dateCalculator = new DateCalculator();				
 	}
 
 	public AppJobConfig jobConfig(ConnectionProfile profile, JsonNode node) throws ConfigParseException {
@@ -35,8 +42,7 @@ public class AppConfigFactory extends ConfigFactory {
 		} catch (JsonProcessingException e) {
 			throw new ConfigParseException(e.getMessage());
 		}
-		config.initialize(profile, dateFactory);
-		config.validate();
+		config.initializeAndValidate(profile, dateFactory);
 		logger.debug(Log.INIT, "jobConfig: " + config.toString());
 		return config;
 	}
@@ -47,6 +53,8 @@ public class AppConfigFactory extends ConfigFactory {
 		AppJobConfig config;
 		try {
 			config = jsonMapper.treeToValue(node, AppJobConfig.class);
+			config.initialize(profile, dateCalculator);
+			config.validate();
 		} catch (JsonProcessingException e) {
 			throw new ConfigParseException(e.getMessage());
 		}

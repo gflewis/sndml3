@@ -9,7 +9,7 @@ import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ResourceException;
 
-public class AppJobRunner extends JobRunner implements Runnable {
+public class AppJobRunner extends JobRunner {
 
 	protected final AppJobConfig config;
 	
@@ -81,45 +81,50 @@ public class AppJobRunner extends JobRunner implements Runnable {
 	protected void setThreadName() {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
 		myThread = Thread.currentThread();
-		String name = config.getName();
-		if (myThread != null && !myThread.equals(AgentMain.getThread()) && 
-				!myThread.getName().equals("scanner")) {
+		String name = config.getNumber();
+		if (!myThread.equals(AgentMain.getThread()) && !myThread.getName().equals("scanner")) {
 			myThread.setName(name);
 		}
 	}
 	
-	@Override
-	public void run() {
-		setThreadName();
-		logger.info(Log.INIT, "run " + number);
-		try {
-			this.call();
-		} catch (JobCancelledException e) {
-			logger.warn(Log.ERROR, "Job Cancellation Detected");
-		} catch (ResourceException e) {
-			logger.error(Log.ERROR, e.getMessage(), e);
-			e.printStackTrace(System.err);
-		} catch (Exception e) {
-			logger.error(Log.ERROR, e.getMessage(), e);			
-			e.printStackTrace(System.err);
-		}
-	}
+//	@Override
+//	public void run() {
+//		setThreadName();
+//		logger.info(Log.INIT, "run " + number);
+//		try {
+//			this.call();
+//		} catch (JobCancelledException e) {
+//			logger.warn(Log.ERROR, "Job Cancellation Detected");
+//		} catch (ResourceException e) {
+//			logger.error(Log.ERROR, e.getMessage(), e);
+//			e.printStackTrace(System.err);
+//		} catch (Exception e) {
+//			logger.error(Log.ERROR, e.getMessage(), e);			
+//			e.printStackTrace(System.err);
+//		}
+//	}
 	
 	@Override
 	public Metrics call() 
 			throws SQLException, IOException, JobCancelledException {
+		String myName = this.getClass().getName() + ".call";
+		setThreadName();
 		logger.info(Log.INIT, "call " + number);
 		Metrics metrics = null;
-		setThreadName();
 		// TODO Why are we unable to detect the interrupt?
 		try {
 			metrics = super.call();
 		}
 		catch (InterruptedException e) {
 			logger.error(Log.FINISH, String.format("%s Interrupt Detected", number));
-			System.out.println(String.format("%s Interrupt Detected", number));
-			System.out.flush();
+		} 
+		catch (Throwable e) {
+			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
+			logger.error(Log.ERROR, "Critical error detected. Halting JVM.");
+			Log.shutdown(); // Flush the logs
+			Runtime.getRuntime().halt(-1);
 		}
+		// TODO Is this debugging code or what?
 		if (Thread.interrupted()) {
 			System.out.println(String.format("%s Was Interrupted", number));
 			System.out.flush();			

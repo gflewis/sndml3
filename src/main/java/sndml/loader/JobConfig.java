@@ -129,6 +129,8 @@ public class JobConfig {
 		validate();		
 	}
 	
+	// Q: Why does this function need access to the connection profile?
+	// A: To determine the default value for autocreate.
 	public void initialize(ConnectionProfile profile, DateCalculator dateCalculator) {
 		updateCoreFields();
 		updateDateFields(dateCalculator);
@@ -138,7 +140,7 @@ public class JobConfig {
 	/**
 	 * Set various default values
 	 */
-	protected void updateCoreFields() {
+	synchronized protected void updateCoreFields() {
 		// Determine Action
 		if (action == null)	action = 
 				Boolean.TRUE.equals(truncate) ?	
@@ -157,7 +159,7 @@ public class JobConfig {
 		}
 	}
 	
-	private void updateDateFields(DateCalculator calculator) {
+	synchronized private void updateDateFields(DateCalculator calculator) {
 		if (calculator == null) calculator = new DateCalculator();
 		
 		if (Objects.isNull(start))
@@ -333,8 +335,9 @@ public class JobConfig {
 		String readerName = partName == null ? jobName : jobName + "." + partName;
 		return readerName;		
 	}
-		
-	public String toString() {
+	
+	@Override
+	synchronized public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
 		addFieldsToObject(node);

@@ -76,12 +76,11 @@ public class AgentRequestHandler implements HttpHandler {
 		catch (Exception e) {
 			// If an unexpected error occurs then shut down the server
 			// What could it possibly be?
-			logger.error(Log.ERROR, String.format( 
-					"Caught %s: %s", 
-					e.getClass().getName(), e.getMessage()));
+			logger.error(Log.ERROR, 
+				String.format("Caught %s: %s", e.getClass().getName(), e.getMessage()), e);
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0); // 500
 			exchange.close();
-			logger.error(Log.FINISH, "Halting the server due to unexpected error");
+			logger.error(Log.ERROR, "Halting the server due to unexpected error");
 			Runtime.getRuntime().halt(-1);
 		}
 	}
@@ -89,8 +88,9 @@ public class AgentRequestHandler implements HttpHandler {
 	void doJobRunStart(URI uri, RecordKey runKey) throws AgentHandlerException {
 		logger.info(Log.REQUEST, String.format("doJobRunStart %s", runKey.toString()));
 		try {
-			AppConfigFactory factory = new AppConfigFactory(appSession);
-			AppJobConfig jobconfig = factory.appJobConfig(runKey);			
+			AppConfigFactory factory = new AppConfigFactory(resources);
+			AppJobConfig jobconfig = factory.appJobConfig(runKey);
+			logger.info(Log.REQUEST, jobconfig.toString());
 			if (jobconfig.getStatus() != AppJobStatus.READY) {
 				logger.error(Log.REQUEST, String.format(
 						"%s has invalid state: %s", jobconfig.getName(), jobconfig.getStatus()));

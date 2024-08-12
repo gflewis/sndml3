@@ -24,13 +24,13 @@ public class AppJobConfig extends JobConfig {
 	}
 
 	@Override
-	protected void updateCoreFields() {
+	synchronized protected void updateCoreFields() {
 		super.updateCoreFields();
 		if (jobName == null && number != null) jobName = number;		
 	}
 		
 	@Override	
-	public String toString() {
+	synchronized public String toString() {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode node = mapper.createObjectNode();
 		if (runKey != null) node.put("sys_id",  runKey.toString());

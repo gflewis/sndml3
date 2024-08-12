@@ -25,20 +25,7 @@ public class JobFactory {
 		this.database = resources.getDatabaseWrapper();
 		this.dateCalculator = new DateCalculator(start);		
 	}
-	
-//	@Deprecated
-//	public JobFactory(ConnectionProfile profile, DateTime start)
-//			throws ResourceException, SQLException {
-//		this(profile, profile.newReaderSession(), new DatabaseWrapper(profile), start);
-//	}
-//	
-//	public JobFactory(ConnectionProfile profile, Session session, DatabaseWrapper database, DateTime start) {
-//		this.profile = profile;
-//		this.session = session;
-//		this.database = database;		
-//		dateCalculator = new DateCalculator(start);
-//	}
-	
+		
 	public JobRunner yamlJob(Reader yamlReader) 
 			throws ConfigParseException, IOException {
 		JobConfig config = configFactory.yamlJob(profile, yamlReader);

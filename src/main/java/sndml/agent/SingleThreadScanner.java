@@ -47,7 +47,7 @@ public class SingleThreadScanner extends AgentScanner {
 			// Run the jobs one at a time
 			for (AppJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);
-				job.run();																					
+				job.call();																					
 			}				
 			Log.setGlobalContext();			
 		}

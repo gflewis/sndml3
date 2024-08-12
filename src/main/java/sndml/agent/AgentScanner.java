@@ -45,7 +45,7 @@ public abstract class AgentScanner extends TimerTask {
 		this.agentName = AgentDaemon.getAgentName();
 		Log.setJobContext(agentName);		
 		this.appSession = resources.getAppSession();
-		this.configFactory = new AppConfigFactory(appSession);
+		this.configFactory = new AppConfigFactory(resources);
 		assert agentName != null;
 		this.uriGetRunList = appSession.uriGetJobRunList();
 		this.statusLogger = new AppStatusLogger(appSession);

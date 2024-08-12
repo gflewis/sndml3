@@ -25,15 +25,14 @@ import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 import sndml.util.Metrics;
 
-
 /**
- * Wrapper class for a ThreadPoolExecutor. This is a singleton class.
+ * Wrapper class for a ThreadPoolExecutor. 
  */
 public class WorkerPool extends ThreadPoolExecutor {
 
-//	private static WorkerPool INSTANCE;
 	private static final int CORE_POOL_SIZE = 0;
 	private static final long KEEP_ALIVE_SECONDS = 60;
+	
 	private static final Logger logger = Log.getLogger(WorkerPool.class);
 
 	private final int threadCount;
@@ -48,26 +47,19 @@ public class WorkerPool extends ThreadPoolExecutor {
 		super(
 			CORE_POOL_SIZE, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
 			new LinkedBlockingQueue<Runnable>());
-//		INSTANCE = this;
 		this.threadCount = threadCount;
 		logger.info(
 			Log.INIT, String.format("instantiate threads=%d", threadCount));
 	}
-	
-//	@Deprecated
-//	static public WorkerPool getWorkerPool(ConnectionProfile profile) {
-//		if (INSTANCE == null) {
-//			INSTANCE = new WorkerPool(profile);
-//		}
-//		return INSTANCE;		
-//	}
-	
+		
 	int getThreadCount() {
 		return threadCount;
 	}
 	
 	synchronized public Future<Metrics> submit(AppJobRunner runner) {
 		logger.info(Log.INIT, "submit " + runner.getNumber());
+		// TODO Call cleanup before submitting a new job
+		if (logger.isInfoEnabled()) dumpJobList();
 		Future<Metrics> future = super.submit((Callable<Metrics>) runner);
 		WorkerEntry entry = new WorkerEntry(runner, future);
 		jobList.add(entry);
@@ -90,6 +82,22 @@ public class WorkerPool extends ThreadPoolExecutor {
 			if (isActive(entry)) result.add(entry);			
 		}		
 		return result;
+	}
+	
+	/**
+	 * Print the content of jobList. Used for debugging.
+	 */
+	synchronized private void dumpJobList() {
+		logger.info(Log.PROCESS, String.format("jobList.size=%d",jobList.size()));
+		Iterator<WorkerEntry> iter = jobList.iterator();
+		int count = 0;
+		while (iter.hasNext()) {
+			WorkerEntry entry = iter.next();
+			Future<Metrics> future = entry.future;
+			logger.info(Log.PROCESS, String.format(
+				"%d %s cancelled=%b done=%b", 
+				++count, entry.number, future.isCancelled(), future.isDone()));
+		}		
 	}
 	
 	synchronized int activeTaskCount() {

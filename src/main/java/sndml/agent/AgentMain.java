@@ -48,10 +48,10 @@ public class AgentMain extends Main {
 			// Run a single job
 			String sys_id = cmd.getOptionValue("jobrun");
 			RecordKey jobkey = new RecordKey(sys_id);
-			AppConfigFactory factory = new AppConfigFactory(appSession);
+			AppConfigFactory factory = new AppConfigFactory(resources);
 			AppJobConfig jobconfig = factory.appJobConfig(jobkey);
 			AppJobRunner jobrunner = new AppJobRunner(resources, jobconfig);			
-			jobrunner.run();			
+			jobrunner.call();			
 		}
 		else if (cmd.hasOption(optServer)) {
 			// Run as an HTTP Server
