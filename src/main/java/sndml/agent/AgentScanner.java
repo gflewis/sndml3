@@ -128,7 +128,7 @@ public abstract class AgentScanner extends TimerTask {
 			for (JsonNode node : runlist) {
 				boolean cancelDetected = false;
 				assert node.isObject();
-				RecordKey runKey = new RecordKey(node.get("sys_id").asText());
+				RecordKey runKey = new RecordKey(node.get("runkey").asText());
 				String number = node.get("number").asText();
 				assert runKey != null;
 				assert number != null;
