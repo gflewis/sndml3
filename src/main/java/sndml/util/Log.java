@@ -7,6 +7,7 @@ import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import sndml.loader.JobConfig;
 import sndml.servicenow.Table;
 
 public class Log {
@@ -67,6 +68,10 @@ public class Log {
 				
 	static public void setJobContext(String jobname) {
 		MDC.put("job", jobname);
+	}
+	
+	static public void setJobContext(JobConfig config) {
+		MDC.put("job", config.getName());
 	}
 	
 	static public String getJobContext() {

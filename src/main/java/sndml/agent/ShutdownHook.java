@@ -32,7 +32,7 @@ public class ShutdownHook extends Thread {
 			if (!future.isCancelled() && !future.isDone()) {
 				logger.info(Log.FINISH, String.format("Cancel %s", entry.number));
 				future.cancel(true);
-				statusLogger.cancelJob(entry.key, null);
+				statusLogger.cancelJob(entry.key, this.getClass().getSimpleName());
 				count += 1;
 			}	
 		}

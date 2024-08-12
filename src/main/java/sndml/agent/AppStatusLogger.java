@@ -46,15 +46,14 @@ public class AppStatusLogger {
 	}	
 
 	void cancelJob(RecordKey runKey, Exception sourceException) {
-		// Who cancelled me?
-		String sourceTag =
-			sourceException == null ? "shutdown" :
-			sourceException instanceof JobCancelledException ? "app" :
-			sourceException instanceof InterruptedException ? "server" :
-			sourceException.getClass().getSimpleName();
+		String sourceName = sourceException.getClass().getSimpleName();
+		cancelJob(runKey, sourceName);
+	}
+
+	void cancelJob(RecordKey runKey, String source) {
 		logger.warn(Log.FINISH, String.format(
 			"cancelJob %s from %s", 
-			runKey.toString(), sourceTag));
+			runKey.toString(), source));
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("runkey", runKey.toString());		
 		body.put("status", AppJobStatus.CANCELLED.toString().toLowerCase());
@@ -64,9 +63,9 @@ public class AppStatusLogger {
 			request.execute();
 		} catch (IOException e1) {
 			logger.warn(Log.FINISH, "cancelJob: " + e1.getMessage());
-		}
+		}		
 	}
-
+	
 	public void logError(RecordKey runKey, Exception e) {
 		assert appSession != null;
 		assert runKey != null;

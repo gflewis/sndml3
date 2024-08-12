@@ -109,6 +109,7 @@ public class AppJobRunner extends JobRunner {
 			throws SQLException, IOException, JobCancelledException {
 		String myName = this.getClass().getName() + ".call";
 		setThreadName();
+		Log.setJobContext(config);
 		logger.info(Log.INIT, "call " + number);
 		Metrics metrics = null;
 		// TODO Why are we unable to detect the interrupt?

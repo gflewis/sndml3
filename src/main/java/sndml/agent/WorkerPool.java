@@ -58,7 +58,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 	
 	synchronized public Future<Metrics> submit(AppJobRunner runner) {
 		logger.info(Log.INIT, "submit " + runner.getNumber());
-		// TODO Call cleanup before submitting a new job
+		this.cleanup();
 		if (logger.isInfoEnabled()) dumpJobList();
 		Future<Metrics> future = super.submit((Callable<Metrics>) runner);
 		WorkerEntry entry = new WorkerEntry(runner, future);
@@ -148,7 +148,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 			WorkerEntry entry = iter.next();
 			Future<Metrics> future = entry.future;
 			if (future.isDone() || future.isCancelled()) {
-				logger.info(Log.PROCESS, String.format("Remove %s", entry.number));
+				logger.info(Log.PROCESS, String.format("cleanup remove %s", entry.number));
 				iter.remove();
 			}
 		}		
