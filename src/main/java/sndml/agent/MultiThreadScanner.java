@@ -1,7 +1,6 @@
 package sndml.agent;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import sndml.loader.*;
@@ -21,6 +20,13 @@ public class MultiThreadScanner extends AgentScanner {
 		// Allow getrunlist to fail two times in a row, but not three
 		return 3;
 	}
+	
+	@Override
+	protected AppJobRunner createJob(AppJobConfig jobConfig) {
+		Resources workerResources = resources.workerCopy();
+		AppJobRunner job = new ScannerJobRunner(this, workerResources, jobConfig);
+		return job;
+	}		
 	
 	@Override
 	public void scanUntilDone() throws IOException, InterruptedException, ConfigParseException {
@@ -56,21 +62,21 @@ public class MultiThreadScanner extends AgentScanner {
 			// Do not wait for them to complete
 			// Each job will generate create its own Session and Database connection
 			for (AppJobRunner job : joblist) {
-				workerPool.submit(job);						
+				workerPool.submit(job);	
 			}				
 		}
 		Log.setGlobalContext();			
 		return joblist.size();
 	}
 
-	/**
-	 * This function is called by {@link AppJobRunner} whenever a job completes.
-	 * When a job completes it may cause other jobs to move to a "ready" state.
-	 */	
-	@Override
-	public void rescan() throws ConfigParseException, IOException, SQLException {
-		logger.info(Log.PROCESS, "Rescan");
-		scan();
-	}
+//	/**
+//	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
+//	 * When a job completes it may cause other jobs to move to a "ready" state.
+//	 */	
+//	@Override
+//	public void rescan() throws ConfigParseException, IOException, SQLException {
+//		logger.info(Log.PROCESS, "Rescan");
+//		scan();
+//	}
 		
 }

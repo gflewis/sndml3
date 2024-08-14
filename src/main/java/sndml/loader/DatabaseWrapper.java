@@ -135,8 +135,10 @@ public class DatabaseWrapper {
 	}
 	
 	public void close() throws SQLException {
-		logger.info(Log.FINISH, "Database connection closed");
-		this.dbc.close();
+		if (!this.dbc.isClosed()) {
+			logger.info(Log.FINISH, "Database connection closed");
+			this.dbc.close();			
+		}
 	}
 
 	boolean isClosed() throws SQLException {

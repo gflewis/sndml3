@@ -17,6 +17,7 @@ import sndml.util.ResourceException;
 
 public class Resources {
 
+	Resources parent; // null if no parent
 	private ConnectionProfile profile;
 	private boolean hasAppSession;
 	private String agentName; // null if no agent
@@ -66,6 +67,10 @@ public class Resources {
 		
 	public ConnectionProfile getProfile() {
 		return this.profile;
+	}
+	
+	public boolean isWorkerCopy() {
+		return (parent != null);
 	}
 	
 	public ReaderSession getReaderSession() throws ResourceException {
@@ -153,7 +158,23 @@ public class Resources {
 	 */
 	public Resources workerCopy() {
 		Resources copy = new Resources(profile, hasAppSession);
+		copy.parent = this;
 		return copy;
+	}
+	
+	public void close() throws ResourceException {
+		try {
+			if (dbWrapper != null) 
+				dbWrapper.close();
+			if (sqlConnection != null && !sqlConnection.isClosed()) 
+				sqlConnection.close();
+		} catch (SQLException e) {
+			throw new ResourceException(e);
+		}
+		sqlConnection = null;
+		dbWrapper = null;
+		appSession = null;
+		readerSession = null;
 	}
 
 }

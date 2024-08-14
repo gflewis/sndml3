@@ -93,12 +93,19 @@ public abstract class AgentScanner extends TimerTask {
 			throws IOException, InterruptedException, ConfigParseException, SQLException;
 	
 	public abstract int scan() throws ConfigParseException, IOException, SQLException;
-
-	public abstract void rescan() throws ConfigParseException, IOException, SQLException;
 	
+	/**
+	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
+	 * When a job completes it may cause other jobs to move to a "ready" state.
+	 */	
+	public void rescan() throws ConfigParseException, IOException, SQLException {
+		logger.info(Log.PROCESS, "Rescan");
+		scan();
+	}
+		
 	protected abstract int getErrorLimit();
 	
-	public 	AppJobRunner createJob(AppJobConfig jobConfig) {
+	protected AppJobRunner createJob(AppJobConfig jobConfig) {
 		AppJobRunner job = new ScannerJobRunner(this, resources, jobConfig);
 		return job;
 	}	

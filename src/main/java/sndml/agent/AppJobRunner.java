@@ -86,23 +86,12 @@ public class AppJobRunner extends JobRunner {
 			myThread.setName(name);
 		}
 	}
-	
-//	@Override
-//	public void run() {
-//		setThreadName();
-//		logger.info(Log.INIT, "run " + number);
-//		try {
-//			this.call();
-//		} catch (JobCancelledException e) {
-//			logger.warn(Log.ERROR, "Job Cancellation Detected");
-//		} catch (ResourceException e) {
-//			logger.error(Log.ERROR, e.getMessage(), e);
-//			e.printStackTrace(System.err);
-//		} catch (Exception e) {
-//			logger.error(Log.ERROR, e.getMessage(), e);			
-//			e.printStackTrace(System.err);
-//		}
-//	}
+
+	@Override
+	public void close() throws ResourceException {
+		// Close the database connection
+		if (resources.isWorkerCopy()) resources.close();
+	}		
 	
 	@Override
 	public Metrics call() 
@@ -130,17 +119,9 @@ public class AppJobRunner extends JobRunner {
 			System.out.println(String.format("%s Was Interrupted", number));
 			System.out.flush();			
 		}
+		if (resources.isWorkerCopy()) resources.close();
 		return metrics;
 	}
 	
-	@Override
-	public void close() throws ResourceException {
-		// Close the database connection
-		try {
-			database.close();
-		} catch (SQLException e) {
-			throw new ResourceException(e);
-		}
-	}		
 		
 }

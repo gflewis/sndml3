@@ -17,9 +17,9 @@ import sndml.util.ResourceException;
 public class JobRunner implements Callable<Metrics> {
 
 	protected final JobConfig config;
-	
+	protected final Resources resources;
 	protected final Session readerSession;
-	protected final DatabaseWrapper database;
+	protected final DatabaseWrapper dbWrapper;
 	
 	protected Action action;
 	protected Table table;
@@ -27,24 +27,15 @@ public class JobRunner implements Callable<Metrics> {
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public JobRunner(Resources resources, JobConfig config) {
+		this.resources = resources;
 		this.readerSession = resources.getReaderSession();
-		this.database = resources.getDatabaseWrapper();
+		this.dbWrapper = resources.getDatabaseWrapper();
 		this.config = config;
 		assert this.readerSession!= null;
-		assert this.database != null;
+		assert this.dbWrapper != null;
 		assert this.config != null;
 	}
-	
-	@Deprecated
-	public JobRunner(Session readerSession, DatabaseWrapper db, JobConfig config) {
-		this.readerSession = readerSession;
-		this.database = db;
-		this.config = config;		
-		assert readerSession!= null;
-		assert db != null;
-		assert config != null;
-	}
-			
+
 	protected String getName() {
 		return config.getName();
 	}
@@ -69,9 +60,8 @@ public class JobRunner implements Callable<Metrics> {
 	 * {@Link AppJobRunner} will override this method
 	 * @throws ResourceException
 	 */
-	public void close() throws ResourceException {
+	public void close() throws ResourceException {		
 	}
-
 	
 	/**
 	 * This method calls one of several different private "run" functions based on the action. 
@@ -91,7 +81,7 @@ public class JobRunner implements Callable<Metrics> {
 			throws SQLException, IOException, InterruptedException, JobCancelledException {
 		assert config != null;
 		assert readerSession != null;
-		assert database != null;
+		assert dbWrapper != null;
 		action = config.getAction();
 		assert action != null;
 		Log.setJobContext(config.getName());
@@ -137,6 +127,7 @@ public class JobRunner implements Callable<Metrics> {
 		if (minRows != null && processed < minRows)
 			throw new TooFewRowsException(table, minRows, processed);			
 		if (config.getSqlAfter() != null) runSQL(config.getSqlAfter());
+		close();
 		return jobMetrics;
 	}
 	
@@ -145,8 +136,8 @@ public class JobRunner implements Callable<Metrics> {
 		jobMetrics.setExpected(0);
 		ProgressLogger progressLogger = createJobProgressLogger(null);
 		progressLogger.logStart();
-		database.executeStatement(sqlCommand);
-		database.commit();
+		dbWrapper.executeStatement(sqlCommand);
+		dbWrapper.commit();
 		progressLogger.logComplete();
 	}
 	
@@ -157,15 +148,15 @@ public class JobRunner implements Callable<Metrics> {
 		assert sqlTableName != null;
 		jobMetrics.setExpected(0);
 		ProgressLogger progressLogger = createJobProgressLogger(null);
-		if (config.getDropTable()) database.dropTable(sqlTableName, true);
-		database.createMissingTable(table, sqlTableName, config.getColumns());
+		if (config.getDropTable()) dbWrapper.dropTable(sqlTableName, true);
+		dbWrapper.createMissingTable(table, sqlTableName, config.getColumns());
 		progressLogger.logComplete();
 	}
 	
 	private void runDropTable() throws SQLException {
 		logger.debug(Log.INIT, "runDropTable " + config.getTarget());
 		jobMetrics.start();
-		database.dropTable(config.getTarget(), true);
+		dbWrapper.dropTable(config.getTarget(), true);
 	}
 	
 	private void runPrune() 
@@ -183,7 +174,7 @@ public class JobRunner implements Callable<Metrics> {
 		auditReader.setCreatedRange(new DateTimeRange(since, null));
 		auditReader.setMaxRows(config.getMaxRows());
 		DatabaseDeleteWriter deleteWriter = 
-			new DatabaseDeleteWriter(database, table, sqlTableName, config.getName());
+			new DatabaseDeleteWriter(dbWrapper, table, sqlTableName, config.getName());
 		ProgressLogger progressLogger = createJobProgressLogger(auditReader);
 		deleteWriter.open(jobMetrics);
 		auditReader.prepare(deleteWriter, jobMetrics, progressLogger);
@@ -198,17 +189,17 @@ public class JobRunner implements Callable<Metrics> {
 		assert sqlTableName != null;
 		logger.debug(Log.INIT, "runSync " + config.toString());
 		if (config.getAutoCreate()) 
-			database.createMissingTable(table, sqlTableName, config.getColumns());
+			dbWrapper.createMissingTable(table, sqlTableName, config.getColumns());
 		Interval partitionInterval = config.getPartitionInterval();
 		TableReader synchronizer;
 		if (partitionInterval == null) {
-			synchronizer = config.createReader(table, database);			
+			synchronizer = config.createReader(table, dbWrapper);			
 			ProgressLogger progressLogger = createJobProgressLogger(synchronizer);
 			synchronizer.prepare(null, jobMetrics, progressLogger);
 		}
 		else {
 			DatePartitionedTableReader multiReader = 
-				new DatePartitionedTableReader(table, config, database);
+				new DatePartitionedTableReader(table, config, dbWrapper);
 			synchronizer = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);	
 			synchronizer.prepare(null, jobMetrics, progressLogger);
@@ -227,13 +218,13 @@ public class JobRunner implements Callable<Metrics> {
 		RecordKey recordKey = config.getDocKey();
 		logger.debug(Log.INIT, "runSingle " + config.toString());
 		if (config.getAutoCreate()) 
-			database.createMissingTable(table, sqlTableName, config.getColumns());
+			dbWrapper.createMissingTable(table, sqlTableName, config.getColumns());
 		TableReader reader = new RestPetitTableReader(table);
 		config.configureReader(reader);
 		reader.setPageSize(100); // page size needs to be at least 2
 		Log.setTableContext(table, config.getName());					
 				DatabaseRecordSyncWriter writer = 
-			new DatabaseRecordSyncWriter(database, table, sqlTableName, recordKey, config.getName());				
+			new DatabaseRecordSyncWriter(dbWrapper, table, sqlTableName, recordKey, config.getName());				
 		ProgressLogger progressLogger = createJobProgressLogger(reader);		
 		writer.open(jobMetrics);
 		reader.prepare(writer, jobMetrics, progressLogger);
@@ -250,15 +241,15 @@ public class JobRunner implements Callable<Metrics> {
 		Action action = config.getAction();	
 		logger.debug(Log.INIT, "runLoad " + config.toString());
 		if (config.getAutoCreate()) 
-			database.createMissingTable(table, sqlTableName, config.getColumns());
-		if (config.getTruncate()) database.truncateTable(sqlTableName);
+			dbWrapper.createMissingTable(table, sqlTableName, config.getColumns());
+		if (config.getTruncate()) dbWrapper.truncateTable(sqlTableName);
 		
 		DatabaseTableWriter writer;
 		if (Action.INSERT.equals(action) || Action.LOAD.equals(action)) {
-			writer = new DatabaseInsertWriter(database, table, sqlTableName, config.getName());
+			writer = new DatabaseInsertWriter(dbWrapper, table, sqlTableName, config.getName());
 		}
 		else {
-			writer = new DatabaseUpdateWriter(database, table, sqlTableName, config.getName());
+			writer = new DatabaseUpdateWriter(dbWrapper, table, sqlTableName, config.getName());
 		}
 		writer.open(jobMetrics);
 		Interval partitionInterval = config.getPartitionInterval();
@@ -267,13 +258,13 @@ public class JobRunner implements Callable<Metrics> {
 		TableReader reader;
 		Log.setTableContext(table, config.getName());					
 		if (partitionInterval == null) {
-			reader = config.createReader(table, database);
+			reader = config.createReader(table, dbWrapper);
 			ProgressLogger progressLogger = createJobProgressLogger(reader);
 			if (since != null) logger.info(Log.INIT, "getKeys " + reader.getQuery().toString());
 			reader.prepare(writer, jobMetrics, progressLogger);
 		}
 		else {
-			DatePartitionedTableReader multiReader = new DatePartitionedTableReader(table, config, database);
+			DatePartitionedTableReader multiReader = new DatePartitionedTableReader(table, config, dbWrapper);
 			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);
 			reader.prepare(writer, jobMetrics, progressLogger);
