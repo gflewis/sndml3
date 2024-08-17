@@ -5,7 +5,7 @@
     sndml.logFolder
     sndml.logPrefix
 -->
-<Configuration>
+<Configuration shutdownHook="disable">
   <Appenders>
     <RollingFile name="RollingFile"
         fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
