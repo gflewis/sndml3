@@ -80,11 +80,12 @@ public class DatabaseWrapper {
 		assert schema==null || schema.length() > 0;
 
 		// If timezone is not specified then use "GMT"
-		// If timezone is "default" then use time zone of virtual machine
+		// If timezone is "default" or "local" then use time zone of virtual machine
 		String timezone = properties.getProperty("timezone", "GMT");
-		this.calendar = 
-			timezone.equalsIgnoreCase("default") ? null :
-			Calendar.getInstance(TimeZone.getTimeZone(timezone));
+		if (timezone.equalsIgnoreCase("default") || timezone.equalsIgnoreCase("local"))
+			this.calendar = null;
+		else
+			this.calendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
 		
 		String logmsg = "database=" + dburl;
 		logmsg += " " + timezone;
