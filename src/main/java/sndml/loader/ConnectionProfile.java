@@ -184,9 +184,10 @@ public class ConnectionProfile {
 		return result;
 	}
 
-	public String getMetricsFolder() { return loader.getProperty("metrics_folder"); }
-	public boolean getWarnOnTruncate() { return loader.getBoolean("warn_on_truncate", true); }
-	
+	public String getMetricsFolder() { 
+		return loader.getProperty("metrics_folder"); 
+	}
+
 	/**
 	 * Return the profile name if it is known, otherwise null
 	 */

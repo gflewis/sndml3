@@ -126,23 +126,25 @@ public class PropertiesSchema {
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
 			String propname = definition.getAttributeValue("name");
-			String description = definition.getChildTextNormalize("description");
-			System.out.print("| ");
-			System.out.print(wrapVar(propname));
-			System.out.print(" | ");
-			ListIterator<Element> alternates = definition.getChildren("alternate").listIterator();
-			boolean first = true;
-
-			while (alternates.hasNext()) {
-				Element alternate = alternates.next();
-				String altname = alternate.getAttributeValue("name");
-				if (!first) System.out.print(" or ");
-				System.out.print(wrapVar(altname));
-				first = false;				
+			String hidden = definition.getAttributeValue("hidden");
+			if (!"true".equals(hidden)) {
+				String description = definition.getChildTextNormalize("description");
+				System.out.print("| ");
+				System.out.print(wrapVar(propname));
+				System.out.print(" | ");
+				ListIterator<Element> alternates = definition.getChildren("alternate").listIterator();
+				boolean first = true;
+				while (alternates.hasNext()) {
+					Element alternate = alternates.next();
+					String altname = alternate.getAttributeValue("name");
+					if (!first) System.out.print(" or ");
+					System.out.print(wrapVar(altname));
+					first = false;				
+				}
+				System.out.print(" | ");
+				System.out.print(description);
+				System.out.println(" |");				
 			}
-			System.out.print(" | ");
-			System.out.print(description);
-			System.out.println(" |");
 		}
 		System.out.flush();		
 	}

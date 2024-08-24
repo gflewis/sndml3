@@ -45,17 +45,19 @@
       Default is 200.
     </description>
   </property>
-  <property name="reader.verify_session">
+  <property name="reader.verify_session" hidden="true">
+    <!--  TODO: Could not find reference to this property -->
     <alternate name="servicenow.verify_session" />
     <description>
       Causes the loader, at startup, to verify that it can connect to ServiceNow by reading 
       the **sys_user** record of the connecting user. Default is **true**.
     </description>
   </property>
-  <property name="reader.verify_timezone">
+  <property name="reader.verify_timezone" hidden="true">
+    <!--  TODO: Could not find reference to this prperty -->
     <alternate name="servicenow.verify_timezone" />
     <description>
-      Causes an exception will be thrown if the ServiceNow user time zone is not "GMT". 
+      Causes an exception to be thrown if the ServiceNow user time zone is not "GMT". 
       Default is **false**.
     </description>
   </property>
@@ -123,7 +125,7 @@
     <alternate name="datamart.dialect" />
     <description>
       Specifies a section in the templates file. If not specified, the loader will infer the correct 
-      section using the &lt;drivers&gt; element of the template and the JDBC prefix of the datamart URL.
+      section using the `drivers` element of the template and the JDBC prefix of the datamart URL.
     </description>
   </property>
   <property name="database.schema">
@@ -142,12 +144,20 @@
   </property>
   <property name="database.autocreate">
     <alternate name="datamart.autocreate" />
-    <description>Defaults to true.</description>
+    <description>Causes tables in the SQL database to be created
+    if they do not already exist. Defaults is "true".</description>
   </property>
   <property name="database.timezone">
     <description>
       This is normally **not** specified. If omitted then "GMT" will be used. 
-      If set to "default" then the time zone of the Java VM will be used.
+      If set to "default" or "local" then the time zone of the Java VM will be used.
+    </description>
+  </property>
+  <property name="database.warn_on_truncate">
+    <default>true</default>
+    <description>
+      Causes a warning to be written to the log whenever a field is truncated 
+      when written to the database. Default is "true".       
     </description>
   </property>
   <property name="loader.metrics_folder">
@@ -157,16 +167,10 @@
       For information refer to [[Metrics]].    
     </description>
   </property> 
-  <property name="loader.warn_on_truncate">
-    <description>
-      Causes a warning will be written to the log whenever a field is truncated 
-      when written to the database.       
-    </description>
-  </property>
   <property name="daemon.interval">
     <default>60</default>
     <description>
-      Recommended if using `--daemon`.
+      Recommended if using `--daemon`. Interval in seconds.
       Default is 60.
     </description>
   </property>
@@ -180,21 +184,21 @@
   </property>
   <property name="server.port">
     <description>
-      Required if using `--server`
+      Required if using `--server`.
     </description>
   </property>
   <property name="server.backlog">
     <default>0</default>
-    <description></description>
+    <description>HTTP Server socket backlog. Default is 0.</description>
   </property>
   <property name="server.threads">
-    <default>3</default>
+    <default>4</default>
     <alternate name="daemon.threads" />
     <description>
       Maximum number of jobs that can be processed concurrently. 
       Additional jobs will wait until a thread becomes available.
       Applicable for `--daemon` or `--server`.
-      Default is 3.
+      Default is 4.
     </description>
   </property>
   <property name="server.pidfile">
