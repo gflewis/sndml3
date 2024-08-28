@@ -2,6 +2,7 @@ package sndml.agent;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Properties;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -13,7 +14,6 @@ import sndml.servicenow.RecordKey;
 import sndml.servicenow.SchemaReader;
 import sndml.servicenow.Session;
 import sndml.util.Log;
-import sndml.util.PropertySet;
 import sndml.util.ResourceException;
 
 /**
@@ -22,18 +22,18 @@ import sndml.util.ResourceException;
  */
 public class AppSession extends Session {
 	
-	final PropertySet propset;
 	final Instance instance;
 	final String agentName;
 	final String appScope;
 	private RecordKey agentKey;
 	
-	public AppSession(PropertySet propset) {
-		super(propset);
-		this.propset = propset;
-		this.instance = new Instance(propset);
-		this.agentName = propset.getNotEmpty("agent");
-		this.appScope = propset.getNotEmpty("scope");
+	public AppSession(Properties properties) {
+		super(properties);
+		this.instance = new Instance(properties);		
+		this.agentName = properties.getProperty("agent");
+		this.appScope = properties.getProperty("scope");
+		assert agentName != null && agentName.length() > 0;
+		assert appScope != null && appScope.length() > 0;
 	}
 
 	public String getAgentName() {
@@ -41,7 +41,7 @@ public class AppSession extends Session {
 	}
 	
 	public Instance getAppInstance() {
-		return new Instance(propset);
+		return new Instance(properties);
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class AppSession extends Session {
 	 */
 	@Override
 	public AppSession duplicate() throws IOException {
-		return new AppSession(this.propset);
+		return new AppSession(this.properties);
 	}
 	
 	/**

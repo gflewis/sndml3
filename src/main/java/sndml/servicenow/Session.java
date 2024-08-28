@@ -2,6 +2,7 @@ package sndml.servicenow;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpHost;
@@ -19,7 +20,6 @@ import org.slf4j.Logger;
 import sndml.agent.AppSession;
 import sndml.util.Log;
 import sndml.util.Parameters;
-import sndml.util.PropertySet;
 
 /**
  * Holds a ServiceNow URL, connection credentials, a cookie store with a session ID
@@ -27,31 +27,30 @@ import sndml.util.PropertySet;
  */
 public class Session {
 
-	private final Instance instance;
-	// private final Properties properties;
-	private final PropertySet propset;
-	private final AuthScope authScope;
-	private final String username;
-	private final Domain domain;
-	private final UsernamePasswordCredentials userPassCreds;
-	private final CredentialsProvider credsProvider;
-	final private BasicCookieStore cookieStore = new BasicCookieStore();
-	final private PoolingHttpClientConnectionManager connectionManager;	
-	private final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
+	protected final Instance instance;
+	protected final Properties properties;
+	protected final AuthScope authScope;
+	protected final String username;
+	protected final Domain domain;
+	protected final UsernamePasswordCredentials userPassCreds;
+	protected final CredentialsProvider credsProvider;
+	protected final BasicCookieStore cookieStore = new BasicCookieStore();
+	protected final PoolingHttpClientConnectionManager connectionManager;	
+	protected final ConcurrentHashMap<String,TableWSDL> wsdlCache = 
 			new ConcurrentHashMap<String,TableWSDL>();
-	private CloseableHttpClient client = null; // created on request
+	protected CloseableHttpClient client = null; // created on request
 	protected SchemaReader schemaReader = null;
 
-	final protected Logger logger = Log.getLogger(this.getClass());
+	protected final Logger logger = Log.getLogger(this.getClass());
 		
-	public Session(PropertySet propset) {
-		this.propset = propset;
-		propset.assertNotEmpty("instance");
-		propset.assertNotEmpty("username");
-		propset.assertNotEmpty("password");
+	public Session(Properties propset) {
+		this.properties = propset;
 		String instancename = propset.getProperty("instance");
 		String username = propset.getProperty("username");
-		String password = propset.getProperty("password");		
+		String password = propset.getProperty("password");
+		assert instancename != null;
+		assert username != null;
+		assert password != null;
 		String domainname = this instanceof AppSession ? null : propset.getProperty("domain");
 		this.instance = new Instance(instancename);
 		this.username = username;
@@ -86,19 +85,19 @@ public class Session {
 	 * The URL and credentials will be the same, but the Session ID will be different.
 	 */
 	public Session duplicate() throws IOException {
-		return new Session(this.propset);
+		return new Session(this.properties);
 	}
 		
 	/**
 	 * Return the value of a property with the name "servicenow." + propname
 	 * if it is defined, otherwise return null.
 	 */
-	public String getProperty(String propname) {
-		return propset.getString(propname);
-	}
+//	public String getProperty(String propname) {
+//		return propset.getString(propname);
+//	}
 		
 	public int defaultPageSize() {
-		int pageSize = propset.getInt("pagesize", 200);
+		int pageSize = Integer.valueOf(properties.getProperty("pagesize"));
 		assert pageSize > 0;
 		return pageSize;
 	}
@@ -197,11 +196,12 @@ public class Session {
 	 * If the time zone is not GMT then an exception will be thrown.
 	 */
 	public Session verifyUser() throws IOException, ServiceNowException {
+		boolean verifyTimezone = Boolean.valueOf(properties.getProperty("verify_timezone"));
 		TableRecord userProfile = this.getUserProfile();
 		String timezone = userProfile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;
-			if (propset.getBoolean("verify_timezone", false)) {
+			if (verifyTimezone) {
 				logger.error(Log.INIT, message);				
 				throw new ServiceNowException(message);				
 			}

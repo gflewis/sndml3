@@ -4,12 +4,12 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Properties;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIBuilder;
 
 import sndml.util.Parameters;
-import sndml.util.PropertySet;
 
 /**
  * Holds the URL for a ServiceNow instance.
@@ -25,7 +25,7 @@ public class Instance {
 		this.host = new HttpHost(url.getHost());
 	}
 
-	public Instance(PropertySet props) {
+	public Instance(Properties props) {
 		this(props.getProperty("instance"));
 	}
 	

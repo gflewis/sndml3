@@ -54,7 +54,8 @@
     </description>
   </property>
   <property name="reader.verify_timezone" hidden="true">
-    <!--  TODO: Could not find reference to this prperty -->
+    <default>false</default>
+    <!--  See Session.verifyUser() -->
     <alternate name="servicenow.verify_timezone" />
     <description>
       Causes an exception to be thrown if the ServiceNow user time zone is not "GMT". 
