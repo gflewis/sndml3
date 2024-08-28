@@ -39,7 +39,7 @@ public class DatabaseWrapper {
 	private final boolean warnOnTruncate;
 	private final String schema;
 	
-	private final Connection dbc;
+	private final Connection connection;
 	private final Generator generator;
 
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
@@ -56,12 +56,13 @@ public class DatabaseWrapper {
 			timezone.equalsIgnoreCase("default") ? null :
 			Calendar.getInstance(TimeZone.getTimeZone(timezone));
 		this.warnOnTruncate = Boolean.parseBoolean(properties.getProperty("warn_on_truncate", "true"));
-		this.dbc = connection;
+		this.connection = connection;
 		this.generator = generator;
 		assert this.generator != null;
-		assert this.dbc != null;
+		assert this.connection != null;
 	}
 	
+	// TODO: DRY - eliminate redundant constructor
 	public DatabaseWrapper(ConnectionProfile profile, Generator generator) throws SQLException {
 		PropertySet properties = profile.database;
 		String dburl = properties.getProperty("url", null);
@@ -94,13 +95,14 @@ public class DatabaseWrapper {
 		if (schema != null) logmsg += " schema=" + getSchema();
 				
 		logger.info(Log.INIT, logmsg);
-		this.warnOnTruncate = profile.loaderProperties().getBoolean("warn_on_truncate", true);
+		this.warnOnTruncate = Boolean.parseBoolean(properties.getProperty("warn_on_truncate", "true"));
+		
 				
 		this.generator = generator;
 		
-		this.dbc = this.open(dburl, dbuser, dbpass);		
+		this.connection = this.open(dburl, dbuser, dbpass);		
 		assert this.generator != null;
-		assert this.dbc != null;
+		assert this.connection != null;
 		
 	}
 
@@ -123,27 +125,27 @@ public class DatabaseWrapper {
 	}
 	
 	public void initialize() throws SQLException {
-		generator.initialize(dbc);
+		generator.initialize(connection);
 	}
 
 	@Override
 	public void finalize() {
 		try {
-			this.dbc.close();
+			this.connection.close();
 		} catch (SQLException e) {
 			// Ignore
 		}		
 	}
 	
 	public void close() throws SQLException {
-		if (!this.dbc.isClosed()) {
+		if (!this.connection.isClosed()) {
 			logger.info(Log.FINISH, "Database connection closed");
-			this.dbc.close();			
+			this.connection.close();			
 		}
 	}
 
 	boolean isClosed() throws SQLException {
-		return this.dbc.isClosed();
+		return this.connection.isClosed();
 	}
 	
 	Generator getGenerator() {
@@ -192,8 +194,8 @@ public class DatabaseWrapper {
 	}
 	
 	Connection getConnection() {
-		assert this.dbc != null;
-		return this.dbc;
+		assert this.connection != null;
+		return this.connection;
 	}
 	
 	String getSchema() {
@@ -216,15 +218,15 @@ public class DatabaseWrapper {
 	}
 	
 	void executeStatement(String sqlCommand) throws SQLException {
-		if (dbc == null) throw new IllegalStateException();
-		Statement stmt = dbc.createStatement();
+		if (connection == null) throw new IllegalStateException();
+		Statement stmt = connection.createStatement();
 		logger.info(Log.PROCESS, sqlCommand);
 		stmt.execute(sqlCommand);
 		stmt.close();
 	}
 	
 	void commit() throws SQLException {
-		if (!generator.getAutoCommit()) dbc.commit();
+		if (!generator.getAutoCommit()) connection.commit();
 	}
 	
 	void truncateTable(String sqlTableName) throws SQLException {
@@ -286,7 +288,7 @@ public class DatabaseWrapper {
 			String fullName = addSchema ? this.qualifiedName(sqlTableName) : sqlTableName;
 			logger.warn(Log.INIT, String.format("dropTable: %s", fullName));
 			String sql = "DROP TABLE " + fullName;
-			Statement stmt = dbc.createStatement();
+			Statement stmt = connection.createStatement();
 			try {
 				stmt.execute(sql);			
 			}
@@ -307,7 +309,7 @@ public class DatabaseWrapper {
 		assert table != null;
 		assert sqlTableName != null;
 		Log.setTableContext(table);
-		Statement stmt = dbc.createStatement();
+		Statement stmt = connection.createStatement();
 		String createSql = generator.getCreateTable(table, sqlTableName, columns);
 		logger.info(Log.INIT, createSql);
 		try {

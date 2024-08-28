@@ -155,6 +155,7 @@
   </property>
   <property name="database.warn_on_truncate">
     <default>true</default>
+    <alternate name="loader.warn_on_truncate" />
     <description>
       Causes a warning to be written to the log whenever a field is truncated 
       when written to the database. Default is "true".       

@@ -60,6 +60,7 @@ public abstract class TableReader implements Callable<Metrics> {
 	}
 	
 	protected void endPrepare(Integer expected) {
+		assert metrics != null;
 		metrics.setExpected(expected);
 		initialized = true;		
 	}
