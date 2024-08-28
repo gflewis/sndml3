@@ -403,9 +403,9 @@
         <configuration>
           <groupId>sndml</groupId>
           <artifactId>sndml</artifactId>
-          <version>3.5.0</version>
+          <version>${version}</version>
           <packaging>jar</packaging>
-          <file>target/sndml-3.5.0.jar</file>
+          <file>target/sndml-${version}.jar</file>
           <generatePom>true</generatePom>
         </configuration>
         <executions>
