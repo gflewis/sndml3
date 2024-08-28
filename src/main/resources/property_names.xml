@@ -91,6 +91,11 @@
       Required if `app.instance` is specified.
     </description>
   </property>
+  <property name="app.pagesize" hidden="true">
+    <!--  Hidden because AppSession does not use TableReader -->
+    <default>200</default>
+    <description>Default page size.</description>
+  </property>
   <property name="dict.instance">
     <description>
       Name or URL of the instance from which dictionary information will be obtained. 

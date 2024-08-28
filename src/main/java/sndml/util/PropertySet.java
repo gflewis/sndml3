@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A subset of properties with a given prefix.
  * The prefix is removed when the properties are added by the constructor.
@@ -15,10 +18,13 @@ public class PropertySet extends java.util.Properties {
 	private final Properties parent;	
 	private final String prefix;
 	private final Collection<String> validNames;
-
+	
+	private static final Logger logger = LoggerFactory.getLogger(PropertySet.class);
+	
 	public PropertySet(Properties parent, String prefix, 
 			Collection<String> validNames, Properties parentDefaults) {
 		super();
+		logger.debug(Log.INIT, String.format("propertyset %s", prefix));
 		assert parent != null;
 		assert prefix != null && prefix.length() > 0;
 		assert parentDefaults != null;
@@ -41,15 +47,18 @@ public class PropertySet extends java.util.Properties {
 					String key = parts[1];
 					this.validNames.add(key);
 				}
-			}			
+			}
 		}
 		for (String parentKey : parentDefaults.stringPropertyNames()) {
 			String parts[] = parentKey.split("\\.", 2);
 			if (parts.length == 2) {
 				if (prefix.equals(parts[0])) {
 					String key = parts[1];
-					if (!this.containsKey(key))
-						this.setProperty(parentKey, parentDefaults.getProperty(parentKey));
+					if (!this.containsKey(key)) {
+						String defaultValue = parentDefaults.getProperty(parentKey);
+						logger.debug(Log.INIT, String.format("default %s=%s", key, defaultValue));
+						this.setProperty(key, defaultValue);
+					}
 				}
 			}			
 		}

@@ -87,15 +87,7 @@ public class Session {
 	public Session duplicate() throws IOException {
 		return new Session(this.properties);
 	}
-		
-	/**
-	 * Return the value of a property with the name "servicenow." + propname
-	 * if it is defined, otherwise return null.
-	 */
-//	public String getProperty(String propname) {
-//		return propset.getString(propname);
-//	}
-		
+
 	public int defaultPageSize() {
 		int pageSize = Integer.valueOf(properties.getProperty("pagesize"));
 		assert pageSize > 0;

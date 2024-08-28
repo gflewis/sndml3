@@ -28,8 +28,12 @@ public class PropertySetTest {
 		ConnectionProfile profile = new ConnectionProfile(file);
 		int size = profile.reader.size();
 		logger.debug("size=" + size);		
+		assertEquals("dev00000", profile.getProperty("reader.instance"));
 		assertEquals("dev00000", profile.reader.getProperty("instance"));
-		assertEquals("admin", profile.database.getProperty("username"));		
+		assertEquals("admin", profile.database.getProperty("username"));
+		assertEquals("200", profile.getProperty("reader.pagesize"));
+		assertEquals("200", profile.reader.getProperty("pagesize"));
+		assertEquals("200", profile.app.getProperty("pagesize"));
 	}
-	
+		
 }
