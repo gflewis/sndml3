@@ -111,7 +111,7 @@
       <!-- PostgreSQL -->
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>[42.4.1,)</version>
+      <version>42.6.2</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
