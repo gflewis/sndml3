@@ -204,7 +204,7 @@ public class PropertiesSchema {
 		if (checkUnused) {
 			for (String propname : oldProps.stringPropertyNames()) {
 				if (!consumed.containsKey(propname))
-					logger.warn("Unrecognized property: " + propname);
+					logger.warn(Log.INIT, "Unrecognized property: " + propname);
 			}
 		}
 		return newProps;		
