@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-  Log4j2 configuration which logs to a file.
-  The following system properties must be predefined:
-    sndml.logFolder
-    sndml.logPrefix
+  Log4j2 configuration which logs to a named file.
+  The following system property must be predefined:
+    sndml.logFile
 -->
 <Configuration>
   <Appenders>
-    <File name="File"
-    	fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMddHHmmss}.log">
+    <File name="File" fileName="${sys:sndml.logFile}">
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
