@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
   Log4j2 configuration which logs to a named file.
+  Warnings and errors are written to console.
   The following system property must be predefined:
     sndml.logFile
 -->
@@ -11,10 +12,17 @@
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
     </File>
-  </Appenders>
+    <Console name="Console">
+      <ThresholdFilter level="warn" />
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss} %level %logger{1} [%thread] %X{job} %marker: %msg%n</Pattern>  
+      </PatternLayout>
+    </Console>
+  </Appenders>  
   <Loggers>
     <Root level="info">
       <AppenderRef ref="File" />
+      <AppenderRef ref="Console" />
     </Root>
     <Logger name="sndml" level="info" />
   </Loggers>
