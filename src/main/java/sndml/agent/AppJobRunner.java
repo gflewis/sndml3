@@ -108,6 +108,10 @@ public class AppJobRunner extends JobRunner {
 		catch (InterruptedException e) {
 			logger.error(Log.FINISH, String.format("%s Interrupt Detected", number));
 		} 
+		catch (JobCancelledException e) {
+			logger.error(Log.FINISH, String.format("%s Job Cancel Detected", number));
+			throw e;
+		}
 		catch (Throwable e) {
 			logger.error(Log.ERROR, myName + ": " + e.getClass().getName(), e);
 			logger.error(Log.ERROR, "Critical error detected. Halting JVM.");
