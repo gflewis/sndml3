@@ -7,6 +7,7 @@ import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import sndml.agent.AgentMain;
 import sndml.loader.JobConfig;
 import sndml.servicenow.Table;
 
@@ -42,7 +43,12 @@ public class Log {
 	}
 	
 	static public void setGlobalContext() {
+		setGlobalContext(AgentMain.getAgentName());
+	}
+	
+	static public void setGlobalContext(String agentName) {
 		MDC.clear();
+		MDC.put("agent", agentName);
 		MDC.put("job", "GLOBAL");
 	}
 	
@@ -52,6 +58,7 @@ public class Log {
 	
 	static public void setTableContext(Table table, String jobname) {
 		MDC.clear();
+		MDC.put("agent", AgentMain.getAgentName());
 		MDC.put("table", table.getName());
 		MDC.put("user", table.getSession().getUsername());
 		MDC.put("job", jobname);

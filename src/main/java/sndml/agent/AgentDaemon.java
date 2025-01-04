@@ -71,23 +71,23 @@ public class AgentDaemon implements Daemon, Runnable {
 		logger.info(String.format("instantiate agent=%s pidfile=%s", agentName, pidFileName));
 	}
 	
-	public static AgentDaemon getDaemon() {
+	static AgentDaemon getDaemon() {
 		assert daemon != null: "Class not initialized";
 		return daemon;
 	}
 	
-	public static String getAgentName() {
+	static String getAgentName() {
 		return getDaemon().agentName;
 	}
 	
 	/**
 	 * @return the Daemon thread, which is the main thread.
 	 */
-	public static Thread getThread() {
+	static Thread getThread() {
 		return daemonThread;
 	}
 	
-	public static ConnectionProfile getConnectionProfile() {
+	static ConnectionProfile getConnectionProfile() {
 		return getDaemon().resources.getProfile();
 	}
 	

@@ -277,14 +277,17 @@ public class ConnectionProfile {
 		return database;
 	}
 
-	private final String APP_AGENT = "app.agent";
+	public static final String APP_AGENT_PROPERTY = "app.agent";
 	
 	public boolean hasAgent() {
-		return hasProperty(APP_AGENT);		
+		return hasProperty(APP_AGENT_PROPERTY);		
 	}
 	
+	static private String agentName = null;
 	public String getAgentName() {
-		return hasProperty(APP_AGENT) ? getProperty(APP_AGENT) : null;
+		if (agentName == null && hasProperty(APP_AGENT_PROPERTY)) 
+			agentName = getProperty(APP_AGENT_PROPERTY);
+		return agentName;
 	}
 
 	/**
@@ -304,7 +307,7 @@ public class ConnectionProfile {
 	
 	protected String getPropertyNotNull(String name) {
 		String value = getProperty(name);
-		assert value != null : "No default value for " + name;
+		if (value == null) throw new AssertionError("No value for property: " + name);
 		return value;
 	}
 	

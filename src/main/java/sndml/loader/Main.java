@@ -26,8 +26,6 @@ public class Main {
 	static protected Resources resources;
 	static private boolean requiresApp = false;
 	
-	static private final Logger logger = LoggerFactory.getLogger(Main.class);
-
 	static Options options = new Options();	
 	static final protected Option optProfile = 
 			Option.builder("p").longOpt("profile").required(true).hasArg(true).
@@ -56,9 +54,10 @@ public class Main {
 	static final protected Option optServer =
 			Option.builder("server").longOpt("server").required(false).hasArg(false).
 			desc("Run as server").build();
+
+	static private Logger logger;
 	
 	public static void main(String[] args) throws Exception {
-		Log.setGlobalContext();
 		options.addOption(optProfile);
 		options.addOption(optTable);
 		options.addOption(optFilter);
@@ -85,6 +84,9 @@ public class Main {
 		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
 		resources = new Resources(profile, requiresApp);
+		String agentName = profile.getAgentName();
+		Log.setGlobalContext(agentName);
+		Main.logger = LoggerFactory.getLogger(Main.class);
 
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
@@ -138,11 +140,13 @@ public class Main {
 	}
 	
 	public static void interrupt() {
+		assert logger != null;
 		logger.info(Log.FINISH, "interrupt");
 		mainThread.interrupt();
 	}
 	
 	public static void sleep(int millisec) {
+		assert logger != null;
 		try {
 			logger.info(Log.FINISH, String.format("sleep %d", millisec));
 			Thread.sleep(millisec);

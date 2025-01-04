@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 
+import sndml.loader.ConnectionProfile;
 import sndml.loader.Main;
 import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
@@ -27,7 +28,9 @@ public class AgentMain extends Main {
 		// thus we could access it even if it were not a parameter		
 		assert resources != null;
 		agentName = resources.getProfile().getAgentName();
-		assert agentName != null;
+		if (agentName == null) 
+			throw new AssertionError(
+				"No value for property: " + ConnectionProfile.APP_AGENT_PROPERTY);
 		AppSession appSession = resources.getAppSession();
 		agentKey = appSession.getAgentKey();
 		assert agentKey != null;
@@ -68,8 +71,11 @@ public class AgentMain extends Main {
 		return agentKey;
 	}
 	
-	String getAgentName() {		
-		return Main.profile.app.getNotEmpty("agent");
+	/**
+	 * Return value of profile property "app.agent" or null if not defined
+	 */
+	public static String getAgentName() {
+		return Main.profile.getAgentName();
 	}
 	
 	static void writePidFile() throws ResourceException {
