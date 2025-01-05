@@ -19,7 +19,6 @@ import sndml.util.ResourceException;
 
 public class AgentMain extends Main {
 
-	static String agentName;
 	static RecordKey agentKey;
 	static final Logger logger = Log.getLogger(AgentMain.class);
 	
@@ -27,7 +26,7 @@ public class AgentMain extends Main {
 		// Note: resources is actually a static protected variable in Main;
 		// thus we could access it even if it were not a parameter		
 		assert resources != null;
-		agentName = resources.getProfile().getAgentName();
+		// agentName is a static variable defined in Main
 		if (agentName == null) 
 			throw new AssertionError(
 				"No value for property: " + ConnectionProfile.APP_AGENT_PROPERTY);
@@ -75,7 +74,7 @@ public class AgentMain extends Main {
 	 * Return value of profile property "app.agent" or null if not defined
 	 */
 	public static String getAgentName() {
-		return Main.profile.getAgentName();
+		return agentName;
 	}
 	
 	static void writePidFile() throws ResourceException {

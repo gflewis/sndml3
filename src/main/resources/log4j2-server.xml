@@ -9,13 +9,14 @@
   <Appenders>
     <RollingFile name="RollingFile"
         fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
-        filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz">
+        filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}.log.gz">
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
       <Policies>
         <TimeBasedTriggeringPolicy modulate="true"/>
       </Policies> 
+      <DefaultRolloverStrategy max="15"/> 
     </RollingFile>
   </Appenders>
   <Loggers>

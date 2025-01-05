@@ -55,8 +55,9 @@ public class Main {
 			Option.builder("server").longOpt("server").required(false).hasArg(false).
 			desc("Run as server").build();
 
+	static protected String agentName;
 	static private Logger logger;
-	
+		
 	public static void main(String[] args) throws Exception {
 		options.addOption(optProfile);
 		options.addOption(optTable);
@@ -84,7 +85,7 @@ public class Main {
 		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
 		resources = new Resources(profile, requiresApp);
-		String agentName = profile.getAgentName();
+		agentName = profile.getAgentName();
 		Log.setGlobalContext(agentName);
 		Main.logger = LoggerFactory.getLogger(Main.class);
 
