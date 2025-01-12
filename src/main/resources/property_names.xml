@@ -45,20 +45,20 @@
       Default is 200.
     </description>
   </property>
-  <property name="reader.verify_session" hidden="true">
-    <!--  TODO: Could not find reference to this property -->
+  <property name="reader.verify_session">
+    <default>true</default>
     <alternate name="servicenow.verify_session" />
     <description>
       Causes the loader, at startup, to verify that it can connect to ServiceNow by reading 
       the **sys_user** record of the connecting user. Default is **true**.
     </description>
   </property>
-  <property name="reader.verify_timezone" hidden="true">
+  <property name="reader.verify_timezone">
     <default>false</default>
-    <!--  See Session.verifyUser() -->
     <alternate name="servicenow.verify_timezone" />
     <description>
-      Causes an exception to be thrown if the ServiceNow user time zone is not "GMT". 
+      Causes an exception to be thrown if the ServiceNow user time zone is not "GMT".
+      If **false* then a warning is displayed. 
       Default is **false**.
     </description>
   </property>
@@ -95,6 +95,13 @@
     <!--  Hidden because AppSession does not use TableReader -->
     <default>200</default>
     <description>Default page size.</description>
+  </property>
+  <property name="app.verify_session" hidden="true">
+    <default>true</default>
+    <description>
+      Causes the loader, at startup, to verify that Scripted REST APIs can be called.
+      Default is **true**.
+    </description>
   </property>
   <property name="dict.instance">
     <description>

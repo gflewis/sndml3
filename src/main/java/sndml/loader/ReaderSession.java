@@ -2,6 +2,7 @@ package sndml.loader;
 
 import sndml.servicenow.Session;
 import sndml.util.PropertySet;
+import sndml.util.ResourceException;
 
 /**
  * {@link Session} that is used to read data records from the instance, 
@@ -10,8 +11,9 @@ import sndml.util.PropertySet;
  */
 public class ReaderSession extends Session {
 
-	public ReaderSession(PropertySet propset) {
+	public ReaderSession(PropertySet propset) throws ResourceException {
 		super(propset);
+		verifySession(propset);
 	}
 	
 }

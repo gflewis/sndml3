@@ -2,7 +2,6 @@ package sndml.agent;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -14,6 +13,7 @@ import sndml.servicenow.RecordKey;
 import sndml.servicenow.SchemaReader;
 import sndml.servicenow.Session;
 import sndml.util.Log;
+import sndml.util.PropertySet;
 import sndml.util.ResourceException;
 
 /**
@@ -22,18 +22,18 @@ import sndml.util.ResourceException;
  */
 public class AppSession extends Session {
 	
-	final Instance instance;
 	final String agentName;
 	final String appScope;
 	private RecordKey agentKey;
 	
-	public AppSession(Properties properties) {
-		super(properties);
-		this.instance = new Instance(properties);		
-		this.agentName = properties.getProperty("agent");
-		this.appScope = properties.getProperty("scope");
+	public AppSession(PropertySet propset) {
+		super(propset);
+		this.agentName = propset.getProperty("agent");
+		this.appScope = propset.getProperty("scope");
 		assert agentName != null && agentName.length() > 0;
 		assert appScope != null && appScope.length() > 0;
+		verifySession(propset);
+
 	}
 
 	public String getAgentName() {
@@ -41,7 +41,7 @@ public class AppSession extends Session {
 	}
 	
 	public Instance getAppInstance() {
-		return new Instance(properties);
+		return new Instance(propset);
 	}
 	
 	@Override
@@ -70,6 +70,28 @@ public class AppSession extends Session {
 		}
 		return agentKey;
 	}
+
+	@Override
+	protected void verifySession(PropertySet propset) throws ResourceException {
+		AppSchemaReader schemaReader = new AppSchemaReader(this);
+		try {
+			schemaReader.getSchema("sys_user");
+		} catch (IOException e) {
+			String errmsg = String.format(
+				"verifySession %s user=%s", this.instance.getURL(), this.username);
+			logger.error(Log.INIT, errmsg, e);
+			throw new ResourceException(e);
+		}
+		boolean verifySession = propset.getBoolean("verify_session", false);
+		boolean verifyTimeZone = propset.getBoolean("verify_timezone",  false);
+		if (verifySession || verifyTimeZone) {
+			try {
+				this.verifyUser(verifyTimeZone);
+			} catch (IOException e) {
+				throw new ResourceException(e);
+			}
+		}
+	}
 	
 	/**
 	 * Create a new Session with the same properties as this one. 
@@ -77,7 +99,7 @@ public class AppSession extends Session {
 	 */
 	@Override
 	public AppSession duplicate() throws IOException {
-		return new AppSession(this.properties);
+		return new AppSession(this.propset);
 	}
 	
 	/**

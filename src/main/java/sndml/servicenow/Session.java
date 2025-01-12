@@ -2,7 +2,6 @@ package sndml.servicenow;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpHost;
@@ -20,6 +19,8 @@ import org.slf4j.Logger;
 import sndml.agent.AppSession;
 import sndml.util.Log;
 import sndml.util.Parameters;
+import sndml.util.PropertySet;
+import sndml.util.ResourceException;
 
 /**
  * Holds a ServiceNow URL, connection credentials, a cookie store with a session ID
@@ -28,7 +29,7 @@ import sndml.util.Parameters;
 public class Session {
 
 	protected final Instance instance;
-	protected final Properties properties;
+	protected final PropertySet propset;
 	protected final AuthScope authScope;
 	protected final String username;
 	protected final Domain domain;
@@ -43,8 +44,8 @@ public class Session {
 
 	protected final Logger logger = Log.getLogger(this.getClass());
 		
-	public Session(Properties propset) {
-		this.properties = propset;
+	public Session(PropertySet propset) {
+		this.propset = propset;
 		String instancename = propset.getProperty("instance");
 		String username = propset.getProperty("username");
 		String password = propset.getProperty("password");
@@ -85,11 +86,11 @@ public class Session {
 	 * The URL and credentials will be the same, but the Session ID will be different.
 	 */
 	public Session duplicate() throws IOException {
-		return new Session(this.properties);
+		return new Session(this.propset);
 	}
 
 	public int defaultPageSize() {
-		int pageSize = Integer.valueOf(properties.getProperty("pagesize"));
+		int pageSize = Integer.valueOf(propset.getProperty("pagesize"));
 		assert pageSize > 0;
 		return pageSize;
 	}
@@ -183,17 +184,32 @@ public class Session {
 		return userProfile;
 	}
 	
+	protected void verifySession(PropertySet propset) throws ResourceException {
+		boolean verifySession = propset.getBoolean("verify_session", false);
+		boolean verifyTimeZone = propset.getBoolean("verify_timezone",  false);
+		if (verifySession || verifyTimeZone) {
+			try {
+				this.verifyUser(verifyTimeZone);
+			} catch (IOException e) {
+				String errmsg = String.format(
+						"verifySession %s user=%s", this.instance.getURL(), this.username);
+				logger.error(Log.INIT, errmsg, e);				
+				throw new ResourceException(e);
+			}
+		}
+	}
+		
 	/**
 	 * Verify that this Session is valid by retrieving the users's record from sys_user.
-	 * If the time zone is not GMT then an exception will be thrown.
+	 * Verify that the time zone is GMT.
+	 * If abort is true and the time zone is not GMT then an exception will be thrown.
 	 */
-	public Session verifyUser() throws IOException, ServiceNowException {
-		boolean verifyTimezone = Boolean.valueOf(properties.getProperty("verify_timezone"));
+	public Session verifyUser(boolean abort) throws IOException, ServiceNowException {
 		TableRecord userProfile = this.getUserProfile();
 		String timezone = userProfile.getValue("time_zone");
 		if (!"GMT".equals(timezone)) { 
 			String message = "Time zone not GMT for user " + this.username;
-			if (verifyTimezone) {
+			if (abort) {
 				logger.error(Log.INIT, message);				
 				throw new ServiceNowException(message);				
 			}

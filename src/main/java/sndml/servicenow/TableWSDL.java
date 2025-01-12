@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.util.FieldNames;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 import org.slf4j.Logger;
 
@@ -49,9 +50,14 @@ public class TableWSDL {
 			logger.error(Log.WSDL, String.format(
 					"%s user=%s table=%s url=%s",
 					e.getClass().getSimpleName(), session.getUsername(), tablename, uri.toString()));
-			throw e;
+			throw new ResourceException(e);
 		} catch (NoContentException e) {
 			throw new InvalidTableNameException(tablename);
+		} catch (IOException e) {
+			logger.error(Log.WSDL, String.format(
+					"%s user=%s table=%s url=%s",
+					e.getClass().getSimpleName(), session.getUsername(), tablename, uri.toString()));
+			throw new ResourceException(e);
 		}
 		if (logger.isTraceEnabled()) 
 			logger.trace(Log.WSDL, "\n" + XmlFormatter.format(doc));
