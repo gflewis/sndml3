@@ -119,13 +119,25 @@ public class PropertySet extends java.util.Properties {
 	public String getString(String name, String defaultValue) {
 		return getProperty(name, defaultValue);
 	}
-		
+	
+	public boolean getBoolean(String name) {
+		return getBoolean(name, false);
+	}
+	
+	@Deprecated
+	// Default value should always be specified in property_names.xml
 	public boolean getBoolean(String name, boolean defaultValue) {
 		String stringValue = getProperty(name);
 		if (stringValue == null) return defaultValue;
 		return Boolean.valueOf(stringValue);
 	}
 
+	public int getInt(String name) {
+		return getInt(name, 0);
+	}
+	
+	@Deprecated
+	// Default value should always be specified in property_names.xml
 	public int getInt(String name, int defaultValue) {
 		String stringValue = getProperty(name);
 		if (stringValue == null) return defaultValue;

@@ -32,7 +32,7 @@ public class AppSession extends Session {
 		this.appScope = propset.getProperty("scope");
 		assert agentName != null && agentName.length() > 0;
 		assert appScope != null && appScope.length() > 0;
-		verifySession(propset);
+		if (propset.getBoolean("verify_session")) verifySession(propset);
 
 	}
 
@@ -81,15 +81,6 @@ public class AppSession extends Session {
 				"verifySession %s user=%s", this.instance.getURL(), this.username);
 			logger.error(Log.INIT, errmsg, e);
 			throw new ResourceException(e);
-		}
-		boolean verifySession = propset.getBoolean("verify_session", false);
-		boolean verifyTimeZone = propset.getBoolean("verify_timezone",  false);
-		if (verifySession || verifyTimeZone) {
-			try {
-				this.verifyUser(verifyTimeZone);
-			} catch (IOException e) {
-				throw new ResourceException(e);
-			}
 		}
 	}
 	

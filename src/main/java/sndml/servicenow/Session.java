@@ -185,8 +185,8 @@ public class Session {
 	}
 	
 	protected void verifySession(PropertySet propset) throws ResourceException {
-		boolean verifySession = propset.getBoolean("verify_session", false);
-		boolean verifyTimeZone = propset.getBoolean("verify_timezone",  false);
+		boolean verifySession = propset.getBoolean("verify_session");
+		boolean verifyTimeZone = propset.getBoolean("verify_timezone");
 		if (verifySession || verifyTimeZone) {
 			try {
 				this.verifyUser(verifyTimeZone);

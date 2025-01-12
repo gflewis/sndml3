@@ -156,6 +156,7 @@
     </description>
   </property>
   <property name="database.autocreate">
+    <default>true</default>
     <alternate name="datamart.autocreate" />
     <description>Causes tables in the SQL database to be created
     if they do not already exist. Defaults is "true".</description>
