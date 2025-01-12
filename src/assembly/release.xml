@@ -1,0 +1,36 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
+  <id>bin</id>
+  <formats>
+    <!-- 
+    <format>tar.gz</format>
+    <format>tar.bz2</format>
+     -->
+    <format>zip</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>${project.basedir}</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>LICENSE*</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/UpdateSets</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>*${version}*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>*${version}*.jar</include>
+      </includes>
+    </fileSet>
+    
+  </fileSets>
+</assembly>
