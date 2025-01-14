@@ -183,10 +183,10 @@
     </description>
   </property> 
   <property name="daemon.interval">
-    <default>60</default>
+    <default>120</default>
     <description>
       Recommended if using `--daemon`. Interval in seconds.
-      Default is 60.
+      Default is 120.
     </description>
   </property>
   <property name="daemon.continue">
