@@ -18,3 +18,15 @@ CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon"
 
 echo Starting $CMD
 nohup $CMD &
+
+SNDML_PIDFILE=$SNDML_CONFIG/daemon.pid
+# wait for pidfile
+sleep 3
+if [ -f $SNDML_PIDFILE ]; then
+  PID=`cat $SNDML_PIDFILE`
+  echo Server is running on PID $PID
+  exit 0
+else 
+  cat nohup.out
+  exit 1
+fi
