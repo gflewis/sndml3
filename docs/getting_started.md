@@ -179,13 +179,9 @@ If **Since Last** is checked, then only records inserted or updated in ServiceNo
 will be processed. The following filter will be used when retrieving records from ServiceNow:
 <blockquote><code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i></blockquote>
 
-<div class="language-plaintext highlighter-rouge">
+<div class="language-plaintext highlighter-rouge"><div class="highlight">
   <code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i>
-</div>
-
-<div class="highlight">
-  <code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i>
-</div>
+</div></div>
 
 where 
 <i><b><small>lastrunstart</small></b></i>
