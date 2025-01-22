@@ -1,0 +1,18 @@
+title: 
+description: 
+lsi: false
+safe: true
+source: docs
+incremental: false
+highlighter: rouge
+github:
+  is_project_page: false
+gist:
+  noscript: false
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
+theme: jekyll-theme-cayman
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+- jekyll-remote-theme
