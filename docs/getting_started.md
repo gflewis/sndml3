@@ -1,27 +1,13 @@
 ---
-title: Getting started with DataPump
+title: Getting Started with DataPump
 description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQL with version 3.5 of SNDML and the DataPump App
 ---
-## Introduction
+## Welcome
 
-DataPump is a contributed application which can be used to export ServiceNow data to 
-Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two parts:
-
-* A Java application (Java agent) which runs the exports. 
-  This application is executed on a Linux or Windows server.
-* A scoped ServiceNow app (**x_108443_sndml**) which is installed in the ServiceNow instance.
-  This application is used to configure the agent and manage the export jobs.
-
-Both parts can be downloaded from 
-[https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases).
-
-Beginning with Release 3.5.0.10, the **Assets** section of the release will contain 
-a ZIP file with the following:
-* **DataPump-v3.5.x.x-Install.xml** - _Update Set to install the ServiceNow app_
-* **sndml-3.5.x.x-mssql.jar** - _JAR file for use with Microsoft SQL Server_
-* **sndml-3.5.x.x-mysql.jar** - _JAR file for use with MySQL_
-* **sndml-3.5.x.x-ora.jar** - _JAR file for use with Oracle_
-* **sndml-3.5.x.x-pg.jar** - _JAR file for use with PostgreSQL_
+This Quick Start Guide assumes that you are using a Personal Developer Instance of ServiceNow,
+that you have an existing database schema that you will be using for your exports,
+that you have imported the **Install.xml** Update Set into your PDI,
+and that you have downloaded the appropriate JAR file corresponding to your database.
 
 ## Create Users and Grant Roles
 

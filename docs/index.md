@@ -2,12 +2,11 @@
 title: ServiceNow DataPump 3.5
 description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQL with version 3.5 of SNDML and the DataPump App
 ---
-## Introduction
 
 DataPump is a contributed application which can be used to export ServiceNow data to 
 Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two parts:
 
-* A Java application (Java agent) which runs the exports. 
+* A Java application (SNDML _a.k.a._ Java Agent) which runs the exports. 
   This application is executed on a Linux or Windows server.
 * A scoped ServiceNow app (**x_108443_sndml**) which is installed in the ServiceNow instance.
   This application is used to configure the agent and manage the export jobs.
@@ -23,5 +22,8 @@ a ZIP file with the following:
 * **sndml-3.5.x.x-ora.jar** - _JAR file for use with Oracle_
 * **sndml-3.5.x.x-pg.jar** - _JAR file for use with PostgreSQL_
 
-
+For instructions, please refer to the following pages
+* [Getting Started](getting_started)
+* [Scheduling Exports](scheduling_exports)
+* [Optimizing Exports](optimizing_exports)
 
