@@ -1,10 +1,12 @@
-title: Site title appears here.
-description: Blah blah description. Blah Blah description.
+title: 
+description: 
 lsi: false
 safe: true
-source: [your repo's top level directory]
+source: docs
 incremental: false
 highlighter: rouge
+github:
+  is_project_page: false
 gist:
   noscript: false
 kramdown:
