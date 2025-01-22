@@ -1,6 +1,6 @@
 ---
 title: Optimizing Database Exports with DataPump
-description: 
+description: Techniques for improving the performance of DataPump exports
 ---
 ## Server Location
 For optimal throughput, a high performance connection to ServiceNow is required. 
