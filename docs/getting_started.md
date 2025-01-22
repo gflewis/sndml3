@@ -178,6 +178,15 @@ Otherwise, it will be inserted.
 If **Since Last** is checked, then only records inserted or updated in ServiceNow since the last run 
 will be processed. The following filter will be used when retrieving records from ServiceNow:
 <blockquote><code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i></blockquote>
+
+<div class="language-plaintext highlighter-rouge">
+  <code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i>
+</div>
+
+<div class="highlight">
+  <code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i>
+</div>
+
 where 
 <i><b><small>lastrunstart</small></b></i>
 is determined from the "Last Run Start" field on the Database Table record.
