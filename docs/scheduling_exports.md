@@ -77,7 +77,8 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_l
 -->
 
 <pre class="highlight">
-<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code><br/>
+<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml \</code>
+<code>  ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code>
 <code>  ‑Dsndml.logPrefix=</code><small><var>&lt;name_of_agent&gt;</var></small>
 <code> -jar </code><small><var>&lt;path_to_jar&gt;</var></small><code> -p </code><small><var>&lt;path_to_connection_profile&gt;</var></small><code> --scan</code>
 </pre>
@@ -88,8 +89,7 @@ and that system properties are case sensitive.
 For Linux, use this crontab entry will run the agent at 2, 17, 32 and 47 minutes past the hour:
 
 ```
-02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> \
-  ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
+02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
 ```
 
 ## Run as Daemon (`--daemon`)
