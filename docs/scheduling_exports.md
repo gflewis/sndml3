@@ -86,17 +86,21 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_l
 Note that a "-D" prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
 
+<!--
 For Linux, use this crontab entry will run the agent at 2, 17, 32 and 47 minutes past the hour:
 
 ```
 02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
 ```
+-->
 
 ## Run as Daemon (`--daemon`)
 
 The `--daemon` option is the simplest to configure. 
 This option simply runs SNDML  in an endless loop, 
 performing a `--scan` every 2 minutes.
+
+Use this command to start the daemon as a background process on Linux.
 
 <!--
 ```
