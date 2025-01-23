@@ -5,7 +5,7 @@ description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQ
 ## Welcome
 
 This Quick Start Guide assumes that you are using a Personal Developer Instance of ServiceNow,
-that you have an existing database schema that you will be using for your exports,
+that you have an existing database schema that you will be using as the target for your exports,
 that you have imported the **Install.xml** Update Set into your PDI,
 and that you have downloaded the appropriate JAR file corresponding to your database.
 

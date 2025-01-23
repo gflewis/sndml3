@@ -69,27 +69,10 @@ and it requires two system properties:
 
 Use this command to run the Java agent redirecting all output to the log directory:
 
-<!--
-```
-java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_log_directory> \
-  ‑Dsndml.logPrefix=<name_of_agent> -jar <path_to_jar> -p <path_to_connection_profile> --scan
-```
--->
-
-<pre class="highlight">
-<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml \</code>
-<code>  ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code>
-<code>  ‑Dsndml.logPrefix=</code><small><var>&lt;name_of_agent&gt;</var></small><code> \</code>
-<code>  -jar </code><small><var>&lt;path_to_jar&gt;</var></small><code> -p </code><small><var>&lt;path_to_connection_profile&gt;</var></small><code> --scan</code>
-</pre>
-
-**Alternate version**
-
 <pre class="highlight">
 java -Dlog4j2.configurationFile=log4j2-daemon.xml \
-  ‑Dsndml.logFolder=<small><var>&lt;path_to_log_directory&gt;</var></small> \
-  ‑Dsndml.logPrefix=<small><var>&lt;name_of_agent&gt;</var></small> \
-  -jar <small><var>&lt;path_to_jar&gt;</var></small> -p <small><var>&lt;path_to_connection_profile&gt;</var></small> --scan
+  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
+  -jar <var>jar-file</var> -p <var>connection-profile</var> --scan
 </pre>
 
 
@@ -112,18 +95,10 @@ performing a `--scan` every 2 minutes.
 
 Use this command to start the daemon as a background process on Linux.
 
-<!--
-```
-java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_log_directory> \
-  ‑Dsndml.logPrefix=<name_of_agent> -jar <path_to_jar> -p <path_to_connection_profile> --daemon >/dev/null 2>&1
-```
--->
-
 <pre class="highlight">
-<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml \</code>
-<code>  ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code>
-<code>  ‑Dsndml.logPrefix=</code><small><var>&lt;name_of_agent&gt;</var></small><code> \</code>
-<code>  -jar </code><small><var>&lt;path_to_jar&gt;</var></small><code> -p </code><small><var>&lt;path_to_connection_profile&gt;</var></small><code> --daemon  >/dev/null 2>&1</code>
+java -Dlog4j2.configurationFile=log4j2-daemon.xml \
+  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
+  -jar <var>jar-file</var> -p <var>connection-profile</var> --daemon >/dev/null 2>&1
 </pre>
 
 ## Run Job through MID Server (`--jobrun`)
