@@ -14,8 +14,7 @@ Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two part
 Both parts can be downloaded from 
 [https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases).
 
-Beginning with Release 3.5.0.10, the **Assets** section of the release will contain 
-a ZIP file with the following:
+When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find the following files.
 * **DataPump-v3.5.x.x-Install.xml** - _Update Set to install the ServiceNow app_
 * **sndml-3.5.x.x-mssql.jar** - _JAR file for use with Microsoft SQL Server_
 * **sndml-3.5.x.x-mysql.jar** - _JAR file for use with MySQL_

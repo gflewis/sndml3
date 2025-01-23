@@ -52,9 +52,9 @@ and eliminate this delay.
 These two methods  and are condigured using the 
 **Job Run Autostart** field on the **Agent** record.
 
-## Synchronized Scan (`--scan`)
+## Synchronized Scan
 
-This method involves using **cron** or **Windows Task Scheduler** to execute the Java agent, 
+This method involves using **cron** or **Windows Task Scheduler** to run a `--scan`, 
 and synchronizing the times with your ServiceNow schedules. 
 For example, if you know that your ServiceNow schedules are set to run at the top of the hour, 
 then create a **cron** or **Windows Task Scheduler** job which runs a couple of minutes later.
@@ -87,7 +87,7 @@ For Linux, use this crontab entry will run the agent at 2, 17, 32 and 47 minutes
 ```
 -->
 
-## Run as Daemon (`--daemon`)
+## Run as Daemon
 
 The `--daemon` option is the simplest to configure. 
 This option simply runs SNDML  in an endless loop, 
