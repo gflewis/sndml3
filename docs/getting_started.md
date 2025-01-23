@@ -118,7 +118,7 @@ which has a small number of records.
 8. **Save** the record.
 9. Click the **Execute Now** button.
 
-This newly created **Job Run** record has a status of **Ready**.
+The newly created **Job Run** record has a status of **Ready**.
 It is waiting to be executed by the Java agent.
 
 ## Run an SNDML Scan

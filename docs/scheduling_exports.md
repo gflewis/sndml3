@@ -12,7 +12,7 @@ The steps are as follows:
    and clicking the **New** button above the Jobs related list.
 3. The **Job** must be saved before it can be added to a Schedule. 
    To add a **Job** to a **Schedule**, edit the **Schedule** field on the **Job** form.
-4. To test a Schedule, open the Schedule form and click the **Execute Now** button.
+4. To test a Schedule, open the **Schedule** form and click the **Execute Now** button.
 
 Since the DataPump table `x_108443_sndml_action_schedule` is extended from the 
 out-of-box table **Scheduled Script Execution**,

@@ -27,3 +27,8 @@ For instructions, please refer to the following pages
 * [Scheduling Exports](scheduling_exports)
 * [Optimizing Exports](optimizing_exports)
 
+## [Getting Started](getting_started)
+* [Create Users and Grant Roles](getting_started#create_users_and_grant_roles)
+* [Create a Connection Profile](getting_started#create_a_connection_profile)
+* [Test Connectivity](getting_started#test_connectivity)
+* [Create a Database Agent Record](getting_started#create_a_database_agent_record)

@@ -9,7 +9,8 @@ or a commercial cloud; but will not normally be available is the agent is run fr
 
 It is also important that the Java agent run in the same subnet as the target database.
 If the SQL database is in a data center, then the Java agent should run on a server in the same data center. 
-If the SQL database is in an AWS or Azure cloud, then the Java agent should run on a server in the same cloud.
+If the SQL database is in an AWS or Azure cloud, 
+then the Java agent should run on a server in the same region.
 
 The Java agent performs a lot of IO, but very little computation; 
 so a minimally configured virtual machine is generally adequate.
@@ -37,7 +38,7 @@ In this example, we have have selected 5 columns from the Incident table and inc
 
 ![Page Size](images/2021-04-26-page-size.jpeg)
 
-The fields **sys_id, sys_created_on** and **sys_updated_on** are always exported by the Java agent, 
+The fields `sys_id`, `sys_created_on` and `sys_updated_on` are always exported by the Java agent, 
 regardless of whether or not they are included in the column list; 
 so in this example we are actually exporting 8 columns.
 
