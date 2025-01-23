@@ -69,10 +69,12 @@ and it requires two system properties:
 
 Use this command to run the Java agent redirecting all output to the log directory:
 
+<!---
 ```
 java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_log_directory> \
   ‑Dsndml.logPrefix=<name_of_agent> -jar <path_to_jar> -p <path_to_connection_profile> --scan
 ```
+--->
 
 <pre class="highlight">
 <code>java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code>
