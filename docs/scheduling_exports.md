@@ -76,11 +76,11 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_l
 ```
 -->
 
-<div class="highlight">
+<pre class="highlight">
 <code>java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code><br/>
 <code>  ‑Dsndml.logPrefix=</code><small><var>&lt;name_of_agent&gt;</var></small>
 <code> -jar </code><small><var>&lt;path_to_jar&gt;</var></small><code> -p </code><small><var>&lt;path_to_connection_profile&gt;</var></small><code> --scan</code>
-</div>
+</pre>
 
 Note that a "-D" prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
@@ -106,8 +106,10 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_l
 -->
 
 <pre class="highlight">
-<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code>
-<code>  ‑Dsndml.logPrefix=</code><small><var>&lt;name_of_agent&gt;</var></small> -jar </code><small><var>&lt;path_to_jar&gt;</var></small><code> -p </code><small><var>&lt;path_to_connection_profile&gt;</var></small><code> --daemon  >/dev/null 2>&1</code>
+<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml \</code>
+<code>  ‑Dsndml.logFolder=</code><small><var>&lt;path_to_log_directory&gt;</var></small><code> \</code>
+<code>  ‑Dsndml.logPrefix=</code><small><var>&lt;name_of_agent&gt;</var></small><code> \</code>
+<code>  -jar </code><small><var>&lt;path_to_jar&gt;</var></small><code> -p </code><small><var>&lt;path_to_connection_profile&gt;</var></small><code> --daemon  >/dev/null 2>&1</code>
 </pre>
 
 ## Run Job through MID Server (`--jobrun`)
