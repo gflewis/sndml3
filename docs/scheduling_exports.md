@@ -38,5 +38,93 @@ All **Job Run** records in a **Schedule Run** are created at the same time,
 therefore the application will not export records inserted after the start of another job in the same schedule.
 
 ## Running Scheduled Jobs
-Once a Job Run record is created with a state of "Ready", it must be be detected by the Java agent. 
-There are several techniques for managing this. 
+Once a **Job Run** record is created with a state of "Ready", it must be be detected by the Java agent. 
+There are four methods for this.
+* Synchronized Scan (`--scan`)
+* Run as Daemon (`--daemon`)
+* Run Job through MID Server (`--jobrun`)
+* Run as HTTP Server (`--server`)
+
+With the first two methods (`--scan` and `--daemon`) there will be a small delay 
+between when the **Job Run** record is marked **Ready** and when execution starts.
+The second two methods (`--jobrun` and `--server`) are new in Release 3.5
+and eliminate this delay.
+These two methods  and are condigured using the 
+**Job Run Autostart** field on the **Agent** record.
+
+## Synchronized Scan (`--scan`)
+
+This method involves using **cron** or **Windows Task Scheduler** to execute the Java agent, 
+and synchronizing the times with your ServiceNow schedules. 
+For example, if you know that your ServiceNow schedules are set to run at the top of the hour, 
+then create a **cron** or **Windows Task Scheduler** job which runs a couple of minutes later.
+
+The SNDML JAR file contains an embedded Log4J2 Rolling File Appender configuration 
+which can be helpful if you are using **cron** or **Windows Task Scheduler**. 
+The name of this configuration file is **log4j2-daemon.xml**, 
+and it requires two system properties:
+
+* `sndml.logFolder` - the directory where log files are written
+* `sndml.logPrefix` - a prefix which will be prepended to the log file name
+
+Use this command to run the Java agent redirecting all output to the log directory:
+
+```
+java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_log_directory> \
+  ‑Dsndml.logPrefix=<name_of_agent> -jar <path_to_jar> -p <path_to_connection_profile> --scan
+```
+
+**blockquote**
+
+<blockquote class="highlight">
+<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=</code>
+<small><var>&lt;path_to_log_directory&gt;</var></small>
+<code> \</code><br/>
+<code>  ‑Dsndml.logPrefix=</code>
+<small><var>&lt;name_of_agent&gt;</var></small>
+<code> -jar </code>
+<small><var>&lt;path_to_jar&gt;</small></var></small>
+<code> -p </code>
+<small><var>&lt;path_to_connection_profile&gt;</var></small>
+<code> --scan</code>
+</blockquote>
+
+**pre** 
+
+<pre class="highlight">
+<code>java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=</code>
+<small><var>&lt;path_to_log_directory&gt;</var></small>
+<code> \</code><br/>
+<code>  ‑Dsndml.logPrefix=</code>
+<small><var>&lt;name_of_agent&gt;</var></small>
+<code> -jar </code>
+<small><var>&lt;path_to_jar&gt;</small></var></small>
+<code> -p </code>
+<small><var>&lt;path_to_connection_profile&gt;</var></small>
+<code> --scan</code>
+</pre>
+
+Note that a "-D" prefix is used when passing system properties to Java, 
+and that system properties are case sensitive.
+
+For Linux, use this crontab entry will run the agent at 2, 17, 32 and 47 minutes past the hour:
+
+```
+02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> \
+  ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
+```
+
+## Run as Daemon (`--daemon`)
+
+The `--daemon` option is the simplest to configure. 
+This option simply runs SNDML  in an endless loop, 
+performing a `--scan` every 2 minutes.
+
+```
+java -Dlog4j2.configurationFile=log4j2-daemon.xml ‑Dsndml.logFolder=<path_to_log_directory> \
+  ‑Dsndml.logPrefix=<name_of_agent> -jar <path_to_jar> -p <path_to_connection_profile> --daemon >/dev/null 2>&1
+```
+
+## Run Job through MID Server (`--jobrun`)
+
+## Run as HTTP Server (`--server`)
