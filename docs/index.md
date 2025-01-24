@@ -3,13 +3,13 @@ title: Getting Started with ServiceNow DataPump
 description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQL with version 3.5 of SNDML and the DataPump App
 ---
 
-DataPump is a contributed application which can be used to export ServiceNow data to 
+**DataPump** is a contributed application which can be used to export ServiceNow data to 
 Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two parts:
 
 * **DataPump** is scoped ServiceNow app (**x_108443_sndml**) which is installed in the ServiceNow instance.
   This application is used to configure the agent and manage the export jobs.
-* **SNDML** is a Java application (_a.k.a._ Java Agent) which runs the exports. 
-  This application is executed on a Linux or Windows server.
+* **SNDML** is a Java application (_a.k.a._ Java Agent) which runs the exports. **SNDML** is executed on a 
+  Linux or Windows server.
 
 ## Contents
 * [Downloading](#downloading)
@@ -17,7 +17,7 @@ Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two part
 * [Create a Connection Profile](#create-a-connection-profile)
 * [Test Connectivity](#test-connectivity)
 * [Create a Database Agent Record](#create-a-database-agent-record)
-* [Configure a Database Table and a Job](#configure-a-database-table-and-a-job)
+* [Configure a Table and a Job](#configure-a-table-and-a-job)
 * [Run an SNDML Scan](#run-an-sndml-scan)
 * [Methods for Running Jobs](#methods-for-running-jobs)
 * [Creating Schedules](#creating-schedules)
@@ -147,7 +147,7 @@ If the initial test is successful, then we can begin configuring the Agent.
 In your ServiceNow instance, go to **DataPump > Agents** and click **New**. 
 Create a new Database Agent record with the name "main".
 
-## Configure a Database Table and a Job
+## Configure a Table and a Job
 
 For the first test of the Agent, you should again choose a ServiceNow table 
 which has a small number of records.
@@ -166,7 +166,7 @@ For additonal information about configuring jobs
 refer to [Job Action Types](#job-action-types) below.
 
 Your newly created **Job Run** record has a status of **Ready**.
-It is waiting to be executed by the Java agent.
+It is waiting to be executed by the Java Agent.
 
 ## Run an SNDML Scan
 
@@ -185,6 +185,8 @@ and executes them.
 
 As the job executes, the **Job Run** record will be updated,
 and rows will be appended to the **Job Run Logs** related list.
+If you are viewing the **Job Run** record in ServiceNow, 
+then you should see the counters and the status changing.
 
 When each job completes, `--scan` checks for new **Job Run** records that are **Ready**.
 If none are found then the Java program terminates.
@@ -202,7 +204,7 @@ there will be a small delay
 between when the **Job Run** record is marked "Ready" and when execution starts.
 The second two methods (<code>&#8209;&#8209;jobrun</code> and <code>&#8209;&#8209;server</code>) 
 are new in Release 3.5 and eliminate this delay.
-These two methods and are configured using the **Job Run Autostart** field on the **Agent** record.
+The second two methods and are configured using the **Job Run Autostart** field on the **Agent** record.
 
 ## Creating Schedules
 DataPump jobs can be grouped together in **Schedules**, and 
@@ -220,12 +222,13 @@ Since the DataPump table `x_108443_sndml_action_schedule` is extended from the
 out-of-box table **Scheduled Script Execution**,
 Schedules can be configured to run at any frequency permitted by ServiceNow.
 
-If a **Job** is part of a **Schedule**, then the **Order** field on the Job form becomes important. 
-Jobs within a Schedule are processed in order, based on the Order field. 
-If multiple Jobs have the same Order number, then they may run concurrently, 
+If a **Job** is part of a **Schedule**, then the **Order** field on the **Job** form becomes important. 
+Jobs within a Schedule are processed in order, based on the **Order** field. 
+If multiple Jobs have the same **Order** value, then they may run concurrently, 
 subject to the number of available threads. 
-(The number of threads is configured in the connection profile.) 
-Jobs with a higher order number will remain in a "Scheduled" state until Jobs with a lower Order number complete. 
+(The number of threads is configured in the Connection Profile.) 
+Jobs with a higher **Order** value will remain in a **Scheduled** state 
+until all Jobs with a lower **Order** value complete. 
 
 This screenshot shows a schedule with three jobs. 
 The table **sys_user_grmember** will be exported after the other two jobs complete.
@@ -241,10 +244,11 @@ therefore the application will not export records inserted after the start of an
 
 ## Synchronized Scanning
 
-Synchronized Scanning involves using **cron** or **Windows Task Scheduler** to run a `--scan`, 
-and synchronizing the time of the scan with thie time of your ServiceNow schedules. 
-For example, if you know that your ServiceNow schedules are set to run at the top of the hour, 
-then you can create a **cron** or **Windows Task Scheduler** job which runs a couple of minutes later.
+Synchronized Scanning involves using **cron** or **Windows Task Scheduler** to run a `--scan`. 
+The start time of the Linux or Windows job is synchronized with the start time of the ServiceNow schedule. 
+The Linux or Windows job should start a few minutes after the ServiceNow schedule.
+For example, if the ServiceNow schedule starts at 5:00 PM,
+then you might set your Linux or Windows `--scan` to start at 5:02 PM.
 
 The SNDML JAR file contains an embedded Log4J2 Rolling File Appender configuration 
 which can be helpful if you are using **cron** or **Windows Task Scheduler**. 
@@ -263,16 +267,15 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml \
 </pre>
 
 
-Note that a "-D" prefix is used when passing system properties to Java, 
+Note that a `-D` prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
 
-<!--
-For Linux, use this crontab entry will run the agent at 2, 17, 32 and 47 minutes past the hour:
+Here is an example of a Linux `crontab` entry that runs the Java agent 4 times per hour,
+(at 2, 17, 32 and 47 minutes past the top of the hour):
 
 ```
 02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
 ```
--->
 
 ## Run SNDML as a Daemon
 
