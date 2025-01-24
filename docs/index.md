@@ -193,10 +193,11 @@ There are four methods for this.
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server) (`--jobrun`)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server) (`--server`)
 
-With the first two methods (`&#8209;&#8209;scan` and `&#8209;&#8209;daemon`) there will be a small delay 
-between when the **Job Run** record is marked **Ready** and when execution starts.
-The second two methods (`&#8209;&#8209;jobrun` and `&#8209;&#8209;server`) are new in Release 3.5
-and eliminate this delay.
+With the first two methods (<code>&#8209;&#8209;scan</code> and <code>&#8209;&#8209;daemon</code>) 
+there will be a small delay 
+between when the **Job Run** record is marked "Ready" and when execution starts.
+The second two methods (<code>&#8209;&#8209;jobrun</code> and <code>&#8209;&#8209;server</code>) 
+are new in Release 3.5 and eliminate this delay.
 These two methods and are configured using the **Job Run Autostart** field on the **Agent** record.
 
 ## Creating Schedules
