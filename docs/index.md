@@ -28,10 +28,10 @@ Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two part
 
 ## Downloading
 
-JAR files for **DataPump** and **SNDM3** can be downloaded from
+JAR files for **DataPump** and **SNDML3** can be downloaded from
 * [https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases)
 
-When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find the following files.
+When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find these files:
 * **DataPump-v3.5.x.x-Install.xml** - _Update Set to install the ServiceNow app_
 * **sndml-3.5.x.x-mssql.jar** - _JAR file for use with Microsoft SQL Server_
 * **sndml-3.5.x.x-mysql.jar** - _JAR file for use with MySQL_
@@ -45,26 +45,26 @@ should be copied to the Linux or Windows server that will be running the jobs.
 ## Create Users and Grant Roles
 
 After installing the Update Set in your instance, 
-the first step is to create two new ServiceNow users 
+the first step is to create two new ServiceNow accounts 
 which will be used by the Java agent.
 
 ### datapump.agent
-This account will be used to retrieve configuration information from the DataPump scoped app 
+This user will be used to retrieve configuration information from the DataPump scoped app 
 and to update the status of running jobs.
 * Set **Time zone** to **GMT**
 * Set **Web service access only** to **true**
 * Grant **x_108443_sndml.daemon** role
-* Assign the user a secure password which will be entered int the Connection Profile below
+* Assign the user a secure password which will be entered in the **Connection Profile** below
 
 ### datapump.reader
-This account will be used to export data from the instance.
+This user will be used to export data from the instance.
 It requires "read" access to any tables which will be exported.
 * Set **Time zone** to **GMT**
 * Set **Web service access only** to **true**
 * Grant **snc_read_only** role
 * Grant **soap_query** role
 * Grant **itil** role and/or any roles necessary to read the requisite tables.
-* Assign the user a secure password which will be entered int the Connection Profile below
+* Assign the user a secure password which will be entered in the **Connection Profile** below
 
 Do not grant  **x_108443_sndml.admin** role to either of these service accounts.
 Users with **x_108443_sndml.admin** role can configure and monitor DataPump jobs.
@@ -74,6 +74,8 @@ Users with **x_108443_sndml.admin** role can configure and monitor DataPump jobs
 The **Connection Profile** is a Java properties file that contains 
 credentials for the database and the ServiceNow instance, 
 as well as other parameters that affect processing. 
+The name of the Connection Profile is passed to the Java program
+using the `-p` or <code>&#8209;&#8209;profile</code>  command line option.
 The Connection Profile looks like this:
 
 ```
@@ -94,16 +96,17 @@ reader.password=******
 ```
 
 Since the **Connection Profile** contains passwords, 
-it should be in a secured location on your Linux or Windows server.
+it should be in a protected location on your Linux or Windows server
+and secured using permissions or ACLs.
 
-The format of **database.url** will vary based on whether you are using 
+The format of `database.url` will vary based on whether you are using 
 MySQL, PostgreSQL, Oracle or Microsoft SQL Server. 
 Please refer to the documentation on configuring a JDBC URL based on the type of your database.
 
-The values of **appinstance** and **reader.instance** can either be a full URL (starting with `https://`)
+The values of `app.instance` and `reader.instance` can either be a full URL (starting with `https://`)
 or an instance name.
 
-The value of **app.agent** must match the name used in the **Database Agent** record below.
+The value of `app.agent` must match the name used in the **Database Agent** record below.
 
 ## Test Connectivity
 
@@ -113,7 +116,7 @@ and that the Java program can write to target database schema.
 
 For this test, you should choose a table that has some data, but is not too large.
 Good tables for this test might include 
-**cmdb_ci_service** or **cmn_location**.
+`cmdb_ci_service` or `cmn_location`.
 
 Using the appropriate JAR file, type the following command:
 
@@ -133,10 +136,11 @@ and copy the ServiceNow data into the target table.
 If you run the command a second time, the the `CREATE TABLE` will be missing.
 When SNDML starts a job, 
 it first check to see if the target table exists in the schema.
-The program will issue a `CREATE TABLE` statement only if
-there is no existing table with the correct name in the target schema.
+If an existing table is not found
+then SNDML will issue a `CREATE TABLE` statement
+before starting the load.
 
-If everything works successfully, then we can begin to configure the agent.
+If the initial test is successful, then we can begin configuring the agent.
 
 ## Create a Database Agent Record
 
@@ -145,7 +149,7 @@ Create a new Database Agent record with the name "main".
 
 ## Configure a Database Table and a Job
 
-For the first test of the agent, you should again choose a ServiceNow table 
+For the first test of the Agent, you should again choose a ServiceNow table 
 which has a small number of records.
 
 1. Go to **DataPump > Agents**.
@@ -321,32 +325,42 @@ ToDo
 There are several types of jobs.
 
 ### Insert
-"Insert" is used for initial loading or reloading of SQL tables. 
+**Insert** is used for initial loading or reloading of SQL tables. 
 It inserts rows into the target table. 
 If a record with the same sys_id already exists in the target table, 
 then a primary key violation will occur and the row will be skipped.
 
-If Truncate is checked, then the SQL table will be truncated prior to the load.
+If **Truncate** is checked, then the SQL table will be truncated prior to the load.
 
 ### Upsert
-"Upsert" is used to load or update SQL tables. 
+**Upsert** is used to load or update SQL tables. 
 If the target record exists (based on **sys_id**), then it will be updated. 
 Otherwise, it will be inserted.
 
-If **Since Last** is checked, then only records inserted or updated in ServiceNow since the last run 
-will be processed. The following filter will be used when retrieving records from ServiceNow:
+<!--
 <blockquote><code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i></blockquote>
 where 
 <i><b><small>lastrunstart</small></b></i>
+-->
+
+If **Since Last** is checked, then only records inserted or updated in ServiceNow since the last run 
+will be processed. The following filter will be used when retrieving records from ServiceNow:
+
+<pre>
+sys_updated_on&gt;=<var>lastrunstart</var>
+</pre>
+
+where <var>lastrunstart</var>
 is determined from the "Last Run Start" field on the Database Table record.
 
 ### Sync
-"Sync" compares the timestamps (`sys_updated_on`) in the source and target tables. 
+**Sync** compares the timestamps (`sys_updated_on`) in the source and target tables. 
 Based on this comparison it will insert, update or delete target records. 
 If the values of sys_updated_on match, then the record will be skipped.
 
-If a Filter has been configured for the Database Table, 
-the Sync will delete any records which do not match the filter.
+If a **Filte**r has been configured for the Database Table, 
+the **Sync** will delete any records which do not match the filter.
 
 ### Execute
-"Execute" executes an arbitrary SQL statement. This is typically used to run a database stored procedure.
+**Execute** executes an arbitrary SQL statement. 
+This is typically used to run a database stored procedure.
