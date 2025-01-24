@@ -19,6 +19,9 @@ Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two part
 * [Create a Database Agent Record](#create-a-database-agent-record)
 * [Configure a Database Table and a Job](#configure-a-database-table-and-a-job)
 * [Run an SNDML Scan](#run-an-sndml-scan)
+* [Methods for Running Jobs](#methods-for-running-jobs)
+* [Creating Schedules](#creating-schedules)
+* [Synchronized Scanning](#synchronized-scanning)
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Job Action Types](#job-action-types)
@@ -114,7 +117,14 @@ Good tables for this test might include
 
 Using the appropriate JAR file, type the following command:
 
+<!--
     java -ea -jar <jarfilename> -p <profilename> -t <tablename>
+-->
+
+<pre class="highlight">
+java -ea -jar <var>jarfilename</var> -p <var>profilename</var> -t <var>tablename</var>
+</pre>
+
 
 The Java program should connect to ServiceNow and to the database,
 create a table in the database schema,
@@ -158,7 +168,13 @@ It is waiting to be executed by the Java agent.
 
 On your Linux or Windows server, type this command:
 
+<!--
     java -ea -jar <jarfilename> -p <profilename> --scan
+-->
+    
+<pre class="highlight">
+java -ea -jar <var>jarfilename</var> -p <var>profilename</var> --scan
+</pre>
 
 The `--scan` command looks for any **Job Run** records that are **Ready**,
 and executes them.
@@ -169,19 +185,19 @@ and rows will be appended to the **Job Run Logs** related list.
 When each job completes, `--scan` checks for new **Job Run** records that are **Ready**.
 If none are found then the Java program terminates.
 
-## Running Scheduled Jobs
+## Methods for Running Jobs
 Once a **Job Run** record is created with a state of "Ready", it must be be detected by the Java agent. 
 There are four methods for this.
-* [Synchronized Scanning](#synchronized-scanning) (`--scan`)
+* [Synchronized Scanning](#synchronized-scanning) (`scan`)
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon) (`--daemon`)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server) (`--jobrun`)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server) (`--server`)
 
-With the first two methods (`--scan` and `--daemon`) there will be a small delay 
+With the first two methods (`&#8209;&#8209;scan` and `&#8209;&#8209;daemon`) there will be a small delay 
 between when the **Job Run** record is marked **Ready** and when execution starts.
-The second two methods (`--jobrun` and `--server`) are new in Release 3.5
+The second two methods (`&#8209;&#8209;jobrun` and `&#8209;&#8209;server`) are new in Release 3.5
 and eliminate this delay.
-These two methods and are condigured using the **Job Run Autostart** field on the **Agent** record.
+These two methods and are configured using the **Job Run Autostart** field on the **Agent** record.
 
 ## Creating Schedules
 DataPump jobs can be grouped together in **Schedules**, and 
