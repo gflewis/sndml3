@@ -1,18 +1,32 @@
 ---
-title: ServiceNow DataPump 3.5
+title: Getting Started with ServiceNow DataPump
 description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQL with version 3.5 of SNDML and the DataPump App
 ---
 
 DataPump is a contributed application which can be used to export ServiceNow data to 
 Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two parts:
 
-* A Java application (SNDML _a.k.a._ Java Agent) which runs the exports. 
-  This application is executed on a Linux or Windows server.
-* A scoped ServiceNow app (**x_108443_sndml**) which is installed in the ServiceNow instance.
+* **DataPump** is scoped ServiceNow app (**x_108443_sndml**) which is installed in the ServiceNow instance.
   This application is used to configure the agent and manage the export jobs.
+* **SNDML** is a Java application (_a.k.a._ Java Agent) which runs the exports. 
+  This application is executed on a Linux or Windows server.
 
-Both parts can be downloaded from 
-[https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases).
+## Contents
+* [Downloading](#downloading)
+* [Create Users and Grant Roles](#create-users-and-grant-roles)
+* [Create a Connection Profile](#create-a-connection-profile)
+* [Test Connectivity](#test-connectivity)
+* [Create a Database Agent Record](#create-a-database-agent-record)
+* [Configure a Database Table and a Job](#configure-a-database-table-and-a-job)
+* [Run an SNDML Scan](#run-an-sndml-scan)
+* [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
+* [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
+* [Job Action Types](#job-action-types)
+
+## Downloading
+
+JAR files for **DataPump** and **SNDM3** can be downloaded from
+* [https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases)
 
 When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find the following files.
 * **DataPump-v3.5.x.x-Install.xml** - _Update Set to install the ServiceNow app_
@@ -21,13 +35,301 @@ When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find the followi
 * **sndml-3.5.x.x-ora.jar** - _JAR file for use with Oracle_
 * **sndml-3.5.x.x-pg.jar** - _JAR file for use with PostgreSQL_
 
-For instructions, please refer to the following pages
-* [Getting Started](getting_started)
-* [Scheduling Exports](scheduling_exports)
-* [Optimizing Exports](optimizing_exports)
+The **Update Set** should be installed in your ServiceNow instance.
+The appropriate JAR file (based on your database)
+should be copied to the Linux or Windows server that will be running the jobs.
 
-## [Getting Started](getting_started)
-* [Create Users and Grant Roles](getting_started#create-users-and-grant-roles)
-* [Create a Connection Profile](getting_started#create-a-connection-profile)
-* [Test Connectivity](getting_started#test-connectivity)
-* [Create a Database Agent Record](getting_started#create-a-database-agent-record)
+## Create Users and Grant Roles
+
+After installing the Update Set in your instance, 
+the first step is to create two new ServiceNow users 
+which will be used by the Java agent.
+
+### datapump.agent
+This account will be used to retrieve configuration information from the DataPump scoped app 
+and to update the status of running jobs.
+* Set **Time zone** to **GMT**
+* Set **Web service access only** to **true**
+* Grant **x_108443_sndml.daemon** role
+* Assign the user a secure password which will be entered int the Connection Profile below
+
+### datapump.reader
+This account will be used to export data from the instance.
+It requires "read" access to any tables which will be exported.
+* Set **Time zone** to **GMT**
+* Set **Web service access only** to **true**
+* Grant **snc_read_only** role
+* Grant **soap_query** role
+* Grant **itil** role and/or any roles necessary to read the requisite tables.
+* Assign the user a secure password which will be entered int the Connection Profile below
+
+Do not grant  **x_108443_sndml.admin** role to either of these service accounts.
+Users with **x_108443_sndml.admin** role can configure and monitor DataPump jobs.
+
+## Create a Connection Profile
+
+The **Connection Profile** is a Java properties file that contains 
+credentials for the database and the ServiceNow instance, 
+as well as other parameters that affect processing. 
+The Connection Profile looks like this:
+
+```
+database.url=jdbc:mysql://name-of-database-host/dbname
+database.schema=******
+database.username=******
+database.password=******
+
+app.instance=dev000000
+app.username=datapump.agent
+app.password=******
+
+app.agent=main
+
+reader.instance=dev000000
+reader.username=datapump.reader
+reader.password=******
+```
+
+Since the **Connection Profile** contains passwords, 
+it should be in a secured location on your Linux or Windows server.
+
+The format of **database.url** will vary based on whether you are using 
+MySQL, PostgreSQL, Oracle or Microsoft SQL Server. 
+Please refer to the documentation on configuring a JDBC URL based on the type of your database.
+
+The values of **appinstance** and **reader.instance** can either be a full URL (starting with `https://`)
+or an instance name.
+
+The value of **app.agent** must match the name used in the **Database Agent** record below.
+
+## Test Connectivity
+
+Before configuring the Agent, it is a good idea to run a quick connectivity test.
+This will verify that the profile contain valid credentials,
+and that the Java program can write to target database schema.
+
+For this test, you should choose a table that has some data, but is not too large.
+Good tables for this test might include 
+**cmdb_ci_service** or **cmn_location**.
+
+Using the appropriate JAR file, type the following command:
+
+    java -ea -jar <jarfilename> -p <profilename> -t <tablename>
+
+The Java program should connect to ServiceNow and to the database,
+create a table in the database schema,
+and copy the ServiceNow data into the target table.
+
+If you run the command a second time, the the `CREATE TABLE` will be missing.
+When SNDML starts a job, 
+it first check to see if the target table exists in the schema.
+The program will issue a `CREATE TABLE` statement only if
+there is no existing table with the correct name in the target schema.
+
+If everything works successfully, then we can begin to configure the agent.
+
+## Create a Database Agent Record
+
+In your ServiceNow instance, go to **DataPump > Agents** and click **New**. 
+Create a new Database Agent record with the name "main".
+
+## Configure a Database Table and a Job
+
+For the first test of the agent, you should again choose a ServiceNow table 
+which has a small number of records.
+
+1. Go to **DataPump > Agents**.
+2. Open the "main" agent configured above.
+3. Click the **New** button above the **Tables** related list.
+4. Select a **Source table**.
+5. **Save** the record.
+6. Click the **New** button above the **Jobs** related list.
+7. For **Action type** select "Insert".
+8. **Save** the record.
+9. Click the **Execute Now** button.
+
+For additonal information about configuring jobs
+refer to [Job Action Types](#job-action-types) below.
+
+Your newly created **Job Run** record has a status of **Ready**.
+It is waiting to be executed by the Java agent.
+
+## Run an SNDML Scan
+
+On your Linux or Windows server, type this command:
+
+    java -ea -jar <jarfilename> -p <profilename> --scan
+
+The `--scan` command looks for any **Job Run** records that are **Ready**,
+and executes them.
+
+As the job executes, the **Job Run** record will be updated,
+and rows will be appended to the **Job Run Logs** related list.
+
+When each job completes, `--scan` checks for new **Job Run** records that are **Ready**.
+If none are found then the Java program terminates.
+
+## Running Scheduled Jobs
+Once a **Job Run** record is created with a state of "Ready", it must be be detected by the Java agent. 
+There are four methods for this.
+* [Synchronized Scanning](#synchronized-scanning) (`--scan`)
+* [Run SNDML as a Daemon](#run-sndml-as-a-daemon) (`--daemon`)
+* [Run Jobs via a MID Server](#run-jobs-via-a-mid-server) (`--jobrun`)
+* [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server) (`--server`)
+
+With the first two methods (`--scan` and `--daemon`) there will be a small delay 
+between when the **Job Run** record is marked **Ready** and when execution starts.
+The second two methods (`--jobrun` and `--server`) are new in Release 3.5
+and eliminate this delay.
+These two methods and are condigured using the **Job Run Autostart** field on the **Agent** record.
+
+## Creating Schedules
+DataPump jobs can be grouped together in **Schedules**, and 
+automatically activated by the ServiceNow scheduler. 
+The steps are as follows:
+
+1. Create a Schedule by going to **DataPump > Schedules**, and clicking New.
+2. Create **Jobs** by going to **DataPump > Tables**, opening a table, 
+   and clicking the **New** button above the Jobs related list.
+3. The **Job** must be saved before it can be added to a Schedule. 
+   To add a **Job** to a **Schedule**, edit the **Schedule** field on the **Job** form.
+4. To test a Schedule, open the **Schedule** form and click the **Execute Now** button.
+
+Since the DataPump table `x_108443_sndml_action_schedule` is extended from the 
+out-of-box table **Scheduled Script Execution**,
+Schedules can be configured to run at any frequency permitted by ServiceNow.
+
+If a **Job** is part of a **Schedule**, then the **Order** field on the Job form becomes important. 
+Jobs within a Schedule are processed in order, based on the Order field. 
+If multiple Jobs have the same Order number, then they may run concurrently, 
+subject to the number of available threads. 
+(The number of threads is configured in the connection profile.) 
+Jobs with a higher order number will remain in a "Scheduled" state until Jobs with a lower Order number complete. 
+
+This screenshot shows a schedule with three jobs. 
+The table **sys_user_grmember** will be exported after the other two jobs complete.
+
+![Schedule with 3 jobs](images/2021-04-25-schedule-with-3-jobs.jpeg)
+
+All Jobs within a Schedule will have the same "start time", regardless of when they actually start running. 
+The Java agent will only export records that were inserted before the "start time". 
+"Start time" is based on when the **Job Run** record was created, 
+not when the **Status** was changed to "Running". 
+All **Job Run** records in a **Schedule Run** are created at the same time, 
+therefore the application will not export records inserted after the start of another job in the same schedule.
+
+## Synchronized Scanning
+
+Synchronized Scanning involves using **cron** or **Windows Task Scheduler** to run a `--scan`, 
+and synchronizing the time of the scan with thie time of your ServiceNow schedules. 
+For example, if you know that your ServiceNow schedules are set to run at the top of the hour, 
+then you can create a **cron** or **Windows Task Scheduler** job which runs a couple of minutes later.
+
+The SNDML JAR file contains an embedded Log4J2 Rolling File Appender configuration 
+which can be helpful if you are using **cron** or **Windows Task Scheduler**. 
+The name of this configuration file is **log4j2-daemon.xml**, 
+and it requires two system properties:
+
+* `sndml.logFolder` - the directory where log files are written
+* `sndml.logPrefix` - a prefix which will be prepended to the log file name
+
+Use this command to run the Java agent redirecting all output to the log directory:
+
+<pre class="highlight">
+java -Dlog4j2.configurationFile=log4j2-daemon.xml \
+  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
+  -jar <var>jar-file</var> -p <var>connection-profile</var> --scan
+</pre>
+
+
+Note that a "-D" prefix is used when passing system properties to Java, 
+and that system properties are case sensitive.
+
+<!--
+For Linux, use this crontab entry will run the agent at 2, 17, 32 and 47 minutes past the hour:
+
+```
+02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
+```
+-->
+
+## Run SNDML as a Daemon
+
+The `--daemon` option is the simplest to configure. 
+This option simply runs SNDML  in an endless loop, 
+performing a `--scan` every 2 minutes.
+
+The frequency of scans can be changed 
+by setting the value of the **Connection Profile** property `daemon.interval`
+to the number of seconds between scans.
+
+Use this command to start the daemon as a background process on Linux:
+
+<pre class="highlight">
+java -Dlog4j2.configurationFile=log4j2-daemon.xml \
+  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
+  -jar <var>jar-file</var> -p <var>connection-profile</var> --daemon >/dev/null 2>&1
+</pre>
+
+If the **Connection Profile** contains a property named `daemon.pidfile`
+then at startup the Java program will write its PID to this file.
+You can then terminate the daemon by sending a SIGTERM signal to the PID.
+
+## Run Jobs via a MID Server
+
+The `--jobrun` option causes the Java program to execute a single **Job Run**, and then terminate.
+The `sys_id` of the **Job Run** record is passed as a command line argument.
+This option is used for executing jobs through the MID Server.
+
+To configure this option you must set **Job Run Autostart** on the **Agent** form to **MID Server**
+and select an appropriate **MID Server Script File**.
+
+When the **DataPump** app is installed, 
+it will create two MID Server Script files, one named `jobrun.ps1` and one named `jobrun.sh`.
+These scripts assume that the JAR file has been installed 
+and that SNDML will be running locally on the MID Server.
+However, it also expected that the script will need to be customized
+based on how your MID Server is configured.
+
+When using this option, care must be taken to not run too many jobs concurrently,
+as this could exhaust the memory on the MID Server.
+Since each job runs as a separate process on the server,
+SNDML cannot constrain the number of concurrent jobs.
+
+## Run SNDML as an HTTP Server
+
+ToDo
+
+## Job Action Types
+There are several types of jobs.
+
+### Insert
+"Insert" is used for initial loading or reloading of SQL tables. 
+It inserts rows into the target table. 
+If a record with the same sys_id already exists in the target table, 
+then a primary key violation will occur and the row will be skipped.
+
+If Truncate is checked, then the SQL table will be truncated prior to the load.
+
+### Upsert
+"Upsert" is used to load or update SQL tables. 
+If the target record exists (based on **sys_id**), then it will be updated. 
+Otherwise, it will be inserted.
+
+If **Since Last** is checked, then only records inserted or updated in ServiceNow since the last run 
+will be processed. The following filter will be used when retrieving records from ServiceNow:
+<blockquote><code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i></blockquote>
+where 
+<i><b><small>lastrunstart</small></b></i>
+is determined from the "Last Run Start" field on the Database Table record.
+
+### Sync
+"Sync" compares the timestamps (`sys_updated_on`) in the source and target tables. 
+Based on this comparison it will insert, update or delete target records. 
+If the values of sys_updated_on match, then the record will be skipped.
+
+If a Filter has been configured for the Database Table, 
+the Sync will delete any records which do not match the filter.
+
+### Execute
+"Execute" executes an arbitrary SQL statement. This is typically used to run a database stored procedure.
