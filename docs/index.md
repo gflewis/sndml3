@@ -270,7 +270,7 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml \
 Note that a `-D` prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
 
-Here is an example of a Linux `crontab` entry that runs the Java agent 4 times per hour,
+Here is an example of a Linux `crontab` entry that runs the Java agent 4 times per hour
 (at 2, 17, 32 and 47 minutes past the top of the hour):
 
 ```
@@ -325,7 +325,6 @@ SNDML cannot constrain the number of concurrent jobs.
 ToDo
 
 ## Job Action Types
-There are several types of jobs.
 
 ### Insert
 **Insert** is used for initial loading or reloading of SQL tables. 
