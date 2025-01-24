@@ -1,6 +1,7 @@
 ---
 title: Getting Started with ServiceNow DataPump
 description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQL with version 3.5 of SNDML and the DataPump App
+layout: index
 ---
 
 **DataPump** is a contributed application which can be used to export ServiceNow data to 
@@ -358,9 +359,9 @@ is determined from the **Last Run Start** field on the Database Table record.
 ### Sync
 **Sync** compares the timestamps (`sys_updated_on`) in the source and target tables. 
 Based on this comparison it will insert, update or delete target records. 
-If the values of sys_updated_on match, then the record will be skipped.
+If the values of `sys_updated_on` match, then the record will be skipped.
 
-If a **Filte**r has been configured for the Database Table, 
+If a **Filter** has been configured for the Database Table, 
 the **Sync** will delete any records which do not match the filter.
 
 ### Execute
