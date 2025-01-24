@@ -79,8 +79,8 @@ using the `-p` or <code>&#8209;&#8209;profile</code>  command line option.
 The Connection Profile looks like this:
 
 ```
-database.url=jdbc:mysql://name-of-database-host/dbname
-database.schema=******
+database.url=jdbc:mysql://<database-host>/<dbname>
+database.schema=<schemaname>
 database.username=******
 database.password=******
 
@@ -130,8 +130,8 @@ java -ea -jar <var>jarfilename</var> -p <var>profilename</var> -t <var>tablename
 
 
 The Java program should connect to ServiceNow and to the database,
-create a table in the database schema,
-and copy the ServiceNow data into the target table.
+create a new table in the target schema,
+and copy the ServiceNow data into the newly created table.
 
 If you run the command a second time, the the `CREATE TABLE` will be missing.
 When SNDML starts a job, 
@@ -140,7 +140,7 @@ If an existing table is not found
 then SNDML will issue a `CREATE TABLE` statement
 before starting the load.
 
-If the initial test is successful, then we can begin configuring the agent.
+If the initial test is successful, then we can begin configuring the Agent.
 
 ## Create a Database Agent Record
 
@@ -334,7 +334,7 @@ If **Truncate** is checked, then the SQL table will be truncated prior to the lo
 
 ### Upsert
 **Upsert** is used to load or update SQL tables. 
-If the target record exists (based on **sys_id**), then it will be updated. 
+If the target record exists (based on `sys_id`), then it will be updated. 
 Otherwise, it will be inserted.
 
 <!--
@@ -351,7 +351,7 @@ sys_updated_on&gt;=<var>lastrunstart</var>
 </pre>
 
 where <var>lastrunstart</var>
-is determined from the "Last Run Start" field on the Database Table record.
+is determined from the **Last Run Start** field on the Database Table record.
 
 ### Sync
 **Sync** compares the timestamps (`sys_updated_on`) in the source and target tables. 
