@@ -118,6 +118,9 @@ or an instance name.
 
 The value of `app.agent` must match the name used in the **Database Agent** record below.
 
+For more detail on the Connection Profile refer to
+[Connection Profle 3.5](https://github.com/gflewis/sndml3/wiki/Connection-Profile-3.5)
+
 ## Test Connectivity
 
 Before configuring the Agent, it is a good idea to run a quick connectivity test.
