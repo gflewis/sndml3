@@ -421,5 +421,5 @@ This is typically used to run a database stored procedure.
 ## Feedback and Support
 
 If you have questions or issues with SNDML or the DataPump app,
-please use the (SNDML Github Issues Page)[https://github.com/gflewis/sndml3/issues]
+please use the [SNDML Github Issues Page](https://github.com/gflewis/sndml3/issues)
 to open a new issue.
