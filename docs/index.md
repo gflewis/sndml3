@@ -4,13 +4,15 @@ description: Exporting ServiceNow data to Oracle, SQL Server, MySQL or PostgreSQ
 layout: index
 ---
 
-**DataPump** is a contributed application which can be used to export ServiceNow data to 
-Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two parts:
+**SNDML** is a Java application which exports ServiceNow data to
+Oracle, Microsoft SQL Server, MySQL or PostgreSQL.
+**SNDML** is run on a Linux or Windows server.
 
-* **DataPump** is scoped ServiceNow app (**x_108443_sndml**) which is installed in the ServiceNow instance.
-  This application is used to configure the agent and manage the export jobs.
-* **SNDML** is a Java application (_a.k.a._ Java Agent) which runs the exports. **SNDML** is executed on a 
-  Linux or Windows server.
+**DataPump** is a scoped ServiceNow app which is installed in the ServiceNow instance
+and is used to configure and manage SNDML jobs.
+
+**SNDML** and **DataPump** are contributed software which can be downloaded from GitHub.
+This page contains instructions for installing and configuring **DataPump** and **SNDML 3.5**.
 
 ## Contents
 * [Downloading](#downloading)
@@ -26,27 +28,34 @@ Oracle, Microsoft SQL Server, MySQL or PostgreSQL. This application has two part
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Job Action Types](#job-action-types)
+* [Feedback and Support](#feedback-and-support)
 
 ## Downloading
 
-JAR files for **DataPump** and **SNDML3** can be downloaded from
+JAR files for **SNDML** and the installation Update Set for **DataPump** can be downloaded from
 * [https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases)
 
 When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find these files:
-* **DataPump-v3.5.x.x-Install.xml** - _Update Set to install the ServiceNow app_
+* **DataPump-v3.5.x.x-Install.xml** - _Update Set to install or upgrade the ServiceNow app_
 * **sndml-3.5.x.x-mssql.jar** - _JAR file for use with Microsoft SQL Server_
 * **sndml-3.5.x.x-mysql.jar** - _JAR file for use with MySQL_
 * **sndml-3.5.x.x-ora.jar** - _JAR file for use with Oracle_
 * **sndml-3.5.x.x-pg.jar** - _JAR file for use with PostgreSQL_
 
 The **Update Set** should be installed in your ServiceNow instance.
+If you have installed an earlier version of **DataPump**
+(including v1.1 from the ServiceNow Share site)
+then you should be able to use the **Install.xml**
+Update Set to upgrade to the latest version.
+Please test the upgrade using a non-production instance of ServiceNow.
+
 The appropriate JAR file (based on your database)
 should be copied to the Linux or Windows server that will be running the jobs.
 
 ## Create Users and Grant Roles
 
 After installing the Update Set in your instance, 
-the first step is to create two new ServiceNow accounts 
+the first step is to create two new ServiceNow service accounts 
 which will be used by the Java agent.
 
 ### datapump.agent
@@ -323,7 +332,48 @@ SNDML cannot constrain the number of concurrent jobs.
 
 ## Run SNDML as an HTTP Server
 
-ToDo
+The `--server` option runs the Java program as a an HTTP server.
+When the state of a **Job Run** changes to **Ready**
+an HTTP message is sent to the SNDML server.
+The HTTP message only contains the `sys_id` of the **Agent** 
+and the `sys_id` of the **Job Run** record.
+SNDML uses its ServiceNow HTTPS connection (REST API) to retrieve the **Job Run** information,
+and it starts execution of the job.
+
+
+To configure this option add the following to [Connection Profile](#create-a-connection-profile):
+
+* `server.port=5124`
+* `server.pidfile=pidfile.pid`
+
+Configure the *Agent* as follows:
+
+* Set **Job Run Autostart** to **HTTP Server**
+* Set **HTTP Server Host** to the IP address of the Linux or Windows server
+* Set **HTTP Port** to **5124**
+
+In addition, you must open TCP/IP port 5124 on your Linux or Windows server to accept inbound connections.
+
+(Note that you can choose a different TCP/IP port as long as the **Connection Profile**
+and the **Agent** are configured consistently.)
+
+As an alternative to opening the TCP/IP port, you can 
+install a MID Server on the same box as SNDML.
+In this case you will specify **MID Server** on the **Agent** configuration form.
+Since the MID Server will be forwarding TCP/IP messages 
+to a SNDML server on the same box,
+you should specify the **HTTP Server Host** as `localhost`.
+
+Use this command to start the HTTP server as a background process on Linux:
+
+<pre class="highlight">
+java -Dlog4j2.configurationFile=log4j2-server.xml \
+  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
+  -jar <var>jar-file</var> -p <var>connection-profile</var> --server >/dev/null 2>&1
+</pre>
+
+To stop the HTTP server send a SIGTERM signal to the PID which was written to the pidfile
+when SNDML started.
 
 ## Job Action Types
 
@@ -367,3 +417,9 @@ the **Sync** will delete any records which do not match the filter.
 ### Execute
 **Execute** executes an arbitrary SQL statement. 
 This is typically used to run a database stored procedure.
+
+## Feedback and Support
+
+If you have questions or issues with SNDML or the DataPump app,
+please use the (SNDML Github Issues Page)[https://github.com/gflewis/sndml3/issues]
+to open a new issue.
