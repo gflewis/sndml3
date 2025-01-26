@@ -8,9 +8,9 @@ export SNDML_JAR=sndml.jar
 export SNDML_LOG_DIR=log
 
 # extract these 3 variables from the connection profile
-export SNDML_AGENT=`awk -F= '/app\.agent/{print $2}' <$SNDML_PROFILE`
-export SNDML_PORT=`awk -F= '/server\.port/{print $2}' <$SNDML_PROFILE`
-export SNDML_PIDFILE=`awk -F= '/server\.pidfile/{print $2}' <$SNDML_PROFILE`
+export SNDML_AGENT=`awk -F= '/\.agent=/{print $2}' <$SNDML_PROFILE`
+export SNDML_PORT=`awk -F= '/\.port=/{print $2}' <$SNDML_PROFILE`
+export SNDML_PIDFILE=`awk -F= '/\.pidfile=/{print $2}' <$SNDML_PROFILE`
 
 OPT_LOG="-Dlog4j2.configurationFile=log4j2-server.xml -Dsndml.logFolder=$SNDML_LOG_DIR -Dsndml.logPrefix=$SNDML_AGENT"
 CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --server"
