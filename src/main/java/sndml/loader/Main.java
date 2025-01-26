@@ -79,9 +79,10 @@ public class Main {
 		if (cmd.hasOption(optServer)) { cmdCount += 1; requiresApp = true; }
 		if (cmdCount != 1) 
 			throw new CommandOptionsException(
-				String.format("Must specify exactly one of: --%s, --%s, --%s or --%s",
+				String.format("Must specify exactly one of: --%s, --%s, --%s, --%s, --%s or --%s",
 						optYaml.getLongOpt(),optTable.getLongOpt(),
-						optScan.getLongOpt(), optDaemon.getLongOpt()));
+						optScan.getLongOpt(), optDaemon.getLongOpt(),
+						optServer.getLongOpt(), optJobRun.getLongOpt()));
 		String profileName = cmd.getOptionValue(optProfile);
 		profile = new ConnectionProfile(new File(profileName));
 		resources = new Resources(profile, requiresApp);

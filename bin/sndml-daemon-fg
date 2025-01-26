@@ -5,7 +5,7 @@
 source sndml-setup $1
 
 # select log4j config file from the jar (src/main/resources)
-  export SNDML_LOG4J=log4j2-console.xml
+export SNDML_LOG4J=log4j2-console.xml
   
 # the next 2 variables are referenced in the selected log4j config file
 export SNDML_AGENT=`awk -F= '/^app.agent/{print $2}' <$SNDML_PROFILE`
@@ -13,7 +13,8 @@ export SNDML_LOG_DIR=$SNDML_CONFIG/log
 OPT_LOG="-Dlog4j2.configurationFile=$SNDML_LOG4J -Dsndml.logFolder=$SNDML_LOG_DIR -Dsndml.logPrefix=$SNDML_AGENT"
 
 # print exported variables
-# env | grep SNDML | sort
+env | grep SNDML | sort
+
 CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon"
 
 echo Running $CMD

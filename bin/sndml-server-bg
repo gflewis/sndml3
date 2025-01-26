@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# Run the DataPump Scanner Daemon as a background process
+# Run the DataPump Scanner HTTP Server as a background process
 #
 source sndml-setup $1
 
 # select log4j config file from the jar (src/main/resources)
-export SNDML_LOG4J=log4j2-daemon.xml
+export SNDML_LOG4J=log4j2-server.xml
 
 # the next 2 variables are referenced in the selected log4j config file
 export SNDML_AGENT=`awk -F= '/^app.agent/{print $2}' <$SNDML_PROFILE`
@@ -14,7 +14,7 @@ OPT_LOG="-Dlog4j2.configurationFile=$SNDML_LOG4J -Dsndml.logFolder=$SNDML_LOG_DI
 
 # print exported variables
 # env | grep SNDML | sort
-CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon"
+CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --server"
 
 echo Starting $CMD
 nohup $CMD &
