@@ -13,7 +13,7 @@ export SNDML_LOG_DIR=$SNDML_CONFIG/log
 OPT_LOG="-Dlog4j2.configurationFile=$SNDML_LOG4J -Dsndml.logFolder=$SNDML_LOG_DIR -Dsndml.logPrefix=$SNDML_AGENT"
 
 # print exported variables
-# env | grep SNDML | sort
+env | grep SNDML | sort
 CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon"
 
 echo Starting $CMD
