@@ -29,7 +29,6 @@ fi
 echo Starting $CMD
 nohup $CMD &
 
-SNDML_PIDFILE=$SNDML_CONFIG/daemon.pid
 # wait 20 seconds for pidfile
 count=0
 until [[ -f $SNDML_PIDFILE || count -ge 20 ]]; do
