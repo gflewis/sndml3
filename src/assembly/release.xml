@@ -21,7 +21,7 @@
       <directory>${project.basedir}/UpdateSets</directory>
       <outputDirectory></outputDirectory>
       <includes>
-        <include>*${version}*.xml</include>
+        <include>*${app.version}*.xml</include>
       </includes>
     </fileSet>
     <fileSet>
