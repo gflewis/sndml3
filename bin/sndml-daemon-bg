@@ -16,6 +16,14 @@ OPT_LOG="-Dlog4j2.configurationFile=$SNDML_LOG4J -Dsndml.logFolder=$SNDML_LOG_DI
 env | grep SNDML | sort
 CMD="java -ea $OPT_LOG -jar $SNDML_JAR --profile=$SNDML_PROFILE --daemon"
 
+# delete the pidfile and nohup.out
+if [ -f $SNDML_PIDFILE ]; then
+  rm $SNDML_PIDFILE
+fi
+if [ -f nohup.out ]; then
+  rm nohup.out
+fi
+
 echo Starting $CMD
 nohup $CMD &
 
