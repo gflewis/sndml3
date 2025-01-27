@@ -28,6 +28,7 @@ This page contains instructions for installing and configuring **DataPump** and 
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Job Action Types](#job-action-types)
+* [Optimizing Exports](#optimizing-exports)
 * [Feedback and Support](#feedback-and-support)
 
 ## Downloading
@@ -283,12 +284,14 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml \
 Note that a `-D` prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
 
+<!--
 Here is an example of a Linux `crontab` entry that runs the Java agent 4 times per hour
 (at 2, 17, 32 and 47 minutes past the top of the hour):
 
 ```
 02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
 ```
+-->
 
 ## Run SNDML as a Daemon
 
@@ -420,6 +423,41 @@ the **Sync** will delete any records which do not match the filter.
 ### Execute
 **Execute** executes an arbitrary SQL statement. 
 This is typically used to run a database stored procedure.
+
+## Optimizing Exports
+
+The DataPump Java agent uses the REST Table API to retrieve data from ServiceNow. 
+Records are retrieved in chunks referred to as "pages". 
+By default, the agent will retrieve all fields in the ServiceNow record, and use a page size of 200, 
+meaning that it will retrieve and process 200 records at a time. 
+(The default page size can changed in the connection profile.) The processing sequence is as follows:
+
+1. Fetch 200 records (_i.e._ one page) from ServiceNow
+2. Insert or Update the SQL table
+3. Commit the changes to the SQL database
+4. Update the record counters in the DataPump Job Run table 
+5. Repeat
+
+In general, most of the time is spent communicating with ServiceNow. 
+Interactions with the SQL database are relatively quick.
+
+The primary two techniques to improve the performance of exports are to reduce the number of columns 
+and to increase the page size. 
+In this example, we have have selected 5 columns from the Incident table and increased the page size to 2000.
+
+![Page size and Columns](images/2021-04-26-page-size.jpeg)
+
+The fields `sys_id`, `sys_created_on` and `sys_updated_on` are always exported by the Java agent, 
+regardless of whether or not they are included in the column list; 
+so in this example we are actually exporting 8 columns.
+
+By making these two changes, the export time for 100,000 Incident records was reduced 
+rom 12 minutes to 3 minutes in an AWS benchmark test with a PDI. Your results may vary.
+
+It is important to note that DataPump will NOT add or drop columns in a pre-existing table. 
+If you change the Columns setting on the Database Table form after the SQL table has been created, 
+then you must either use ALTER TABLE to modify the table structure, 
+or drop the table and allow DataPump to recreate it.
 
 ## Feedback and Support
 
