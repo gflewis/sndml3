@@ -338,7 +338,7 @@ SNDML cannot constrain the number of concurrent jobs.
 
 ## Run SNDML as an HTTP Server
 
-The `--server` option runs the Java program as a an HTTP server.
+The `--server` option runs the Java program as an HTTP server.
 When the state of a **Job Run** changes to **Ready**
 an HTTP message is sent to the SNDML server.
 The HTTP message only contains the `sys_id` of the **Agent** 
@@ -358,16 +358,16 @@ Configure the *Agent* as follows:
 * Set **HTTP Server Host** to the IP address of the Linux or Windows server
 * Set **HTTP Port** to **5124**
 
-In addition, you must open TCP/IP port 5124 on your Linux or Windows server to accept inbound connections.
+In addition, you must modify your firewall configuration to open TCP/IP port 5124 for inbound connections.
 
 (Note that you can choose a different TCP/IP port as long as the **Connection Profile**
 and the **Agent** are configured consistently.)
 
-As an alternative to opening the TCP/IP port, you can 
-install a MID Server on the same box as SNDML.
+As an alternative to opening the TCP/IP port for inbound connnections, 
+you can install a MID Server on the same box as SNDML.
 In this case you will specify **MID Server** on the **Agent** configuration form.
 Since the MID Server will be forwarding TCP/IP messages 
-to a SNDML server on the same box,
+to an SNDML server on the same box,
 you should specify the **HTTP Server Host** as `localhost`.
 
 Use this command to start the HTTP server as a background process on Linux:
@@ -378,7 +378,7 @@ java -Dlog4j2.configurationFile=log4j2-server.xml \
   -jar <var>jar-file</var> -p <var>connection-profile</var> --server >/dev/null 2>&1
 </pre>
 
-To stop the HTTP server send a SIGTERM signal to the PID which was written to the pidfile
+To shut down the HTTP server, send a SIGTERM signal to the PID which was written to the pidfile
 when SNDML started.
 
 ## Job Action Types
