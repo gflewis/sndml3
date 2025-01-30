@@ -462,5 +462,5 @@ or drop the table and allow DataPump to recreate it.
 ## Feedback and Support
 
 If you have questions or issues with SNDML or the DataPump app,
-please use the [SNDML Github Issues Page](https://github.com/gflewis/sndml3/issues)
+please use the [SNDM3 Github Issues Page](https://github.com/gflewis/sndml3/issues)
 to open a new issue.
