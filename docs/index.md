@@ -29,6 +29,7 @@ This page contains instructions for installing and configuring **DataPump** and 
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Job Action Types](#job-action-types)
 * [Optimizing Exports](#optimizing-exports)
+* [Partitioned Load](#partitioned-load)
 * [Feedback and Support](#feedback-and-support)
 
 ## Downloading
@@ -247,7 +248,7 @@ until all Jobs with a lower **Order** value complete.
 This screenshot shows a schedule with three jobs. 
 The table **sys_user_grmember** will be exported after the other two jobs complete.
 
-![Schedule with 3 jobs](images/2021-04-25-schedule-with-3-jobs.jpeg)
+<img src="images/2025-01-30-schedule-with-3-jobs.png" width="800" class="screenshot"/>
 
 All Jobs within a Schedule will have the same "start time", regardless of when they actually start running. 
 The Java agent will only export records that were inserted before the "start time". 
@@ -370,6 +371,10 @@ Since the MID Server will be forwarding TCP/IP messages
 to an SNDML server on the same box,
 you should specify the **HTTP Server Host** as `localhost`.
 
+
+<img src="images/2025-01-28-http-server-via-mid.png" width="600" class="screenshot"/>
+
+
 Use this command to start the HTTP server as a background process on Linux:
 
 <pre class="highlight">
@@ -443,21 +448,50 @@ Interactions with the SQL database are relatively quick.
 
 The primary two techniques to improve the performance of exports are to reduce the number of columns 
 and to increase the page size. 
-In this example, we have have selected 5 columns from the Incident table and increased the page size to 2000.
+In this Incident table example, we have have 
+increased the page size from 200 to 2000
+and selected 5 columns.
 
-![Page size and Columns](images/2021-04-26-page-size.jpeg)
+<img src="images/2025-01-30-table-advanced.png" width="800" class="screenshot"/>
 
 The fields `sys_id`, `sys_created_on` and `sys_updated_on` are always exported by the Java agent, 
 regardless of whether or not they are included in the column list; 
 so in this example we are actually exporting 8 columns.
 
-By making these two changes, the export time for 100,000 Incident records was reduced 
-rom 12 minutes to 3 minutes in an AWS benchmark test with a PDI. Your results may vary.
-
 It is important to note that DataPump will NOT add or drop columns in a pre-existing table. 
 If you change the Columns setting on the Database Table form after the SQL table has been created, 
 then you must either use ALTER TABLE to modify the table structure, 
 or drop the table and allow DataPump to recreate it.
+
+## Partitioned Load
+
+Task based tables may contain a large amount of history, and may take a many hours to initially export. 
+The application allows these tables to be exported in sections (i.e. partitions), 
+based on the record creation date (`sys_created_on`).
+
+**Partition** may be specified on the **Advanced** section of the **Job** form 
+as **Quarter**, **Month**, **Week** or **Day**. 
+When performing a partitioned export, 
+the Java agent starts by determining the minimum and maximum values of `sys_created_on`, 
+and then divides the work accordingly. 
+All partitions are written to the same target table.
+
+Partitions are exported in reverse chronological order. 
+In other words, the most recent partition is always exported first. 
+In some cases this may permit useful analysis of recent data while the export of older data continues.
+
+If a Partition is specified for a **Job**, then a **Job Run Parts** tab 
+will appear at the bottom of the **Job Run** form
+as shown in this screenshot.
+
+If **Partition** is specified for a **Job**, then **Threads** may also be specified. 
+If the number of threads is 2 or more, then the Java agent will export multiple partitions in parallel. 
+In some situations the total export time for large tables may be reduced by using multiple threads.
+However, it is recommended that **Threads** not be set to a value greater than 4.
+
+**Caution:** The use of multiple threads may adversely impact the performance of your ServiceNow instance.
+
+<img src="images/2025-01-28-job-run-parts.png" width="800" class="screenshot"/>
 
 ## Feedback and Support
 
