@@ -509,4 +509,4 @@ we would love to hear what version you are using,
 what features you are using,
 what database you are using,
 the number of tables you have configured,
-and the size of your largest table. :two_hearts:
+and the size of your largest table.
