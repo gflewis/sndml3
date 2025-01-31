@@ -4,6 +4,9 @@ SNDML uses the ServiceNow REST API to extract data from ServiceNow.
 It uses JDBC to load target tables. It creates tables in the target database based on ServiceNow meta-data. 
 It supports a variety of load and synchronization operations. 
 
+For an overview of the changes in **Relase 3.5** please refer to
+- https://github.com/gflewis/sndml3/wiki/Release-3.5
+  
 **ServiceNow DataPump** is a scoped ServiceNow app which is installed in the ServiceNow instance and is used to configure and manage SNDML jobs.
 For an introduction to the DataPump app, please refer to
 - [Getting Started with ServiceNow DataPump](https://gflewis.github.io/sndml3/)
