@@ -83,8 +83,6 @@ Do not grant **x_108443_sndml.admin** role to either of these users.
 
 Users with **x_108443_sndml.admin** role can configure and monitor DataPump jobs.
 
-<a id="connection-profile"></a><!-- Redundant anchor -->
-
 ## Create a Connection Profile
 
 The **Connection Profile** is a Java properties file that contains 
@@ -213,7 +211,7 @@ If none are found then the Java program terminates.
 ## Methods for Running Jobs
 Once a **Job Run** record is created with a state of "Ready", it must be be detected by the Java agent. 
 There are four methods for this.
-* [Synchronized Scanning](#synchronized-scanning) (`scan`)
+* [Synchronized Scanning](#synchronized-scanning) (`--scan`)
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon) (`--daemon`)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server) (`--jobrun`)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server) (`--server`)
@@ -241,7 +239,8 @@ Since the DataPump table `x_108443_sndml_action_schedule` is extended from the
 out-of-box table **Scheduled Script Execution**,
 Schedules can be configured to run at any frequency permitted by ServiceNow.
 
-If a **Job** is part of a **Schedule**, then the **Order** field on the **Job** form becomes important. 
+If a **Job** is part of a **Schedule**, 
+then the **Order** field on the **Job** form becomes important. 
 Jobs within a Schedule are processed in order, based on the **Order** field. 
 If multiple Jobs have the same **Order** value, then they may run concurrently, 
 subject to the number of available threads. 
@@ -250,16 +249,18 @@ Jobs with a higher **Order** value will remain in a **Scheduled** state
 until all Jobs with a lower **Order** value complete. 
 
 This screenshot shows a schedule with three jobs. 
-The table **sys_user_grmember** will be exported after the other two jobs complete.
+The table `sys_user_grmember` will be exported after the other two jobs complete.
 
 <img src="images/2025-01-30-schedule-with-3-jobs.png" width="800" class="screenshot"/>
 
-All Jobs within a Schedule will have the same "start time", regardless of when they actually start running. 
+All Jobs within a Schedule will have the same "start time", 
+regardless of when they actually start running. 
 The Java agent will only export records that were inserted before the "start time". 
 "Start time" is based on when the **Job Run** record was created, 
 not when the **Status** was changed to "Running". 
 All **Job Run** records in a **Schedule Run** are created at the same time, 
-therefore the application will not export records inserted after the start of another job in the same schedule.
+therefore the application will not export records inserted after 
+the start of another job in the same schedule.
 
 ## Synchronized Scanning
 
@@ -267,7 +268,7 @@ Synchronized Scanning involves using **cron** or **Windows Task Scheduler** to r
 The start time of the Linux or Windows job is synchronized with the start time of the ServiceNow schedule. 
 The Linux or Windows job should start a few minutes after the ServiceNow schedule.
 For example, if the ServiceNow schedule starts at 5:00 PM,
-then you might set your Linux or Windows `--scan` to start at 5:02 PM.
+then you might set your `--scan` to start at 5:02 PM.
 
 The SNDML JAR file contains an embedded Log4J2 Rolling File Appender configuration 
 which can be helpful if you are using **cron** or **Windows Task Scheduler**. 
@@ -431,7 +432,7 @@ the **Sync** will delete any records which do not match the filter.
 
 ### Execute
 **Execute** executes an arbitrary SQL statement. 
-This is typically used to run a database stored procedure.
+This is typically used to run a database stored procedure following a load.
 
 ## Optimizing Exports
 
