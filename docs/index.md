@@ -37,13 +37,14 @@ This page contains instructions for installing and configuring **DataPump** and 
 JAR files for **SNDML** and the installation Update Set for **DataPump** can be downloaded from
 * [https://github.com/gflewis/sndml3/releases](https://github.com/gflewis/sndml3/releases)
 
-When you unpack the ZIP file (**sndml-3.5.x.x.zip**) you should find these files:
-* **DataPump-v3.5.x.x-Install.xml** - _Update Set to install or upgrade the ServiceNow app_
-* **sndml-3.5.x.x-mssql.jar** - _JAR file for use with Microsoft SQL Server_
-* **sndml-3.5.x.x-mysql.jar** - _JAR file for use with MySQL_
-* **sndml-3.5.x.x-ora.jar** - _JAR file for use with Oracle_
-* **sndml-3.5.x.x-pg.jar** - _JAR file for use with PostgreSQL_
+When you unpack the ZIP file (**sndml-3.5.n.n.zip**) you should find these files:
+* **DataPump-v3.5.n-Install.xml** - _Update Set to install or upgrade the ServiceNow app_
+* **sndml-3.5.n.n-mssql.jar** - _JAR file for use with Microsoft SQL Server_
+* **sndml-3.5.n.n-mysql.jar** - _JAR file for use with MySQL_
+* **sndml-3.5.n.n-ora.jar** - _JAR file for use with Oracle_
+* **sndml-3.5.n.n-pg.jar** - _JAR file for use with PostgreSQL_
 
+(Note that for some releases the Update Set version may not exactly match the release number.)
 The **Update Set** should be installed in your ServiceNow instance.
 If you have installed an earlier version of **DataPump**
 (including v1.1 from the ServiceNow Share site)
@@ -56,9 +57,9 @@ should be copied to the Linux or Windows server that will be running the jobs.
 
 ## Create Users and Grant Roles
 
-After installing the Update Set in your instance, 
-the first step is to create two new ServiceNow service accounts 
-which will be used by the Java agent.
+After installing the Update Set in your ServiceNow instance, 
+the first step is to create two new users 
+for use by by the Java agent.
 
 ### datapump.agent
 This user will be used to retrieve configuration information from the DataPump scoped app 
@@ -78,8 +79,11 @@ It requires "read" access to any tables which will be exported.
 * Grant **itil** role and/or any roles necessary to read the requisite tables.
 * Assign the user a secure password which will be entered in the **Connection Profile** below
 
-Do not grant  **x_108443_sndml.admin** role to either of these service accounts.
+Do not grant **x_108443_sndml.admin** role to either of these users.
+
 Users with **x_108443_sndml.admin** role can configure and monitor DataPump jobs.
+
+<a id="connection-profile"></a><!-- Redundant anchor -->
 
 ## Create a Connection Profile
 
@@ -460,7 +464,7 @@ so in this example we are actually exporting 8 columns.
 
 It is important to note that DataPump will NOT add or drop columns in a pre-existing table. 
 If you change the Columns setting on the Database Table form after the SQL table has been created, 
-then you must either use ALTER TABLE to modify the table structure, 
+then you must either use `ALTER TABLE` to modify the table structure, 
 or drop the table and allow DataPump to recreate it.
 
 ## Partitioned Load
@@ -498,3 +502,11 @@ However, it is recommended that **Threads** not be set to a value greater than 4
 If you have questions or issues with SNDML or the DataPump app,
 please use the [SNDM3 Github Issues Page](https://github.com/gflewis/sndml3/issues)
 to open a new issue.
+
+You can also open an Issue to provide positive feedback on this product.
+Even if you are not having any issues,
+we would love to hear what version you are using, 
+what features you are using,
+what database you are using,
+the number of tables you have configured,
+and the size of your largest table. :two_hearts:
