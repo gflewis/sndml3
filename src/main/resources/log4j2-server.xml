@@ -8,7 +8,7 @@
 <Configuration shutdownHook="disable">
   <Appenders>
     <RollingFile name="RollingFile"
-        fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
+        fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%{yyyyMMdd}.log"
         filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}.log.gz">
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
