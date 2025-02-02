@@ -30,7 +30,7 @@ import sndml.util.Metrics;
  */
 public class WorkerPool extends ThreadPoolExecutor {
 
-	private static final int CORE_POOL_SIZE = 0;
+//	private static final int CORE_POOL_SIZE = 0;
 	private static final long KEEP_ALIVE_SECONDS = 60;
 	
 	private static final Logger logger = Log.getLogger(WorkerPool.class);
@@ -45,7 +45,7 @@ public class WorkerPool extends ThreadPoolExecutor {
 	
 	public WorkerPool(int threadCount) {
 		super(
-			CORE_POOL_SIZE, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
+			threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
 			new LinkedBlockingQueue<Runnable>());
 		this.threadCount = threadCount;
 		logger.info(
