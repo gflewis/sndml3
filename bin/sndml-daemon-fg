@@ -2,7 +2,7 @@
 #
 # Run the DataPump Scanner Daemon
 #
-source sndml-setup $
+source sndml-setup $1
 cd $SNDML_CONFIG
 
 # select log4j config file from the jar (src/main/resources)
