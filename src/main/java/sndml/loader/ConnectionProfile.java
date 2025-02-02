@@ -294,7 +294,11 @@ public class ConnectionProfile {
 	 * Get the size of the worker pool.
 	 */
 	public int getThreadCount() {
-		return Integer.parseInt(getPropertyNotNull("server.threads"));
+		return Integer.parseInt(getProperty("server.threads"));
+	}
+	
+	public int getJobBacklog() {
+		return Integer.parseInt(getProperty("server.backlog"));
 	}
 	
 	public String getPidFileName() {

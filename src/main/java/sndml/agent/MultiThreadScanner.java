@@ -33,17 +33,17 @@ public class MultiThreadScanner extends AgentScanner {
 		logger.debug(Log.INIT, "scanUntilDone");
 		scan();
 		int loopCounter = 0;
-		while (workerPool.getActiveCount() > 0) {
+		while (workerPool.activeTaskCount() > 0) {
 			// print message every 15 seconds
 			if (++loopCounter % 15 == 0)
 				logger.info(Log.PROCESS, 
-					String.format("scanUntilDone: %d threads running", workerPool.getActiveCount()));
+					String.format("scanUntilDone: %d threads running", workerPool.activeTaskCount()));
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				logger.error(Log.PROCESS, e.getMessage());
 				throw e;
-			}												
+			}	
 		}	
 	}
 

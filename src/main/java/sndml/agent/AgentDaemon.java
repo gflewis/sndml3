@@ -197,6 +197,12 @@ public class AgentDaemon implements Daemon, Runnable {
 	
 	@Override
 	public void stop() {
+		executor.shutdown();
+	}
+	
+	/*
+	@Override
+	public void stop() {
 		Log.setJobContext(agentName);		
 		logger.debug(Log.FINISH, "Begin stop");
 		// shutdownNow will send an interrupt to all threads
@@ -213,6 +219,7 @@ public class AgentDaemon implements Daemon, Runnable {
 		}
 		logger.info(Log.FINISH, "End stop");
 	}
+	*/
 	
 	@Override
 	public void destroy() {		

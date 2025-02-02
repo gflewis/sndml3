@@ -203,8 +203,13 @@
     </description>
   </property>
   <property name="server.backlog">
-    <default>0</default>
-    <description>HTTP Server socket backlog. Default is 0.</description>
+    <default>60</default>
+    <alternate name="daemon.backlog" />
+    <description>
+      Maximum number of jobs that can be enqueued waiting for a thread.
+      Applicable for `--daemon` or `--server`.
+      Default is 60.
+    </description>
   </property>
   <property name="server.threads">
     <default>4</default>

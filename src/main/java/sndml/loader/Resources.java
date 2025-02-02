@@ -146,8 +146,7 @@ public class Resources {
 	
 	public WorkerPool getWorkerPool() throws ResourceException {
 		if (this.workerPool == null) {
-			int threadCount = Integer.parseInt(profile.getProperty("server.threads"));
-			this.workerPool = new WorkerPool(threadCount);			
+			this.workerPool = new WorkerPool(profile);			
 		}
 		return this.workerPool;
 	}

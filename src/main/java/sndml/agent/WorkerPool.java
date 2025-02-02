@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -28,7 +29,7 @@ import sndml.util.Metrics;
 /**
  * Wrapper class for a ThreadPoolExecutor. 
  */
-public class WorkerPool extends ThreadPoolExecutor {
+public class WorkerPool {
 
 //	private static final int CORE_POOL_SIZE = 0;
 	private static final long KEEP_ALIVE_SECONDS = 60;
@@ -36,31 +37,47 @@ public class WorkerPool extends ThreadPoolExecutor {
 	private static final Logger logger = Log.getLogger(WorkerPool.class);
 
 	private final int threadCount;
+	private final int backlog;
+	private final int shutdownSeconds;
+	
+	final BlockingQueue<Runnable> queue;
+	final ThreadPoolExecutor executor;
 			
 	final List<WorkerEntry> jobList = Collections.synchronizedList(new LinkedList<WorkerEntry>());
 	
 	public WorkerPool(ConnectionProfile profile) {
-		this(profile.getThreadCount());
+		this.threadCount = profile.getThreadCount();
+		this.backlog = profile.getJobBacklog();
+		this.shutdownSeconds = 
+			Integer.parseInt(profile.getProperty("server.shutdown_seconds"));		
+		
+		this.queue = new LinkedBlockingQueue<Runnable>(backlog);
+		this.executor = new ThreadPoolExecutor(
+				threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, queue);
 	}
 	
-	public WorkerPool(int threadCount) {
-		super(
-			threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-			new LinkedBlockingQueue<Runnable>());
-		this.threadCount = threadCount;
-		logger.info(
-			Log.INIT, String.format("instantiate threads=%d", threadCount));
-	}
+//	public WorkerPool(int threadCount) {
+//		super(
+//			threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
+//			new LinkedBlockingQueue<Runnable>());
+//		this.threadCount = threadCount;
+//		logger.info(
+//			Log.INIT, String.format("instantiate threads=%d", threadCount));
+//	}
 		
 	int getThreadCount() {
 		return threadCount;
+	}
+	
+	private String getAgentName() {
+		return AgentMain.getAgentName();
 	}
 	
 	synchronized public Future<Metrics> submit(AppJobRunner runner) {
 		logger.info(Log.INIT, "submit " + runner.getNumber());
 		this.cleanup();
 		if (jobList.size() > 0 && logger.isDebugEnabled()) dumpJobList();
-		Future<Metrics> future = super.submit((Callable<Metrics>) runner);
+		Future<Metrics> future = executor.submit((Callable<Metrics>) runner);
 		WorkerEntry entry = new WorkerEntry(runner, future);
 		jobList.add(entry);
 		return future;
@@ -108,6 +125,24 @@ public class WorkerPool extends ThreadPoolExecutor {
 			if (isActive(entry)) count += 1; 			
 		}
 		return count;				
+	}
+
+	public void shutdown() {
+		Log.setJobContext(getAgentName());
+		logger.debug(Log.FINISH, "Begin stop");
+		// shutdownNow will send an interrupt to all threads
+		executor.shutdown();
+//		isRunning = false;
+		try { 
+			executor.awaitTermination(shutdownSeconds, TimeUnit.SECONDS);
+		}
+		catch (InterruptedException e) { 
+			logger.warn("Shutdown interrupted");
+		};
+		if (!executor.isTerminated()) {
+			logger.warn("Some threads failed to terminate");
+		}
+		logger.info(Log.FINISH, "End stop");
 	}
 	
 	/**

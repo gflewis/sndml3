@@ -22,7 +22,7 @@ public class AgentHttpServer {
 	static HttpServer server;
 	final Resources resources;
 	final int port;
-//	final int backlog;
+	// final int backlog;
 	final String agentName;
 	final RecordKey agentKey;
 	final AgentRequestHandler handler;
@@ -50,7 +50,7 @@ public class AgentHttpServer {
 			throw new MissingPropertyException("server.port not specified");
 		this.port = Integer.parseInt(portValue);
 		assert this.port != 0;
-//		this.backlog = Integer.parseInt(profile.getProperty("server.backlog"));
+		// this.backlog = Integer.parseInt(profile.getProperty("server.backlog"));
 		this.heartbeatInterval = Integer.parseInt(profile.getProperty("server.heartbeat"));
 		
 		logger.info(Log.INIT, String.format(
