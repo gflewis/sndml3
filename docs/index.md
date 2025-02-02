@@ -27,6 +27,7 @@ This page contains instructions for installing and configuring **DataPump** and 
 * [Synchronized Scanning](#synchronized-scanning)
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
+* [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server)
 * [Job Action Types](#job-action-types)
 * [Optimizing Exports](#optimizing-exports)
 * [Partitioned Load](#partitioned-load)
@@ -282,22 +283,14 @@ Use this command to run the Java agent redirecting all output to the log directo
 
 <pre class="highlight">
 java -Dlog4j2.configurationFile=log4j2-daemon.xml \
-  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
-  -jar <var>jar-file</var> -p <var>connection-profile</var> --scan
+  ‑Dsndml.logFolder=<var>logdirectory</var> ‑Dsndml.logPrefix=<var>agentname</var> \
+  -jar <var>jarfilename</var> -p <var>profilename</var> --scan
 </pre>
 
 
 Note that a `-D` prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
 
-<!--
-Here is an example of a Linux `crontab` entry that runs the Java agent 4 times per hour
-(at 2, 17, 32 and 47 minutes past the top of the hour):
-
-```
-02,17,32,47 * * * * java -Dlog4j2.configurationFile=log4j2-daemon.xml -Dsndml.logFolder=<log_directory> ‑Dsndml.logPrefix=datapump-cron -jar <jar_file> -p <connection_profile> --scan >/dev/null 2>&1
-```
--->
 
 ## Run SNDML as a Daemon
 
@@ -313,8 +306,8 @@ Use this command to start the daemon as a background process on Linux:
 
 <pre class="highlight">
 java -Dlog4j2.configurationFile=log4j2-daemon.xml \
-  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
-  -jar <var>jar-file</var> -p <var>connection-profile</var> --daemon >/dev/null 2>&1
+  ‑Dsndml.logFolder=<var>logdirectory</var> ‑Dsndml.logPrefix=<var>agentname</var> \
+  -jar <var>jarfilename</var> -p <var>profilename</var> --daemon >/dev/null 2>&1
 </pre>
 
 If the **Connection Profile** contains a property named `daemon.pidfile`
@@ -352,7 +345,6 @@ and the `sys_id` of the **Job Run** record.
 SNDML uses its ServiceNow HTTPS connection (REST API) to retrieve the **Job Run** information,
 and it starts execution of the job.
 
-
 To configure this option add the following to [Connection Profile](#create-a-connection-profile):
 
 * `server.port=5124`
@@ -383,9 +375,9 @@ you should specify the **HTTP Server Host** as `localhost`.
 Use this command to start the HTTP server as a background process on Linux:
 
 <pre class="highlight">
-java -Dlog4j2.configurationFile=log4j2-server.xml \
-  ‑Dsndml.logFolder=<var>log-directory</var> ‑Dsndml.logPrefix=<var>agent-name</var> \
-  -jar <var>jar-file</var> -p <var>connection-profile</var> --server >/dev/null 2>&1
+java -Dlog4j2.configurationFile=log4j2-daemon.xml \
+  ‑Dsndml.logFolder=<var>logdirectory</var> ‑Dsndml.logPrefix=<var>agentname</var> \
+  -jar <var>jarfilename</var> -p <var>profilename</var> --server >/dev/null 2>&1
 </pre>
 
 To shut down the HTTP server, send a SIGTERM signal to the PID which was written to the pidfile
@@ -471,7 +463,7 @@ or drop the table and allow DataPump to recreate it.
 ## Partitioned Load
 
 Task based tables may contain a large amount of history, and may take a many hours to initially export. 
-The application allows these tables to be exported in sections (i.e. partitions), 
+The application allows these tables to be exported in sections (<i>i.e.</i> partitions), 
 based on the record creation date (`sys_created_on`).
 
 **Partition** may be specified on the **Advanced** section of the **Job** form 
