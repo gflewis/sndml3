@@ -138,6 +138,7 @@ public class Main {
 	}
 	
 	public static Thread getThread() {
+		assert mainThread != null;
 		return mainThread;
 	}
 	

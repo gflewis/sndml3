@@ -111,9 +111,12 @@ public class WorkerPool {
 		while (iter.hasNext()) {
 			WorkerEntry entry = iter.next();
 			Future<Metrics> future = entry.future;
+			boolean isQueued = queue.contains((Runnable) entry.runner);
+			boolean isCancelled = future.isCancelled();
+			boolean isDone = future.isDone();
 			logger.info(Log.PROCESS, String.format(
-				"%d %s cancelled=%b done=%b", 
-				++count, entry.number, future.isCancelled(), future.isDone()));
+				"%d %s queued=%b cancelled=%b done=%b", 
+				++count, entry.number, isQueued, isCancelled, isDone));
 		}		
 	}
 	

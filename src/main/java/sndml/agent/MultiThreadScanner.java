@@ -60,7 +60,7 @@ public class MultiThreadScanner extends AgentScanner {
 		if (joblist.size() > 0) {
 			// Schedule all jobs for future execution
 			// Do not wait for them to complete
-			// Each job will generate create its own Session and Database connection
+			// Each job will open its own Session and Database connection
 			for (AppJobRunner job : joblist) {
 				workerPool.submit(job);	
 			}				

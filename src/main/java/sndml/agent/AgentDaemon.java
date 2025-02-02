@@ -3,7 +3,6 @@ package sndml.agent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Timer;
-import java.util.concurrent.*;
 
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
@@ -22,7 +21,7 @@ import sndml.util.ResourceException;
  */
 public class AgentDaemon implements Daemon, Runnable {
 		
-	static private final Thread daemonThread = Thread.currentThread();
+	static private final Thread daemonThread = AgentMain.getThread(); /* Thread.currentThread(); */
 	static private AgentDaemon daemon;
 
 	private final Resources resources;
@@ -31,9 +30,9 @@ public class AgentDaemon implements Daemon, Runnable {
 	private final AgentScanner scanner;
 	private final int threadCount;	
 	private final int intervalSeconds;
-	private final int shutdownSeconds;
+//	private final int shutdownSeconds;
 	private final String pidFileName;
-	private final WorkerPool executor; // null if threadCount < 2
+	private final WorkerPool workerPool; // null if threadCount < 2
 	
 	private static volatile boolean isRunning = false;
 	DaemonContext context = null;
@@ -52,17 +51,17 @@ public class AgentDaemon implements Daemon, Runnable {
 		this.agentName = profile.getAgentName();
 		this.threadCount = profile.getThreadCount();
 		this.intervalSeconds = Integer.parseInt(profile.getProperty("daemon.interval"));
-		this.shutdownSeconds = Integer.parseInt(profile.getProperty("server.shutdown_seconds"));
+//		this.shutdownSeconds = Integer.parseInt(profile.getProperty("server.shutdown_seconds"));
 		
 		this.pidFileName = profile.getPidFileName();
 		
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
-			this.executor = resources.getWorkerPool();
-			this.scanner = new MultiThreadScanner(resources, executor);
+			this.workerPool = resources.getWorkerPool();
+			this.scanner = new MultiThreadScanner(resources, workerPool);
 		}
 		else {
-			this.executor = null;
+			this.workerPool = null;
 			this.scanner = new SingleThreadScanner(resources);
 		}
 		assert agentName != null;
@@ -182,7 +181,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	public void start() {
 		if (isRunning) 
 			throw new AssertionError("start already called");
-		if (executor == null)
+		if (workerPool == null)
 			throw new AssertionError("WorkerPool not created");
 		isRunning = true;
 		Log.setJobContext(agentName);
@@ -197,7 +196,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	
 	@Override
 	public void stop() {
-		executor.shutdown();
+		workerPool.shutdown();
 	}
 	
 	/*
