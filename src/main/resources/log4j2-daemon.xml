@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-  Rolling File Appender to create a new log file each day (based on the date pattern).
+  Rolling File Appender to create a new log file each day (based on the file pattern).
   The following system properties must be set:
     sndml.logFolder
     sndml.logPrefix (normally this is the Agent name)
@@ -8,14 +8,15 @@
 <Configuration shutdownHook="disable">
   <Appenders>
     <RollingFile name="RollingFile"
-        fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-${date:yyyyMMdd}.log"
-        filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}-%i.log.gz">
+        fileName="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-current.log"
+        filePattern="${sys:sndml.logFolder}/${sys:sndml.logPrefix}-%d{yyyyMMdd}.log">
       <PatternLayout>
         <Pattern>%d{MM-dd HH:mm:ss} %level %logger{1} [%thread] %marker %X{job}: %msg%n</Pattern>  
       </PatternLayout>
       <Policies>
         <TimeBasedTriggeringPolicy modulate="true"/>
       </Policies> 
+      <DefaultRolloverStrategy max="10"/> 
     </RollingFile>
   </Appenders>
   <Loggers>
