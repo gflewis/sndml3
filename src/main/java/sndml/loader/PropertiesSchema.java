@@ -47,8 +47,8 @@ public class PropertiesSchema {
 			Option.builder("v").longOpt("validate").required(false).hasArg(true).
 			desc("Validate property file").build();
 		Option optHelp =
-			Option.builder("h").longOpt("help").required(false).hasArg(false).
-			desc("Print list of available properties").build();		
+			Option.builder("m").longOpt("markdown").required(false).hasArg(false).
+			desc("Print markdown table of available properties").build();		
 		Options options = new Options();
 		options.addOption(optValidate);
 		options.addOption(optHelp);

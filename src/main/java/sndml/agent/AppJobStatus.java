@@ -7,6 +7,7 @@ public enum AppJobStatus {
 	DRAFT,
 	SCHEDULED,
 	READY,
+	QUEUED,
 	PREPARE,
 	RUNNING,
 	COMPLETE,
