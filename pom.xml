@@ -6,13 +6,13 @@
 
   <groupId>sndml</groupId>
   <artifactId>sndml</artifactId>
-  <version>3.5.0.12</version>
+  <version>3.5.0.13</version>
   <packaging>jar</packaging>
   <name>sndml</name>
   <url>http://maven.apache.org</url>
 
   <properties>
-    <app.version>3.5.0.10</app.version>
+    <app.version>3.5.1</app.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <main.class>sndml.loader.Main</main.class>
     <maven.compiler.source>11</maven.compiler.source>
