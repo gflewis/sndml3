@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 
-import sndml.loader.ConnectionProfile;
 import sndml.loader.DatePart;
 import sndml.servicenow.*;
 import sndml.util.Log;
@@ -18,26 +17,22 @@ import sndml.util.ResourceException;
 
 public class AppProgressLogger extends ProgressLogger {
 	
-	final ConnectionProfile profile;
 	final AppSession appSession;
 	final String number;
 	final RecordKey runKey;
 	final Logger logger = Log.getLogger(this.getClass());	
 
 	AppProgressLogger(
-			ConnectionProfile profile, 
 			AppSession appSession,
 			Metrics metrics,
 			String number, 
 			RecordKey runKey) {
-		this(profile, appSession, metrics, number, runKey, null);
+		this(appSession, metrics, number, runKey, null);
 		logger.debug(Log.INIT, String.format(
 			"URI=%s sys_id=%s", appSession.uriPutJobRunStatus(runKey).toString(), runKey));
 	}
 
-	// TODO profile should not be required
 	AppProgressLogger(
-			ConnectionProfile profile, 
 			AppSession appSession,
 			Metrics metrics,
 			String number, 
@@ -45,7 +40,6 @@ public class AppProgressLogger extends ProgressLogger {
 			DatePart part) {
 		super(metrics, part);
 		assert runKey != null;
-		this.profile = profile;
 		this.appSession = appSession;
 		this.number = number;
 		this.runKey = runKey;
@@ -55,7 +49,7 @@ public class AppProgressLogger extends ProgressLogger {
 	public ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
 		// logger.info(Log.INIT, "newPartLogger");
 		return new AppProgressLogger(
-			this.profile, this.appSession, newMetrics, this.number, this.runKey, newPart);
+			this.appSession, newMetrics, this.number, this.runKey, newPart);
 	}
 	
 	@Override

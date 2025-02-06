@@ -2,7 +2,6 @@ package sndml.loader;
 
 import sndml.agent.AppProgressLogger;
 import sndml.agent.JobCancelledException;
-import sndml.servicenow.*;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
 

@@ -68,7 +68,7 @@ public class AppJobRunner extends JobRunner {
 		else {
 			textLogger =  new Log4jProgressLogger(this.getClass(), action, jobMetrics);
 		}
-		appLogger =	new AppProgressLogger(profile, appSession, jobMetrics, number, runKey);
+		appLogger =	new AppProgressLogger(appSession, jobMetrics, number, runKey);
 		assert appLogger.getMetrics() == jobMetrics;
 		ProgressLogger compositeLogger = new CompositeProgressLogger(textLogger, appLogger);
 		return compositeLogger;
