@@ -404,9 +404,9 @@
         <configuration>
           <groupId>sndml</groupId>
           <artifactId>sndml</artifactId>
-          <version>${version}</version>
+          <version>${project.version}</version>
           <packaging>jar</packaging>
-          <file>target/sndml-${version}.jar</file>
+          <file>target/sndml-${project.version}.jar</file>
           <generatePom>true</generatePom>
         </configuration>
         <executions>
