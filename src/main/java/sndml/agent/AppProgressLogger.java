@@ -1,9 +1,9 @@
 package sndml.agent;
 
-import java.io.IOException;
-import java.net.URI;
+//import java.io.IOException;
+//import java.net.URI;
+//import com.fasterxml.jackson.databind.JsonNode;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
@@ -18,6 +18,7 @@ import sndml.util.ResourceException;
 public class AppProgressLogger extends ProgressLogger {
 	
 	final AppSession appSession;
+	final AppStatusLogger appStatusLogger;
 	final String number;
 	final RecordKey runKey;
 	final Logger logger = Log.getLogger(this.getClass());	
@@ -41,6 +42,7 @@ public class AppProgressLogger extends ProgressLogger {
 		super(metrics, part);
 		assert runKey != null;
 		this.appSession = appSession;
+		this.appStatusLogger = new AppStatusLogger(appSession);
 		this.number = number;
 		this.runKey = runKey;
 	}
@@ -143,7 +145,12 @@ public class AppProgressLogger extends ProgressLogger {
 		}		
 	}
 	
+	void putRunStatus(ObjectNode body) throws JobCancelledException {
+		appStatusLogger.putRunStatus(runKey, body);		
+	}
+		
 	// TODO: Use the AppStatusLogger version of this method
+	/*
 	void putRunStatus(ObjectNode body) throws JobCancelledException {
 		logger.debug(Log.REQUEST, String.format(
 			"putRunStatus request=%s", body.toString()));
@@ -169,6 +176,6 @@ public class AppProgressLogger extends ProgressLogger {
 			logger.debug(Log.RESPONSE, String.format(
 				"putRunStatus %s %s", runKey, response.toString()));		
 	}
-
+	*/
 	
 }

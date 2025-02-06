@@ -88,7 +88,7 @@ public class AppStatusLogger {
 	/**
 	 * Update status and/or metrics in the JobRun
 	 */
-	ObjectNode putRunStatus(RecordKey runKey, ObjectNode body) throws IOException, JobCancelledException {
+	ObjectNode putRunStatus(RecordKey runKey, ObjectNode body) throws JobCancelledException {
 		logger.info(Log.REQUEST, String.format(
 			"putRunStatus request=%s", body.toString()));
 		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
