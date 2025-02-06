@@ -3,10 +3,10 @@ package sndml.util;
 import java.io.PrintWriter;
 import java.util.Date;
 
-public final class Metrics {
+public final class Metrics implements Cloneable {
 
 	private final String name; // name as it appears in properties file; null if global
-	private final Metrics parent;
+	private Metrics parent;
 	private Integer expected = null;
 	private int input = 0;
 	private int inserted = 0;
@@ -177,6 +177,13 @@ public final class Metrics {
 		skipped += stats.skipped;
 	}
 		
+	@Override
+	protected Metrics clone() throws CloneNotSupportedException {
+		Metrics copy = (Metrics) super.clone();
+		copy.parent = null;
+		return copy;
+	}
+	
 	public void write(PrintWriter writer) {
 		String prefix = (name == null ? "" : name + ".");
 		writer.println(prefix + "start="     + getStarted());
