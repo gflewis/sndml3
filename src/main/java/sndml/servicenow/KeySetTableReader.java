@@ -7,6 +7,7 @@ import sndml.agent.JobCancelledException;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.Parameters;
+import sndml.util.ProgressLogger;
 
 /**
  * A {@link TableReader} which attempts to read records using a {@link RecordKeySet}.

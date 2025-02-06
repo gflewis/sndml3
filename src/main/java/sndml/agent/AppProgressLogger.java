@@ -13,6 +13,7 @@ import sndml.loader.DatePart;
 import sndml.servicenow.*;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 import sndml.util.ResourceException;
 
 public class AppProgressLogger extends ProgressLogger {

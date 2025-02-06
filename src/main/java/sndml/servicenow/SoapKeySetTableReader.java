@@ -8,6 +8,7 @@ import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.Parameters;
+import sndml.util.ProgressLogger;
 
 /**
  * A {@link TableReader} which attempts to read a set of records

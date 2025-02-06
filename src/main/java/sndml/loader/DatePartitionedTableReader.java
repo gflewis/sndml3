@@ -18,6 +18,7 @@ import sndml.servicenow.*;
 import sndml.util.DateTimeRange;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 
 public final class DatePartitionedTableReader extends TableReader {
 

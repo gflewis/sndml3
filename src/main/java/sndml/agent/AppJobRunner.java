@@ -7,6 +7,7 @@ import sndml.loader.*;
 import sndml.servicenow.*;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 import sndml.util.ResourceException;
 
 public class AppJobRunner extends JobRunner {

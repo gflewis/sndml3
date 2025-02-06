@@ -11,6 +11,7 @@ import sndml.agent.JobCancelledException;
 import sndml.util.DateTimeRange;
 import sndml.util.FieldNames;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 
 public abstract class TableReader implements Callable<Metrics> {
  

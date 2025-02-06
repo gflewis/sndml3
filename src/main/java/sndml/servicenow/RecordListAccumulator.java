@@ -1,6 +1,7 @@
 package sndml.servicenow;
 
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 
 /**
  * Simple class to collect a bunch of records in a list.

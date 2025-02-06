@@ -12,6 +12,7 @@ import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 import sndml.util.ResourceException;
 
 public class JobRunner implements Callable<Metrics> {

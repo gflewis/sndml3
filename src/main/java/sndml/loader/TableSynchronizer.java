@@ -9,6 +9,7 @@ import sndml.util.DateTime;
 import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 
 /**
  * A class which knows how to compare the keys and timestamps from a ServiceNow table

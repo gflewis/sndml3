@@ -13,6 +13,7 @@ import sndml.loader.Action;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.Log4jProgressLogger;
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 import sndml.util.PropertySet;
 
 /**

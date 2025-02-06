@@ -7,6 +7,7 @@ import sndml.agent.JobCancelledException;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.Parameters;
+import sndml.util.ProgressLogger;
 
 /**
  * <p>This class is designed to reliably read a large number of records from a ServiceNow table.

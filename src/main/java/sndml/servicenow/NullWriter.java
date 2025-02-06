@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import sndml.util.Metrics;
+import sndml.util.ProgressLogger;
 
 /**
  * {@link RecordWriter} which discards all input.
