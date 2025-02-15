@@ -100,6 +100,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		logger.debug(Log.INIT, String.format("expected=%d", expected));	
 		if (expected == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; no readers created");
+			super.endPrepare(expected);
 			return;
 		}
 		range = stats.getCreated();
@@ -134,6 +135,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		progress.logStart();
 		if (getExpected() == 0) {
 			logger.debug(Log.PROCESS, "expecting 0 rows; bypassing call");
+			progress.logComplete();
 			return metrics;
 		}
 		if (threads > 1) {			

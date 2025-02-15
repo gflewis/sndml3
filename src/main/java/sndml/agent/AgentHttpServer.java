@@ -19,6 +19,7 @@ import sndml.util.MissingPropertyException;
  */
 public class AgentHttpServer {
 
+	static AgentHttpServer instance;
 	static HttpServer server;
 	final Resources resources;
 	final int port;
@@ -35,6 +36,9 @@ public class AgentHttpServer {
 	private final Logger logger = Log.getLogger(this.getClass());
 		
 	public AgentHttpServer(Resources resources) throws IOException {
+		// This is a singleton class, so save me as a static variable
+		if (instance != null) throw new AssertionError("Server already instantiated");
+        instance = this;	
 		this.resources = resources;
 		ConnectionProfile profile = resources.getProfile();
 		this.agentName = profile.getAgentName();
