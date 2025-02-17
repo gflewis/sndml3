@@ -102,17 +102,20 @@ public final class DatePartitionedTableReader extends TableReader {
 		Integer expected = stats.getCount();
 		logger.debug(Log.INIT, String.format("expected=%d", expected));	
 		if (expected == 0) {
-			logger.debug(Log.PROCESS, "expecting 0 rows; no readers created");
-			super.endPrepare(expected);
+			range = null;
 			return;
 		}
-		range = stats.getCreated();
-		assert range.getStart() != null;
-		assert range.getEnd() != null;
+		else {
+			range = stats.getCreated();
+			assert range.getStart() != null : "range.start is null";
+			assert range.getEnd() != null : "range.end is null";
+		}
 		this.partition = new DatePartition(range, interval);
-		logger.debug(Log.INIT, String.format(
-				"range=%s partition=%s expected=%d", 
-				range.toString(), partition.toString(), expected));
+		if (range == null) 
+			logger.info(Log.INIT, "expected=0; empty partition created");
+		else 
+			logger.debug(Log.INIT, String.format(
+				"range=%s partition=%s expected=%d", range, partition, expected));
 		super.endPrepare(expected);
 	}
 	
