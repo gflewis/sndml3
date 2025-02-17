@@ -6,6 +6,7 @@ import sndml.loader.TestManager;
 import sndml.loader.TestingProfile;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.NullProgressLogger;
 
 import static org.junit.Assert.*;
 

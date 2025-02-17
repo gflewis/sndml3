@@ -10,6 +10,7 @@ import sndml.loader.TestManager;
 import sndml.util.FieldNames;
 import sndml.util.Log;
 import sndml.util.Metrics;
+import sndml.util.NullProgressLogger;
 
 public class SetFieldsTest {
 

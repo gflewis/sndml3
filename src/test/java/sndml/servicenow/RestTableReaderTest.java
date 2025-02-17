@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.TestManager;
 import sndml.util.Metrics;
+import sndml.util.NullProgressLogger;
 
 public class RestTableReaderTest {
 

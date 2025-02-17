@@ -15,7 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
+import sndml.util.DatePart;
+import sndml.util.DatePartition;
 import sndml.util.DateTimeRange;
+import sndml.util.IntervalSize;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
@@ -25,7 +28,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	final JobConfig config;
 	final DatabaseWrapper db;
 	final int threads;
-	final Interval interval;
+	final IntervalSize interval;
 	
 	private DateTimeRange range;
 	private DatePartition partition;
@@ -62,7 +65,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	}
 
 	private int numPartsTotal() {
-		assert futures != null;
+		if (futures == null) return 0;
 		return futures.size();
 	}
 		

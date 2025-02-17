@@ -1,7 +1,6 @@
 package sndml.util;
 
 import sndml.agent.JobCancelledException;
-import sndml.loader.DatePart;
 
 public abstract class ProgressLogger {
 

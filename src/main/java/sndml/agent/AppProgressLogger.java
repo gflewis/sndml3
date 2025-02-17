@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 
-import sndml.loader.DatePart;
 import sndml.servicenow.*;
+import sndml.util.DatePart;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;

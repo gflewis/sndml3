@@ -1,18 +1,15 @@
-package sndml.loader;
-
-import sndml.util.DateTime;
-import sndml.util.DateTimeRange;
+package sndml.util;
 
 /**
- * One piece of a {@link DatePartition}. 
- * Both start and end must be on an {@link Interval} boundary.
+ * One entry of a {@link DatePartition}. 
+ * Both start and end must be on an {@link IntervalSize} boundary.
  *
  */
 public class DatePart extends DateTimeRange {
 
-	protected final Interval interval;
+	protected final IntervalSize interval;
 	
-	public DatePart(Interval interval, DateTime start, DateTime end) {
+	public DatePart(IntervalSize interval, DateTime start, DateTime end) {
 		super(start, end);
 		this.interval = interval;
 		assert interval != null;
@@ -28,15 +25,20 @@ public class DatePart extends DateTimeRange {
 	public String getName() {
 		return getName(interval, start);
 	}
+	
+	public DateTimeRange getRange() {
+		return new DateTimeRange(this.start, this.end);
+	}
 
-	static public String getName(Interval interval, DateTime start) {
-		String prefix = (interval.equals(Interval.FIVEMIN) || interval.equals(Interval.MINUTE)) ? 
+	static public String getName(IntervalSize interval, DateTime start) {
+		String prefix = (interval.equals(IntervalSize.FIVEMIN) || interval.equals(IntervalSize.MINUTE)) ? 
 				"" : interval.toString().substring(0,1);
 		switch (interval) {
 		case YEAR: 
-			return prefix + start.toString().substring(0, 4);
+			return prefix + "-" + start.toString().substring(0, 4);
 		case QUARTER:
 		case MONTH:
+			return prefix + "-" + start.toString().substring(0, 7);
 		case WEEK:
 		case DAY:
 			return prefix + start.toString().substring(0, 10);

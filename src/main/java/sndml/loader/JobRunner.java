@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
+import sndml.util.DatePartition;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
+import sndml.util.IntervalSize;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
@@ -191,7 +193,7 @@ public class JobRunner implements Callable<Metrics> {
 		logger.debug(Log.INIT, "runSync " + config.toString());
 		if (config.getAutoCreate()) 
 			dbWrapper.createMissingTable(table, sqlTableName, config.getColumns());
-		Interval partitionInterval = config.getPartitionInterval();
+		IntervalSize partitionInterval = config.getPartitionInterval();
 		TableReader synchronizer;
 		if (partitionInterval == null) {
 			synchronizer = config.createReader(table, dbWrapper);			
@@ -253,7 +255,7 @@ public class JobRunner implements Callable<Metrics> {
 			writer = new DatabaseUpdateWriter(dbWrapper, table, sqlTableName, config.getName());
 		}
 		writer.open(jobMetrics);
-		Interval partitionInterval = config.getPartitionInterval();
+		IntervalSize partitionInterval = config.getPartitionInterval();
 		DateTime since = config.getSince();	
 		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
 		TableReader reader;

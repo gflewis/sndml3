@@ -1,7 +1,6 @@
 package sndml.agent;
 
-import sndml.loader.DatePart;
-import sndml.servicenow.RecordKey;
+import sndml.util.DatePart;
 import sndml.util.Metrics;
 
 public class AppStatusPayload {
@@ -13,26 +12,20 @@ public class AppStatusPayload {
 	}
 	
 	final Type type;
-	final Thread publisher;
-	final RecordKey runKey;
-	final String number;
+	final AppJobRunner runner;
 	final AppJobStatus status;	
 	final DatePart datePart;
 	final Metrics metrics;
 	
 	public AppStatusPayload(
 			Type type,
-			Thread publisher,
-			RecordKey runKey,
-			String number,
+			AppJobRunner runner,
 			AppJobStatus status,			
 			DatePart datePart,
 			Metrics metrics) 
 	{
 		this.type = type;
-		this.publisher = publisher;
-		this.runKey = runKey;
-		this.number = number;
+		this.runner = runner;
 		this.status = status;
 		this.datePart = datePart;
 		this.metrics = metrics;
@@ -40,18 +33,31 @@ public class AppStatusPayload {
 	
 	public AppStatusPayload newHeartBeat() {
 		return new AppStatusPayload(
-				Type.HEARTBEAT, null, null, null, null, null, null);
+				Type.HEARTBEAT, null, null, null, null);
 	}
 	
 	public AppStatusPayload newStatusPayload(
-			Thread publisher,
-			RecordKey runKey,
-			String number,
+			AppJobRunner runner,
 			AppJobStatus status) {
 		return new AppStatusPayload(
-			Type.STATUS, publisher, runKey, number, status, null, null);		
+			Type.STATUS, runner, status, null, null);		
 	}
 	
+	public AppStatusPayload newProgressStatusPayload(
+			AppJobRunner runner,
+			AppJobStatus status,
+			Metrics metrics) {
+		return new AppStatusPayload(Type.PROGRESS, runner, status, null, metrics);
+	}
+		
+	public AppStatusPayload newPartitionProgressPayload(
+			AppJobRunner runner,
+			AppJobStatus status,
+			DatePart datePart,
+			Metrics metrics) {
+		return new AppStatusPayload(Type.PROGRESS, runner, status, datePart, metrics);
+	}
+		
 	public void process() {
 		// TODO Implement AppStatusPayload.process()
 		throw new IllegalStateException();

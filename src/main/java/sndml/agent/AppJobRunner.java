@@ -19,7 +19,7 @@ public class AppJobRunner extends JobRunner {
 	final RecordKey runKey;
 	final String number;
 	final AppStatusLogger statusLogger;
-	Thread myThread;
+	Thread runnerThread;
 
 	public AppJobRunner(Resources resources, AppJobConfig config) {
 		super(resources, config);
@@ -29,10 +29,10 @@ public class AppJobRunner extends JobRunner {
 		this.statusLogger = new AppStatusLogger(appSession);				
 		this.runKey = config.getRunKey();
 		this.number = config.getNumber();
-		assert runKey != null;
-		assert runKey.isGUID();
-		assert number != null;
-		assert number.length() > 0;		
+		assert runKey != null : "runKey is null";
+		assert runKey.isGUID() : "runKey is not a GUID";
+		assert number != null : "number is null";
+		assert number.length() > 0 : "number is empty";
 	}
 	
 	String getNumber() {
@@ -40,16 +40,17 @@ public class AppJobRunner extends JobRunner {
 	}
 	
 	Thread getThread() {
-		return myThread;
+		assert runnerThread != null : "runnerThread not initialized";
+		return runnerThread;
 	}
 	
 	/**
 	 * Cancel this AppJobRunner
 	 */
 	void interrupt() {
-		assert myThread != null;
-		assert myThread != Thread.currentThread();
-		myThread.interrupt();
+		assert runnerThread != null : "runnerThread not initialized";
+		assert runnerThread != Thread.currentThread() : "cannot interrupt self";
+		runnerThread.interrupt();
 	}
 	
 	AppStatusLogger getStatusLogger() {
@@ -58,8 +59,8 @@ public class AppJobRunner extends JobRunner {
 		
 	@Override
 	protected ProgressLogger createJobProgressLogger(TableReader reader) {
-		assert action != null;
-		assert jobMetrics != null;
+		assert action != null : "action is null";
+		assert jobMetrics != null : "jobMetrics is null";
 		Log4jProgressLogger textLogger;
 		AppProgressLogger appLogger;
 		if (reader != null) {
@@ -81,10 +82,10 @@ public class AppJobRunner extends JobRunner {
 	
 	protected void setThreadName() {		
 		// If this is not the main thread and it is not the scanner thread then change the thread name
-		myThread = Thread.currentThread();
+		runnerThread = Thread.currentThread();
 		String name = config.getNumber();
-		if (!myThread.equals(AgentMain.getThread()) && !myThread.getName().equals("scanner")) {
-			myThread.setName(name);
+		if (!runnerThread.equals(AgentMain.getThread()) && !runnerThread.getName().equals("scanner")) {
+			runnerThread.setName(name);
 		}
 	}
 

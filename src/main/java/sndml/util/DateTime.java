@@ -11,8 +11,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import sndml.loader.Interval;
-
 /**
  * An immutable thread-safe DateTime field in ServiceNow format.
  * All DateTime fields are represented in GMT.
@@ -201,7 +199,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return new DateTime(newsec);
 	}
 
-	public DateTime truncate(Interval interval) {
+	public DateTime truncate(IntervalSize interval) {
 		int y, m;
 		switch (interval) {
 		case MINUTE:
@@ -272,7 +270,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * to the start of the next interval.
 	 * Assumes original object is truncated.
 	 */
-	public DateTime incrementBy(Interval interval) {
+	public DateTime incrementBy(IntervalSize interval) {
 		int y, m;
 		switch (interval) {
 		case YEAR:
@@ -318,7 +316,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * to the start of the prior interval.
 	 * Assumes original object is truncated.
 	 */
-	public DateTime decrementBy(Interval interval) {
+	public DateTime decrementBy(IntervalSize interval) {
 		int y, m;
 		switch (interval) {
 		case YEAR:
@@ -386,9 +384,14 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return now().truncate();
 	}
 	
+	/**
+	 * Returns epoch seconds for a date time assuming GMT
+	 * @return Epoch seconds
+	 * @throws InvalidDateTimeException
+	 */
 	private static long toSeconds(String str) throws InvalidDateTimeException {
 		LocalDateTime localDateTime;
-		assert str != null;
+		if (str == null) throw new InvalidDateTimeException("null");
 		switch (str.length()) {
 		case DATE_ONLY_LEN:
 			try {

@@ -66,7 +66,7 @@ public class TimestampTest {
 		String created = rec.getValue("sys_created_on");
 		JobConfig config = new ConfigFactory().tableLoader(profile, tbl);
 		config.filter = "sys_id=" + sys_id;
-		DateTimeRange emptyRange = new DateTimeRange(null, null);
+		DateTimeRange emptyRange = DateTimeRange.all();
 		config.setCreated(emptyRange);
 		logger.info(Log.TEST, config.toString());
 		JobRunner runner = new TestJobRunner(profile, config);

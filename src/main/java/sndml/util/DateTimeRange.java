@@ -13,8 +13,15 @@ public class DateTimeRange {
 		this.end = end;
 	}
 	
+	public DateTimeRange(String start, String end) {
+		assert end != null : "null end invalid for constructor with Strings";
+		assert start != null : "null start invalid for constructor with Strings";
+		this.start = new DateTime(start);
+		this.end = new DateTime(end);
+	}
+	
 	public static DateTimeRange all() {
-		return new DateTimeRange(null, null);
+		return new DateTimeRange((DateTime) null, (DateTime) null);
 	}
 	
 	public DateTime getStart() {
@@ -67,10 +74,5 @@ public class DateTimeRange {
 		node.add(hasEnd() ? end.toString() : null);
 		return node;
 	}
-
-//	@Deprecated
-//	public String getName(Interval interval) {
-//		return interval.getName(this.getStart());
-//	}
 
 }

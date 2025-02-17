@@ -7,9 +7,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sndml.loader.DatePartition;
-import sndml.loader.Interval;
-
 public class DateTimeTest {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -97,8 +94,8 @@ public class DateTimeTest {
 		assertEquals("2014-05-26 15:34:53", d1.toString());
 		assertEquals(2014, d1.getYear());
 		assertEquals(5, d1.getMonth());
-		assertEquals(new DateTime("2014-06-01"), d1.incrementBy(Interval.MONTH));
-		assertEquals(new DateTime("2015-01-01"), d2.incrementBy(Interval.MONTH));		
+		assertEquals(new DateTime("2014-06-01"), d1.incrementBy(IntervalSize.MONTH));
+		assertEquals(new DateTime("2015-01-01"), d2.incrementBy(IntervalSize.MONTH));		
 	}
 	
 	@Test
@@ -106,30 +103,30 @@ public class DateTimeTest {
 		DateTime d1 = new DateTime("2014-01-01 15:34:53");
 		DateTime d2 = new DateTime("2014-01-01 00:00:00");
 		DateTime d3 = new DateTime("2013-12-01 00:00:00");
-		assertEquals(d3, d1.decrementBy(Interval.MONTH));
-		assertEquals(d3, d2.decrementBy(Interval.MONTH));				
+		assertEquals(d3, d1.decrementBy(IntervalSize.MONTH));
+		assertEquals(d3, d2.decrementBy(IntervalSize.MONTH));				
 	}
 	
 	@Test
 	public void testTruncate() throws Exception {
 		DateTime start;
 		start = new DateTime("2014-05-10");
-		assertEquals("2014-05-01", start.truncate(Interval.MONTH).toString());
-		assertEquals(new DateTime("2014-05-01"), start.truncate(Interval.MONTH));
-		assertEquals(new DateTime("2014-04-01"), start.truncate(Interval.QUARTER));
-		assertEquals(new DateTime("2014-01-01"), start.truncate(Interval.YEAR));	
+		assertEquals("2014-05-01", start.truncate(IntervalSize.MONTH).toString());
+		assertEquals(new DateTime("2014-05-01"), start.truncate(IntervalSize.MONTH));
+		assertEquals(new DateTime("2014-04-01"), start.truncate(IntervalSize.QUARTER));
+		assertEquals(new DateTime("2014-01-01"), start.truncate(IntervalSize.YEAR));	
 		start = new DateTime("2016-10-04 17:18:18");
-		assertEquals("2016-10-01", start.truncate(Interval.MONTH).toString());
-		assertEquals(new DateTime("2016-10-01"), start.truncate(Interval.MONTH));
-		assertEquals(new DateTime("2016-10-01"), start.truncate(Interval.QUARTER));
-		assertEquals(new DateTime("2016-01-01"), start.truncate(Interval.YEAR));					
+		assertEquals("2016-10-01", start.truncate(IntervalSize.MONTH).toString());
+		assertEquals(new DateTime("2016-10-01"), start.truncate(IntervalSize.MONTH));
+		assertEquals(new DateTime("2016-10-01"), start.truncate(IntervalSize.QUARTER));
+		assertEquals(new DateTime("2016-01-01"), start.truncate(IntervalSize.YEAR));					
 	}
 	
 	@Test
 	public void testTruncateWeek() throws Exception {
 		// Week should be truncated to Sunday morning
 		DateTime start = new DateTime("2021-02-10 14:30:00");
-		DateTime trunc = start.truncate(Interval.WEEK);
+		DateTime trunc = start.truncate(IntervalSize.WEEK);
 		assertEquals(new DateTime("2021-02-07"), trunc);
 		assertEquals("2021-02-07", trunc.toString());
 	}
@@ -139,7 +136,7 @@ public class DateTimeTest {
 		DateTime start = new DateTime("2014-05-10");
 		DateTime end   = new DateTime("2016-12-17");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartition partition = new DatePartition(range, Interval.MONTH);
+		DatePartition partition = new DatePartition(range, IntervalSize.MONTH);
 		logger.info("partition=" + partition.toString());
 		int size = 0;
 		DateTimeRange newest = null;

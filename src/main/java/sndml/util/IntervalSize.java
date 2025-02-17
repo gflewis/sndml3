@@ -1,5 +1,5 @@
-package sndml.loader;
+package sndml.util;
 
-public enum Interval {
+public enum IntervalSize {
 	YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, FIVEMIN, MINUTE;	
 }
