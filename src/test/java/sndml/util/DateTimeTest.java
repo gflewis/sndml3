@@ -136,12 +136,12 @@ public class DateTimeTest {
 		DateTime start = new DateTime("2014-05-10");
 		DateTime end   = new DateTime("2016-12-17");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartition partition = new DatePartition(range, IntervalSize.MONTH);
-		logger.info("partition=" + partition.toString());
+		DatePartitions partitions = new DatePartitions(range, IntervalSize.MONTH);
+		logger.info("partitions=" + partitions.toString());
 		int size = 0;
 		DateTimeRange newest = null;
 		DateTimeRange oldest = null;
-		for (DateTimeRange part : partition) {
+		for (DateTimeRange part : partitions) {
 			if (size == 0) newest = part;
 			oldest = part;
 			size += 1;

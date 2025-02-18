@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
-import sndml.util.DatePartition;
+import sndml.util.DatePartitions;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.IntervalSize;
@@ -206,7 +206,7 @@ public class JobRunner implements Callable<Metrics> {
 			synchronizer = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);	
 			synchronizer.prepare(null, jobMetrics, progressLogger);
-			DatePartition partition = multiReader.getPartition();
+			DatePartitions partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 		}
 		assert(synchronizer instanceof TableSynchronizer);
@@ -271,7 +271,7 @@ public class JobRunner implements Callable<Metrics> {
 			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);
 			reader.prepare(writer, jobMetrics, progressLogger);
-			DatePartition partition = multiReader.getPartition();
+			DatePartitions partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 		}
 		assert reader.getMetrics() != null;

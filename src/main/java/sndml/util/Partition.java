@@ -1,15 +1,15 @@
 package sndml.util;
 
 /**
- * One entry of a {@link DatePartition}. 
+ * One entry of a {@link DatePartitions}. 
  * Both start and end must be on an {@link IntervalSize} boundary.
  *
  */
-public class DatePart extends DateTimeRange {
+public class Partition extends DateTimeRange {
 
 	protected final IntervalSize interval;
 	
-	public DatePart(IntervalSize interval, DateTime start, DateTime end) {
+	public Partition(IntervalSize interval, DateTime start, DateTime end) {
 		super(start, end);
 		this.interval = interval;
 		assert interval != null;

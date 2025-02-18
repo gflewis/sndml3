@@ -1,29 +1,57 @@
 package sndml.util;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Iterate through the ranges of a partition backwards, starting with
  * the most recent, and ending with the earliest.
  *
  */
-public class DatePartitionIterator implements Iterator<DatePart> {
+public class DatePartitionIterator implements Iterator<Partition> {
 	
+	final DatePartitions partition;
 	final DateTimeRange range;
 	final IntervalSize interval;
-	final DatePart newest;
-	final DatePart oldest;
 	final int size;
 	boolean started = false;
 	boolean finished = false;
-	DatePart current = null;
+	Partition current = null;
 
+	public DatePartitionIterator(DatePartitions partition) {
+		this.partition = partition;
+		this.range = partition.getRange();
+		this.interval = partition.getInterval();
+		if (partition.isEmpty()) {
+			this.size = 0;
+			this.finished = true;			
+		}
+		else {
+			if (range.start == null)
+				throw new IllegalArgumentException("start date is null");
+			if (range.end == null)
+				throw new IllegalArgumentException("end date is null");
+			if (range.end.compareTo(range.start) < 0)
+				throw new IllegalArgumentException("end date is before start date");
+			if (range.end.compareTo(range.start) == 0) {
+				this.size = 0;
+				this.finished = true;
+			}
+			else {
+				assert interval != null : "interval is null";
+				assert range.end != null : "end date is null";
+				assert range.start != null : "start date is null";
+				this.size = partition.computeSize();
+			}
+		}
+  	}
+	
+	@Deprecated
 	public DatePartitionIterator(DateTimeRange range, IntervalSize interval) {
 		this.range = range;
 		this.interval = interval;
+		this.partition = new DatePartitions(range, interval);
 		if (range == null) {
-			this.newest = null;
-			this.oldest = null;
 			this.size = 0;
 			this.finished = true;
 		}
@@ -35,8 +63,6 @@ public class DatePartitionIterator implements Iterator<DatePart> {
 			if (range.getEnd().compareTo(range.getStart()) < 0)
 				throw new IllegalArgumentException("end date is before start date");
 			if (range.getEnd().compareTo(range.getStart()) == 0) {
-				this.newest = null;
-				this.oldest = null;
 				this.size = 0;
 				this.finished = true;
 			}
@@ -50,7 +76,6 @@ public class DatePartitionIterator implements Iterator<DatePart> {
 				assert end.compareTo(range.getEnd()) >= 0;
 				DateTime start = end.decrementBy(interval);
 				assert start.compareTo(end) < 0;
-				this.newest = new DatePart(interval, start, end);
 				int size = 1;
 				while (start.compareTo(range.getStart()) > 0) {
 					size += 1;
@@ -58,42 +83,56 @@ public class DatePartitionIterator implements Iterator<DatePart> {
 					start = end.decrementBy(interval);
 					assert start.compareTo(end) < 0;
 				}
-				this.oldest = new DatePart(interval, start, end);
 				this.size = size;
 			}			
 		}
 	}
 
+	/**
+	 * Return the most recent part
+	 */
+	private Partition getNewest() {
+		DateTime end = range.end.ceiling(interval);
+		assert end.compareTo(range.end) >= 0 : "getNewest bad ceiling";
+		DateTime start = end.decrementBy(interval);
+		return new Partition(interval, start, end);		
+	}
+
+	/**
+	 * Return the earliest part
+	 */
+	@SuppressWarnings("unused")
+	private Partition getOldest() {
+		DateTime start = range.start.truncate(interval);
+		assert start.compareTo(range.start) <= 0 : "getOldest bad truncate"; 
+		DateTime end = start.incrementBy(interval);
+		return new Partition(interval, start, end); 
+	}
+		
+	
 	public int getSize() {
 		return this.size;
 	}
 	
 	@Override
-	public boolean hasNext() {
-		return (current == null) ? size > 0 :
-			current.getStart().compareTo(range.getStart()) > 0;
+	public boolean hasNext() {		
+		return !finished;
 	}
 
 	@Override
-	public DatePart next() {
-		if (finished) {
-			return null;
-		}
+	public Partition next() throws NoSuchElementException {
+		if (finished) throw new NoSuchElementException();
 		if (!started) { 
-			assert newest != null : "newest is null";
-			current = newest;			
+			current = getNewest();			
 			started = true;
-			return current;
 		}
-		DateTime end = current.getStart();
-		DateTime start = end.decrementBy(interval);
-		assert start.compareTo(end) < 0 : "start not before end"; 
-		if (end.compareTo(oldest.start) <= 0) {
-			finished = true;
-			return null;			
-		}		
-		current = new DatePart(interval, start, end);
-		assert current != null;
+		else {
+			DateTime end = current.start;
+			DateTime start = end.decrementBy(interval);
+			assert start.compareTo(end) < 0 : "start not before end"; 
+			current = new Partition(interval, start, end);			
+		}
+		if (current.start.compareTo(range.start) <= 0) finished = true;
 		return current;
 	}
 

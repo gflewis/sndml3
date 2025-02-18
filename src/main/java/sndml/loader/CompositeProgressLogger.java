@@ -2,7 +2,7 @@ package sndml.loader;
 
 import sndml.agent.AppProgressLogger;
 import sndml.agent.JobCancelledException;
-import sndml.util.DatePart;
+import sndml.util.Partition;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
 
@@ -31,7 +31,7 @@ public class CompositeProgressLogger extends ProgressLogger {
 //	}
 
 	@Override
-	public CompositeProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
+	public CompositeProgressLogger newPartLogger(Metrics newMetrics, Partition newPart) {
 		Log4jProgressLogger newTextLogger =
 				(Log4jProgressLogger) textLogger.newPartLogger(newMetrics,  newPart);
 		AppProgressLogger newAppLogger = 

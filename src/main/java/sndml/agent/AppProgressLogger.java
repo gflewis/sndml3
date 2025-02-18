@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 
 import sndml.servicenow.*;
-import sndml.util.DatePart;
+import sndml.util.Partition;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
@@ -38,7 +38,7 @@ public class AppProgressLogger extends ProgressLogger {
 			Metrics metrics,
 			String number, 
 			RecordKey runKey,
-			DatePart part) {
+			Partition part) {
 		super(metrics, part);
 		assert runKey != null;
 		this.appSession = appSession;
@@ -48,7 +48,7 @@ public class AppProgressLogger extends ProgressLogger {
 	}
 
 	@Override
-	public ProgressLogger newPartLogger(Metrics newMetrics, DatePart newPart) {
+	public ProgressLogger newPartLogger(Metrics newMetrics, Partition newPart) {
 		// logger.info(Log.INIT, "newPartLogger");
 		return new AppProgressLogger(
 			this.appSession, newMetrics, this.number, this.runKey, newPart);

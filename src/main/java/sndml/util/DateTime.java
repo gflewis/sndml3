@@ -199,6 +199,9 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		return new DateTime(newsec);
 	}
 
+	/**
+	 * Return next interval boundary on or before this datetime
+	 */
 	public DateTime truncate(IntervalSize interval) {
 		int y, m;
 		switch (interval) {
@@ -227,6 +230,15 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		default:
 			throw new AssertionError("Invalid interval");
 		}
+	}
+	
+	/**
+	 * Return next interval boundary on or after this datetime
+	 */
+	public DateTime ceiling(IntervalSize interval) {
+		DateTime x = this.truncate(interval);
+		if (x.compareTo(this) < 0) x = x.incrementBy(interval);
+		return x;
 	}
 
 	/**

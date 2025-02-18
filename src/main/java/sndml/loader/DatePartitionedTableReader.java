@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
-import sndml.util.DatePart;
-import sndml.util.DatePartition;
+import sndml.util.Partition;
+import sndml.util.DatePartitions;
 import sndml.util.DateTimeRange;
 import sndml.util.IntervalSize;
 import sndml.util.Log;
@@ -31,7 +31,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	final IntervalSize interval;
 	
 	private DateTimeRange range;
-	private DatePartition partition;
+	private DatePartitions partition;
 	private List<Future<Metrics>> futures;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,7 +49,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		this.threads = (config.getThreads()==null) ? 1 : config.getThreads();
 	}
 		
-	public DatePartition getPartition() {
+	public DatePartitions getPartition() {
 		assert partition != null : "Not initialized";
 		return partition;
 	}
@@ -110,7 +110,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			assert range.getStart() != null : "range.start is null";
 			assert range.getEnd() != null : "range.end is null";
 		}
-		this.partition = new DatePartition(range, interval);
+		this.partition = new DatePartitions(range, interval);
 		if (range == null) 
 			logger.info(Log.INIT, "expected=0; empty partition created");
 		else 
@@ -119,7 +119,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		super.endPrepare(expected);
 	}
 	
-	private TableReader createReader(DatePart datePart) 
+	private TableReader createReader(Partition datePart) 
 			throws IOException, SQLException, InterruptedException, JobCancelledException {
 		String partName = datePart.getName();
 		boolean createNewSession = (threads > 1) ? true : false;
@@ -148,7 +148,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			futures = new ArrayList<Future<Metrics>>();
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
-			for (DatePart partRange : partition) {
+			for (Partition partRange : partition) {
 				TableReader partReader = createReader(partRange);
 				logger.debug("Submit " + metrics.getName());
 				Future<Metrics> future = executor.submit(partReader);
@@ -161,7 +161,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			}
 		}
 		else {
-			for (DatePart partRange : partition) {
+			for (Partition partRange : partition) {
 				TableReader partReader = createReader(partRange);
 				assert partReader.getProgressLogger() != null;
 				partReader.call();				

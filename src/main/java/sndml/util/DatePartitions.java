@@ -1,15 +1,15 @@
 package sndml.util;
 
-public class DatePartition implements Iterable<DatePart> {
+public class DatePartitions implements Iterable<Partition> {
 	
 	private final DateTimeRange range;
 	private final IntervalSize interval;
 
-	public DatePartition(DateTimeRange range, IntervalSize interval) {
+	public DatePartitions(DateTimeRange range, IntervalSize interval) {
 		this.range = range;
 		this.interval = interval;
 		if (range == null) {
-			// creating an empty partition
+			// this is empty
 		}
 		else {
 			if (range.getStart() == null)
@@ -37,23 +37,20 @@ public class DatePartition implements Iterable<DatePart> {
 		if (range == null) return 0;
 		if (range.start == null) return 0;
 		if (range.end == null ) return 0;
-		if (range.end.compareTo(range.start) <= 0) return 0; // end is before start
+		if (range.end.compareTo(range.start) <= 0) return 0; // end is before start (should be impossible)
 		if (interval == null) return 0;
-		DateTime end = range.getEnd().truncate(interval);
-		if (end.compareTo(range.getEnd()) < 0) end = end.incrementBy(interval);
-		assert end.compareTo(range.getEnd()) >= 0;
+		DateTime end = range.end.ceiling(interval);
+		assert end.compareTo(range.end) >= 0 : "computeSize bad ceiling";
 		DateTime start = end.decrementBy(interval);
-		assert start.compareTo(end) < 0;
+		assert start.compareTo(end) < 0 : "computeSize bad decrement";
 		int size = 1;
-		while (start.compareTo(range.getStart()) > 0) {
+		while (start.compareTo(range.start) > 0) {
 			size += 1;
 			end = start;
 			start = end.decrementBy(interval);
 			assert start.compareTo(end) < 0;
 		}
-		new DatePart(interval, start, end);
-		return size;
-		
+		return size;		
 	}
 	
 	public String toString() {
@@ -69,7 +66,7 @@ public class DatePartition implements Iterable<DatePart> {
 	 * and ending with the earliest.
 	 */
 	public DatePartitionIterator iterator() {
-		return new DatePartitionIterator(this.range, this.interval);
+		return new DatePartitionIterator(this);
 	}
 
 }
