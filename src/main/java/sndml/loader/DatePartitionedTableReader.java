@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
 import sndml.util.Partition;
-import sndml.util.DatePartitions;
+import sndml.util.DatePartitioning;
 import sndml.util.DateTimeRange;
-import sndml.util.IntervalSize;
+import sndml.util.PartitionInterval;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
@@ -28,10 +28,10 @@ public final class DatePartitionedTableReader extends TableReader {
 	final JobConfig config;
 	final DatabaseWrapper db;
 	final int threads;
-	final IntervalSize interval;
+	final PartitionInterval interval;
 	
 	private DateTimeRange range;
-	private DatePartitions partition;
+	private DatePartitioning partition;
 	private List<Future<Metrics>> futures;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,7 +49,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		this.threads = (config.getThreads()==null) ? 1 : config.getThreads();
 	}
 		
-	public DatePartitions getPartition() {
+	public DatePartitioning getPartition() {
 		assert partition != null : "Not initialized";
 		return partition;
 	}
@@ -110,7 +110,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			assert range.getStart() != null : "range.start is null";
 			assert range.getEnd() != null : "range.end is null";
 		}
-		this.partition = new DatePartitions(range, interval);
+		this.partition = new DatePartitioning(range, interval);
 		if (range == null) 
 			logger.info(Log.INIT, "expected=0; empty partition created");
 		else 

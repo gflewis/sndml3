@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
-import sndml.util.DatePartitions;
+import sndml.util.DatePartitioning;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
-import sndml.util.IntervalSize;
+import sndml.util.PartitionInterval;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
@@ -193,7 +193,7 @@ public class JobRunner implements Callable<Metrics> {
 		logger.debug(Log.INIT, "runSync " + config.toString());
 		if (config.getAutoCreate()) 
 			dbWrapper.createMissingTable(table, sqlTableName, config.getColumns());
-		IntervalSize partitionInterval = config.getPartitionInterval();
+		PartitionInterval partitionInterval = config.getPartitionInterval();
 		TableReader synchronizer;
 		if (partitionInterval == null) {
 			synchronizer = config.createReader(table, dbWrapper);			
@@ -206,7 +206,7 @@ public class JobRunner implements Callable<Metrics> {
 			synchronizer = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);	
 			synchronizer.prepare(null, jobMetrics, progressLogger);
-			DatePartitions partition = multiReader.getPartition();
+			DatePartitioning partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 		}
 		assert(synchronizer instanceof TableSynchronizer);
@@ -255,7 +255,7 @@ public class JobRunner implements Callable<Metrics> {
 			writer = new DatabaseUpdateWriter(dbWrapper, table, sqlTableName, config.getName());
 		}
 		writer.open(jobMetrics);
-		IntervalSize partitionInterval = config.getPartitionInterval();
+		PartitionInterval partitionInterval = config.getPartitionInterval();
 		DateTime since = config.getSince();	
 		logger.debug(Log.INIT, "since=" + config.sinceExpr + "=" + since);
 		TableReader reader;
@@ -271,7 +271,7 @@ public class JobRunner implements Callable<Metrics> {
 			reader = multiReader;
 			ProgressLogger progressLogger = createJobProgressLogger(multiReader);
 			reader.prepare(writer, jobMetrics, progressLogger);
-			DatePartitions partition = multiReader.getPartition();
+			DatePartitioning partition = multiReader.getPartition();
 			logger.info(Log.INIT, "partition=" + partition.toString());
 		}
 		assert reader.getMetrics() != null;

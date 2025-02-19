@@ -10,15 +10,15 @@ import java.util.NoSuchElementException;
  */
 public class DatePartitionIterator implements Iterator<Partition> {
 	
-	final DatePartitions partition;
+	final DatePartitioning partition;
 	final DateTimeRange range;
-	final IntervalSize interval;
+	final PartitionInterval interval;
 	final int size;
 	boolean started = false;
 	boolean finished = false;
 	Partition current = null;
 
-	public DatePartitionIterator(DatePartitions partition) {
+	public DatePartitionIterator(DatePartitioning partition) {
 		this.partition = partition;
 		this.range = partition.getRange();
 		this.interval = partition.getInterval();
@@ -47,10 +47,10 @@ public class DatePartitionIterator implements Iterator<Partition> {
   	}
 	
 	@Deprecated
-	public DatePartitionIterator(DateTimeRange range, IntervalSize interval) {
+	public DatePartitionIterator(DateTimeRange range, PartitionInterval interval) {
 		this.range = range;
 		this.interval = interval;
-		this.partition = new DatePartitions(range, interval);
+		this.partition = new DatePartitioning(range, interval);
 		if (range == null) {
 			this.size = 0;
 			this.finished = true;

@@ -202,7 +202,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	/**
 	 * Return next interval boundary on or before this datetime
 	 */
-	public DateTime truncate(IntervalSize interval) {
+	public DateTime truncate(PartitionInterval interval) {
 		int y, m;
 		switch (interval) {
 		case MINUTE:
@@ -235,7 +235,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	/**
 	 * Return next interval boundary on or after this datetime
 	 */
-	public DateTime ceiling(IntervalSize interval) {
+	public DateTime ceiling(PartitionInterval interval) {
 		DateTime x = this.truncate(interval);
 		if (x.compareTo(this) < 0) x = x.incrementBy(interval);
 		return x;
@@ -282,7 +282,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * to the start of the next interval.
 	 * Assumes original object is truncated.
 	 */
-	public DateTime incrementBy(IntervalSize interval) {
+	public DateTime incrementBy(PartitionInterval interval) {
 		int y, m;
 		switch (interval) {
 		case YEAR:
@@ -328,7 +328,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 	 * to the start of the prior interval.
 	 * Assumes original object is truncated.
 	 */
-	public DateTime decrementBy(IntervalSize interval) {
+	public DateTime decrementBy(PartitionInterval interval) {
 		int y, m;
 		switch (interval) {
 		case YEAR:

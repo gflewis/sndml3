@@ -1,5 +1,5 @@
 package sndml.util;
 
-public enum IntervalSize {
+public enum PartitionInterval {
 	YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, FIVE_MINUTE, MINUTE;	
 }

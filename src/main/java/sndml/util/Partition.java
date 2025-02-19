@@ -1,15 +1,15 @@
 package sndml.util;
 
 /**
- * One entry of a {@link DatePartitions}. 
- * Both start and end must be on an {@link IntervalSize} boundary.
+ * One entry of a {@link DatePartitioning}. 
+ * Both start and end must be on an {@link PartitionInterval} boundary.
  *
  */
 public class Partition extends DateTimeRange {
 
-	protected final IntervalSize interval;
+	protected final PartitionInterval interval;
 	
-	public Partition(IntervalSize interval, DateTime start, DateTime end) {
+	public Partition(PartitionInterval interval, DateTime start, DateTime end) {
 		super(start, end);
 		this.interval = interval;
 		assert interval != null;
@@ -30,8 +30,8 @@ public class Partition extends DateTimeRange {
 		return new DateTimeRange(this.start, this.end);
 	}
 
-	static public String getName(IntervalSize interval, DateTime start) {
-		String prefix = (interval.equals(IntervalSize.FIVE_MINUTE) || interval.equals(IntervalSize.MINUTE)) ? 
+	static public String getName(PartitionInterval interval, DateTime start) {
+		String prefix = (interval.equals(PartitionInterval.FIVE_MINUTE) || interval.equals(PartitionInterval.MINUTE)) ? 
 				"" : interval.toString().substring(0,1);
 		switch (interval) {
 		case YEAR: 

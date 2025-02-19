@@ -1,11 +1,11 @@
 package sndml.util;
 
-public class DatePartitions implements Iterable<Partition> {
+public class DatePartitioning implements Iterable<Partition> {
 	
 	private final DateTimeRange range;
-	private final IntervalSize interval;
+	private final PartitionInterval interval;
 
-	public DatePartitions(DateTimeRange range, IntervalSize interval) {
+	public DatePartitioning(DateTimeRange range, PartitionInterval interval) {
 		this.range = range;
 		this.interval = interval;
 		if (range == null) {
@@ -29,7 +29,7 @@ public class DatePartitions implements Iterable<Partition> {
 		return this.range;
 	}
 	
-	public IntervalSize getInterval() {
+	public PartitionInterval getInterval() {
 		return this.interval;			
 	}
 

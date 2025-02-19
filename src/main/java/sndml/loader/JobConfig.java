@@ -22,7 +22,7 @@ import sndml.util.Partition;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.FieldNames;
-import sndml.util.IntervalSize;
+import sndml.util.PartitionInterval;
 import sndml.util.Log;
 
 @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
@@ -44,7 +44,7 @@ public class JobConfig {
 	@JsonIgnore public DateTimeRange createdRange;
 	@JsonIgnore public DateTime sinceDate;
 	public String filter;
-	public IntervalSize partition;
+	public PartitionInterval partition;
 	public Integer pageSize;
 	public Integer minRows;
 	public Integer maxRows;
@@ -89,7 +89,7 @@ public class JobConfig {
 		return new EncodedQuery(table, filter);		
 	}
 		
-	IntervalSize getPartitionInterval() { return this.partition; }
+	PartitionInterval getPartitionInterval() { return this.partition; }
 	
 	FieldNames getIncludeColumns() { return this.includeColumns; }
 	

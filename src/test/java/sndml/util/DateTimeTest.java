@@ -94,8 +94,8 @@ public class DateTimeTest {
 		assertEquals("2014-05-26 15:34:53", d1.toString());
 		assertEquals(2014, d1.getYear());
 		assertEquals(5, d1.getMonth());
-		assertEquals(new DateTime("2014-06-01"), d1.incrementBy(IntervalSize.MONTH));
-		assertEquals(new DateTime("2015-01-01"), d2.incrementBy(IntervalSize.MONTH));		
+		assertEquals(new DateTime("2014-06-01"), d1.incrementBy(PartitionInterval.MONTH));
+		assertEquals(new DateTime("2015-01-01"), d2.incrementBy(PartitionInterval.MONTH));		
 	}
 	
 	@Test
@@ -103,45 +103,45 @@ public class DateTimeTest {
 		DateTime d1 = new DateTime("2014-01-01 15:34:53");
 		DateTime d2 = new DateTime("2014-01-01 00:00:00");
 		DateTime d3 = new DateTime("2013-12-01 00:00:00");
-		assertEquals(d3, d1.decrementBy(IntervalSize.MONTH));
-		assertEquals(d3, d2.decrementBy(IntervalSize.MONTH));				
+		assertEquals(d3, d1.decrementBy(PartitionInterval.MONTH));
+		assertEquals(d3, d2.decrementBy(PartitionInterval.MONTH));				
 	}
 	
 	@Test
 	public void testTruncate() throws Exception {
 		DateTime start;
 		start = new DateTime("2014-05-10");
-		assertEquals("2014-05-01", start.truncate(IntervalSize.MONTH).toString());
-		assertEquals(new DateTime("2014-05-01"), start.truncate(IntervalSize.MONTH));
-		assertEquals(new DateTime("2014-04-01"), start.truncate(IntervalSize.QUARTER));
-		assertEquals(new DateTime("2014-01-01"), start.truncate(IntervalSize.YEAR));	
+		assertEquals("2014-05-01", start.truncate(PartitionInterval.MONTH).toString());
+		assertEquals(new DateTime("2014-05-01"), start.truncate(PartitionInterval.MONTH));
+		assertEquals(new DateTime("2014-04-01"), start.truncate(PartitionInterval.QUARTER));
+		assertEquals(new DateTime("2014-01-01"), start.truncate(PartitionInterval.YEAR));	
 		start = new DateTime("2016-10-04 17:18:18");
-		assertEquals("2016-10-01", start.truncate(IntervalSize.MONTH).toString());
-		assertEquals(new DateTime("2016-10-01"), start.truncate(IntervalSize.MONTH));
-		assertEquals(new DateTime("2016-10-01"), start.truncate(IntervalSize.QUARTER));
-		assertEquals(new DateTime("2016-01-01"), start.truncate(IntervalSize.YEAR));					
+		assertEquals("2016-10-01", start.truncate(PartitionInterval.MONTH).toString());
+		assertEquals(new DateTime("2016-10-01"), start.truncate(PartitionInterval.MONTH));
+		assertEquals(new DateTime("2016-10-01"), start.truncate(PartitionInterval.QUARTER));
+		assertEquals(new DateTime("2016-01-01"), start.truncate(PartitionInterval.YEAR));					
 	}
 
 	@Test
 	public void testCeiling() throws Exception {
 		DateTime start;
 		start = new DateTime("2014-05-10");
-		assertEquals("2014-06-01", start.ceiling(IntervalSize.MONTH).toString());
-		assertEquals(new DateTime("2014-06-01"), start.ceiling(IntervalSize.MONTH));
-		assertEquals(new DateTime("2014-07-01"), start.ceiling(IntervalSize.QUARTER));
-		assertEquals(new DateTime("2015-01-01"), start.ceiling(IntervalSize.YEAR));	
+		assertEquals("2014-06-01", start.ceiling(PartitionInterval.MONTH).toString());
+		assertEquals(new DateTime("2014-06-01"), start.ceiling(PartitionInterval.MONTH));
+		assertEquals(new DateTime("2014-07-01"), start.ceiling(PartitionInterval.QUARTER));
+		assertEquals(new DateTime("2015-01-01"), start.ceiling(PartitionInterval.YEAR));	
 		start = new DateTime("2016-10-04 17:18:18");
-		assertEquals(new DateTime("2016-10-05"), start.ceiling(IntervalSize.DAY));
-		assertEquals(new DateTime("2016-11-01"), start.ceiling(IntervalSize.MONTH));
-		assertEquals(new DateTime("2017-01-01"), start.ceiling(IntervalSize.QUARTER));
-		assertEquals(new DateTime("2017-01-01"), start.ceiling(IntervalSize.YEAR));					
+		assertEquals(new DateTime("2016-10-05"), start.ceiling(PartitionInterval.DAY));
+		assertEquals(new DateTime("2016-11-01"), start.ceiling(PartitionInterval.MONTH));
+		assertEquals(new DateTime("2017-01-01"), start.ceiling(PartitionInterval.QUARTER));
+		assertEquals(new DateTime("2017-01-01"), start.ceiling(PartitionInterval.YEAR));					
 	}
 	
 	@Test
 	public void testTruncateWeek() throws Exception {
 		// Week should be truncated to Sunday morning
 		DateTime start = new DateTime("2021-02-10 14:30:00");
-		DateTime trunc = start.truncate(IntervalSize.WEEK);
+		DateTime trunc = start.truncate(PartitionInterval.WEEK);
 		assertEquals(new DateTime("2021-02-07"), trunc);
 		assertEquals("2021-02-07", trunc.toString());
 	}
@@ -151,7 +151,7 @@ public class DateTimeTest {
 		DateTime start = new DateTime("2014-05-10");
 		DateTime end   = new DateTime("2016-12-17");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitions partitions = new DatePartitions(range, IntervalSize.MONTH);
+		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.MONTH);
 		logger.info("partitions=" + partitions.toString());
 		int size = 0;
 		DateTimeRange newest = null;
