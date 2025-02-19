@@ -121,6 +121,21 @@ public class DateTimeTest {
 		assertEquals(new DateTime("2016-10-01"), start.truncate(IntervalSize.QUARTER));
 		assertEquals(new DateTime("2016-01-01"), start.truncate(IntervalSize.YEAR));					
 	}
+
+	@Test
+	public void testCeiling() throws Exception {
+		DateTime start;
+		start = new DateTime("2014-05-10");
+		assertEquals("2014-06-01", start.ceiling(IntervalSize.MONTH).toString());
+		assertEquals(new DateTime("2014-06-01"), start.ceiling(IntervalSize.MONTH));
+		assertEquals(new DateTime("2014-07-01"), start.ceiling(IntervalSize.QUARTER));
+		assertEquals(new DateTime("2015-01-01"), start.ceiling(IntervalSize.YEAR));	
+		start = new DateTime("2016-10-04 17:18:18");
+		assertEquals(new DateTime("2016-10-05"), start.ceiling(IntervalSize.DAY));
+		assertEquals(new DateTime("2016-11-01"), start.ceiling(IntervalSize.MONTH));
+		assertEquals(new DateTime("2017-01-01"), start.ceiling(IntervalSize.QUARTER));
+		assertEquals(new DateTime("2017-01-01"), start.ceiling(IntervalSize.YEAR));					
+	}
 	
 	@Test
 	public void testTruncateWeek() throws Exception {

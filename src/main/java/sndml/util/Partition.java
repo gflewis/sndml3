@@ -31,7 +31,7 @@ public class Partition extends DateTimeRange {
 	}
 
 	static public String getName(IntervalSize interval, DateTime start) {
-		String prefix = (interval.equals(IntervalSize.FIVEMIN) || interval.equals(IntervalSize.MINUTE)) ? 
+		String prefix = (interval.equals(IntervalSize.FIVE_MINUTE) || interval.equals(IntervalSize.MINUTE)) ? 
 				"" : interval.toString().substring(0,1);
 		switch (interval) {
 		case YEAR: 

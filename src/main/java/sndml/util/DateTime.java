@@ -207,7 +207,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 		switch (interval) {
 		case MINUTE:
 			return this.truncate(SEC_PER_MINUTE);
-		case FIVEMIN:
+		case FIVE_MINUTE:
 			return this.truncate(SEC_PER_MINUTE * 5);
 		case HOUR:
 			return this.truncate(SEC_PER_HOUR);
@@ -314,7 +314,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			return addSeconds(SEC_PER_DAY);
 		case HOUR:
 			return addSeconds(SEC_PER_HOUR);
-		case FIVEMIN:
+		case FIVE_MINUTE:
 			return addSeconds(SEC_PER_MINUTE * 5);
 		case MINUTE:
 			return addSeconds(SEC_PER_MINUTE);
@@ -359,7 +359,7 @@ public class DateTime implements Comparable<DateTime>, Comparator<DateTime> {
 			return subtractSeconds(SEC_PER_DAY);
 		case HOUR:
 			return subtractSeconds(SEC_PER_HOUR);
-		case FIVEMIN:
+		case FIVE_MINUTE:
 			return subtractSeconds(SEC_PER_MINUTE * 5);
 		case MINUTE:
 			return subtractSeconds(SEC_PER_MINUTE);
