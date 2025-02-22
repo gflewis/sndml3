@@ -241,12 +241,9 @@ public class Session {
 
 	
 	/**
-	 * <p>Returns a {@link Table} object which can be used for 
-	 * get, insert, update and delete operations.</p>
+	 * Returns a {@link Table} object which can be used for 
+	 * get, insert, update and delete operations.
 	 * 
-	 * <p>The full schema will be retrieved from sys_dictionary 
-	 * only if you call {@link Table#getSchema()}.</p>
-	 * 	 
 	 * @param name 
 	 * The internal name of the table (not the label that appears on the forms). 
 	 * The table name is in all lower case letters and may contain underscores.

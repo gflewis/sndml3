@@ -34,14 +34,6 @@ public class SingleJobRunner implements Runnable {
 	final Logger logger = LoggerFactory.getLogger(SingleJobRunner.class);
 	Metrics metrics;
 	
-	/**
-	 * 
-	 * @param profile
-	 * @param jobKey
-	 * @throws ConfigParseException
-	 * @throws IOException
-	 * @throws IllegalStateException Job was found but the state was not READY
-	 */
 	public SingleJobRunner(Resources resources, RecordKey jobKey) 
 			throws ConfigParseException, IOException, IllegalStateException {
 		this.resources = resources;

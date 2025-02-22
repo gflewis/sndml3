@@ -60,7 +60,7 @@ public class JobRunner implements Callable<Metrics> {
 
 	/**
 	 * Override this method to release all resources.
-	 * {@Link AppJobRunner} will override this method
+	 * {@link sndml.agent.AppJobRunner} will override this method
 	 * @throws ResourceException
 	 */
 	public void close() throws ResourceException {		

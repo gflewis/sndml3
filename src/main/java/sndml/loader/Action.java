@@ -6,16 +6,55 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_VALUES)
 public enum Action {
-	INSERT, 
-	UPDATE, 
-	SYNC, 
+	/**
+	 * Insert new records and generate a warning if a primary key violation occurs.
+	 */
+	INSERT,
+	
+	/**
+	 * Insert new records and update existing records.
+	 */
+	UPDATE,
+	
+	/**
+	 * Compare all timestampls and insert, update or delete records accordingly.
+	 */
+	SYNC,
+	
+	/**
+	 * Delete records based on sys_audit_delete. 
+	 */
 	PRUNE, 
-	EXECUTE, // Execute an SQL command
-	SINGLE, // Synchronize a single record
-	CREATE,  // Create a table
-	DROPTABLE, // Used for JUnit tests
-	LOAD,    // Alias for INSERT 
-	REFRESH;  // Alias for UPSERT
+	
+	/**
+	 * Execute an SQL command.
+	 */
+	EXECUTE,
+	
+	/**
+	 * Synchronize a single record
+	 */
+	SINGLE,
+
+	/**
+	 * Create a table.
+	 */
+	CREATE,
+	
+	/**
+	 * Drop a table. Used for JUnit tests.
+	 */
+	DROPTABLE,
+	
+	/**
+	 * Alias for INSERT.
+	 */
+	LOAD,
+	
+	/**
+	 * Alias for UPDATE.
+	 */
+	REFRESH;
 	
 	public static EnumSet<Action> INSERT_UPDATE =
 			EnumSet.of(INSERT, UPDATE, LOAD, REFRESH);
