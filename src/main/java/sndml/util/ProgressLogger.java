@@ -4,15 +4,15 @@ import sndml.agent.JobCancelledException;
 
 public abstract class ProgressLogger {
 
-	protected final Partition datePart;
+	protected final DatePartition datePart;
 	protected final Metrics metrics;
 	
-	public ProgressLogger(Metrics metrics, Partition datePart) {
+	public ProgressLogger(Metrics metrics, DatePartition datePart) {
 		this.datePart = datePart;
 		this.metrics = metrics;
 	}
 	
-	public Partition getPart() {
+	public DatePartition getPart() {
 		return datePart;
 	}
 	
@@ -24,7 +24,7 @@ public abstract class ProgressLogger {
 		return metrics;
 	}
 	
-	public abstract ProgressLogger newPartLogger(Metrics newMetrics, Partition newPart);	
+	public abstract ProgressLogger newPartLogger(Metrics newMetrics, DatePartition newPart);	
 
 	/**
 	 * We are starting the initialization process, which includes

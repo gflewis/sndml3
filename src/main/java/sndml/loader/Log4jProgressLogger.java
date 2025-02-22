@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sndml.servicenow.*;
-import sndml.util.Partition;
+import sndml.util.DatePartition;
 import sndml.util.Log;
 import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
@@ -18,7 +18,7 @@ public class Log4jProgressLogger extends ProgressLogger {
 		this(reader, action, null);
 	}
 	
-	public Log4jProgressLogger(TableReader reader, Action action, Partition part) {
+	public Log4jProgressLogger(TableReader reader, Action action, DatePartition part) {
 		this(reader.getClass(), action, null, null);
 	}
 
@@ -28,7 +28,7 @@ public class Log4jProgressLogger extends ProgressLogger {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public Log4jProgressLogger(Class clazz, Action action, Metrics metrics, Partition part) {
+	public Log4jProgressLogger(Class clazz, Action action, Metrics metrics, DatePartition part) {
 		super(metrics, part);
 		assert action != null;
 		assert metrics != null;
@@ -36,7 +36,7 @@ public class Log4jProgressLogger extends ProgressLogger {
 		this.logger = LoggerFactory.getLogger(clazz);
 	}
 	
-	protected Log4jProgressLogger(Logger logger, Action action, Metrics metrics, Partition part) {
+	protected Log4jProgressLogger(Logger logger, Action action, Metrics metrics, DatePartition part) {
 		super(metrics, part);
 		assert action != null;
 		assert metrics != null;
@@ -45,12 +45,12 @@ public class Log4jProgressLogger extends ProgressLogger {
 	}
 		
 			
-	public Log4jProgressLogger newPartLogger(TableReader newReader, Partition newPart) {
+	public Log4jProgressLogger newPartLogger(TableReader newReader, DatePartition newPart) {
 		return new Log4jProgressLogger(newReader, action, newPart);
 	}
 
 	@Override
-	public ProgressLogger newPartLogger(Metrics newMetrics, Partition newPart) {
+	public ProgressLogger newPartLogger(Metrics newMetrics, DatePartition newPart) {
 		return new Log4jProgressLogger(logger, action, newMetrics, newPart);
 	}
 

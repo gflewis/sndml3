@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import sndml.agent.AppJobStatus;
 import sndml.servicenow.*;
-import sndml.util.Partition;
+import sndml.util.DatePartition;
 import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.FieldNames;
@@ -68,7 +68,7 @@ public class JobConfig {
 	boolean getDropTable() { return this.dropTable == null ? false : this.dropTable.booleanValue(); }
 	DateTime getSince() { return this.sinceDate; }
 	
-	DateTimeRange getCreatedRange(Partition datePart) { 
+	DateTimeRange getCreatedRange(DatePartition datePart) { 
 		DateTimeRange range = 
 			datePart == null ? createdRange : datePart.intersect(createdRange);
 		return range;
@@ -290,7 +290,7 @@ public class JobConfig {
 		return createReader(table, db, table.getSession(), null);
 	}
 	
-	public TableReader createReader(Table table, DatabaseWrapper db, Session session, Partition datePart) 
+	public TableReader createReader(Table table, DatabaseWrapper db, Session session, DatePartition datePart) 
 			throws IOException {
 
 		assert table != null;
@@ -318,7 +318,7 @@ public class JobConfig {
 		configureReader(reader, null);
 	}
 	
-	public void configureReader(TableReader reader, Partition datePart) {
+	public void configureReader(TableReader reader, DatePartition datePart) {
 		Table table = reader.table;
 		String partName = datePart == null ? null : datePart.getName();
 		String readerName = getReaderName(datePart);
@@ -332,7 +332,7 @@ public class JobConfig {
 		reader.setMaxRows(getMaxRows());	
 	}
 	
-	private String getReaderName(Partition datePart) {
+	private String getReaderName(DatePartition datePart) {
 		String partName = datePart == null ? null : datePart.getName();
 		String readerName = partName == null ? jobName : jobName + "." + partName;
 		return readerName;		

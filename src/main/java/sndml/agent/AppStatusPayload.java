@@ -1,6 +1,6 @@
 package sndml.agent;
 
-import sndml.util.Partition;
+import sndml.util.DatePartition;
 import sndml.util.Metrics;
 
 public class AppStatusPayload {
@@ -14,14 +14,14 @@ public class AppStatusPayload {
 	final Type type;
 	final AppJobRunner runner;
 	final AppJobStatus status;	
-	final Partition datePart;
+	final DatePartition datePart;
 	final Metrics metrics;
 	
 	public AppStatusPayload(
 			Type type,
 			AppJobRunner runner,
 			AppJobStatus status,			
-			Partition datePart,
+			DatePartition datePart,
 			Metrics metrics) 
 	{
 		this.type = type;
@@ -53,7 +53,7 @@ public class AppStatusPayload {
 	public AppStatusPayload newPartitionProgressPayload(
 			AppJobRunner runner,
 			AppJobStatus status,
-			Partition datePart,
+			DatePartition datePart,
 			Metrics metrics) {
 		return new AppStatusPayload(Type.PROGRESS, runner, status, datePart, metrics);
 	}

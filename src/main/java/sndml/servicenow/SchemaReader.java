@@ -8,7 +8,7 @@ import java.io.IOException;
  * <ul>
  * <li>{@link sndml.servicenow.TableSchemaReader}</li> 
  * <li>{@link sndml.agent.AppSchemaReader}</li>
- * <ul>
+ * </ul>
  */
 public interface SchemaReader {
 

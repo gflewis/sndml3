@@ -1,11 +1,21 @@
 package sndml.util;
 
-public class DatePartitioning implements Iterable<Partition> {
+/**
+ * A {@link DatePartitionSet} divides a {@link DateTimeRange} into partitions 
+ * based on the {@link PartitionInterval}.
+ * <p>
+ * Each {@link DatePartition} is a {@link DateTimeRange} which begins and ends on an interval boundary.
+ * Thus, the first and last partitions may exceed the boundaries of the original range.
+ * <p>
+ * The {@link #iterator()} method returns the partitions in reverse chronological order.
+ * In other words, the most recent partition is returned first.
+ */
+public class DatePartitionSet implements Iterable<DatePartition> {
 	
 	private final DateTimeRange range;
 	private final PartitionInterval interval;
 
-	public DatePartitioning(DateTimeRange range, PartitionInterval interval) {
+	public DatePartitionSet(DateTimeRange range, PartitionInterval interval) {
 		this.range = range;
 		this.interval = interval;
 		if (range == null) {
@@ -33,6 +43,11 @@ public class DatePartitioning implements Iterable<Partition> {
 		return this.interval;			
 	}
 
+	/**
+	 * Compute the number of partitions in this {@link DatePartitionSet}.
+	 * 
+	 * @return number of partitions
+	 */
 	public int computeSize() {
 		if (range == null) return 0;
 		if (range.start == null) return 0;

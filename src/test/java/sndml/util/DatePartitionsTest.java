@@ -60,7 +60,7 @@ public class DatePartitionsTest {
 		DateTime startDate = new DateTime(start);
 		DateTime endDate = new DateTime(end);
 		DateTimeRange range = new DateTimeRange(startDate, endDate);
-		DatePartitioning partitions = new DatePartitioning(range, interval);
+		DatePartitionSet partitions = new DatePartitionSet(range, interval);
 		assertNotNull(partitions);
 		logger.info(Log.TEST, String.format(
 				"Testing: %s", partitions.toString()));
@@ -76,11 +76,13 @@ public class DatePartitionsTest {
 			oldest = part;
 			size += 1;
 			logger.info(Log.TEST, String.format(
-				"%d %s %s", size, part.toString(), Partition.getName(interval,  pstart)));			
+				"%d %s %s", size, part.toString(), DatePartition.getName(interval,  pstart)));			
 		}
 		if (size > 0) {
 			assertTrue(oldest.getStart().toString().compareTo(start) <= 0);
 			assertTrue(newest.getEnd().toString().compareTo(end) >= 0);
+			assertTrue(range.contains(startDate));
+			assertFalse(range.contains(endDate));
 		}
 		return size;
 		
@@ -89,7 +91,7 @@ public class DatePartitionsTest {
 	@Test
 	public void testHalfMonth() {
 		DateTimeRange range = new DateTimeRange("2024-01-01", "2024-01-15");
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.MONTH);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.MONTH);
 		assertEquals(1, partitions.computeSize());
 		assertEquals(1, partitions.iterator().getSize());
 	}
@@ -97,7 +99,7 @@ public class DatePartitionsTest {
 	@Test
 	public void testOneMonth() {
 		DateTimeRange range = new DateTimeRange("2024-01-01", "2024-01-31");
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.MONTH);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.MONTH);
 		assertEquals(1, partitions.computeSize());
 		assertEquals(1, partitions.iterator().getSize());
 	}
@@ -107,11 +109,11 @@ public class DatePartitionsTest {
 		DateTime start = new DateTime("2024-01-15");
 		DateTime end = new DateTime("2024-06-15");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.MONTH);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.MONTH);
 		DatePartitionIterator iterator = partitions.iterator();
 		int size = iterator.getSize();
 		assertEquals(size, 6);
-		Partition part = null;
+		DatePartition part = null;
 		for (int i = 0; i < 6; ++i) {
 			part = iterator.next();
 			logger.info(Log.TEST, String.format("testSixMonths %s %s", part.getName(), part.getRange().toString()));
@@ -127,11 +129,11 @@ public class DatePartitionsTest {
 		DateTime start = new DateTime("2024-01-15");
 		DateTime end = new DateTime("2024-06-15");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.MONTH);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.MONTH);
 		DatePartitionIterator iterator = partitions.iterator();
 		int size = iterator.getSize();
 		assertEquals(size, 6);
-		Partition part = null;
+		DatePartition part = null;
 		for (int i = 0; i < 7; ++i) {
 			part = iterator.next();
 			assertNotNull(part);
@@ -143,7 +145,7 @@ public class DatePartitionsTest {
 		DateTime start = new DateTime("2024-06-15 10:30:00");
 		DateTime end = new DateTime("2024-06-15 10:30:00");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.HOUR);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.HOUR);
 		int size = partitions.computeSize();
 		assertEquals(0, size);
 	}
@@ -153,14 +155,14 @@ public class DatePartitionsTest {
 		DateTime start = new DateTime("2024-06-15 10:30:00");
 		DateTime end = new DateTime("2024-06-12 10:30:00");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.HOUR);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.HOUR);
 		int size = partitions.computeSize();
 		assertEquals(0, size);		
 	}
 	
 	@Test
 	public void testEmptyPartition() {
-		DatePartitioning partitions = new DatePartitioning(null, null);
+		DatePartitionSet partitions = new DatePartitionSet(null, null);
 		int size = partitions.iterator().getSize();
 		assertEquals(size, 0);		
 	}
@@ -170,13 +172,13 @@ public class DatePartitionsTest {
 		DateTime start = new DateTime("2024-06-15 10:30:00");
 		DateTime end = new DateTime("2024-06-15 10:30:00");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.HOUR);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.HOUR);
 		int size = partitions.computeSize();
 		assertEquals(0, size);		
 		DatePartitionIterator iterator = partitions.iterator();
 		// should throw an exception
 		@SuppressWarnings("unused")
-		Partition part = iterator.next();
+		DatePartition part = iterator.next();
 	}
 	
 }

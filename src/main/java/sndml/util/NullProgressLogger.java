@@ -9,12 +9,12 @@ public class NullProgressLogger extends ProgressLogger {
 		super(null, null);
 	}
 	
-	public NullProgressLogger(Metrics metrics, Partition datePart) {
+	public NullProgressLogger(Metrics metrics, DatePartition datePart) {
 		super(metrics, datePart);
 	}
 		
 	@Override
-	public NullProgressLogger newPartLogger(Metrics newMetrics, Partition newPart) {
+	public NullProgressLogger newPartLogger(Metrics newMetrics, DatePartition newPart) {
 		return new NullProgressLogger(null, newPart);
 	}
 	

@@ -8,21 +8,21 @@ import java.util.NoSuchElementException;
  * the most recent, and ending with the earliest.
  *
  */
-public class DatePartitionIterator implements Iterator<Partition> {
+public class DatePartitionIterator implements Iterator<DatePartition> {
 	
-	final DatePartitioning partition;
+	final DatePartitionSet parts;
 	final DateTimeRange range;
 	final PartitionInterval interval;
 	final int size;
 	boolean started = false;
 	boolean finished = false;
-	Partition current = null;
+	DatePartition current = null;
 
-	public DatePartitionIterator(DatePartitioning partition) {
-		this.partition = partition;
-		this.range = partition.getRange();
-		this.interval = partition.getInterval();
-		if (partition.isEmpty()) {
+	public DatePartitionIterator(DatePartitionSet parts) {
+		this.parts = parts;
+		this.range = parts.getRange();
+		this.interval = parts.getInterval();
+		if (parts.isEmpty()) {
 			this.size = 0;
 			this.finished = true;			
 		}
@@ -41,7 +41,7 @@ public class DatePartitionIterator implements Iterator<Partition> {
 				assert interval != null : "interval is null";
 				assert range.end != null : "end date is null";
 				assert range.start != null : "start date is null";
-				this.size = partition.computeSize();
+				this.size = parts.computeSize();
 			}
 		}
   	}
@@ -50,7 +50,7 @@ public class DatePartitionIterator implements Iterator<Partition> {
 	public DatePartitionIterator(DateTimeRange range, PartitionInterval interval) {
 		this.range = range;
 		this.interval = interval;
-		this.partition = new DatePartitioning(range, interval);
+		this.parts = new DatePartitionSet(range, interval);
 		if (range == null) {
 			this.size = 0;
 			this.finished = true;
@@ -91,22 +91,22 @@ public class DatePartitionIterator implements Iterator<Partition> {
 	/**
 	 * Return the most recent part
 	 */
-	private Partition getNewest() {
+	private DatePartition getNewest() {
 		DateTime end = range.end.ceiling(interval);
 		assert end.compareTo(range.end) >= 0 : "getNewest bad ceiling";
 		DateTime start = end.decrementBy(interval);
-		return new Partition(interval, start, end);		
+		return new DatePartition(interval, start, end);		
 	}
 
 	/**
 	 * Return the earliest part
 	 */
 	@SuppressWarnings("unused")
-	private Partition getOldest() {
+	private DatePartition getOldest() {
 		DateTime start = range.start.truncate(interval);
 		assert start.compareTo(range.start) <= 0 : "getOldest bad truncate"; 
 		DateTime end = start.incrementBy(interval);
-		return new Partition(interval, start, end); 
+		return new DatePartition(interval, start, end); 
 	}
 		
 	
@@ -120,7 +120,7 @@ public class DatePartitionIterator implements Iterator<Partition> {
 	}
 
 	@Override
-	public Partition next() throws NoSuchElementException {
+	public DatePartition next() throws NoSuchElementException {
 		if (finished) throw new NoSuchElementException();
 		if (!started) { 
 			current = getNewest();			
@@ -130,7 +130,7 @@ public class DatePartitionIterator implements Iterator<Partition> {
 			DateTime end = current.start;
 			DateTime start = end.decrementBy(interval);
 			assert start.compareTo(end) < 0 : "start not before end"; 
-			current = new Partition(interval, start, end);			
+			current = new DatePartition(interval, start, end);			
 		}
 		if (current.start.compareTo(range.start) <= 0) finished = true;
 		return current;

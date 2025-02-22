@@ -3,6 +3,11 @@ package sndml.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+/**
+ * A {@link DateTime} range which is open at the beginning but closed at the end.
+ * In other words,
+ * the start date is included but the end date is NOT included.
+ */
 public class DateTimeRange {
 
 	protected final DateTime start;
@@ -22,6 +27,19 @@ public class DateTimeRange {
 	
 	public static DateTimeRange all() {
 		return new DateTimeRange((DateTime) null, (DateTime) null);
+	}
+	
+	/**
+	 * Determine whether a date falls within the {@link DateTimeRange}.
+	 * The range is open at the beginning and closed at the end.
+	 * In other words,
+	 * the start date is included but the end date is NOT included.
+	 */
+	public boolean contains(DateTime date) {
+		assert date != null : "null date cannot be tested";
+		if (start != null && date.compareTo(start) < 0) return false;
+		if (end != null && date.compareTo(end) >= 0) return false;
+		return true;
 	}
 	
 	public DateTime getStart() {

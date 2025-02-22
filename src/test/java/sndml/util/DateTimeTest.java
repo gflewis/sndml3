@@ -151,7 +151,7 @@ public class DateTimeTest {
 		DateTime start = new DateTime("2014-05-10");
 		DateTime end   = new DateTime("2016-12-17");
 		DateTimeRange range = new DateTimeRange(start, end);
-		DatePartitioning partitions = new DatePartitioning(range, PartitionInterval.MONTH);
+		DatePartitionSet partitions = new DatePartitionSet(range, PartitionInterval.MONTH);
 		logger.info("partitions=" + partitions.toString());
 		int size = 0;
 		DateTimeRange newest = null;

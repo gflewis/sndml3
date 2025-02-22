@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import sndml.agent.JobCancelledException;
 import sndml.servicenow.*;
-import sndml.util.Partition;
-import sndml.util.DatePartitioning;
+import sndml.util.DatePartition;
+import sndml.util.DatePartitionSet;
 import sndml.util.DateTimeRange;
 import sndml.util.PartitionInterval;
 import sndml.util.Log;
@@ -31,7 +31,7 @@ public final class DatePartitionedTableReader extends TableReader {
 	final PartitionInterval interval;
 	
 	private DateTimeRange range;
-	private DatePartitioning partition;
+	private DatePartitionSet parts;
 	private List<Future<Metrics>> futures;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,9 +49,9 @@ public final class DatePartitionedTableReader extends TableReader {
 		this.threads = (config.getThreads()==null) ? 1 : config.getThreads();
 	}
 		
-	public DatePartitioning getPartition() {
-		assert partition != null : "Not initialized";
-		return partition;
+	public DatePartitionSet getPartitions() {
+		assert parts != null : "Not initialized";
+		return parts;
 	}
 		
 	@SuppressWarnings("unused")
@@ -110,16 +110,16 @@ public final class DatePartitionedTableReader extends TableReader {
 			assert range.getStart() != null : "range.start is null";
 			assert range.getEnd() != null : "range.end is null";
 		}
-		this.partition = new DatePartitioning(range, interval);
+		this.parts = new DatePartitionSet(range, interval);
 		if (range == null) 
 			logger.info(Log.INIT, "expected=0; empty partition created");
 		else 
 			logger.debug(Log.INIT, String.format(
-				"range=%s partition=%s expected=%d", range, partition, expected));
+				"range=%s partition=%s expected=%d", range, parts, expected));
 		super.endPrepare(expected);
 	}
 	
-	private TableReader createReader(Partition datePart) 
+	private TableReader createReader(DatePartition datePart) 
 			throws IOException, SQLException, InterruptedException, JobCancelledException {
 		String partName = datePart.getName();
 		boolean createNewSession = (threads > 1) ? true : false;
@@ -148,7 +148,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			futures = new ArrayList<Future<Metrics>>();
 			logger.info(Log.INIT, String.format("starting %d threads", threads));			
 			ExecutorService executor = Executors.newFixedThreadPool(this.threads);
-			for (Partition partRange : partition) {
+			for (DatePartition partRange : parts) {
 				TableReader partReader = createReader(partRange);
 				logger.debug("Submit " + metrics.getName());
 				Future<Metrics> future = executor.submit(partReader);
@@ -161,7 +161,7 @@ public final class DatePartitionedTableReader extends TableReader {
 			}
 		}
 		else {
-			for (Partition partRange : partition) {
+			for (DatePartition partRange : parts) {
 				TableReader partReader = createReader(partRange);
 				assert partReader.getProgressLogger() != null;
 				partReader.call();				
@@ -170,7 +170,7 @@ public final class DatePartitionedTableReader extends TableReader {
 		progress.logComplete();
 		// Free resources
 		futures = null;
-		partition = null;
+		parts = null;
 		return metrics;
 	}
 
