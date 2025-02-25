@@ -13,7 +13,6 @@ import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
 import sndml.loader.Resources;
 import sndml.util.Log;
-import sndml.util.ResourceException;
 
 /**
  * A class which runs forever in a loop, periodically scanning the app
@@ -30,8 +29,6 @@ public class AgentDaemon implements Daemon, Runnable {
 	private final AgentScanner scanner;
 	private final int threadCount;	
 	private final int intervalSeconds;
-//	private final int shutdownSeconds;
-	private final String pidFileName;
 	private final WorkerPool workerPool; // null if threadCount < 2
 	
 	private static volatile boolean isRunning = false;
@@ -50,10 +47,8 @@ public class AgentDaemon implements Daemon, Runnable {
         this.daemon = this;
 		this.agentName = profile.getAgentName();
 		this.threadCount = profile.getThreadCount();
-		this.intervalSeconds = Integer.parseInt(profile.getProperty("daemon.interval"));
-//		this.shutdownSeconds = Integer.parseInt(profile.getProperty("server.shutdown_seconds"));
-		
-		this.pidFileName = profile.getPidFileName();
+		this.intervalSeconds = Integer.parseInt(profile.getProperty("daemon.interval"));		
+//		final String pidFileName = profile.getPidFileName();
 		
 		assert intervalSeconds > 0;
 		if (threadCount > 1) {
@@ -67,7 +62,7 @@ public class AgentDaemon implements Daemon, Runnable {
 		assert agentName != null;
 		assert agentName != "";
 		Log.setJobContext(agentName);
-		logger.info(String.format("instantiate agent=%s pidfile=%s", agentName, pidFileName));
+//		logger.info(String.format("instantiate agent=%s pidfile=%s", agentName, pidFileName));
 	}
 	
 	static AgentDaemon getDaemon() {
@@ -168,12 +163,12 @@ public class AgentDaemon implements Daemon, Runnable {
 	@Override
 	public void init(DaemonContext context) throws DaemonInitException {
 		this.context = context;
-		try {
-			AgentMain.writePidFile();
-		} catch (ResourceException e) {
-			throw new DaemonInitException(
-				"Unable to write pidfile: " + pidFileName);
-		}
+//		try {
+//			AgentMain.init();
+//		} catch (ResourceException e) {
+//			throw new DaemonInitException(
+//				"Unable to write pidfile: " + pidFileName);
+//		}
 	}
 
 	// TODO Make this class work with JSCV and PROCRUN

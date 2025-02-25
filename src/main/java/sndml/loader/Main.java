@@ -25,6 +25,7 @@ public class Main {
 	static protected ConnectionProfile profile;
 	static protected Resources resources;
 	static private boolean requiresApp = false;
+	static protected String agentName;
 	
 	static Options options = new Options();	
 	static final protected Option optProfile = 
@@ -55,7 +56,6 @@ public class Main {
 			Option.builder("server").longOpt("server").required(false).hasArg(false).
 			desc("Run as server").build();
 
-	static protected String agentName;
 	static private Logger logger;
 		
 	public static void main(String[] args) throws Exception {

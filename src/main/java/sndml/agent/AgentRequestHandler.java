@@ -34,7 +34,6 @@ public class AgentRequestHandler implements HttpHandler {
 		this.appSession = resources.getAppSession();
 		this.agentKey = appSession.getAgentKey().toString();
 		this.workerPool = resources.getWorkerPool();
-		AgentMain.writePidFile();
 	}
 	
 	@Override

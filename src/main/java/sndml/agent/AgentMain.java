@@ -19,13 +19,15 @@ import sndml.util.ResourceException;
 
 public class AgentMain extends Main {
 
-	static RecordKey agentKey;
+	static private RecordKey agentKey;
+	static private long pid;
 	static final Logger logger = Log.getLogger(AgentMain.class);
 	
 	public static void main(CommandLine cmd, Resources resources) throws Exception {
 		// Note: resources is actually a static protected variable in Main;
 		// thus we could access it even if it were not a parameter		
 		assert resources != null;
+		init();
 		// agentName is a static variable defined in Main
 		if (agentName == null) 
 			throw new AssertionError(
@@ -71,23 +73,24 @@ public class AgentMain extends Main {
 	}
 	
 	/**
-	 * Return value of profile property "app.agent" or null if not defined
+	 * Return value of profile property "app.agent" or null if not defined.
 	 */
 	public static String getAgentName() {
+		// agentName is declared in {@link sndml.loader.Main}
 		return agentName;
 	}
 	
-	static void writePidFile() throws ResourceException {
+	private static void init() throws ResourceException {
         ProcessHandle processHandle = ProcessHandle.current();
         String pidFileName = Main.profile.getPidFileName();
-		long pid = processHandle.pid();
+		AgentMain.pid = processHandle.pid();
 		if (pidFileName == null) {
-			logger.info(Log.INIT, String.format("writePidFile pid=%d", pid));			
+			logger.info(Log.INIT, String.format("pid=%d", pid));			
 		}
 		else {
 			File pidFile = new File(pidFileName);
 			logger.info(Log.INIT, String.format(
-				"init pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
+				"pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
 			PrintWriter pidWriter;
 			try {
 				pidWriter = new PrintWriter(pidFile);
@@ -95,8 +98,7 @@ public class AgentMain extends Main {
 				pidWriter.close();
 			} catch (IOException e) {
 				throw new ResourceException(
-					"Unable to write pidfile: " + pidFileName);
-				
+					"Unable to write pidfile: " + pidFileName);				
 			}
 		}		
 	}
