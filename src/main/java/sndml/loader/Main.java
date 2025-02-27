@@ -25,9 +25,11 @@ public class Main {
 	static protected ConnectionProfile profile;
 	static protected Resources resources;
 	static private boolean requiresApp = false;
+	static private CommandLine cmd;
 	static protected String agentName;
 	
-	static Options options = new Options();	
+	static Options options = new Options();
+	
 	static final protected Option optProfile = 
 			Option.builder("p").longOpt("profile").required(true).hasArg(true).
 			desc("Property file (required)").build();
@@ -56,20 +58,21 @@ public class Main {
 			Option.builder("server").longOpt("server").required(false).hasArg(false).
 			desc("Run as server").build();
 
+	static final Option commandOptions[] = {
+			optYaml, optTable, optJobRun, optScan, optDaemon, optServer};
+	
 	static private Logger logger;
-		
+
 	public static void main(String[] args) throws Exception {
-		options.addOption(optProfile);
-		options.addOption(optTable);
-		options.addOption(optFilter);
-		options.addOption(optSysID);
-		options.addOption(optYaml);
-		options.addOption(optJobRun);
-		options.addOption(optScan);
-		options.addOption(optDaemon);
-		options.addOption(optServer);
-				
-		CommandLine cmd = new DefaultParser().parse(options,  args);
+		final Option allOptions[] = {
+			optProfile, optTable, optFilter, optSysID, optYaml, 
+			optJobRun, optScan, optDaemon, optServer};		
+
+		for (Option opt : allOptions) {
+			options.addOption(opt);
+		}
+						
+		cmd = new DefaultParser().parse(options,  args);
 		int cmdCount = 0;
 		if (cmd.hasOption(optYaml))   cmdCount += 1;
 		if (cmd.hasOption(optTable))  cmdCount += 1;
@@ -128,7 +131,18 @@ public class Main {
 			AgentMain.main(cmd, resources);
 		}
 	}
+
+	protected static Option getCommandOption() {
+		for (Option opt : commandOptions) {
+			if (cmd.hasOption(opt)) return opt;			
+		}
+		return null;		
+	}
 	
+	protected static String getCommandOptionName() {
+		return getCommandOption().getLongOpt();		
+	}
+		
 	public static Resources getResources() {
 		return resources;
 	}
