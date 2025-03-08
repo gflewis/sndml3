@@ -388,13 +388,14 @@ when SNDML started.
 ### Insert
 **Insert** is used for initial loading or reloading of SQL tables. 
 It inserts rows into the target table. 
-If a record with the same sys_id already exists in the target table, 
+If a record with the same `sys_id` already exists in the target table, 
 then a primary key violation will occur and the row will be skipped.
 
 If **Truncate** is checked, then the SQL table will be truncated prior to the load.
 
 ### Upsert
 **Upsert** is used to load or update SQL tables. 
+This is the most common Job Action.
 If the target record exists (based on `sys_id`), then it will be updated. 
 Otherwise, it will be inserted.
 
@@ -437,7 +438,7 @@ meaning that it will retrieve and process 200 records at a time.
 1. Fetch 200 records (_i.e._ one page) from ServiceNow
 2. Insert or Update the SQL table
 3. Commit the changes to the SQL database
-4. Update the record counters in the DataPump Job Run table 
+4. Update the record counters in the DataPump **Job Run** table 
 5. Repeat
 
 In general, most of the time is spent communicating with ServiceNow. 
@@ -458,7 +459,7 @@ so in this example we are actually exporting 8 columns.
 It is important to note that DataPump will NOT add or drop columns in a pre-existing table. 
 If you change the Columns setting on the Database Table form after the SQL table has been created, 
 then you must either use `ALTER TABLE` to modify the table structure, 
-or drop the table and allow DataPump to recreate it.
+or drop the table and allow SNDML to recreate it.
 
 ## Partitioned Load
 
