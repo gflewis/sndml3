@@ -71,7 +71,7 @@ public enum Action {
 	public static EnumSet<Action> EXECUTE_ONLY =
 			EnumSet.of(EXECUTE);
 	
-	public static EnumSet<Action> SINGLE_ONLY =
+	public static EnumSet<Action> ROWSYNC_ONLY =
 			EnumSet.of(ROWSYNC);
 	
 }

@@ -246,7 +246,7 @@ public class JobConfig {
 		validForActions("Filter", filter, Action.INSERT_UPDATE_SYNC);
 		validForActions("Since", sinceDate, Action.INSERT_UPDATE_PRUNE);
 		validForActions("SQL", sql, Action.EXECUTE_ONLY);
-		validForActions("Document", docKey, Action.SINGLE_ONLY);
+		validForActions("Document", docKey, Action.ROWSYNC_ONLY);
 		
 		if (sinceExpr != null && sinceDate == null)
 			configError("Missing Since Date");
