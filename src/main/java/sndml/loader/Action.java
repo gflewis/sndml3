@@ -34,7 +34,7 @@ public enum Action {
 	/**
 	 * Synchronize a single record
 	 */
-	SINGLE,
+	ROWSYNC,
 
 	/**
 	 * Create a table.
@@ -66,12 +66,12 @@ public enum Action {
 			EnumSet.of(INSERT, UPDATE, PRUNE, LOAD, REFRESH);
 
 	public static EnumSet<Action> ANY_TABLE_ACTION =
-			EnumSet.of(INSERT, UPDATE, SYNC, PRUNE, CREATE, DROPTABLE, LOAD, REFRESH, SINGLE);
+			EnumSet.of(INSERT, UPDATE, SYNC, PRUNE, CREATE, DROPTABLE, LOAD, REFRESH, ROWSYNC);
 
 	public static EnumSet<Action> EXECUTE_ONLY =
 			EnumSet.of(EXECUTE);
 	
 	public static EnumSet<Action> SINGLE_ONLY =
-			EnumSet.of(SINGLE);
+			EnumSet.of(ROWSYNC);
 	
 }

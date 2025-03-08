@@ -118,8 +118,8 @@ public class JobRunner implements Callable<Metrics> {
 		case SYNC:
 			runSync();
 			break;
-		case SINGLE:
-			runSingleRecordSync();
+		case ROWSYNC:
+			runRowSync();
 			break;
 		default:
 			runLoad();
@@ -214,7 +214,10 @@ public class JobRunner implements Callable<Metrics> {
 		synchronizer.call();
 	}
 	
-	private void runSingleRecordSync() 
+	/**
+	 * Synronize a single row
+	 */
+	private void runRowSync() 
 			throws SQLException, IOException, InterruptedException, JobCancelledException {
 		String sqlTableName = config.getTarget();
 		assert sqlTableName != null;

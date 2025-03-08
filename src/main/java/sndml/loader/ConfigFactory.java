@@ -139,7 +139,7 @@ public class ConfigFactory {
 	JobConfig singleRecordSync(ConnectionProfile profile, Table table, RecordKey docKey) {
 		DateCalculator dateFactory = new DateCalculator();
 		JobConfig job = new JobConfig();
-		job.action = Action.SINGLE;
+		job.action = Action.ROWSYNC;
 		job.source = table.getName();
 		job.docKey = docKey;
 		job.initialize(profile, dateFactory);

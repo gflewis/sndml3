@@ -36,7 +36,7 @@ public class JobConfig {
 	public String source;
 	public String target;
 	public Action action;
-	@JsonProperty("dockey") public RecordKey docKey; // Action SINGLE only
+	@JsonProperty("dockey") public RecordKey docKey; // Action ROWSYNC only
 	public Boolean truncate;
 	@JsonProperty("drop") public Boolean dropTable;
 	@JsonProperty("created") public JsonNode createdExpr;
@@ -252,7 +252,7 @@ public class JobConfig {
 			configError("Missing Since Date");
 		if (createdExpr != null && createdRange == null)
 			configError("Missing Created Range");
-		if (action == Action.SINGLE && docKey == null)
+		if (action == Action.ROWSYNC && docKey == null)
 			configError("Missing Document");
 		
 		if (threads != null && partition == null)
