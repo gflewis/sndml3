@@ -30,21 +30,25 @@ public class MultiThreadScanner extends AgentScanner {
 	
 	@Override
 	public void scanUntilDone() throws IOException, InterruptedException, ConfigParseException {
-		logger.debug(Log.INIT, "scanUntilDone");
+		String myname = this.getClass().getSimpleName() + ".scanUntilDone";
+		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		scan();
 		int loopCounter = 0;
-		while (workerPool.activeTaskCount() > 0) {
+		int activeTasks = workerPool.activeTaskCount();
+		while (activeTasks > 0) {
 			// print message every 15 seconds
 			if (++loopCounter % 15 == 0)
 				logger.info(Log.PROCESS, 
-					String.format("scanUntilDone: %d threads running", workerPool.activeTaskCount()));
+					String.format("scanUntilDone: %d threads running", activeTasks));
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				logger.error(Log.PROCESS, e.getMessage());
 				throw e;
-			}	
+			}
+			activeTasks = workerPool.activeTaskCount();
 		}	
+		logger.debug(Log.FINISH, String.format("%s end",  myname));
 	}
 
 	/**
@@ -54,8 +58,9 @@ public class MultiThreadScanner extends AgentScanner {
 	 * <p>Note: This function does NOT necessarily wait for all jobs to complete.</p>
 	 */
 	public int scan() throws IOException, ConfigParseException {
+		String myname = this.getClass().getSimpleName() + ".scan";
 		Log.setJobContext(agentName);		
-		logger.debug(Log.INIT, "scan");
+		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		ArrayList<AppJobRunner> joblist = getJobList();
 		if (joblist.size() > 0) {
 			// Schedule all jobs for future execution
@@ -65,8 +70,10 @@ public class MultiThreadScanner extends AgentScanner {
 				workerPool.submit(job);	
 			}				
 		}
-		Log.setGlobalContext();			
-		return joblist.size();
+		Log.setGlobalContext();
+		int result = joblist.size();
+		logger.debug(Log.FINISH, String.format("%s end %d", myname, result));
+		return result;
 	}
 
 //	/**

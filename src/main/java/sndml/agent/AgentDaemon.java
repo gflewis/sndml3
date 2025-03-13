@@ -137,7 +137,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	
 	/**
 	 * Run the {@link AgentScanner} a single time. 
-	 * Wait for all jobs to complete.
+	 * Rescan until all jobs to complete.
 	 * Shut down the worker pool.
 	 * 
 	 * @throws DaemonInitException
@@ -191,13 +191,16 @@ public class AgentDaemon implements Daemon, Runnable {
 	
 	@Override
 	public void stop() {
+		Log.setJobContext(agentName);	
+		logger.debug(Log.FINISH, "Begin stop");
 		workerPool.shutdown();
+		logger.info(Log.FINISH, "End stop");
 	}
 	
 	/*
 	@Override
 	public void stop() {
-		Log.setJobContext(agentName);		
+		Log.setJobContext(agentName);	
 		logger.debug(Log.FINISH, "Begin stop");
 		// shutdownNow will send an interrupt to all threads
 		executor.shutdown();
