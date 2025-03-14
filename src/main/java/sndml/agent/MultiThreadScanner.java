@@ -32,23 +32,32 @@ public class MultiThreadScanner extends AgentScanner {
 	public void scanUntilDone() throws IOException, InterruptedException, ConfigParseException {
 		String myname = this.getClass().getSimpleName() + ".scanUntilDone";
 		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
-		scan();
-		int loopCounter = 0;
-		int activeTasks = workerPool.activeTaskCount();
-		while (activeTasks > 0) {
-			// print message every 15 seconds
-			if (++loopCounter % 15 == 0)
-				logger.info(Log.PROCESS, 
-					String.format("scanUntilDone: %d threads running", activeTasks));
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				logger.error(Log.PROCESS, e.getMessage());
-				throw e;
+		boolean done = false;
+		while (!done) {
+			int jobcount = scan();
+			if (jobcount == 0) {
+				done = true;				
 			}
-			activeTasks = workerPool.activeTaskCount();
-		}	
+			else {
+				int loopCounter = 0;
+				int activeTasks = workerPool.activeTaskCount();
+				if (activeTasks == 0) done = true;
+				while (activeTasks > 0) {
+					// print message every 15 seconds
+					if (++loopCounter % 15 == 0)
+						logger.info(Log.PROCESS, 
+							String.format("scanUntilDone: %d threads running", activeTasks));
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						logger.error(Log.PROCESS, e.getMessage());
+						throw e;
+					}				
+				}											
+			}
+		}
 		logger.debug(Log.FINISH, String.format("%s end",  myname));
+		if (logger.isDebugEnabled()) workerPool.dumpJobList();
 	}
 
 	/**
@@ -72,7 +81,7 @@ public class MultiThreadScanner extends AgentScanner {
 		}
 		Log.setGlobalContext();
 		int result = joblist.size();
-		logger.debug(Log.FINISH, String.format("%s end %d", myname, result));
+		logger.debug(Log.FINISH, String.format("%s end jobs=%d", myname, result));
 		return result;
 	}
 

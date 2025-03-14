@@ -32,7 +32,6 @@ public class SingleThreadScanner extends AgentScanner {
 		}			
 		while (jobcount > 0);
 		logger.debug(Log.FINISH, String.format("%s end",  myname));
-		
 	}
 
 	/**
@@ -60,16 +59,5 @@ public class SingleThreadScanner extends AgentScanner {
 		return result;
 		
 	}
-
-//	/**
-//	 * This function is called by {@link AppJobRunner} whenever a job completes.
-//	 * When a job completes it may cause other jobs to move to a "ready" state.
-//	 * @throws SQLException 
-//	 */	
-//	@Override
-//	public void rescan() throws ConfigParseException, IOException, SQLException {
-//		logger.info(Log.PROCESS, "Rescan");
-//		scan();
-//	}		
 	
 }

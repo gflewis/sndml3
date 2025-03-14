@@ -1,7 +1,5 @@
 package sndml.agent;
 
-import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,12 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import sndml.loader.ConnectionProfile;
-import sndml.servicenow.HttpMethod;
-import sndml.servicenow.JsonRequest;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
 import sndml.util.Metrics;
@@ -55,16 +48,7 @@ public class WorkerPool {
 		this.executor = new ThreadPoolExecutor(
 				threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, queue);
 	}
-	
-//	public WorkerPool(int threadCount) {
-//		super(
-//			threadCount, threadCount, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-//			new LinkedBlockingQueue<Runnable>());
-//		this.threadCount = threadCount;
-//		logger.info(
-//			Log.INIT, String.format("instantiate threads=%d", threadCount));
-//	}
-		
+			
 	int getThreadCount() {
 		return threadCount;
 	}
@@ -101,10 +85,24 @@ public class WorkerPool {
 		return result;
 	}
 	
+	synchronized int activeTaskCount() {
+		int count = 0;
+		Iterator<WorkerEntry> iter = jobList.iterator();
+		while (iter.hasNext()) {
+			WorkerEntry entry = iter.next();
+			if (isActive(entry)) count += 1; 			
+		}
+		return count;				
+	}
+	
+	synchronized boolean isDormant() {
+		return (activeTaskCount() == 0);
+	}
+
 	/**
 	 * Print the content of jobList. Used for debugging.
 	 */
-	synchronized private void dumpJobList() {
+	synchronized public void dumpJobList() {
 		logger.info(Log.PROCESS, String.format("%d active jobs", jobList.size()));
 		Iterator<WorkerEntry> iter = jobList.iterator();
 		int count = 0;
@@ -120,22 +118,11 @@ public class WorkerPool {
 		}		
 	}
 	
-	synchronized int activeTaskCount() {
-		int count = 0;
-		Iterator<WorkerEntry> iter = jobList.iterator();
-		while (iter.hasNext()) {
-			WorkerEntry entry = iter.next();
-			if (isActive(entry)) count += 1; 			
-		}
-		return count;				
-	}
-
 	public void shutdown() {
 		Log.setJobContext(getAgentName());
 		logger.debug(Log.FINISH, "Begin stop");
 		// shutdownNow will send an interrupt to all threads
 		executor.shutdown();
-//		isRunning = false;
 		try { 
 			executor.awaitTermination(shutdownSeconds, TimeUnit.SECONDS);
 		}
@@ -192,7 +179,7 @@ public class WorkerPool {
 		}		
 	}
 
-	@SuppressWarnings("unused")
+	/*
 	private void setRunStatus(AppSession appSession, RecordKey runKey, AppJobStatus status, String message) {
 		logger.warn(Log.FINISH, String.format(
 			"setRunStatus %s %s", runKey.toString(), status.toString()));
@@ -208,5 +195,6 @@ public class WorkerPool {
 			logger.warn(Log.FINISH, "setRunStatus: " + e1.getMessage());
 		}
 	}
+	*/
 
 }

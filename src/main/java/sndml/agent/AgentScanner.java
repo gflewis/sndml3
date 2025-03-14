@@ -98,10 +98,10 @@ public abstract class AgentScanner extends TimerTask {
 	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
 	 * When a job completes it may cause other jobs to move to a "ready" state.
 	 */	
-	public void rescan() throws ConfigParseException, IOException, SQLException {
-		logger.info(Log.PROCESS, "Rescan");
-		scan();
-	}
+//	public void rescan() throws ConfigParseException, IOException, SQLException {
+//		logger.info(Log.PROCESS, "Rescan");
+//		scan();
+//	}
 		
 	protected abstract int getErrorLimit();
 	

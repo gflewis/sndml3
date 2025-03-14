@@ -31,10 +31,6 @@ public class ScannerJobRunner extends AppJobRunner {
 		setThreadName();
 		try {
 			super.call();
-			if (scanner != null) {
-				logger.debug(Log.FINISH, myname + " rescan");
-				scanner.rescan();
-			}
 		} catch (JobCancelledException e) {
 			logger.error(Log.ERROR, e.getMessage());
 			statusLogger.cancelJob(runKey, e);			
@@ -48,7 +44,7 @@ public class ScannerJobRunner extends AppJobRunner {
 			logger.error(Log.ERROR, "Critical error detected. Halting JVM.");
 			Runtime.getRuntime().halt(-1);
 		}
-		logger.debug(Log.FINISH, myname + " complete");
+		logger.debug(Log.FINISH, myname + " end");
 		return jobMetrics;
 	}
 	
