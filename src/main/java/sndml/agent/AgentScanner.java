@@ -92,7 +92,8 @@ public abstract class AgentScanner extends TimerTask {
 	public abstract void scanUntilDone() 
 			throws IOException, InterruptedException, ConfigParseException, SQLException;
 	
-	public abstract int scan() throws ConfigParseException, IOException, SQLException;
+	public abstract int scan() 
+			throws ConfigParseException, IOException, SQLException;
 	
 	/**
 	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
@@ -171,14 +172,14 @@ public abstract class AgentScanner extends TimerTask {
 		return runlist;		
 	}
 		
-	String getNumbers(ArrayNode runlist) {		
+	private String getNumbers(ArrayNode runlist) {		
 		ArrayList<String> numbers = new ArrayList<String>();
 		for (JsonNode node : runlist) {
 			assert node.isObject();
 			ObjectNode obj = (ObjectNode) node;
 			numbers.add(obj.get("number").asText());
 		}
-		return String.join(",", numbers);		
+		return "[" + String.join(",", numbers) + "]";		
 	}
 	
 	/**

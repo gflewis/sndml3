@@ -62,9 +62,9 @@ public class MultiThreadScanner extends AgentScanner {
 
 	/**
 	 * <p>Submit for execution all jobs that are ready.
-	 * Return the number of jobs run or submitted.</p> 
+	 * Return the number of jobs submitted.</p> 
 	 * 
-	 * <p>Note: This function does NOT necessarily wait for all jobs to complete.</p>
+	 * <p>Note: This function does NOT wait for jobs to complete.</p>
 	 */
 	public int scan() throws IOException, ConfigParseException {
 		String myname = this.getClass().getSimpleName() + ".scan";
