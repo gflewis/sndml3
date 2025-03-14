@@ -84,7 +84,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		assert progressLogger != null;
 		for (TableRecord rec : recs) {
 			logger.debug(Log.PROCESS, String.format(
-				"processing %s %s", rec.getCreatedTimestamp(), rec.getKey()));
+				"processing %s %s",  rec.getKey(), rec.getCreatedTimestamp()));
 			writeRecord(rec, metrics);
 		}
 		db.commit();
