@@ -52,7 +52,8 @@ public class MultiThreadScanner extends AgentScanner {
 					} catch (InterruptedException e) {
 						logger.error(Log.PROCESS, e.getMessage());
 						throw e;
-					}				
+					}
+					activeTasks = workerPool.activeTaskCount();
 				}											
 			}
 		}
