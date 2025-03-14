@@ -17,7 +17,7 @@ import sndml.util.Metrics;
 import sndml.util.ProgressLogger;
 import sndml.util.ResourceException;
 
-public class JobRunner implements Callable<Metrics> {
+public class JobRunner implements Runnable, Callable<Metrics> {
 
 	protected final JobConfig config;
 	protected final Resources resources;
@@ -64,6 +64,21 @@ public class JobRunner implements Callable<Metrics> {
 	 * @throws ResourceException
 	 */
 	public void close() throws ResourceException {		
+	}
+
+	@Override
+	public void run() {
+		try {
+			call();
+		} catch (JobCancelledException e) {
+			throw new ResourceException(e);
+		} catch (SQLException e) {
+			throw new ResourceException(e);
+		} catch (IOException e) {
+			throw new ResourceException(e);
+		} catch (InterruptedException e) {
+			throw new ResourceException(e);
+		}		
 	}
 	
 	/**
@@ -289,5 +304,6 @@ public class JobRunner implements Callable<Metrics> {
 		writer.close(jobMetrics);
 		if (cancel != null) throw(cancel);
 	}
+
 
 }

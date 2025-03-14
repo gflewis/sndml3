@@ -7,11 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +84,7 @@ public class YamlLoader {
 		return loaderMetrics;
 	}
 
+	/*
 	@Deprecated
 	public Metrics loadTablesConcurrent() 
 			throws SQLException, IOException, InterruptedException, ExecutionException {
@@ -122,6 +118,7 @@ public class YamlLoader {
 		}
 		return loaderMetrics;
 	}
+	*/
 
 	public static String readFully(File file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
