@@ -25,7 +25,7 @@ public class ScannerJobRunner extends AppJobRunner {
 	@Override
 	public Metrics call() throws JobCancelledException {
 		String myname = this.getClass().getSimpleName() + ".call";
-		logger.info(Log.INIT, myname + " begin");
+		logger.debug(Log.INIT, myname + " begin");
 		assert profile != null;
 		assert config.getNumber() != null;
 		setThreadName();

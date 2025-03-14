@@ -67,7 +67,7 @@ public class WorkerPool {
 		return future;
 	}
 
-	boolean isActive(WorkerEntry entry) {
+	synchronized boolean isActive(WorkerEntry entry) {
 		Future<Metrics> future = entry.future;
 		return (future.isDone()) ? false : true;		
 	}
