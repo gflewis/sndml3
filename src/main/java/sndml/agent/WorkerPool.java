@@ -93,10 +93,6 @@ public class WorkerPool {
 		}
 		return count;				
 	}
-	
-	synchronized boolean isDormant() {
-		return (activeTaskCount() == 0);
-	}
 
 	/**
 	 * Print the content of jobList. Used for debugging.

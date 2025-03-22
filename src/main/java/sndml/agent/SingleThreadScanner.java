@@ -28,7 +28,8 @@ public class SingleThreadScanner extends AgentScanner {
 		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		int jobcount;
 		do { 
-			jobcount = scanOnce(); 
+			jobcount = scanOnce();
+			if (jobcount > 0) Thread.sleep(rescanDelayMillisec);
 		}			
 		while (jobcount > 0);
 		logger.debug(Log.FINISH, String.format("%s end",  myname));
