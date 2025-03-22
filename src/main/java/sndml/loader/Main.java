@@ -1,6 +1,8 @@
 package sndml.loader;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 
 import org.apache.commons.cli.CommandLine;
@@ -15,6 +17,7 @@ import sndml.servicenow.EncodedQuery;
 import sndml.servicenow.RecordKey;
 import sndml.servicenow.Table;
 import sndml.util.Log;
+import sndml.util.ResourceException;
 
 /**
  * This is the main class invoked from the JAR file. This is a singleton class.
@@ -27,7 +30,8 @@ public class Main {
 	static private boolean requiresApp = false;
 	static private CommandLine cmd;
 	static protected String agentName;
-	
+	static protected long pid;
+
 	static Options options = new Options();
 	
 	static final protected Option optProfile = 
@@ -64,6 +68,7 @@ public class Main {
 	static private Logger logger;
 
 	public static void main(String[] args) throws Exception {
+		
 		final Option allOptions[] = {
 			optProfile, optTable, optFilter, optSysID, optYaml, 
 			optJobRun, optScan, optDaemon, optServer};		
@@ -92,6 +97,7 @@ public class Main {
 		agentName = profile.getAgentName();
 		Log.setGlobalContext(agentName);
 		Main.logger = LoggerFactory.getLogger(Main.class);
+		Main.writePidfile();
 
 		if (cmd.hasOption(optTable)) {
 			// Simple Table Loader
@@ -132,6 +138,29 @@ public class Main {
 		}
 	}
 
+	private static void writePidfile() throws ResourceException {
+        ProcessHandle processHandle = ProcessHandle.current();
+        String pidFileName = profile.getProperty("loader.pidfile");
+		Main.pid = processHandle.pid();
+		if (pidFileName == null) {
+			logger.info(Log.INIT, String.format("pid=%d", pid));			
+		}
+		else {
+			File pidFile = new File(pidFileName);
+			logger.info(Log.INIT, String.format(
+				"pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
+			PrintWriter pidWriter;
+			try {
+				pidWriter = new PrintWriter(pidFile);
+				pidWriter.println(pid);
+				pidWriter.close();
+			} catch (IOException e) {
+				throw new ResourceException(
+					"Unable to write pidfile: " + pidFileName);				
+			}
+		}		
+	}
+	
 	protected static Option getCommandOption() {
 		for (Option opt : commandOptions) {
 			if (cmd.hasOption(opt)) return opt;			
@@ -162,14 +191,21 @@ public class Main {
 		mainThread.interrupt();
 	}
 	
-	public static void sleep(int millisec) {
-		assert logger != null;
+	/**
+	 * Sleep for milliseconds.
+	 *
+	 * @param millisec
+	 * @return true if interrupted, otherwise false
+	 */
+	public static boolean sleep(int millisec, Logger logger) {
 		try {
 			logger.info(Log.FINISH, String.format("sleep %d", millisec));
 			Thread.sleep(millisec);
 		} catch (InterruptedException e) {
 			logger.warn(Log.ERROR, e.getMessage());
-		}		
+			return true;
+		}
+		return false;
 	}
 		
 }

@@ -17,7 +17,7 @@ import sndml.util.MissingPropertyException;
 /**
  * Implements the Java built-in HttpServer class.
  */
-public class AgentHttpServer {
+public class AgentHttpServer implements Runnable {
 
 	static AgentHttpServer instance;
 	static HttpServer server;
@@ -72,7 +72,7 @@ public class AgentHttpServer {
 		this.heartbeatTask = new HeartbeatTask(resources);
 	}
 			
-	public void start() {
+	public void run() {
 		logger.info(Log.INIT, String.format("start port=%d", port));		
 		server.start();
 		ShutdownHook shutdownHook = new ShutdownHook(resources);

@@ -39,10 +39,9 @@ public class WorkerPool {
 	final List<WorkerEntry> jobList = Collections.synchronizedList(new LinkedList<WorkerEntry>());
 	
 	public WorkerPool(ConnectionProfile profile) {
-		this.threadCount = profile.getThreadCount();
-		this.backlog = profile.getJobBacklog();
-		this.shutdownSeconds = 
-			Integer.parseInt(profile.getProperty("server.shutdown_seconds"));		
+		this.threadCount = profile.getInteger("agent.workers");
+		this.backlog = profile.getInteger("agent.backlog");
+		this.shutdownSeconds = profile.getInteger("agent.shutdown_seconds");
 		
 		this.queue = new LinkedBlockingQueue<Runnable>(backlog);
 		this.executor = new ThreadPoolExecutor(

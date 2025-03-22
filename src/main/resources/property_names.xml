@@ -14,57 +14,63 @@
 ]>
 
 <properties>
-  <property name="reader.instance">
-    <alternate name="servicenow.instance" />
+  <property name="agent.backlog">
+    <default>60</default>
+    <alternate name="server.backlog" />
+    <alternate name="daemon.backlog" />
     <description>
-      Required. Name or URL of the ServiceNow instance from which data records will be retrieved. 
-      You can specify an instance name (_e.g._ `dev12345`) or a URL (_e.g._ `https://dev12345.service-now.com`)
+      Maximum number of jobs that can be enqueued waiting for a thread.
+      Applicable for `--daemon` or `--server`.
+      Default is 60.
     </description>
   </property>
-  <property name="reader.username">
-    <alternate name="servicenow.username" />
-    <description>Required.</description>
-  </property>
-  <property name="reader.password">
-    <alternate name="servicenow.password" />
-    <description>Required.</description>
-  </property>
-  <property name="reader.domain">
-    <alternate name="servicenow.domain" />
+  <property name="agent.workers">
+    <default>4</default>
+    <alternate name="server.threads" />
+    <alternate name="daemon.threads" />
     <description>
-      For use in domain separated instances. 
-      This can be a single **sys_id** or a comma separated list of domains.
-      Refer to [[Domain Separation]]. 
-     </description>
-  </property>
-  <property name="reader.pagesize">
-    <default>200</default>
-    <alternate name="servicenow.pagesize" />
-    <description>
-      Number of records to be processed at a time if not overridden at the table level. 
-      Default is 200.
+      Maximum number of jobs that can be processed concurrently.
+      Additional jobs will wait until a thread becomes available.
+      Applicable for `--daemon` or `--server`.
+      Default is 4.
     </description>
   </property>
-  <property name="reader.verify_session">
-    <default>true</default>
-    <alternate name="servicenow.verify_session" />
+  <property name="agent.shutdown_seconds">
+    <default>30</default>
+    <alternate name="server.shutdown_seconds" />
+    <alternate name="daemon.shutdown_seconds" />
     <description>
-      Causes the loader, at startup, to verify that it can connect to ServiceNow by reading 
-      the **sys_user** record of the connecting user. Default is **true**.
-    </description>
-  </property>
-  <property name="reader.verify_timezone">
-    <default>false</default>
-    <alternate name="servicenow.verify_timezone" />
-    <description>
-      Causes an exception to be thrown if the ServiceNow user time zone is not "GMT".
-      If **false* then a warning is displayed. 
-      Default is **false**.
+      Seconds that the `--daemon` or `--server` will wait
+      before aborting worker threads.
+      Default is 30.
     </description>
   </property>
   <property name="app.agent">
     <alternate name="daemon.agent" />
-    <description>Required if using the **DataPump** app.</description>
+    <description>
+      Name of the Agent as configured in the **DataPump** app.
+      Required if using the
+      **DataPump** app.
+    </description>
+  </property>
+  <property name="app.instance">
+    <alternate name="servicenow.instance" />
+    <description>
+      Required if using the **DataPump** app. Name or URL of
+      the instance where the app is
+      installed.
+    </description>
+  </property>
+  <property name="app.pagesize" hidden="true">
+    <!-- Hidden because AppSession does not use TableReader -->
+    <default>200</default>
+    <description>Default page size.</description>
+  </property>
+  <property name="app.password">
+    <alternate name="servicenow.password" />
+    <description>
+      Required if `app.instance` is specified.
+    </description>
   </property>
   <property name="app.scope">
     <default>x_108443_sndml</default>
@@ -73,73 +79,58 @@
       Optional. Default is `x_108443_sndml`.
     </description>
   </property>
-  <property name="app.instance">
-    <alternate name="servicenow.instance" />
-    <description>
-      Required if using the **DataPump** app. Name or URL of the instance where the app is installed.
-    </description>
-  </property>
   <property name="app.username">
     <alternate name="servicenow.username" />
     <description>
       Required if `app.instance` is specified.
     </description>
   </property>
-  <property name="app.password">
-    <alternate name="servicenow.password" />
-    <description>
-      Required if `app.instance` is specified.
-    </description>
-  </property>
-  <property name="app.pagesize" hidden="true">
-    <!--  Hidden because AppSession does not use TableReader -->
-    <default>200</default>
-    <description>Default page size.</description>
-  </property>
   <property name="app.verify_session" hidden="true">
     <default>true</default>
     <description>
-      Causes the loader, at startup, to verify that Scripted REST APIs can be called.
+      Causes the loader, at startup, to verify that Scripted
+      REST APIs can be called.
       Default is **true**.
     </description>
   </property>
-  <property name="dict.instance">
+  <property name="daemon.continue">
+    <default>false</default>
     <description>
-      Name or URL of the instance from which dictionary information will be obtained. 
-      This is optional and the default is to use `reader.instance`. 
-      This property is not applicable if using the DataPump app 
-      (_i.e._ if `app.instance` is specified.)
+      Controls whether or not the daemon will continue running 
+      after encountering an IO error in communication
+      with ServiceNow or the database.
+      If “true” then it writes an error to the log and goes back to sleep.
+      If “false” (default) then it will immediately abort.
     </description>
   </property>
-  <property name="dict.username">
-    <description>Required if `dict.instance` is specified.</description>
-  </property>
-  <property name="disct.password">
-    <description>Required if `dict.instance` is specified.</description>
-  </property>
-  <property name="database.url">
-    <alternate name="datamart.url" />
+  <property name="daemon.interval">
+    <default>120</default>
     <description>
-      Required. JDBC URL for the target database. 
-      Refer to the documentation for your selected JDBC driver.
+      Recommended if using `--daemon`. Interval in seconds.
+      Default is 120.
     </description>
   </property>
-  <property name="database.username">
-    <alternate name="datamart.username" />
+  <property name="database.autocreate">
+    <default>true</default>
+    <alternate name="datamart.autocreate" />
     <description>
-      Required unless database is SQLite. User name for the target database.
+      Causes tables in the SQL database to be created
+      if they do not already exist.
+      Defaults is "true".
+    </description>
+  </property>
+  <property name="database.dialect">
+    <alternate name="datamart.dialect" />
+    <description>
+      Specifies a section in the templates file. If not
+      specified, the loader will infer the correct section
+      using the `drivers` element of the template and the JDBC prefix 
+      of the datamart URL.
     </description>
   </property>
   <property name="database.password">
     <alternate name="datamart.password" />
     <description>Required unless database is SQLite.</description>
-  </property>
-  <property name="database.dialect">
-    <alternate name="datamart.dialect" />
-    <description>
-      Specifies a section in the templates file. If not specified, the loader will infer the correct 
-      section using the `drivers` element of the template and the JDBC prefix of the datamart URL.
-    </description>
   </property>
   <property name="database.schema">
     <alternate name="datamart.schema" />
@@ -150,51 +141,148 @@
   <property name="database.templates">
     <alternate name="datamart.templates" />
     <description>
-      The name of an XML file to use for generating SQL statements. 
-      If not specified, the loader will use `sqltemplates.xml` which is embedded in the JAR. 
+      The name of an XML file to use for generating SQL statements.
+      If not specified, the loader will use
+      `sqltemplates.xml` which is embedded in the JAR.
       For information refer to [[Templates]].
     </description>
   </property>
-  <property name="database.autocreate">
-    <default>true</default>
-    <alternate name="datamart.autocreate" />
-    <description>Causes tables in the SQL database to be created
-    if they do not already exist. Defaults is "true".</description>
-  </property>
   <property name="database.timezone">
     <description>
-      This is normally **not** specified. If omitted then "GMT" will be used. 
-      If set to "default" or "local" then the time zone of the Java VM will be used.
+      This is normally **not** specified. 
+      If omitted then "GMT" will be used.
+      If set to "default" or "local"
+      then the time zone of the Java VM will be used.
+    </description>
+  </property>
+  <property name="database.url">
+    <alternate name="datamart.url" />
+    <description>
+      Required. JDBC URL for the target database.
+      Refer to the documentation for your selected JDBC driver.
+    </description>
+  </property>
+  <property name="database.username">
+    <alternate name="datamart.username" />
+    <description>
+      Required unless database is SQLite. 
+      User name for the target database.
     </description>
   </property>
   <property name="database.warn_on_truncate">
     <default>true</default>
     <alternate name="loader.warn_on_truncate" />
     <description>
-      Causes a warning to be written to the log whenever a field is truncated 
-      when written to the database. Default is "true".       
+      Causes a warning to be written to the log whenever a
+      field is truncated when written to the database.
+      Default is "true".
     </description>
+  </property>
+  <property name="dict.instance" hidden="true">
+    <description>
+      Name or URL of the instance from which dictionary
+      information will be obtained.
+      This is optional and the default is to use `reader.instance`.
+      This property is not applicable if
+      using the DataPump app
+      (_i.e._ if `app.instance` is specified.)
+    </description>
+  </property>
+  <property name="dict.username" hidden="true">
+    <description>Required if `dict.instance` is specified.</description>
+  </property>
+  <property name="dict.password" hidden="true">
+    <description>Required if `dict.instance` is specified.</description>
   </property>
   <property name="loader.metrics_folder">
     <description>
-      The name of a directory where metrics files are located. 
-      If not specified, metrics files are assumed to reside in the current working directory. 
-      For information refer to [[Metrics]].    
-    </description>
-  </property> 
-  <property name="daemon.interval">
-    <default>120</default>
-    <description>
-      Recommended if using `--daemon`. Interval in seconds.
-      Default is 120.
+      The name of a directory where metrics files are located.
+      If not specified, metric files are assumed to
+      reside in the current working directory.
+      For information refer to [[Metrics]].
     </description>
   </property>
-  <property name="daemon.continue">
+  <property name="loader.pidfile">
+    <alternate name="daemon.pidfile" />
+    <alternate name="server.pidfile" />
     <description>
-      Controls whether or not the daemon will continue running after encountering 
-      an IO error in communication with ServiceNow or the database. 
-      If “true” then it writes an error to the log and goes back to sleep. 
-      If “false” then it will immediately abort.
+      If specified, then the process ID will be written to this file.
+      This is used in conjunction with `--server` or `--daemon`.
+      If you want to shut down the server then read the PID  number
+      from this file and send a `kill` signal to the PID.
+    </description>
+  </property>
+  <property name="loader.rescan_delay_millisec">
+    <default>0</default>
+    <description>
+      Number of milliseconds to pause before each rescan.
+      Applicable for `--scan` or `--daemon`.
+    </description>
+  </property>
+  <property name="reader.domain">
+    <alternate name="servicenow.domain" />
+    <description>
+      For use in domain separated instances.
+      This can be a single **sys_id** or a comma
+      separated list of domains.
+      Refer to [[Domain Separation]].
+    </description>
+  </property>
+  <property name="reader.instance">
+    <alternate name="servicenow.instance" />
+    <description>
+      Required. Name or URL of the ServiceNow instance from
+      which data records will be retrieved.
+      You can specify an instance name (_e.g._ `dev12345`) 
+      or a URL (_e.g._ `https://dev12345.service-now.com`)
+    </description>
+  </property>
+  <property name="reader.pagesize">
+    <default>200</default>
+    <alternate name="servicenow.pagesize" />
+    <description>
+      Number of records to be processed at a time if not
+      overridden at the table level.
+      Default is 200.
+    </description>
+  </property>
+  <property name="reader.password">
+    <alternate name="servicenow.password" />
+    <description>Required.</description>
+  </property>
+  <property name="reader.username">
+    <alternate name="servicenow.username" />
+    <description>Required.</description>
+  </property>
+  <property name="reader.verify_session">
+    <default>true</default>
+    <alternate name="servicenow.verify_session" />
+    <description>
+      Causes the loader, at startup, to verify that it can connect to ServiceNow
+      by reading the **sys_user** record of the connecting user. 
+      Default is **true**.
+    </description>
+  </property>
+  <property name="reader.verify_timezone">
+    <default>false</default>
+    <alternate name="servicenow.verify_timezone" />
+    <description>
+      Causes an exception to be thrown if the ServiceNow user
+      time zone is not "GMT".
+      If **false* then a warning is displayed.
+      Default is **false**.
+    </description>
+  </property>
+  <property name="server.heartbeat">
+    <default>300</default>
+    <description>
+      Applicable if using `--server`. 
+      Interval in seconds that the HTTP server will send a
+      heartbeat message to the scoped app 
+      confirming that it is still listening and that the `app`
+      session is still active. 
+      Default is 300. 
+      Set to 0 to disable the heartbeat.
     </description>
   </property>
   <property name="server.port">
@@ -202,49 +290,5 @@
       Required if using `--server`.
     </description>
   </property>
-  <property name="server.backlog">
-    <default>60</default>
-    <alternate name="daemon.backlog" />
-    <description>
-      Maximum number of jobs that can be enqueued waiting for a thread.
-      Applicable for `--daemon` or `--server`.
-      Default is 60.
-    </description>
-  </property>
-  <property name="server.threads">
-    <default>4</default>
-    <alternate name="daemon.threads" />
-    <description>
-      Maximum number of jobs that can be processed concurrently. 
-      Additional jobs will wait until a thread becomes available.
-      Applicable for `--daemon` or `--server`.
-      Default is 4.
-    </description>
-  </property>
-  <property name="server.pidfile">
-    <alternate name="daemon.pidfile" />
-    <description>
-      If specified, then the process ID will be written to this file.
-      This is used in conjunction with a server or daemon.
-      If you want to shut down the server then read the PID number from this file
-      and send a `kill` signal to the PID.
-    </description>
-  </property>
-  <property name="server.shutdown_seconds">
-    <default>30</default>
-    <alternate name="daemon.shutdown_seconds" />
-    <description>
-      Seconds that the daemon or server will wait before aborting worker threads.
-      Default is 30.
-    </description>
-  </property>
-  <property name="server.heartbeat">
-    <default>300</default>
-    <description>
-      Applicable if using `--server`. Interval in seconds that the HTTP server will send a
-      heartbeat message to the scoped app confirming that it is still listening and that
-      the `app` session is still active. Default is 300. Set to 0 to disable the heartbeat.
-    </description>
-  </property>
-
 </properties>
+

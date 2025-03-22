@@ -1,9 +1,5 @@
 package sndml.agent;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 
@@ -12,7 +8,6 @@ import sndml.loader.Main;
 import sndml.loader.Resources;
 import sndml.servicenow.RecordKey;
 import sndml.util.Log;
-import sndml.util.ResourceException;
 
 //Q: Why does this class exist? 
 //A: Because many of the classes in the package are not public. 
@@ -20,14 +15,15 @@ import sndml.util.ResourceException;
 public class AgentMain extends Main {
 
 	static private RecordKey agentKey;
-	static private long pid;
 	static final Logger logger = Log.getLogger(AgentMain.class);
-	
+
+	/**
+	 * Called from {@link Main#main()}
+	 */
 	public static void main(CommandLine cmd, Resources resources) throws Exception {
 		// Note: resources is actually a static protected variable in Main;
 		// thus we could access it even if it were not a parameter		
 		assert resources != null;
-		init();
 		// agentName is a static variable defined in Main
 		if (agentName == null) 
 			throw new AssertionError(
@@ -46,7 +42,7 @@ public class AgentMain extends Main {
 			// Scan forever
 			AgentDaemon daemon = new AgentDaemon(resources);
 			logger.info(Log.INIT, "Starting daemon: " + AgentDaemon.getAgentName());
-			daemon.runForever();
+			daemon.run();
 		}
 		else if (cmd.hasOption(optJobRun)) {
 			// Run a single job
@@ -60,7 +56,7 @@ public class AgentMain extends Main {
 		else if (cmd.hasOption(optServer)) {
 			// Run as an HTTP Server
 			AgentHttpServer server = new AgentHttpServer(resources);
-			server.start();
+			server.run();
 		}
 		else {
 			throw new IllegalStateException(); // should never be here
@@ -78,29 +74,6 @@ public class AgentMain extends Main {
 	public static String getAgentName() {
 		// agentName is declared in {@link sndml.loader.Main}
 		return agentName;
-	}
-	
-	private static void init() throws ResourceException {
-        ProcessHandle processHandle = ProcessHandle.current();
-        String pidFileName = Main.profile.getPidFileName();
-		AgentMain.pid = processHandle.pid();
-		if (pidFileName == null) {
-			logger.info(Log.INIT, String.format("pid=%d", pid));			
-		}
-		else {
-			File pidFile = new File(pidFileName);
-			logger.info(Log.INIT, String.format(
-				"pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
-			PrintWriter pidWriter;
-			try {
-				pidWriter = new PrintWriter(pidFile);
-				pidWriter.println(pid);
-				pidWriter.close();
-			} catch (IOException e) {
-				throw new ResourceException(
-					"Unable to write pidfile: " + pidFileName);				
-			}
-		}		
 	}
 	
 }

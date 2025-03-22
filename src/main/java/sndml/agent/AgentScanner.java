@@ -5,6 +5,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -24,8 +25,11 @@ public abstract class AgentScanner extends TimerTask {
 	final AppConfigFactory configFactory;	
 	final AppStatusLogger statusLogger;
 	final String agentName;
+	final int rescanDelayMillisec;
 	final URI uriGetRunList;
 	int errorCount = 0;
+	
+	final Semaphore runnable = new Semaphore(1);
 	
 	final Logger logger = Log.getLogger(this.getClass());
 	
@@ -47,10 +51,11 @@ public abstract class AgentScanner extends TimerTask {
 		this.appSession = resources.getAppSession();
 		this.configFactory = new AppConfigFactory(resources);
 		assert agentName != null;
-		this.uriGetRunList = appSession.uriGetJobRunList();
+		this.rescanDelayMillisec = profile.getInteger("loader.rescan_delay_millisec");
+		this.uriGetRunList = appSession.uriGetJobRunList();		
 		this.statusLogger = new AppStatusLogger(appSession);
 	}
-		
+	
 	@Override
 	/**
 	 * This method is called from the Timer. It performs a single scan and submits
@@ -59,10 +64,15 @@ public abstract class AgentScanner extends TimerTask {
 	 * as each job completes.
 	 */
 	public synchronized void run() {
-		boolean onExceptionContinue = Boolean.parseBoolean(profile.getProperty("daemon.continue"));
 		Log.setJobContext(agentName);		
+		// exit if already running
+		if (!runnable.tryAcquire()) {
+			logger.warn(Log.INIT, "already running");
+			return;
+		}
+		boolean onExceptionContinue = profile.getBoolean("daemon.continue"); 
 		try {
-			scan();
+			scanUntilDone();
 		}
 		catch (NoContentException e) {
 			logger.error(Log.ERROR, "run: " + e.getClass().getName());
@@ -81,11 +91,19 @@ public abstract class AgentScanner extends TimerTask {
 			// if (!connectionReset && !onExceptionContinue) AgentDaemon.abort();
 			if (!onExceptionContinue) AgentDaemon.abort();
 		}
+		catch (InterruptedException e) {
+			logger.error(Log.ERROR, "run: " + e.getClass().getName());
+			logger.error(Log.ERROR, e.toString(), e);
+			AgentDaemon.abort();			
+		}
 		catch (Exception e) {
 			logger.error(Log.ERROR, "run: " + e.getClass().getName());
 			logger.error(Log.ERROR, e.toString(), e);
 			AgentDaemon.abort();
 			throw e; 
+		}
+		finally {
+			runnable.release();
 		}
 	}
 	
@@ -95,14 +113,6 @@ public abstract class AgentScanner extends TimerTask {
 	public abstract int scan() 
 			throws ConfigParseException, IOException, SQLException;
 	
-	/**
-	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
-	 * When a job completes it may cause other jobs to move to a "ready" state.
-	 */	
-//	public void rescan() throws ConfigParseException, IOException, SQLException {
-//		logger.info(Log.PROCESS, "Rescan");
-//		scan();
-//	}
 		
 	protected abstract int getErrorLimit();
 	

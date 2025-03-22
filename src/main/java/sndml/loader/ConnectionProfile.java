@@ -43,11 +43,11 @@ public class ConnectionProfile {
 	private final String pathName; // null if unknown
 	public final PropertySet app; // Properties for ServiceNow instance that contains scopped app
 	public final PropertySet reader; // Properties for ServiceNow instance that is source of data
-	public final PropertySet dict; // Properties for ServiceNow instance used for schema
+//	public final PropertySet dict; // Properties for ServiceNow instance used for schema
 	public final PropertySet database; // Properties for SQL Database
 	private final PropertySet loader; // Is this still used for anything?
-	private final PropertySet server; // Properties for HTTP Server
-	private final PropertySet daemon; // Properties for Agent Daemon
+//	private final PropertySet server; // Properties for HTTP Server
+//	private final PropertySet daemon; // Properties for Agent Daemon
 	private final PropertiesSchema schema;
 
 	static AppSession lastAppSession = null; // Last AppSession obtained
@@ -71,10 +71,10 @@ public class ConnectionProfile {
 		this.app      = getSubset("app");
 		this.reader   = getSubset("reader");
 		this.database = getSubset("database");
-		this.dict     = getSubset("dict");
+//		this.dict     = getSubset("dict");
 		this.loader   = getSubset("loader");
-		this.server   = getSubset("server");
-		this.daemon   = getSubset("daemon");
+//		this.server   = getSubset("server");
+//		this.daemon   = getSubset("daemon");
 		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
@@ -93,10 +93,10 @@ public class ConnectionProfile {
 		this.app      = getSubset("app");
 		this.reader   = getSubset("reader");
 		this.database = getSubset("database");
-		this.dict     = getSubset("dict");
+//		this.dict     = getSubset("dict");
 		this.loader   = getSubset("loader");
-		this.server   = getSubset("server");
-		this.daemon   = getSubset("daemon");
+//		this.server   = getSubset("server");
+//		this.daemon   = getSubset("daemon");
 		
 		if (hasProperty("app.instance"))
 			this.schemaSource = SchemaSource.APP;
@@ -126,10 +126,17 @@ public class ConnectionProfile {
 		return newProperties;
 	}
 	
+	/**
+	 * Return true is this is a valid property name.
+	 */
 	public boolean isValidName(String name) {
 		return schema.hasName(name);
 	}
 
+	public boolean isMultiThreaded() {
+		return this.getInteger("agent.workers") > 1;
+	}
+	
 	/*
 	 * Return a property value from the profile.
 	 * If name is not in property_names.xml then throw IllegalArgumentException.
@@ -143,7 +150,15 @@ public class ConnectionProfile {
 			if (schema.hasDefault(name)) value = schema.getDefault(name);
 		return value;
 	}
-		
+	
+	public int getInteger(String name) {
+		return Integer.parseInt(getProperty(name));		
+	}
+	
+	public boolean getBoolean(String name) {
+		return Boolean.parseBoolean(getProperty(name));
+	}
+
 	private boolean hasProperty(String name) {
 		return allProperties.containsKey(name);
 	}
@@ -152,18 +167,18 @@ public class ConnectionProfile {
 		return this.app; 
 	}
 	
-	@Deprecated
-	public PropertySet daemonProperties() {
-		return this.daemon; 
-	}
+//	@Deprecated
+//	public PropertySet daemonProperties() {
+//		return this.daemon; 
+//	}
 	
 	public PropertySet databaseProperties() {
 		return this.database; 
 	}
 	
-	public PropertySet dictProperties() {
-		return this.dict; 
-	}
+//	public PropertySet dictProperties() {
+//		return this.dict; 
+//	}
 	
 	public PropertySet loaderProperties() {
 		return this.loader; 	
@@ -173,10 +188,10 @@ public class ConnectionProfile {
 		return this.reader; 
 	}
 	
-	@Deprecated
-	public PropertySet serverProperties() { 
-		return this.server; 
-	}
+//	@Deprecated
+//	public PropertySet serverProperties() { 
+//		return this.server; 
+//	}
 	
 	private PropertySet getSubset(String prefix) {
 		PropertySet result = new PropertySet(
@@ -293,17 +308,13 @@ public class ConnectionProfile {
 	/**
 	 * Get the size of the worker pool.
 	 */
-	public int getThreadCount() {
-		return Integer.parseInt(getProperty("server.threads"));
-	}
-	
-	public int getJobBacklog() {
-		return Integer.parseInt(getProperty("server.backlog"));
-	}
-	
-	public String getPidFileName() {
-		return getProperty("server.pidfile");
-	}
+//	public int getThreadCount() {
+//		return Integer.parseInt(getProperty("server.threads"));
+//	}
+//	
+//	public int getJobBacklog() {
+//		return Integer.parseInt(getProperty("server.backlog"));
+//	}
 	
 	public int getInterval() {
 		return Integer.parseInt(getPropertyNotNull("daemon.interval"));

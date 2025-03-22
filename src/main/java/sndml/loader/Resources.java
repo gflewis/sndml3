@@ -151,6 +151,29 @@ public class Resources {
 		return this.workerPool;
 	}
 	
+	public void shutdown() {
+		logger.info(Log.FINISH, "shutdown");
+		if (workerPool != null) {
+			workerPool.shutdown();
+		}
+		if (sqlConnection != null) {
+			try {
+				sqlConnection.rollback();
+				sqlConnection.close();
+			}
+			catch (SQLException e) {
+				logger.error(Log.FINISH, e.getMessage());
+			}
+		}
+		readerSession = null;
+		appSession = null;
+		schemaReader = null;
+		generator = null;
+		dbWrapper = null;
+		sqlConnection = null;
+		workerPool = null;
+	}
+	
 	/**
 	 * Make a copy of these resources for use by a worker thread.
 	 * Everything is set to null, so the worker has to create their own sessions.

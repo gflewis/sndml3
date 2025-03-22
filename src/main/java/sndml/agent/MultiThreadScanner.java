@@ -67,6 +67,8 @@ public class MultiThreadScanner extends AgentScanner {
 	 * 
 	 * <p>Note: This function does NOT wait for jobs to complete.</p>
 	 */
+	
+	@Override
 	public int scan() throws IOException, ConfigParseException {
 		String myname = this.getClass().getSimpleName() + ".scan";
 		Log.setJobContext(agentName);		
