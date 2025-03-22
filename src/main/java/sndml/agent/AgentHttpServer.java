@@ -55,7 +55,7 @@ public class AgentHttpServer implements Runnable {
 		this.port = Integer.parseInt(portValue);
 		assert this.port != 0;
 		// this.backlog = Integer.parseInt(profile.getProperty("server.backlog"));
-		this.heartbeatInterval = Integer.parseInt(profile.getProperty("server.heartbeat"));
+		this.heartbeatInterval = profile.getInteger("server.heartbeat_seconds");
 		
 		logger.info(Log.INIT, String.format(
 				"agent=%s/%s port=%d heartbeat=%d", 

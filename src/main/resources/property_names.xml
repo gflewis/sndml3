@@ -273,7 +273,7 @@
       Default is **false**.
     </description>
   </property>
-  <property name="server.heartbeat">
+  <property name="server.heartbeat_seconds">
     <default>300</default>
     <description>
       Applicable if using `--server`. 

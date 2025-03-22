@@ -25,7 +25,7 @@ import sndml.util.ResourceException;
 /**
  * To print out list of properties
  * <code>
- *   --help
+ *   --markdown
  * </code>
  * 
  * To validate properties file
