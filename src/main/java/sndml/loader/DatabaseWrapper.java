@@ -147,7 +147,7 @@ public class DatabaseWrapper {
 		return "oracle".equalsIgnoreCase(protocol);
 	}
 	
-	boolean isMSSQL() {
+	boolean isMicrosoft() {
 		return "sqlserver".equalsIgnoreCase(protocol);
 	}
 	
