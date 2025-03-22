@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.slf4j.Logger;
@@ -35,9 +34,10 @@ public class DatabaseWrapper {
 
 	private final String protocol;
 	private final Calendar calendar;
-	private final String dbuser;
-	private final boolean warnOnTruncate;
-	private final String schema;
+	private String timezone;
+	private String dbuser;
+	private boolean warnOnTruncate;
+	private String schema;
 	
 	private final Connection connection;
 	private final Generator generator;
@@ -45,65 +45,41 @@ public class DatabaseWrapper {
 	public final static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 	private final static Logger logger = Log.getLogger(DatabaseWrapper.class);
 
-	public DatabaseWrapper(Connection connection, Generator generator, Properties properties) {
-		this.protocol = properties.getProperty("dialect");
-		this.schema = properties.getProperty("schema");
-		this.dbuser = null;
-		// If timezone is not specified then use "GMT"
-		// If timezone is "default" then use time zone of virtual machine
-		String timezone = properties.getProperty("timezone", "GMT");
-		this.calendar = 
-			timezone.equalsIgnoreCase("default") ? null :
-			Calendar.getInstance(TimeZone.getTimeZone(timezone));
-		this.warnOnTruncate = Boolean.parseBoolean(properties.getProperty("warn_on_truncate", "true"));
+	public DatabaseWrapper(Connection connection, ConnectionProfile profile, Generator generator) throws SQLException {
 		this.connection = connection;
 		this.generator = generator;
 		assert this.generator != null;
 		assert this.connection != null;
-	}
-	
-	// TODO: DRY - eliminate redundant constructor
-	public DatabaseWrapper(ConnectionProfile profile, Generator generator) throws SQLException {
-		PropertySet properties = profile.database;
-		String dburl = properties.getProperty("url", null);
-		assert dburl != null : "Property database.url not found";
-		URI dbURI;
-		try {
-			dbURI = new URI(dburl);
-		} catch (URISyntaxException e) {
-			throw new ResourceException(e);
-		}
-		this.protocol = getProtocol(dbURI);
-		this.dbuser = properties.getProperty("username", null);
-		String dbpass = properties.getProperty("password", "");
-		schema = profile.database.getProperty("schema", null);
-		
-		assert schema==null || schema.length() > 0;
-
-		// If timezone is not specified then use "GMT"
-		// If timezone is "default" or "local" then use time zone of virtual machine
-		String timezone = properties.getProperty("timezone", "GMT");
-		if (timezone.equalsIgnoreCase("default") || timezone.equalsIgnoreCase("local"))
+		this.protocol = protocolFromProfile(profile);
+		assert protocol != null : "protocol not found";
+		this.schema = profile.getProperty("database.schema");
+		// schema is allowed to be null
+		assert schema==null || schema.length() > 0 : "invalid schema";
+		this.dbuser = null;
+		// The default time zone is "GMT"
+		// If timezone is "local" then use time zone of virtual machine
+		// "default" is deprecated. Please use "local" instead
+		timezone = profile.getProperty("database.timezone");
+		if (timezone.equalsIgnoreCase("local") || timezone.equalsIgnoreCase("default"))
 			this.calendar = null;
 		else
 			this.calendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+		this.warnOnTruncate = profile.getBoolean("database.warn_on_truncate"); 
+		initialize();
+	}
+	
+	public DatabaseWrapper(ConnectionProfile profile, Generator generator) throws SQLException {
+		this(newConnectionFromProfile(profile), profile, generator);
+		String dburl = profile.getPropertyNotNull("database.url");
+		this.dbuser = profile.getProperty("database.username");
+		schema = profile.getProperty("database.schema");		
+		assert schema==null || schema.length() > 0;
 		
 		String logmsg = "database=" + dburl;
 		logmsg += " " + timezone;
 		logmsg += " user=" + dbuser;
-		
-		if (schema != null) logmsg += " schema=" + getSchema();
-				
 		logger.info(Log.INIT, logmsg);
-		this.warnOnTruncate = Boolean.parseBoolean(properties.getProperty("warn_on_truncate", "true"));
-		
-				
-		this.generator = generator;
-		
-		this.connection = this.open(dburl, dbuser, dbpass);		
-		assert this.generator != null;
-		assert this.connection != null;
-		
+									
 	}
 
 	// Used for JUnit tests
@@ -112,16 +88,31 @@ public class DatabaseWrapper {
 			throws ResourceException, SQLException {
 		this(profile, new Generator(profile));
 	}
-		
-	/**
-	 * Open the database connection.
-	 * Set the timezoneName to GMT.
-	 * Set the date format to YYYY-MM-DD
-	 */
-	private Connection open(String dburl, String dbuser, String dbpass) throws SQLException {		
+	
+	public static String protocolFromProfile(ConnectionProfile profile) {
+		if (profile.hasProperty("database.dialect"))
+			return profile.getProperty("database.dialect");
+		else {
+			String dburl = profile.getProperty("database.url");
+			assert dburl != null : "Property database.url not found";
+			URI dbURI;
+			try {
+				dbURI = new URI(dburl);
+			} catch (URISyntaxException e) {
+				throw new ResourceException(e);
+			}
+			return protocolFromURI(dbURI);			
+		}
+	}
+	
+	private static Connection newConnectionFromProfile(ConnectionProfile profile) throws SQLException {
+		PropertySet properties = profile.database;
+		String dburl = properties.getProperty("url", null);
+		String dbuser = properties.getProperty("username", null);
+		String dbpass = properties.getProperty("password", "");
+		assert dburl != null : "Property database.url not found";
 		Connection dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
-		generator.initialize(dbc);
-		return dbc;
+		return dbc;		
 	}
 	
 	public void initialize() throws SQLException {
@@ -184,7 +175,7 @@ public class DatabaseWrapper {
 		return this.protocol;
 	}
 	
-	static String getProtocol(URI dbURI) {
+	static String protocolFromURI(URI dbURI) {
 		String urlPart[] = dbURI.toString().split(":");
 		return urlPart[1];		
 	}

@@ -148,11 +148,11 @@
     </description>
   </property>
   <property name="database.timezone">
+    <default>GMT</default>
     <description>
       This is normally **not** specified. 
-      If omitted then "GMT" will be used.
-      If set to "default" or "local"
-      then the time zone of the Java VM will be used.
+      The default value is "GMT".
+      If set to "local" then the time zone of the Java VM will be used.
     </description>
   </property>
   <property name="database.url">

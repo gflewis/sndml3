@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 
 import sndml.loader.ConfigParseException;
 import sndml.loader.ConnectionProfile;
-import sndml.loader.Main;
 import sndml.loader.Resources;
 import sndml.util.Log;
 
@@ -103,11 +102,15 @@ public class AgentDaemon implements Daemon, Runnable {
 		try {
 			if (multiThreaded) {
 				start();
-				isInterrupted = waitForever();			
+				waitForever();			
 			}
 			else {
-				isInterrupted = scanForever();
+				scanForever();
 			}
+		} catch (InterruptedException e) {
+			logger.warn(Log.FINISH, "Interrupt detected");			
+			resources.shutdown();
+			Thread.currentThread().interrupt();
 		} catch (Exception e) {
 			logger.error(Log.FINISH, e.getMessage(), e);
 		}
@@ -115,36 +118,38 @@ public class AgentDaemon implements Daemon, Runnable {
 		resources.shutdown();
 	}
 	
-	
-	private boolean scanForever() throws ConfigParseException, IOException, SQLException {
+	/**
+	 * Run until interrupted
+	 */
+	private void scanForever() throws ConfigParseException, IOException, SQLException, InterruptedException {
 		assert isStarted : "scanForever: not started";
-		boolean isInterrupted = false;
-		while (!isInterrupted) {
-			scanner.scan();
-			isInterrupted = Main.sleep(1000 * intervalSeconds, logger);
+		while (true) {
+			scanner.scanOnce();
+			Thread.sleep(1000);
 		}
-		return isInterrupted;
 	}
 	
-	private boolean waitForever() {
+	/**
+	 * Wait until interrupted
+	 */
+	private void waitForever() throws InterruptedException {
 		assert isStarted : "waitForever: not started";
 		boolean isInterrupted = false;
 		final int sleepSeconds = 300;
 		while (!isInterrupted) {
-			isInterrupted = Main.sleep(1000 * sleepSeconds, logger);
+			Thread.sleep(1000 * sleepSeconds);
 		}
-		return isInterrupted;
 	}
 	
 	/**
 	 * Run the {@link AgentScanner} a single time. 
-	 * Rescan until all jobs to complete.
+	 * Rescan until all jobs complete.
 	 * Shut down the worker pool.
 	 * 
 	 * @throws DaemonInitException
 	 * @throws InterruptedException
 	 */
-	public void scanOnce() throws DaemonInitException, InterruptedException {
+	public void scanUntilDone() throws DaemonInitException, InterruptedException {
 		assert Thread.currentThread() == daemonThread;
 		assert !isStarted;
 		init(null);		
@@ -188,7 +193,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	public void stop() {
 		Log.setJobContext(agentName);	
 		logger.debug(Log.FINISH, "Begin stop");
-		workerPool.shutdown();
+		resources.shutdown();
 		logger.info(Log.FINISH, "End stop");
 	}
 	

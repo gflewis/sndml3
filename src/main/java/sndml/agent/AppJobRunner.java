@@ -109,6 +109,7 @@ public class AppJobRunner extends JobRunner {
 		}
 		catch (InterruptedException e) {
 			logger.error(Log.FINISH, String.format("%s Interrupt Detected", number));
+			Thread.currentThread().interrupt();
 		} 
 		catch (JobCancelledException e) {
 			logger.error(Log.FINISH, String.format("%s Job Cancel Detected", number));

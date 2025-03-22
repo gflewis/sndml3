@@ -108,10 +108,10 @@ public abstract class AgentScanner extends TimerTask {
 	}
 	
 	public abstract void scanUntilDone() 
-			throws IOException, InterruptedException, ConfigParseException, SQLException;
+			throws IOException, ConfigParseException, SQLException, InterruptedException;
 	
-	public abstract int scan() 
-			throws ConfigParseException, IOException, SQLException;
+	public abstract int scanOnce() 
+			throws ConfigParseException, IOException, SQLException, InterruptedException;
 	
 		
 	protected abstract int getErrorLimit();

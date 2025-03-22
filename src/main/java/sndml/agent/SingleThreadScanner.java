@@ -23,12 +23,12 @@ public class SingleThreadScanner extends AgentScanner {
 	}
 	
 	@Override
-	public void scanUntilDone() throws IOException, ConfigParseException, SQLException {
+	public void scanUntilDone() throws IOException, ConfigParseException, SQLException, InterruptedException {
 		String myname = this.getClass().getSimpleName() + ".scanUntilDone";
 		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		int jobcount;
 		do { 
-			jobcount = scan(); 
+			jobcount = scanOnce(); 
 		}			
 		while (jobcount > 0);
 		logger.debug(Log.FINISH, String.format("%s end",  myname));
@@ -41,8 +41,8 @@ public class SingleThreadScanner extends AgentScanner {
 	 * @throws SQLException 
 	 */
 	@Override
-	public int scan() throws IOException, ConfigParseException, SQLException {
-		String myname = this.getClass().getSimpleName() + ".scan";
+	public int scanOnce() throws IOException, ConfigParseException, SQLException, InterruptedException {
+		String myname = this.getClass().getSimpleName() + ".scanOnce";
 		Log.setJobContext(agentName);		
 		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		ArrayList<AppJobRunner> joblist = getJobList();
@@ -50,7 +50,7 @@ public class SingleThreadScanner extends AgentScanner {
 			// Run the jobs one at a time
 			for (AppJobRunner job : joblist) {
 				logger.info(Log.INIT, "Running job " + job.number);
-				job.call();																					
+				job.call();
 			}				
 			Log.setGlobalContext();			
 		}

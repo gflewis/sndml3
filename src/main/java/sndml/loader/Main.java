@@ -191,21 +191,4 @@ public class Main {
 		mainThread.interrupt();
 	}
 	
-	/**
-	 * Sleep for milliseconds.
-	 *
-	 * @param millisec
-	 * @return true if interrupted, otherwise false
-	 */
-	public static boolean sleep(int millisec, Logger logger) {
-		try {
-			logger.info(Log.FINISH, String.format("sleep %d", millisec));
-			Thread.sleep(millisec);
-		} catch (InterruptedException e) {
-			logger.warn(Log.ERROR, e.getMessage());
-			return true;
-		}
-		return false;
-	}
-		
 }

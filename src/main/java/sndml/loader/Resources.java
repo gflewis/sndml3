@@ -127,15 +127,17 @@ public class Resources {
 	
 	public DatabaseWrapper getDatabaseWrapper() throws ResourceException {
 		if (dbWrapper == null) {
-			PropertySet props = profile.databaseProperties();
 			try {
-				if (props.hasProperty("url")) {
+				if (profile.hasProperty("database.url")) {
 					dbWrapper = new DatabaseWrapper(profile, getGenerator());
 					sqlConnection = dbWrapper.getConnection();
 				}
 				else {
-					assert sqlConnection != null;
-					dbWrapper = new DatabaseWrapper(sqlConnection, getGenerator(), props);								
+					// No database URL in the profile?
+					// Did the database connection come from a connection pool?
+					// Was it set by the setSqlConnection method?
+					assert sqlConnection != null : "getDatabaseWrapper: no JDBC connection or URL";
+					dbWrapper = new DatabaseWrapper(sqlConnection, profile, getGenerator());								
 				}
 			} catch (SQLException e) {
 				throw new ResourceException(e);
@@ -151,6 +153,9 @@ public class Resources {
 		return this.workerPool;
 	}
 	
+	/**
+	 * Shutdown all resources including the worker pool
+	 */
 	public void shutdown() {
 		logger.info(Log.FINISH, "shutdown");
 		if (workerPool != null) {
@@ -176,7 +181,8 @@ public class Resources {
 	
 	/**
 	 * Make a copy of these resources for use by a worker thread.
-	 * Everything is set to null, so the worker has to create their own sessions.
+	 * Everything is set to null, so the worker has to create their own sessions
+	 * and database connection.
 	 */
 	public Resources workerCopy() {
 		Resources copy = new Resources(profile, hasAppSession);
@@ -184,6 +190,10 @@ public class Resources {
 		return copy;
 	}
 	
+	/**
+	 * Close database connection.
+	 * Do not shutdown the worker pool.
+	 */
 	public void close() throws ResourceException {
 		try {
 			if (dbWrapper != null) 

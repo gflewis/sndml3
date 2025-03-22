@@ -178,22 +178,5 @@ public class WorkerPool {
 		}		
 	}
 
-	/*
-	private void setRunStatus(AppSession appSession, RecordKey runKey, AppJobStatus status, String message) {
-		logger.warn(Log.FINISH, String.format(
-			"setRunStatus %s %s", runKey.toString(), status.toString()));
-		URI uriPutJobRun = appSession.uriPutJobRunStatus(runKey);
-		ObjectNode body = JsonNodeFactory.instance.objectNode();
-		body.put("runkey", runKey.toString());		
-		body.put("status", status.toString().toLowerCase());
-		if (message != null) body.put("message",  message);
-		JsonRequest request = new JsonRequest(appSession, uriPutJobRun, HttpMethod.PUT, body, runKey);		
-		try {
-			request.execute();
-		} catch (IOException e1) {
-			logger.warn(Log.FINISH, "setRunStatus: " + e1.getMessage());
-		}
-	}
-	*/
 
 }

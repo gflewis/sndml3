@@ -36,7 +36,7 @@ public class AgentMain extends Main {
 			// Scan once
 			AgentDaemon daemon = new AgentDaemon(resources);
 			logger.info(Log.INIT, "Scanning agent: " + AgentDaemon.getAgentName());
-			daemon.scanOnce();
+			daemon.scanUntilDone();
 		}
 		else if (cmd.hasOption(optDaemon)) {
 			// Scan forever

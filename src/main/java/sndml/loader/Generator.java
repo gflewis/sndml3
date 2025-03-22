@@ -86,6 +86,7 @@ public class Generator {
 			throw new ResourceException(e);
 		}
 		
+		// TODO: use DatabaseWrapper.protocolFromProfile
 		if (dialectName == null) {
 			String dburl = properties.getProperty("url", null);
 			// Infer dialect from the URL

@@ -159,7 +159,7 @@ public class ConnectionProfile {
 		return Boolean.parseBoolean(getProperty(name));
 	}
 
-	private boolean hasProperty(String name) {
+	public boolean hasProperty(String name) {
 		return allProperties.containsKey(name);
 	}
 	
@@ -320,7 +320,7 @@ public class ConnectionProfile {
 		return Integer.parseInt(getPropertyNotNull("daemon.interval"));
 	}
 	
-	protected String getPropertyNotNull(String name) {
+	public String getPropertyNotNull(String name) {
 		String value = getProperty(name);
 		if (value == null) throw new AssertionError("No value for property: " + name);
 		return value;

@@ -29,12 +29,12 @@ public class MultiThreadScanner extends AgentScanner {
 	}		
 	
 	@Override
-	public void scanUntilDone() throws IOException, InterruptedException, ConfigParseException {
+	public void scanUntilDone() throws IOException, ConfigParseException, InterruptedException {
 		String myname = this.getClass().getSimpleName() + ".scanUntilDone";
 		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		boolean done = false;
 		while (!done) {
-			int jobcount = scan();
+			int jobcount = scanOnce();
 			if (jobcount == 0) {
 				done = true;				
 			}
@@ -69,8 +69,8 @@ public class MultiThreadScanner extends AgentScanner {
 	 */
 	
 	@Override
-	public int scan() throws IOException, ConfigParseException {
-		String myname = this.getClass().getSimpleName() + ".scan";
+	public int scanOnce() throws IOException, ConfigParseException {
+		String myname = this.getClass().getSimpleName() + ".scanOnce";
 		Log.setJobContext(agentName);		
 		logger.debug(Log.INIT, String.format("%s begin %s",  myname, agentName));
 		ArrayList<AppJobRunner> joblist = getJobList();
@@ -87,15 +87,5 @@ public class MultiThreadScanner extends AgentScanner {
 		logger.debug(Log.FINISH, String.format("%s end jobs=%d", myname, result));
 		return result;
 	}
-
-//	/**
-//	 * This function is called by {@link ScannerJobRunner} whenever a job completes.
-//	 * When a job completes it may cause other jobs to move to a "ready" state.
-//	 */	
-//	@Override
-//	public void rescan() throws ConfigParseException, IOException, SQLException {
-//		logger.info(Log.PROCESS, "Rescan");
-//		scan();
-//	}
 		
 }
