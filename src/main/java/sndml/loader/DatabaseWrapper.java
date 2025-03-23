@@ -65,21 +65,18 @@ public class DatabaseWrapper {
 		else
 			this.calendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
 		this.warnOnTruncate = profile.getBoolean("database.warn_on_truncate"); 
+		if (timezone == "GMT")
+			logger.debug(Log.INIT, String.format("timezone=%s warn_on_truncate=%b", timezone, warnOnTruncate));
+		else 
+			logger.info(Log.INIT, String.format("timezone=%s warn_on_truncate=%b", timezone, warnOnTruncate));			
 		initialize();
 	}
 	
 	public DatabaseWrapper(ConnectionProfile profile, Generator generator) throws SQLException {
 		this(newConnectionFromProfile(profile), profile, generator);
-		String dburl = profile.getPropertyNotNull("database.url");
 		this.dbuser = profile.getProperty("database.username");
 		schema = profile.getProperty("database.schema");		
-		assert schema==null || schema.length() > 0;
-		
-		String logmsg = "database=" + dburl;
-		logmsg += " " + timezone;
-		logmsg += " user=" + dbuser;
-		logger.info(Log.INIT, logmsg);
-									
+		assert schema==null || schema.length() > 0;										
 	}
 
 	// Used for JUnit tests
@@ -111,6 +108,9 @@ public class DatabaseWrapper {
 		String dbuser = properties.getProperty("username", null);
 		String dbpass = properties.getProperty("password", "");
 		assert dburl != null : "Property database.url not found";
+		String logmsg = "database=" + dburl;
+		logmsg += " user=" + dbuser;
+		logger.info(Log.INIT, logmsg);		
 		Connection dbc = DriverManager.getConnection(dburl, dbuser, dbpass);
 		return dbc;		
 	}
