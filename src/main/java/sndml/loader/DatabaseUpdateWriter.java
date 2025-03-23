@@ -30,11 +30,11 @@ public class DatabaseUpdateWriter extends DatabaseTableWriter {
 	@Override
 	void writeRecord(TableRecord rec, Metrics writerMetrics) throws SQLException {
 		RecordKey key = rec.getKey();
-		logger.trace(Log.PROCESS, "Update " + key);
+		logger.debug(Log.PROCESS, "Update " + key);
 		if (updateStmt.update(rec)) {
 			writerMetrics.incrementUpdated();
 		} else {
-			logger.trace(Log.PROCESS, "Insert " + key);
+			logger.debug(Log.PROCESS, "Insert " + key);
 			insertStmt.insert(rec);
 			writerMetrics.incrementInserted();
 		}

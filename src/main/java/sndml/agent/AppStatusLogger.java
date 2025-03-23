@@ -26,7 +26,6 @@ public class AppStatusLogger {
 			throws IOException, JobCancelledException, IllegalStateException {		
 		assert appSession != null;
 		assert runKey != null;
-//		Log.setJobContext(runKey.toString());
 		ObjectNode body = JsonNodeFactory.instance.objectNode();
 		body.put("runkey", runKey.toString());		
 		body.put("status", status.toString().toLowerCase());
@@ -42,7 +41,6 @@ public class AppStatusLogger {
 		}
 		if (!newStatus.equalsIgnoreCase(status.toString()))
 			throw new IllegalStateException("Failed to update status. Is there an ACL problem?");
-//		Log.setGlobalContext();
 	}	
 
 	void cancelJob(RecordKey runKey, Exception sourceException) {

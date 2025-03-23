@@ -83,7 +83,7 @@ public abstract class DatabaseTableWriter extends RecordWriter {
 		assert metrics != null;
 		assert progressLogger != null;
 		for (TableRecord rec : recs) {
-			logger.debug(Log.PROCESS, String.format(
+			logger.trace(Log.PROCESS, String.format(
 				"processing %s %s",  rec.getKey(), rec.getCreatedTimestamp()));
 			writeRecord(rec, metrics);
 		}

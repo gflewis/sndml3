@@ -177,7 +177,7 @@ public class PropertiesSchema {
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
 			String propname = definition.getAttributeValue("name");
-			logger.debug(Log.INIT, "processing " + propname);
+			logger.trace(Log.INIT, "processing " + propname);
 			boolean found = false;
 			if (oldProps.containsKey(propname)) {
 				found = true;
@@ -190,7 +190,7 @@ public class PropertiesSchema {
 				while (alternates.hasNext()) {
 					Element alternate = alternates.next();
 					String altname = alternate.getAttributeValue("name");
-					logger.debug(Log.INIT, "alternate " + altname);
+					logger.trace(Log.INIT, "alternate " + altname);
 					if (oldProps.containsKey(altname)) {
 						found = true;
 						newProps.setProperty(propname, oldProps.getProperty(altname));

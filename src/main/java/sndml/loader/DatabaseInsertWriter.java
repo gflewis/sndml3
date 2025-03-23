@@ -34,7 +34,7 @@ public class DatabaseInsertWriter extends DatabaseTableWriter {
 	@Override
 	void writeRecord(TableRecord rec, Metrics writerMetrics) throws SQLException {
 		RecordKey key = rec.getKey();
-		logger.trace(Log.PROCESS, "Insert " + key);
+		logger.debug(Log.PROCESS, "Insert " + key);
 		try {
 			insertStmt.insert(rec);
 			writerMetrics.incrementInserted();
