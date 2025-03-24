@@ -137,7 +137,7 @@ public class PropertiesSchema {
 				while (alternates.hasNext()) {
 					Element alternate = alternates.next();
 					String altname = alternate.getAttributeValue("name");
-					if (!first) System.out.print(", ");
+					if (!first) System.out.print(" _or_ ");
 					System.out.print(altname);
 					first = false;				
 				}

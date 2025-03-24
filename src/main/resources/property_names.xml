@@ -106,7 +106,7 @@
   <property name="daemon.interval">
     <default>120</default>
     <description>
-      Recommended if using `--daemon`. Interval in seconds.
+      Recommended if using `--daemon`. Interval between scans in seconds.
       Default is 120.
     </description>
   </property>
