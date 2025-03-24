@@ -269,7 +269,7 @@
     <description>
       Causes an exception to be thrown if the ServiceNow user
       time zone is not "GMT".
-      If **false* then a warning is displayed.
+      If **false** then a warning is displayed.
       Default is **false**.
     </description>
   </property>

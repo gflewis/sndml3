@@ -120,8 +120,8 @@ public class PropertiesSchema {
 	}
 	
 	public void printPropertiesTable() throws JDOMException, IOException {
-		System.out.println("| Property Name | Alternate Name | Notes / Description |");
-		System.out.println("| ------------- | -------------- | --------------------|");
+		System.out.println("| Property Name | Alternate Name(s) | Notes / Description |");
+		System.out.println("| ------------- | ----------------- | --------------------|");
 		ListIterator<Element> definitions = xmlDocument.getRootElement().getChildren().listIterator();
 		while (definitions.hasNext()) {
 			Element definition = definitions.next();
@@ -137,8 +137,8 @@ public class PropertiesSchema {
 				while (alternates.hasNext()) {
 					Element alternate = alternates.next();
 					String altname = alternate.getAttributeValue("name");
-					if (!first) System.out.print(" or ");
-					System.out.print(wrapVar(altname));
+					if (!first) System.out.print(", ");
+					System.out.print(altname);
 					first = false;				
 				}
 				System.out.print(" | ");
