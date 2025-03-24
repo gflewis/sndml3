@@ -103,10 +103,10 @@
     <!-- Database Dependencies -->
     <dependency>
       <!-- MySQL -->
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.28</version>
-      <optional>true</optional>
+      <groupId>com.mysql</groupId>
+	  <artifactId>mysql-connector-j</artifactId>
+	  <version>9.2.0</version>
+	  <optional>true</optional>
     </dependency>
     <dependency>
       <!-- PostgreSQL -->
@@ -219,7 +219,7 @@
               </transformers>
               <artifactSet>
                 <includes>
-                  <include>mysql:*</include>
+                  <include>com.mysql:*</include>
                   <include>org.apache.*:*</include>
                   <include>commons-*:*</include>
                   <include>com.fasterxml.jackson.*:*</include>
