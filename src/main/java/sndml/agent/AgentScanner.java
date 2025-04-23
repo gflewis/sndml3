@@ -65,13 +65,17 @@ public abstract class AgentScanner extends TimerTask {
 	 */
 	public synchronized void run() {
 		Log.setJobContext(agentName);
-		logger.info(Log.PROCESS, "run");
+		logger.debug(Log.PROCESS, "run");
 		// exit if already running
 		if (!runnable.tryAcquire()) {
+			// This may be dead code.
+			// MultiThreadScanner.scanUntilDone() is running in this thread,
+			// and it does not terminate until there are no more job
+			// so run will not get called again until this run finishes.
 			logger.warn(Log.INIT, "already running");
 			return;
 		}
-		logger.info(Log.PROCESS, "semaphore acquired");
+		logger.debug(Log.PROCESS, "semaphore acquired");
 		boolean onExceptionContinue = profile.getBoolean("daemon.continue"); 
 		try {
 			scanUntilDone();
@@ -106,7 +110,7 @@ public abstract class AgentScanner extends TimerTask {
 		}
 		finally {
 			runnable.release();
-			logger.info(Log.PROCESS, "semaphore released");			
+			logger.debug(Log.PROCESS, "semaphore released");			
 		}
 	}
 	

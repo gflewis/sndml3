@@ -122,7 +122,7 @@ public class AgentDaemon implements Daemon, Runnable {
 	 * Run until interrupted
 	 */
 	private void scanForever() throws ConfigParseException, IOException, SQLException, InterruptedException {
-		assert isStarted : "scanForever: not started";
+		assert isStarted || !multiThreaded : "scanForever: not started";
 		while (true) {
 			scanner.scanOnce();
 			Thread.sleep(1000);
