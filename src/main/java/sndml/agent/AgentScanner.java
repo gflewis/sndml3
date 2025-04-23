@@ -68,10 +68,10 @@ public abstract class AgentScanner extends TimerTask {
 		logger.debug(Log.PROCESS, "run");
 		// exit if already running
 		if (!runnable.tryAcquire()) {
-			// This may be dead code.
-			// MultiThreadScanner.scanUntilDone() is running in this thread,
+			// This appears to be dead code.
+			// MultiThreadScanner.scanUntilDone() is running in this same thread,
 			// and it does not terminate until there are no more job
-			// so run will not get called again until this run finishes.
+			// so run() will not get called again until this function finishes.
 			logger.warn(Log.INIT, "already running");
 			return;
 		}

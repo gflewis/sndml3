@@ -143,12 +143,12 @@ public class Main {
         String pidFileName = profile.getProperty("loader.pidfile");
 		Main.pid = processHandle.pid();
 		if (pidFileName == null) {
-			logger.info(Log.INIT, String.format("pid=%d", pid));			
+			logger.debug(Log.INIT, String.format("pid=%d", pid));			
 		}
 		else {
 			File pidFile = new File(pidFileName);
 			logger.info(Log.INIT, String.format(
-				"pid=%d pidfile=%s", pid, pidFile.getAbsolutePath()));
+				"pidfile=%s pid=%d", pidFile.getAbsolutePath(), pid));
 			PrintWriter pidWriter;
 			try {
 				pidWriter = new PrintWriter(pidFile);
