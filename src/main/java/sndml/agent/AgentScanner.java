@@ -64,12 +64,14 @@ public abstract class AgentScanner extends TimerTask {
 	 * as each job completes.
 	 */
 	public synchronized void run() {
-		Log.setJobContext(agentName);		
+		Log.setJobContext(agentName);
+		logger.debug(Log.PROCESS, "run");
 		// exit if already running
 		if (!runnable.tryAcquire()) {
 			logger.warn(Log.INIT, "already running");
 			return;
 		}
+		logger.debug(Log.PROCESS, "semaphore acquired");
 		boolean onExceptionContinue = profile.getBoolean("daemon.continue"); 
 		try {
 			scanUntilDone();
@@ -104,6 +106,7 @@ public abstract class AgentScanner extends TimerTask {
 		}
 		finally {
 			runnable.release();
+			logger.debug(Log.PROCESS, "semaphore released");			
 		}
 	}
 	

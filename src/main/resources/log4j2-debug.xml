@@ -32,6 +32,6 @@
     <Logger name="org.apache.http.headers" level="info" />
     <Logger name="org.apache.http.impl" level="info" />
     <Logger name="org.apache.http.wire" level="info" />
-    <Logger name="sndml" level="debug" />>
+    <Logger name="sndml.agent" level="debug" />>
   </Loggers>
 </Configuration>
