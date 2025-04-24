@@ -252,6 +252,7 @@ until all Jobs with a lower **Order** value complete.
 This screenshot shows a schedule with three jobs. 
 The table `sys_user_grmember` will be exported after the other two jobs complete.
 
+#### Schedule with three jobs
 <img src="images/2025-01-30-schedule-with-3-jobs.png" width="800" class="screenshot"/>
 
 All Jobs within a Schedule will have the same "start time", 
@@ -337,7 +338,7 @@ Since the MID Server will be forwarding TCP/IP messages
 to an SNDML server on the same box,
 you should specify the **HTTP Server Host** as `localhost`.
 
-#### HTTP Server on MID Server VM (localhost)
+#### Agent configured for HTTP Server on MID Server VM (localhost)
 <img src="images/2025-01-28-http-server-via-mid.png" width="600" class="screenshot"/>
 
 Use this command to start the HTTP server as a background process on Linux:
@@ -500,6 +501,7 @@ However, it is recommended that **Threads** not be set to a value greater than 4
 
 **Caution:** The use of multiple threads may adversely impact the performance of your ServiceNow instance.
 
+#### Job Run Parts for Insert job partitioned by Month
 <img src="images/2025-01-28-job-run-parts.png" width="800" class="screenshot"/>
 
 ## Feedback and Support
