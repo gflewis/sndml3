@@ -28,6 +28,7 @@ This page contains instructions for installing and configuring **DataPump** and 
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server)
+* [Shut down Daemon or Server](#shut-down-daemon-or-server)
 * [Job Action Types](#job-action-types)
 * [Optimizing Exports](#optimizing-exports)
 * [Partitioned Load](#partitioned-load)
@@ -189,10 +190,6 @@ It is waiting to be executed by the Java Agent.
 ## Run an SNDML Scan
 
 On your Linux or Windows server, type this command:
-
-<!--
-    java -ea -jar <jarfilename> -p <profilename> --scan
--->
     
 <pre class="highlight">
 java -ea -jar <var>jarfilename</var> -p <var>profilename</var> --scan
@@ -210,6 +207,7 @@ When each job completes, `--scan` checks for new **Job Run** records that are **
 If none are found then the Java program terminates.
 
 ## Methods for Running Jobs
+
 Once a **Job Run** record is created with a state of "Ready", it must be be detected by the Java agent. 
 There are four methods for this.
 * [Synchronized Scanning](#synchronized-scanning) (`--scan`)
@@ -225,6 +223,7 @@ are new in Release 3.5 and eliminate this delay.
 The second two methods and are configured using the **Job Run Autostart** field on the **Agent** record.
 
 ## Creating Schedules
+
 DataPump jobs can be grouped together in **Schedules**, and 
 automatically activated by the ServiceNow scheduler. 
 The steps are as follows:
@@ -287,10 +286,8 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml \
   -jar <var>jarfilename</var> -p <var>profilename</var> --scan
 </pre>
 
-
 Note that a `-D` prefix is used when passing system properties to Java, 
 and that system properties are case sensitive.
-
 
 ## Run SNDML as a Daemon
 
@@ -345,10 +342,9 @@ and the `sys_id` of the **Job Run** record.
 SNDML uses its ServiceNow HTTPS connection (REST API) to retrieve the **Job Run** information,
 and it starts execution of the job.
 
-To configure this option add the following to [Connection Profile](#create-a-connection-profile):
+To configure this option add the following to the [Connection Profile](#create-a-connection-profile):
 
 * `server.port=5124`
-* `server.pidfile=pidfile.pid`
 
 Configure the *Agent* as follows:
 
@@ -368,9 +364,7 @@ Since the MID Server will be forwarding TCP/IP messages
 to an SNDML server on the same box,
 you should specify the **HTTP Server Host** as `localhost`.
 
-
 <img src="images/2025-01-28-http-server-via-mid.png" width="600" class="screenshot"/>
-
 
 Use this command to start the HTTP server as a background process on Linux:
 
@@ -380,8 +374,21 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml \
   -jar <var>jarfilename</var> -p <var>profilename</var> --server >/dev/null 2>&1
 </pre>
 
-To shut down the HTTP server, send a SIGTERM signal to the PID which was written to the pidfile
-when SNDML started.
+## Shut down Daemon or Server
+
+To shut down a Daemon or Server, send a SIGTERM signal to the PID.  
+
+Add the following line to the Connection Profile to capture the PID when SNDML starts.
+
+<pre class="hilight">
+loader.pidfile=<var>pidfilename</var>
+</pre>                   
+
+For Linux, use the following command to shut down a Daemon or Server.
+
+<pre>
+kill $(cat <var>pidfilename</var>)
+</pre>
 
 ## Job Action Types
 
