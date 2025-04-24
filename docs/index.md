@@ -29,6 +29,7 @@ This page contains instructions for installing and configuring **DataPump** and 
 * [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server)
 * [Shut down Daemon or Server](#shut-down-daemon-or-server)
+* [Logging](#logging)
 * [Job Action Types](#job-action-types)
 * [Optimizing Exports](#optimizing-exports)
 * [Partitioned Load](#partitioned-load)
@@ -270,25 +271,6 @@ The Linux or Windows job should start a few minutes after the ServiceNow schedul
 For example, if the ServiceNow schedule starts at 5:00 PM,
 then you might set your `--scan` to start at 5:02 PM.
 
-The SNDML JAR file contains an embedded Log4J2 Rolling File Appender configuration 
-which can be helpful if you are using **cron** or **Windows Task Scheduler**. 
-The name of this configuration file is **log4j2-daemon.xml**, 
-and it requires two system properties:
-
-* `sndml.logFolder` - the directory where log files are written
-* `sndml.logPrefix` - a prefix which will be prepended to the log file name
-
-Use this command to run the Java agent redirecting all output to the log directory:
-
-<pre class="highlight">
-java -Dlog4j2.configurationFile=log4j2-daemon.xml \
-  ‑Dsndml.logFolder=<var>logdirectory</var> ‑Dsndml.logPrefix=<var>agentname</var> \
-  -jar <var>jarfilename</var> -p <var>profilename</var> --scan
-</pre>
-
-Note that a `-D` prefix is used when passing system properties to Java, 
-and that system properties are case sensitive.
-
 ## Run SNDML as a Daemon
 
 The `--daemon` option is the simplest to configure. 
@@ -298,18 +280,6 @@ performing a `--scan` every 2 minutes.
 The frequency of scans can be changed 
 by setting the value of the **Connection Profile** property `daemon.interval`
 to the number of seconds between scans.
-
-Use this command to start the daemon as a background process on Linux:
-
-<pre class="highlight">
-java -Dlog4j2.configurationFile=log4j2-daemon.xml \
-  ‑Dsndml.logFolder=<var>logdirectory</var> ‑Dsndml.logPrefix=<var>agentname</var> \
-  -jar <var>jarfilename</var> -p <var>profilename</var> --daemon >/dev/null 2>&1
-</pre>
-
-If the **Connection Profile** contains a property named `daemon.pidfile`
-then at startup the Java program will write its PID to this file.
-You can then terminate the daemon by sending a SIGTERM signal to the PID.
 
 ## Run Jobs via a MID Server
 
@@ -378,7 +348,8 @@ java -Dlog4j2.configurationFile=log4j2-daemon.xml \
 
 To shut down a Daemon or Server, send a SIGTERM signal to the PID.  
 
-Add the following line to the Connection Profile to capture the PID when SNDML starts.
+Add the following line to the **Connection Profile** to capture the PID 
+when SNDML starts.
 
 <pre class="hilight">
 loader.pidfile=<var>pidfilename</var>
@@ -389,6 +360,41 @@ For Linux, use the following command to shut down a Daemon or Server.
 <pre>
 kill $(cat <var>pidfilename</var>)
 </pre>
+
+## Logging
+
+SNDML3 uses [Apache Log4j2](https://logging.apache.org/log4j/2.x/) for logging. 
+Sample Log4j2 configuration files can be found in the directory 
+[/src/main/resources](https://github.com/gflewis/sndml3//blob/master/src/main/resources).
+These files are embedded in the JAR, so you can use them directly or modify them based on 
+your own logging requirements.
+
+The default configuration file (which writes to the console) is 
+[log4j2.xml](https://github.com/gflewis/sndml3/blob/master/src/main/resources/log4j2.xml).
+
+The file 
+[log4j2-daemon.xml](https://github.com/gflewis/sndml3/blob/master/src/main/resources/log4j2-daemon.xml)
+redirects all output to a designated directory and creates a new log file at the beginning of each day.
+This can be useful for `--daemon` or `--server` or 
+[Synchronized Scanning](#synchronized-scanning)
+using **cron** or **Windows Task Scheduler**. 
+
+This file requires two system properties:
+
+* `sndml.logFolder` - the directory where log files are written
+* `sndml.logPrefix` - a prefix which will be prepended to the log file name
+
+As an example, you can use this command to start the daemon as a background process on Linux,
+creating a new log file each day in a designated directory.
+
+<pre class="highlight">
+java -Dlog4j2.configurationFile=log4j2-daemon.xml \
+  ‑Dsndml.logFolder=<var>logdirectory</var> ‑Dsndml.logPrefix=<var>agentname</var> \
+  -jar <var>jarfilename</var> -p <var>profilename</var> --daemon >/dev/null 2>&1
+</pre>
+
+Note that a `-D` prefix is used when passing system properties to Java, 
+and that system properties are case sensitive.
 
 ## Job Action Types
 
@@ -405,12 +411,6 @@ If **Truncate** is checked, then the SQL table will be truncated prior to the lo
 This is the most common Job Action.
 If the target record exists (based on `sys_id`), then it will be updated. 
 Otherwise, it will be inserted.
-
-<!--
-<blockquote><code>sys_updated_on>=</code><i><b><small>lastrunstart</small></b></i></blockquote>
-where 
-<i><b><small>lastrunstart</small></b></i>
--->
 
 If **Since Last** is checked, then only records inserted or updated in ServiceNow since the last run 
 will be processed. The following filter will be used when retrieving records from ServiceNow:
