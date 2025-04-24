@@ -312,11 +312,14 @@ and the `sys_id` of the **Job Run** record.
 SNDML uses its ServiceNow HTTPS connection (REST API) to retrieve the **Job Run** information,
 and it starts execution of the job.
 
-To configure this option add the following to the [Connection Profile](#create-a-connection-profile):
+This option requires that you specify a TCP/IP port in the
+[Connection Profile](#create-a-connection-profile)
+and also on the **Agent** configuration form.
+For example, add this line to the **Connection Profile**:
 
 * `server.port=5124`
 
-Configure the *Agent* as follows:
+and configure the **Agent** as follows:
 
 * Set **Job Run Autostart** to **HTTP Server**
 * Set **HTTP Server Host** to the IP address of the Linux or Windows server
@@ -324,8 +327,8 @@ Configure the *Agent* as follows:
 
 In addition, you must modify your firewall configuration to open TCP/IP port 5124 for inbound connections.
 
-(Note that you can choose a different TCP/IP port as long as the **Connection Profile**
-and the **Agent** are configured consistently.)
+You can choose a different TCP/IP port as long as the **Connection Profile**
+and the **Agent** are configured consistently.
 
 As an alternative to opening the TCP/IP port for inbound connnections, 
 you can install a MID Server on the same box as SNDML.
@@ -334,6 +337,7 @@ Since the MID Server will be forwarding TCP/IP messages
 to an SNDML server on the same box,
 you should specify the **HTTP Server Host** as `localhost`.
 
+#### HTTP Server on MID Server VM (localhost)
 <img src="images/2025-01-28-http-server-via-mid.png" width="600" class="screenshot"/>
 
 Use this command to start the HTTP server as a background process on Linux:
