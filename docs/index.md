@@ -383,7 +383,6 @@ redirects all output to a designated directory and creates a new log file at the
 This can be useful for `--daemon` or `--server` or 
 [Synchronized Scanning](#synchronized-scanning)
 using **cron** or **Windows Task Scheduler**. 
-
 This file requires two system properties:
 
 * `sndml.logFolder` - the directory where log files are written
