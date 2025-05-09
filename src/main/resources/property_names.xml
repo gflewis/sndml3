@@ -2,6 +2,11 @@
 
 <!-- This file describes all available properties in the connection profile -->
 
+<!--
+  To generate a markdown version of this file
+    java -cp <jarfilename> sndml.loader.PropertiesSchema -m
+ -->
+
 <!DOCTYPE properties[
 <!ELEMENT properties (property*) >
 <!ATTLIST property name CDATA #REQUIRED >
