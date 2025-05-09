@@ -104,10 +104,10 @@
     </description>
   </property>
   <property name="daemon.interval">
-    <default>120</default>
+    <default>300</default>
     <description>
       Recommended if using `--daemon`. Interval between scans in seconds.
-      Default is 120.
+      Default is 300.
     </description>
   </property>
   <property name="database.autocreate">
