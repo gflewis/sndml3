@@ -26,7 +26,6 @@ This page contains instructions for installing and configuring **DataPump** and 
 * [Creating Schedules](#creating-schedules)
 * [Synchronized Scanning](#synchronized-scanning)
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon)
-* [Run Jobs via a MID Server](#run-jobs-via-a-mid-server)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server)
 * [Shut down Daemon or Server](#shut-down-daemon-or-server)
 * [Logging](#logging)
@@ -126,7 +125,7 @@ or an instance name.
 The value of `app.agent` must match the name used in the **Database Agent** record below.
 
 For more detail on the Connection Profile refer to
-[Connection Profle 3.5](https://github.com/gflewis/sndml3/wiki/Connection-Profile-3.5)
+[Connection Profile 3.5](https://github.com/gflewis/sndml3/wiki/Connection-Profile-3.5)
 
 ## Test Connectivity
 
@@ -210,18 +209,16 @@ If none are found then the Java program terminates.
 ## Methods for Running Jobs
 
 Once a **Job Run** record is created with a state of "Ready", it must be be detected by the Java agent. 
-There are four methods for this.
+There are three methods.
 * [Synchronized Scanning](#synchronized-scanning) (`--scan`)
 * [Run SNDML as a Daemon](#run-sndml-as-a-daemon) (`--daemon`)
-* [Run Jobs via a MID Server](#run-jobs-via-a-mid-server) (`--jobrun`)
 * [Run SNDML as an HTTP Server](#run-sndml-as-an-http-server) (`--server`)
 
 With the first two methods (<code>&#8209;&#8209;scan</code> and <code>&#8209;&#8209;daemon</code>) 
 there will be a small delay 
 between when the **Job Run** record is marked "Ready" and when execution starts.
-The second two methods (<code>&#8209;&#8209;jobrun</code> and <code>&#8209;&#8209;server</code>) 
-are new in Release 3.5 and eliminate this delay.
-The second two methods and are configured using the **Job Run Autostart** field on the **Agent** record.
+HTTP Server is new in Release 3.5 and eliminates this delay.
+HTTP Server is configured using the **Job Run Autostart** field on the **Agent** record.
 
 ## Creating Schedules
 
@@ -237,7 +234,7 @@ The steps are as follows:
 4. To test a Schedule, open the **Schedule** form and click the **Execute Now** button.
 
 Since the DataPump table `x_108443_sndml_action_schedule` is extended from the 
-out-of-box table **Scheduled Script Execution**,
+out-of-box **Scheduled Script Execution**,
 Schedules can be configured to run at any frequency permitted by ServiceNow.
 
 If a **Job** is part of a **Schedule**, 
@@ -276,41 +273,20 @@ then you might set your `--scan` to start at 5:02 PM.
 
 The `--daemon` option is the simplest to configure. 
 This option simply runs SNDML  in an endless loop, 
-performing a `--scan` every 2 minutes.
+performing a `--scan` every few minutes.
 
 The frequency of scans can be changed 
 by setting the value of the **Connection Profile** property `daemon.interval`
 to the number of seconds between scans.
 
-## Run Jobs via a MID Server
-
-The `--jobrun` option causes the Java program to execute a single **Job Run**, and then terminate.
-The `sys_id` of the **Job Run** record is passed as a command line argument.
-This option is used for executing jobs through the MID Server.
-
-To configure this option you must set **Job Run Autostart** on the **Agent** form to **MID Server**
-and select an appropriate **MID Server Script File**.
-
-When the **DataPump** app is installed, 
-it will create two MID Server Script files, one named `jobrun.ps1` and one named `jobrun.sh`.
-These scripts assume that the JAR file has been installed 
-and that SNDML will be running locally on the MID Server.
-However, it also expected that the script will need to be customized
-based on how your MID Server is configured.
-
-When using this option, care must be taken to not run too many jobs concurrently,
-as this could exhaust the memory on the MID Server.
-Since each job runs as a separate process on the server,
-SNDML cannot constrain the number of concurrent jobs.
 
 ## Run SNDML as an HTTP Server
 
 The `--server` option runs the Java program as an HTTP server.
-When the state of a **Job Run** changes to **Ready**
-an HTTP message is sent to the SNDML server.
-The HTTP message only contains the `sys_id` of the **Agent** 
-and the `sys_id` of the **Job Run** record.
-SNDML uses its ServiceNow HTTPS connection (REST API) to retrieve the **Job Run** information,
+When the state of a **Job Run** changes to **Ready**,
+an HTTP message is sent to the SNDML server 
+with the `sys_id` of the **Agent** and the `sys_id` of the **Job Run** record.
+SNDML then uses the `app.instance` HTTPS connection (REST API) to retrieve the **Job Run** information,
 and it starts execution of the job.
 
 This option requires that you specify a TCP/IP port in the
@@ -332,7 +308,7 @@ You can choose a different TCP/IP port as long as the **Connection Profile**
 and the **Agent** are configured consistently.
 
 As an alternative to opening the TCP/IP port for inbound connnections, 
-you can install a MID Server on the same box as SNDML.
+you can install a MID Server and SNDML on the same box.
 In this case you will specify **MID Server** on the **Agent** configuration form.
 Since the MID Server will be forwarding TCP/IP messages 
 to an SNDML server on the same box,
