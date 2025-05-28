@@ -23,7 +23,6 @@ import sndml.util.DateTime;
 import sndml.util.DateTimeRange;
 import sndml.util.FieldNames;
 import sndml.util.PartitionInterval;
-import sndml.util.Log;
 
 @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
 public class JobConfig {
@@ -49,10 +48,10 @@ public class JobConfig {
 	public Integer minRows;
 	public Integer maxRows;
 	public String sql; // Action EXECUTE only
-	@Deprecated public String sqlBefore;
-	@Deprecated public String sqlAfter;
+//	@Deprecated public String sqlBefore;
+//	@Deprecated public String sqlAfter;
 	public Boolean autoCreate;
-	@JsonIgnore public FieldNames includeColumns;
+	@JsonIgnore private FieldNames includedColumns;
 	public Integer threads;
 	public AppJobStatus status; // Used by ConfigFactory
 	static EnumSet<Action> anyLoadAction =
@@ -91,12 +90,10 @@ public class JobConfig {
 		
 	PartitionInterval getPartitionInterval() { return this.partition; }
 	
-	FieldNames getIncludeColumns() { return this.includeColumns; }
-	
 	RecordKey getDocKey() { return this.docKey; }
 	String getSql() { return this.sql; }
-	String getSqlBefore() {	return this.sqlBefore; }
-	String getSqlAfter() { return this.sqlAfter; }
+//	String getSqlBefore() {	return this.sqlBefore; }
+//	String getSqlAfter() { return this.sqlAfter; }
 	Integer getPageSize() { return this.pageSize; }
 	Integer getMinRows() { return this.minRows;	}
 	Integer getMaxRows() { return this.maxRows;	}
@@ -106,19 +103,20 @@ public class JobConfig {
 		return this.autoCreate == null ? true : this.autoCreate.booleanValue();	
 	}
 	
+	// Jackson ObjectMapper will call this function to set the value of "columns"
 	void setColumns(String columnNames) {
-		includeColumns = new FieldNames();
-		includeColumns.add("sys_id");
-		includeColumns.add("sys_created_on");
-		includeColumns.add("sys_updated_on");
+		includedColumns = new FieldNames();
+		includedColumns.add("sys_id");
+		includedColumns.add("sys_created_on");
+		includedColumns.add("sys_updated_on");
 		FieldNames temp = new FieldNames(columnNames);
 		for (String name : temp) {
-			if (!includeColumns.contains(name)) includeColumns.add(name);
+			if (!includedColumns.contains(name)) includedColumns.add(name);
 		}
 	}
 	
 	FieldNames getColumns() {
-		return this.includeColumns;
+		return this.includedColumns;
 	}
 			
 	DateTimeRange getDefaultRange() {
@@ -258,8 +256,8 @@ public class JobConfig {
 		if (threads != null && partition == null)
 			configError("Threads only valid with Partition");
 		
-		if (sqlBefore != null) logger.warn(Log.INIT, "Deprecated option: SQLBefore");
-		if (sqlAfter != null) logger.warn(Log.INIT, "Deprecated option: SQLAfter");		
+//		if (sqlBefore != null) logger.warn(Log.INIT, "Deprecated option: SQLBefore");
+//		if (sqlAfter != null) logger.warn(Log.INIT, "Deprecated option: SQLAfter");		
 	}
 		
 	void booleanValidForActions(String name, Boolean value, EnumSet<Action> validActions) {
@@ -371,7 +369,7 @@ public class JobConfig {
 		if (getPartitionInterval() != null) 
 			node.put("partition",  getPartitionInterval().toString());
 		if (filter != null) node.put("filter",this.filter);
-		if (includeColumns != null) node.put("columns", includeColumns.toString());
+		if (includedColumns != null) node.put("columns", includedColumns.toString());
 		if (minRows != null) node.put("minrows", minRows);
 		if (maxRows != null) node.put("maxrows", maxRows);		
 	}

@@ -116,7 +116,7 @@ public class JobRunner implements Runnable, Callable<Metrics> {
 		}
 		jobMetrics = new Metrics(config.getName());
 		jobMetrics.start();
-		if (config.getSqlBefore() != null) runSQL(config.getSqlBefore());
+//		if (config.getSqlBefore() != null) runSQL(config.getSqlBefore());
 		switch (action) {
 		case CREATE:
 			runCreateTable();
@@ -144,7 +144,7 @@ public class JobRunner implements Runnable, Callable<Metrics> {
 		Integer minRows = config.getMinRows();
 		if (minRows != null && processed < minRows)
 			throw new TooFewRowsException(table, minRows, processed);			
-		if (config.getSqlAfter() != null) runSQL(config.getSqlAfter());
+//		if (config.getSqlAfter() != null) runSQL(config.getSqlAfter());
 		close();
 		return jobMetrics;
 	}
