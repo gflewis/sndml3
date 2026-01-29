@@ -92,9 +92,9 @@ public final class DatePartitionedTableReader extends TableReader {
 	public void prepare(RecordWriter writer, Metrics metrics, ProgressLogger progress) 
 			throws IOException, InterruptedException {
 		super.beginPrepare(writer, metrics, progress);
-		assert writer != null;
-		assert metrics != null;
-		assert progress != null;
+//		assert writer != null;
+//		assert metrics != null;
+//		assert progress != null;
 		// Use Stats API to determine min and max dates
 		EncodedQuery query = this.getQuery();
 		logger.debug(Log.INIT, String.format("initialize query=\"%s\"", query));
