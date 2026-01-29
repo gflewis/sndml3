@@ -120,7 +120,7 @@
       <!-- Microsoft SQL Server -->
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
-      <version>11.2.3.jre11</version>
+      <version>11.2.4.jre11</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
