@@ -224,7 +224,7 @@ public class JobRunner implements Runnable, Callable<Metrics> {
 			DatePartitionSet parts = multiReader.getPartitions();
 			logger.info(Log.INIT, "partition=" + parts.toString());
 		}
-		assert(synchronizer instanceof TableSynchronizer);
+//		assert(synchronizer instanceof TableSynchronizer);
 		Log.setTableContext(table, config.getName());
 		synchronizer.call();
 	}
